@@ -36,14 +36,14 @@ class C {
   /// Line 1
   static int staticMethod() => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static void staticMethodWithBody() { /// Line 2
     /// Line 3
     void foo() {}
   }
   /// Line 4
-  
+
   /// Line 1
   static void _privateStaticMethod() => 0; /// Line 2
   /// Line 3
@@ -58,7 +58,7 @@ class C {
     void foo() {}
   }
   /// Line 4
-    
+
   /// Line 1
   void _privateInstanceMethod() { /// Line 2
   /// Line 3
@@ -115,7 +115,7 @@ class C {
   }
   /** Line 4
    */
-  
+
   /** Line 1
    */
   static void _privateStaticMethod() => 0; /** Line 2 */
@@ -137,7 +137,7 @@ class C {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   void _privateInstanceMethod() { /** Line 2 */
@@ -171,14 +171,14 @@ mixin M {
   /// Line 1
   static int staticMethod() => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static void staticMethodWithBody() { /// Line 2
     /// Line 3
     void foo() {}
   }
   /// Line 4
-  
+
   /// Line 1
   static void _privateStaticMethod() => 0; /// Line 2
   /// Line 3
@@ -193,7 +193,7 @@ mixin M {
     void foo() {}
   }
   /// Line 4
-    
+
   /// Line 1
   void _privateInstanceMethod() { /// Line 2
   /// Line 3
@@ -250,7 +250,7 @@ mixin M {
   }
   /** Line 4
    */
-  
+
   /** Line 1
    */
   static void _privateStaticMethod() => 0; /** Line 2 */
@@ -272,7 +272,7 @@ mixin M {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   void _privateInstanceMethod() { /** Line 2 */
@@ -307,14 +307,14 @@ enum E {
   /// Line 1
   static int staticMethod() => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static void staticMethodWithBody() { /// Line 2
     /// Line 3
     void foo() {}
   }
   /// Line 4
-  
+
   /// Line 1
   static void _privateStaticMethod() => 0; /// Line 2
   /// Line 3
@@ -329,7 +329,7 @@ enum E {
     void foo() {}
   }
   /// Line 4
-  
+
   /// Line 1
   void _privateInstanceMethod() { /// Line 2
   /// Line 3
@@ -386,7 +386,7 @@ enum E {
   }
   /** Line 4
    */
-  
+
   /** Line 1
    */
   static void _privateStaticMethod() => 0; /** Line 2 */
@@ -408,7 +408,7 @@ enum E {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   void _privateInstanceMethod() { /** Line 2 */
@@ -444,14 +444,14 @@ extension Ext on A {
   /// Line 1
   static int staticMethod() => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static void staticMethodWithBody() { /// Line 2
     /// Line 3
     void foo() {}
   }
   /// Line 4
-  
+
   /// Line 1
   static void _privateStaticMethod() => 0; /// Line 2
   /// Line 3
@@ -466,7 +466,7 @@ extension Ext on A {
     void foo() {}
   }
   /// Line 4
-  
+
   /// Line 1
   void _privateInstanceMethod() { /// Line 2
   /// Line 3
@@ -524,7 +524,7 @@ extension Ext on A {
   }
   /** Line 4
    */
-  
+
   /** Line 1
    */
   static void _privateStaticMethod() => 0; /** Line 2 */
@@ -546,9 +546,9 @@ extension Ext on A {
   }
   /** Line 4
    */
-   
+
   /** Line 1
-   */ 
+   */
   void _privateInstanceMethod() { /** Line 2 */
   /** Line 3
    */
@@ -580,14 +580,14 @@ extension type ET(int v) {
   /// Line 1
   static int staticMethod() => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static void staticMethodWithBody() { /// Line 2
     /// Line 3
     void foo() {}
   }
   /// Line 4
-  
+
   /// Line 1
   static void _privateStaticMethod() => 0; /// Line 2
   /// Line 3
@@ -602,7 +602,7 @@ extension type ET(int v) {
     void foo() {}
   }
   /// Line 4
-  
+
   /// Line 1
   void _privateInstanceMethod() { /// Line 2
   /// Line 3
@@ -658,7 +658,7 @@ extension type ET(int v) {
   }
   /** Line 4
    */
-  
+
   /** Line 1
    */
   static void _privateStaticMethod() => 0; /** Line 2 */
@@ -680,9 +680,9 @@ extension type ET(int v) {
   }
   /** Line 4
    */
-   
+
   /** Line 1
-   */ 
+   */
   void _privateInstanceMethod() { /** Line 2 */
   /** Line 3
    */

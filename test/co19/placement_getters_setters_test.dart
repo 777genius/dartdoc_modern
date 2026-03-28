@@ -36,13 +36,13 @@ class C {
   /// Line 1
   static int get staticGetter => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static void set staticSetter(int _) { /// Line 2
     /// Line 3
   }
   /// Line 4
-  
+
   /// Line 1
   static int get staticGetterWithBody { /// Line 2
     /// Line 3
@@ -53,13 +53,13 @@ class C {
   /// Line 1
   int get instanceGetter => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   void set instanceSetter(int _) { /// Line 2
     /// Line 3
   }
   /// Line 4
-  
+
   /// Line 1
   int get instanceGetterWithBody { /// Line 2
     /// Line 3
@@ -106,7 +106,7 @@ class C {
   static int get staticGetter => 0; /** Line 2 */
   /** Line 3
    */
-  
+
   /** Line 1
    */
   static void set staticSetter(int _) { /** Line 2 */
@@ -115,7 +115,7 @@ class C {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   static int get staticGetterWithBody { /** Line 2 */
@@ -125,13 +125,13 @@ class C {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   int get instanceGetter => 0; /** Line 2 */
   /** Line 3
    */
-  
+
   /** Line 1
    */
   void set instanceSetter(int _) { /** Line 2 */
@@ -140,7 +140,7 @@ class C {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   int get instanceGetterWithBody { /** Line 2 */
@@ -149,7 +149,7 @@ class C {
     return 0;
   }
   /** Line 4
-   */   
+   */
 }
 ''');
     var c = library.classes.named('C');
@@ -175,13 +175,13 @@ mixin M {
   /// Line 1
   static int get staticGetter => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static void set staticSetter(int _) { /// Line 2
     /// Line 3
   }
   /// Line 4
-  
+
   /// Line 1
   static int get staticGetterWithBody { /// Line 2
     /// Line 3
@@ -192,13 +192,13 @@ mixin M {
   /// Line 1
   int get instanceGetter => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   void set instanceSetter(int _) { /// Line 2
     /// Line 3
   }
   /// Line 4
-  
+
   /// Line 1
   int get instanceGetterWithBody { /// Line 2
     /// Line 3
@@ -245,7 +245,7 @@ mixin M {
   static int get staticGetter => 0; /** Line 2 */
   /** Line 3
    */
-  
+
   /** Line 1
    */
   static void set staticSetter(int _) { /** Line 2 */
@@ -254,7 +254,7 @@ mixin M {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   static int get staticGetterWithBody { /** Line 2 */
@@ -264,13 +264,13 @@ mixin M {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   int get instanceGetter => 0; /** Line 2 */
   /** Line 3
    */
-  
+
   /** Line 1
    */
   void set instanceSetter(int _) { /** Line 2 */
@@ -279,7 +279,7 @@ mixin M {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   int get instanceGetterWithBody { /** Line 2 */
@@ -288,7 +288,7 @@ mixin M {
     return 0;
   }
   /** Line 4
-   */   
+   */
 }
 ''');
     var mixinM = library.mixins.named('M');
@@ -315,13 +315,13 @@ enum E {
   /// Line 1
   static int get staticGetter => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static void set staticSetter(int _) { /// Line 2
     /// Line 3
   }
   /// Line 4
-  
+
   /// Line 1
   static int get staticGetterWithBody { /// Line 2
     /// Line 3
@@ -332,13 +332,13 @@ enum E {
   /// Line 1
   int get instanceGetter => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   void set instanceSetter(int _) { /// Line 2
     /// Line 3
   }
   /// Line 4
-  
+
   /// Line 1
   int get instanceGetterWithBody { /// Line 2
     /// Line 3
@@ -386,7 +386,7 @@ enum E {
   static int get staticGetter => 0; /** Line 2 */
   /** Line 3
    */
-  
+
   /** Line 1
    */
   static void set staticSetter(int _) { /** Line 2 */
@@ -395,7 +395,7 @@ enum E {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   static int get staticGetterWithBody { /** Line 2 */
@@ -405,13 +405,13 @@ enum E {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   int get instanceGetter => 0; /** Line 2 */
   /** Line 3
    */
-  
+
   /** Line 1
    */
   void set instanceSetter(int _) { /** Line 2 */
@@ -420,7 +420,7 @@ enum E {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   int get instanceGetterWithBody { /** Line 2 */
@@ -429,7 +429,7 @@ enum E {
     return 0;
   }
   /** Line 4
-   */   
+   */
 }
 ''');
     var e = library.enums.named('E');
@@ -457,13 +457,13 @@ extension Ext on A {
   /// Line 1
   static int get staticGetter => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static void set staticSetter(int _) { /// Line 2
     /// Line 3
   }
   /// Line 4
-  
+
   /// Line 1
   static int get staticGetterWithBody { /// Line 2
     /// Line 3
@@ -474,13 +474,13 @@ extension Ext on A {
   /// Line 1
   int get instanceGetter => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   void set instanceSetter(int _) { /// Line 2
     /// Line 3
   }
   /// Line 4
-  
+
   /// Line 1
   int get instanceGetterWithBody { /// Line 2
     /// Line 3
@@ -529,7 +529,7 @@ extension Ext on A {
   static int get staticGetter => 0; /** Line 2 */
   /** Line 3
    */
-  
+
   /** Line 1
    */
   static void set staticSetter(int _) { /** Line 2 */
@@ -538,7 +538,7 @@ extension Ext on A {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   static int get staticGetterWithBody { /** Line 2 */
@@ -548,13 +548,13 @@ extension Ext on A {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   int get instanceGetter => 0; /** Line 2 */
   /** Line 3
    */
-  
+
   /** Line 1
    */
   void set instanceSetter(int _) { /** Line 2 */
@@ -563,7 +563,7 @@ extension Ext on A {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   int get instanceGetterWithBody { /** Line 2 */
@@ -572,7 +572,7 @@ extension Ext on A {
     return 0;
   }
   /** Line 4
-   */   
+   */
 }
 ''');
     var ext = library.extensions.named('Ext');
@@ -598,13 +598,13 @@ extension type ET(int _) {
   /// Line 1
   static int get staticGetter => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static void set staticSetter(int _) { /// Line 2
     /// Line 3
   }
   /// Line 4
-  
+
   /// Line 1
   static int get staticGetterWithBody { /// Line 2
     /// Line 3
@@ -615,13 +615,13 @@ extension type ET(int _) {
   /// Line 1
   int get instanceGetter => 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   void set instanceSetter(int _) { /// Line 2
     /// Line 3
   }
   /// Line 4
-  
+
   /// Line 1
   int get instanceGetterWithBody { /// Line 2
     /// Line 3
@@ -668,7 +668,7 @@ extension type ET(int _) {
   static int get staticGetter => 0; /** Line 2 */
   /** Line 3
    */
-  
+
   /** Line 1
    */
   static void set staticSetter(int _) { /** Line 2 */
@@ -677,7 +677,7 @@ extension type ET(int _) {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   static int get staticGetterWithBody { /** Line 2 */
@@ -687,13 +687,13 @@ extension type ET(int _) {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   int get instanceGetter => 0; /** Line 2 */
   /** Line 3
    */
-  
+
   /** Line 1
    */
   void set instanceSetter(int _) { /** Line 2 */
@@ -702,7 +702,7 @@ extension type ET(int _) {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   int get instanceGetterWithBody { /** Line 2 */
@@ -711,7 +711,7 @@ extension type ET(int _) {
     return 0;
   }
   /** Line 4
-   */   
+   */
 }
 ''');
     var et = library.extensionTypes.named('ET');

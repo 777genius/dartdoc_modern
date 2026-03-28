@@ -41,51 +41,51 @@ class C {
   /// Line 3
   }
   /// Line 4
-  
+
   /// Line 1
   C.redirecting() : this(); /// Line 2
   /// Line 3
-  
+
   /// Line 1
   factory C.factory() { /// Line 2
   /// Line 3
     return C();
   }
   /// Line 4
-  
+
   /// Line 1
   factory C.redirectingFactory() = C.named; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   C._private() { /// Line 2
   /// Line 3
   }
   /// Line 4
-  
+
   /// Line 1
   factory C._privateFactory() { /// Line 2
   /// Line 3
     return C();
   }
   /// Line 4
-  
+
   /// Line 1
   external C.external(); /// Line 2
   /// Line 3
-  
+
   /// Line 1
   external factory C.externalFactory(); /// Line 2
   /// Line 3
-  
+
   /// Line 1
   const C.constant(); /// Line 2
   /// Line 3
-  
+
   /// Line 1
   external const C.externalConst(); /// Line 2
   /// Line 3
-  
+
   /// Line 1
   external const factory C.externalConstFactory(); /// Line 2
   /// Line 3
@@ -166,13 +166,13 @@ class C {
   }
   /** Line 4
    */
-  
+
   /** Line 1
    */
   C.redirecting() : this(); /** Line 2 */
   /** Line 3
    */
-  
+
   /** Line 1
    */
   factory C.factory() { /** Line 2 */
@@ -182,13 +182,13 @@ class C {
   }
   /** Line 4
    */
-  
+
   /** Line 1
    */
   factory C.redirectingFactory() = C.named; /** Line 2 */
   /** Line 3
    */
-   
+
   /** Line 1
    */
   C._private() { /** Line 2 */
@@ -197,7 +197,7 @@ class C {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   factory C._privateFactory() { /** Line 2 */
@@ -219,7 +219,7 @@ class C {
   external factory C.externalFactory(); /** Line 2 */
   /** Line 3
    */
-   
+
   /** Line 1
    */
   const C.constant(); /** Line 2 */
@@ -289,22 +289,22 @@ enum E {
     return E.e0;
   }
   /// Line 4
-  
+
   /// Line 1
   const E._private(); /// Line 2
   /// Line 3
-  
+
     /// Line 1
   factory E._privateFactory() { /// Line 2
     /// Line 3
     return E.e0;
   }
   /// Line 4
-  
+
   /// Line 1
   external const C.externalConst(); /// Line 2
   /// Line 3
-  
+
   /// Line 1
   external const factory C.externalConstFactory(); /// Line 2
   /// Line 3
@@ -380,13 +380,13 @@ enum E {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   const E._private(); /** Line 2 */
   /** Line 3
    */
-   
+
      /** Line 1
    */
   factory E._privateFactory() { /** Line 2 */
@@ -439,51 +439,51 @@ extension type ET._(int v) {
   /// Line 3
   }
   /// Line 4
-  
+
   /// Line 1
   ET.redirecting(int v) : this(v); /// Line 2
   /// Line 3
-  
+
   /// Line 1
   factory ET.factory() { /// Line 2
   /// Line 3
     return ET(0);
   }
   /// Line 4
-  
+
   /// Line 1
   factory ET.redirectingFactory(int _) = ET.named; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   ET._private(this.v) { /// Line 2
   /// Line 3
   }
   /// Line 4
-  
+
   /// Line 1
   factory ET._privateFactory() { /// Line 2
   /// Line 3
     return ET(0);
   }
   /// Line 4
-  
+
   /// Line 1
   external C.external(); /// Line 2
   /// Line 3
-  
+
   /// Line 1
   external factory C.externalFactory(); /// Line 2
   /// Line 3
-  
+
   /// Line 1
   const C.constant(); /// Line 2
   /// Line 3
-  
+
   /// Line 1
   external const C.externalConst(); /// Line 2
   /// Line 3
-  
+
   /// Line 1
   external const factory C.externalConstFactory(); /// Line 2
   /// Line 3
@@ -564,13 +564,13 @@ extension type ET._(int v) {
   }
   /** Line 4
    */
-  
+
   /** Line 1
    */
   ET.redirecting(int v) : this(v); /** Line 2 */
   /** Line 3
    */
-  
+
   /** Line 1
    */
   factory ET.factory() { /** Line 2 */
@@ -580,22 +580,22 @@ extension type ET._(int v) {
   }
   /** Line 4
    */
-  
+
   /** Line 1
    */
   factory ET.redirectingFactory() = ET.named; /** Line 2 */
   /** Line 3
    */
-   
+
   /** Line 1
-   */ 
+   */
   ET._private(this.v) { /** Line 2 */
   /** Line 3
    */
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   factory ET._privateFactory() { /** Line 2 */
@@ -605,7 +605,7 @@ extension type ET._(int v) {
   }
   /** Line 4
    */
-   
+
   /** Line 1
    */
   external ET.external(); /** Line 2 */
@@ -617,7 +617,7 @@ extension type ET._(int v) {
   external factory ET.externalFactory(); /** Line 2 */
   /** Line 3
    */
-   
+
   /** Line 1
    */
   const ET.constant(); /** Line 2 */

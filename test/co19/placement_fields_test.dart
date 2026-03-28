@@ -36,14 +36,14 @@ abstract class C {
   /// Line 1
   static int staticField = 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static int staticFieldWithInitializer = () { /// Line 2
     /// Line 3
     return 1;
   }();
   /// Line 4
-  
+
   /// Line 1
   external static int externalStaticField; /// Line 2
   /// Line 3
@@ -58,7 +58,7 @@ abstract class C {
     return 1;
   }();
   /// Line 4
-    
+
   /// Line 1
   abstract int abstractInstanceField; /// Line 2
   /// Line 3
@@ -142,7 +142,7 @@ class C {
   }();
   /** Line 4
    */
-   
+
   /** Line 1
    */
   abstract int abstractInstanceField; /** Line 2 */
@@ -181,14 +181,14 @@ mixin M {
   /// Line 1
   static int staticField = 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static int staticFieldWithInitializer = () { /// Line 2
     /// Line 3
     return 1;
   }();
   /// Line 4
-  
+
   /// Line 1
   external static int externalStaticField; /// Line 2
   /// Line 3
@@ -203,7 +203,7 @@ mixin M {
     return 1;
   }();
   /// Line 4
-    
+
   /// Line 1
   abstract int abstractInstanceField; /// Line 2
   /// Line 3
@@ -287,7 +287,7 @@ mixin M {
   }();
   /** Line 4
    */
-   
+
   /** Line 1
    */
   abstract int abstractInstanceField; /** Line 2 */
@@ -329,14 +329,14 @@ enum E {
   /// Line 1
   static int staticField = 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static int staticFieldWithInitializer = () { /// Line 2
     /// Line 3
     return 1;
   }();
   /// Line 4
-  
+
   /// Line 1
   external static int externalStaticField; /// Line 2
   /// Line 3
@@ -351,7 +351,7 @@ enum E {
     return 1;
   }();
   /// Line 4
-    
+
   /// Line 1
   abstract final int abstractInstanceField; /// Line 2
   /// Line 3
@@ -437,7 +437,7 @@ enum E {
   }();
   /** Line 4
    */
-   
+
   /** Line 1
    */
   abstract final int abstractInstanceField; /** Line 2 */
@@ -477,18 +477,18 @@ extension Ext on A {
   /// Line 1
   static int staticField = 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static int staticFieldWithInitializer = () { /// Line 2
     /// Line 3
     return 1;
   }();
   /// Line 4
-  
+
   /// Line 1
   external static int externalStaticField; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   external int externalInstanceField; /// Line 2
   /// Line 3
@@ -570,18 +570,18 @@ extension type ET(
   /// Line 1
   static int staticField = 0; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   static int staticFieldWithInitializer = () { /// Line 2
     /// Line 3
     return 1;
   }();
   /// Line 4
-  
+
   /// Line 1
   external static int externalStaticField; /// Line 2
   /// Line 3
-  
+
   /// Line 1
   external int externalInstanceField; /// Line 2
   /// Line 3
@@ -636,7 +636,7 @@ extension type ET(
   external static int externalStaticField; /** Line 2 */
   /** Line 3
    */
-   
+
   /** Line 1
    */
   external int externalInstanceField; /** Line 2 */
