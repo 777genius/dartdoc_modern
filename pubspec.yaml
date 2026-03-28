@@ -36,4 +36,5 @@ dev_dependencies:
   web: ^1.1.0
 
 executables:
+  dartdoc: dartdoc_vitepress
   dartdoc_vitepress: null

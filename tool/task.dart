@@ -353,6 +353,7 @@ Future<Iterable<Map<String, Object?>>> _docFlutter({
 }) async {
   var flutterRepo = await FlutterRepo.copyFromExistingFlutterRepo(
       await cleanFlutterRepo, flutterPath, env, label);
+  await _patchFlutterApiDocsRunner(flutterPath);
   var snippetsPath = path.join(flutterPath, 'dev', 'snippets');
   var snippetsOutPath =
       path.join(flutterPath, 'bin', 'cache', 'artifacts', 'snippets');
@@ -395,6 +396,27 @@ Future<Iterable<Map<String, Object?>>> _docFlutter({
     workingDirectory: flutterPath,
     withStats: withStats,
   );
+}
+
+Future<void> _patchFlutterApiDocsRunner(String flutterPath) async {
+  final createApiDocs = File(
+    path.join(flutterPath, 'dev', 'tools', 'create_api_docs.dart'),
+  );
+  final contents = await createApiDocs.readAsString();
+
+  var patched = contents.replaceFirst(
+    r"r'^(?<name>dartdoc) (?<version>[^\s]+)'",
+    r"r'^(?<name>dartdoc(?:_vitepress)?) (?<version>[^\s]+)'",
+  );
+  patched = patched.replaceFirst("'dartdoc',", "'dartdoc_vitepress',");
+
+  if (patched == contents) {
+    throw StateError(
+      'Failed to patch Flutter API docs runner for dartdoc_vitepress.',
+    );
+  }
+
+  await createApiDocs.writeAsString(patched);
 }
 
 final Directory flutterDir =
