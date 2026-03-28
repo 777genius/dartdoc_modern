@@ -151,6 +151,14 @@ class VitePressInitGenerator {
       placeholders: placeholders,
     );
 
+    // Outline collapse composable for large API containers
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('theme', 'composables', 'useOutlineCollapse.ts'),
+      outputFile: '.vitepress/theme/composables/useOutlineCollapse.ts',
+      placeholders: placeholders,
+    );
+
     // Generate empty stubs so config.ts and theme/index.ts imports work
     // even before the first full generation run (e.g. CI doing npm install
     // + vitepress build before dartdoc_vitepress).
