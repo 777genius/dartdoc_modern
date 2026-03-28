@@ -1,3 +1,7 @@
+## 1.2.1
+
+* Fix scaffold generation to include `useOutlineCollapse` composable for new projects.
+
 ## 1.2.0
 
 * **Interactive DartPad embeds:**
