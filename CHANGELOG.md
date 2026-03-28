@@ -1,3 +1,40 @@
+## 1.2.0
+
+* **Interactive DartPad embeds:**
+  * Run code examples directly in the docs with embedded DartPad.
+  * Loader animation, toolbar with Run/Reset/Open in DartPad buttons.
+
+* **Enhanced member signatures:**
+  * Linked type signatures - every type is a clickable link to its definition.
+  * Multi-line Dart-style formatting for long signatures.
+  * Shiki-matched syntax highlighting for member signatures.
+
+* **UI improvements:**
+  * Copy button on all code blocks across all pages.
+  * Collapsible outline for large API containers with many members.
+  * API breadcrumbs with source link icon.
+  * Auto-linked inline code references in doc comments.
+  * Dark mode search icon contrast fix.
+
+* **Scaffold & generation:**
+  * `useOutlineCollapse` composable added to scaffold generation.
+  * Guide frontmatter `sidebar_position` support for custom ordering.
+  * Filter internal SDK libraries from sidebar.
+  * `api-styles.css` generated as separate file for easy updates.
+
+* **Upstream sync:**
+  * Merged dartdoc upstream through commit 1c367092.
+  * Require analyzer 12.0.0.
+  * Dart SDK 3.10+ support.
+
+* **Fixes:**
+  * Fix Vue parser errors from blank lines in tall-style signatures.
+  * Fix broken type-link URLs for private types and internal SDK libs.
+  * Escape orphaned HTML tags in inline text.
+  * Fix nested code fence mangling and frontmatter title entities.
+  * Fix duplicate heading IDs and anchor conflicts.
+  * Resolve VitePress build failures from raw HTML in doc comments.
+
 ## 1.1.1
 
 * **Mermaid diagrams:**
