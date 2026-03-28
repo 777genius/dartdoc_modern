@@ -14,7 +14,6 @@ import 'package:dartdoc_vitepress/src/comment_references/model_comment_reference
 import 'package:dartdoc_vitepress/src/generator/vitepress_paths.dart';
 import 'package:dartdoc_vitepress/src/logging.dart';
 import 'package:dartdoc_vitepress/src/matching_link_result.dart';
-import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/runtime_stats.dart';
 import 'package:markdown/markdown.dart' as md;

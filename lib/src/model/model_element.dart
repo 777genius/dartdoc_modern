@@ -15,7 +15,6 @@ import 'package:collection/collection.dart';
 import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
 import 'package:dartdoc_vitepress/src/model/annotation.dart';
 import 'package:dartdoc_vitepress/src/model/attribute.dart';
-import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/kind.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/model/prefix.dart';

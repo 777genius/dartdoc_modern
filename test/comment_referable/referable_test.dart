@@ -6,8 +6,8 @@
 library;
 
 import 'package:collection/collection.dart';
-import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/package_graph.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:test/test.dart';
 
 const _separator = '.';

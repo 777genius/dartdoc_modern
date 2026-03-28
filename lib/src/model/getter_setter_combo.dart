@@ -14,11 +14,11 @@ import 'package:dartdoc_vitepress/src/model/accessor.dart';
 import 'package:dartdoc_vitepress/src/model/annotation.dart';
 import 'package:dartdoc_vitepress/src/model/attribute.dart';
 import 'package:dartdoc_vitepress/src/model/class.dart';
-import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/constructor.dart';
 import 'package:dartdoc_vitepress/src/model/enum.dart';
 import 'package:dartdoc_vitepress/src/model/model_element.dart';
 import 'package:dartdoc_vitepress/src/model/parameter.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/utils.dart';
 import 'package:meta/meta.dart';
 

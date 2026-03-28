@@ -18,7 +18,6 @@ import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
 import 'package:dartdoc_vitepress/src/element_type.dart';
 import 'package:dartdoc_vitepress/src/failure.dart';
 import 'package:dartdoc_vitepress/src/logging.dart';
-import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/model_utils.dart' as utils;
 import 'package:dartdoc_vitepress/src/package_meta.dart'
