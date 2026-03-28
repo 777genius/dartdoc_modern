@@ -62,6 +62,33 @@ class C {
   /// Line 3
   }
   /// Line 4
+  
+  /// Line 1
+  factory C._privateFactory() { /// Line 2
+  /// Line 3
+    return C();
+  }
+  /// Line 4
+  
+  /// Line 1
+  external C.external(); /// Line 2
+  /// Line 3
+  
+  /// Line 1
+  external factory C.externalFactory(); /// Line 2
+  /// Line 3
+  
+  /// Line 1
+  const C.constant(); /// Line 2
+  /// Line 3
+  
+  /// Line 1
+  external const C.externalConst(); /// Line 2
+  /// Line 3
+  
+  /// Line 1
+  external const factory C.externalConstFactory(); /// Line 2
+  /// Line 3
 }
 ''');
     var c = library.classes.named('C');
@@ -87,6 +114,34 @@ Line 4
 Line 1''');
     var c6 = c.constructors.named('C._private');
     expect(c6.documentation, '''
+Line 2
+Line 3
+Line 1''');
+    var c7 = c.constructors.named('C._privateFactory');
+    expect(c7.documentation, '''
+Line 4
+Line 1''');
+    var c8 = c.constructors.named('C.external');
+    expect(c8.documentation, '''
+Line 4
+Line 1''');
+    var c9 = c.constructors.named('C.externalFactory');
+    expect(c9.documentation, '''
+Line 2
+Line 3
+Line 1''');
+    var c10 = c.constructors.named('C.constant');
+    expect(c10.documentation, '''
+Line 2
+Line 3
+Line 1''');
+    var c11 = c.constructors.named('C.externalConst');
+    expect(c11.documentation, '''
+Line 2
+Line 3
+Line 1''');
+    var c12 = c.constructors.named('C.externalConstFactory');
+    expect(c12.documentation, '''
 Line 2
 Line 3
 Line 1''');
@@ -142,6 +197,46 @@ class C {
   }
   /** Line 4
    */
+   
+  /** Line 1
+   */
+  factory C._privateFactory() { /** Line 2 */
+  /** Line 3
+   */
+    return C();
+  }
+  /** Line 4
+   */
+
+  /** Line 1
+   */
+  external C.external(); /** Line 2 */
+  /** Line 3
+   */
+
+  /** Line 1
+   */
+  external factory C.externalFactory(); /** Line 2 */
+  /** Line 3
+   */
+   
+  /** Line 1
+   */
+  const C.constant(); /** Line 2 */
+  /** Line 3
+   */
+
+  /** Line 1
+   */
+  external const C.externalConst(); /** Line 2 */
+  /** Line 3
+   */
+
+  /** Line 1
+   */
+  external const factory C.externalConstFactory(); /** Line 2 */
+  /** Line 3
+   */
 }
 ''');
     var c = library.classes.named('C');
@@ -157,6 +252,18 @@ class C {
     expect(c5.documentation, 'Line 1');
     var c6 = c.constructors.named('C._private');
     expect(c6.documentation, 'Line 1');
+    var c7 = c.constructors.named('C._privateFactory');
+    expect(c7.documentation, 'Line 1');
+    var c8 = c.constructors.named('C.external');
+    expect(c8.documentation, 'Line 1');
+    var c9 = c.constructors.named('C.externalFactory');
+    expect(c9.documentation, 'Line 1');
+    var c10 = c.constructors.named('C.constant');
+    expect(c10.documentation, 'Line 1');
+    var c11 = c.constructors.named('C.externalConst');
+    expect(c11.documentation, 'Line 1');
+    var c12 = c.constructors.named('C.externalConstFactory');
+    expect(c12.documentation, 'Line 1');
   }
 
   /// Check that doc comments can be placed before enum constructors.
@@ -186,6 +293,21 @@ enum E {
   /// Line 1
   const E._private(); /// Line 2
   /// Line 3
+  
+    /// Line 1
+  factory E._privateFactory() { /// Line 2
+    /// Line 3
+    return E.e0;
+  }
+  /// Line 4
+  
+  /// Line 1
+  external const C.externalConst(); /// Line 2
+  /// Line 3
+  
+  /// Line 1
+  external const factory C.externalConstFactory(); /// Line 2
+  /// Line 3
 }
 ''');
     var e = library.enums.named('E');
@@ -209,6 +331,20 @@ Line 1''');
     var c5 = e.constructors.named('E._private');
     expect(c5.documentation, '''
 Line 4
+Line 1''');
+    var c6 = e.constructors.named('E._privateFactory');
+    expect(c6.documentation, '''
+Line 2
+Line 3
+Line 1''');
+    var c7 = e.constructors.named('E.externalConst');
+    expect(c7.documentation, '''
+Line 4
+Line 1''');
+    var c8 = e.constructors.named('E.externalConstFactory');
+    expect(c8.documentation, '''
+Line 2
+Line 3
 Line 1''');
   }
 
@@ -250,6 +386,25 @@ enum E {
   const E._private(); /** Line 2 */
   /** Line 3
    */
+   
+     /** Line 1
+   */
+  factory E._privateFactory() { /** Line 2 */
+    /** Line 3
+     */
+    return E.e0;
+  }
+  /** Line 1
+   */
+  external const E.externalConst(); /** Line 2 */
+  /** Line 3
+   */
+
+  /** Line 1
+   */
+  external const factory E.externalConstFactory(); /** Line 2 */
+  /** Line 3
+   */
 }
 ''');
     var e = library.enums.named('E');
@@ -263,6 +418,12 @@ enum E {
     expect(c4.documentation, 'Line 1');
     var c5 = e.constructors.named('E._private');
     expect(c5.documentation, 'Line 1');
+    var c6 = e.constructors.named('E._privateFactory');
+    expect(c6.documentation, 'Line 1');
+    var c7 = e.constructors.named('E.externalConst');
+    expect(c7.documentation, 'Line 1');
+    var c8 = e.constructors.named('E.externalConstFactory');
+    expect(c8.documentation, 'Line 1');
   }
 
   /// Check that doc comments can be placed before extension type constructors.
@@ -299,6 +460,33 @@ extension type ET._(int v) {
   /// Line 3
   }
   /// Line 4
+  
+  /// Line 1
+  factory ET._privateFactory() { /// Line 2
+  /// Line 3
+    return ET(0);
+  }
+  /// Line 4
+  
+  /// Line 1
+  external C.external(); /// Line 2
+  /// Line 3
+  
+  /// Line 1
+  external factory C.externalFactory(); /// Line 2
+  /// Line 3
+  
+  /// Line 1
+  const C.constant(); /// Line 2
+  /// Line 3
+  
+  /// Line 1
+  external const C.externalConst(); /// Line 2
+  /// Line 3
+  
+  /// Line 1
+  external const factory C.externalConstFactory(); /// Line 2
+  /// Line 3
 }
 ''');
     var et = library.extensionTypes.named('ET');
@@ -324,6 +512,34 @@ Line 4
 Line 1''');
     var c6 = et.constructors.named('ET._private');
     expect(c6.documentation, '''
+Line 2
+Line 3
+Line 1''');
+    var c7 = et.constructors.named('ET._privateFactory');
+    expect(c7.documentation, '''
+Line 4
+Line 1''');
+    var c8 = et.constructors.named('ET.external');
+    expect(c8.documentation, '''
+Line 4
+Line 1''');
+    var c9 = et.constructors.named('ET.externalFactory');
+    expect(c9.documentation, '''
+Line 2
+Line 3
+Line 1''');
+    var c10 = et.constructors.named('ET.constant');
+    expect(c10.documentation, '''
+Line 2
+Line 3
+Line 1''');
+    var c11 = et.constructors.named('ET.externalConst');
+    expect(c11.documentation, '''
+Line 2
+Line 3
+Line 1''');
+    var c12 = et.constructors.named('ET.externalConstFactory');
+    expect(c12.documentation, '''
 Line 2
 Line 3
 Line 1''');
@@ -379,6 +595,46 @@ extension type ET._(int v) {
   }
   /** Line 4
    */
+   
+  /** Line 1
+   */
+  factory ET._privateFactory() { /** Line 2 */
+  /** Line 3
+   */
+     return ET(0);
+  }
+  /** Line 4
+   */
+   
+  /** Line 1
+   */
+  external ET.external(); /** Line 2 */
+  /** Line 3
+   */
+
+  /** Line 1
+   */
+  external factory ET.externalFactory(); /** Line 2 */
+  /** Line 3
+   */
+   
+  /** Line 1
+   */
+  const ET.constant(); /** Line 2 */
+  /** Line 3
+   */
+
+  /** Line 1
+   */
+  external const ET.externalConst(); /** Line 2 */
+  /** Line 3
+   */
+
+  /** Line 1
+   */
+  external const factory ET.externalConstFactory(); /** Line 2 */
+  /** Line 3
+   */
 }
 ''');
     var et = library.extensionTypes.named('ET');
@@ -394,5 +650,17 @@ extension type ET._(int v) {
     expect(c5.documentation, 'Line 1');
     var c6 = et.constructors.named('ET._private');
     expect(c6.documentation, 'Line 1');
+    var c7 = et.constructors.named('ET._privateFactory');
+    expect(c7.documentation, 'Line 1');
+    var c8 = et.constructors.named('ET.external');
+    expect(c8.documentation, 'Line 1');
+    var c9 = et.constructors.named('ET.externalFactory');
+    expect(c9.documentation, 'Line 1');
+    var c10 = et.constructors.named('ET.constant');
+    expect(c10.documentation, 'Line 1');
+    var c11 = et.constructors.named('ET.externalConst');
+    expect(c11.documentation, 'Line 1');
+    var c12 = et.constructors.named('ET.externalConstFactory');
+    expect(c12.documentation, 'Line 1');
   }
 }

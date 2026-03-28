@@ -15,7 +15,7 @@ import 'package:collection/collection.dart';
 import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
 import 'package:dartdoc_vitepress/src/model/annotation.dart';
 import 'package:dartdoc_vitepress/src/model/attribute.dart';
-import 'package:dartdoc_vitepress/src/model/comment_referable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/kind.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/model/prefix.dart';
@@ -58,7 +58,7 @@ import 'package:path/path.dart' as p show Context;
 /// ModelElement will reference itself as part of the "wrong" [Library] from the
 /// public interface perspective.
 abstract class ModelElement
-    with CommentReferable, Warnable, Nameable, SourceCode, DocumentationComment
+    with Warnable, Referable, SourceCode, DocumentationComment
     implements Comparable<ModelElement>, Documentable {
   /// The [Library] of a model can be `null` in three cases:
   ///
@@ -875,7 +875,7 @@ abstract class ModelElement
 
   @internal
   @override
-  CommentReferable get definingCommentReferable {
+  Referable get definingReferable {
     return getModelForElement(element);
   }
 

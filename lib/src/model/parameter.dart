@@ -4,7 +4,7 @@
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:dartdoc_vitepress/src/element_type.dart';
-import 'package:dartdoc_vitepress/src/model/comment_referable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/kind.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 
@@ -34,6 +34,17 @@ class Parameter extends ModelElement with HasNoPage {
   String? get href => null;
 
   @override
+  String? get documentedName {
+    // TODO(rnystrom): Allow private named declaring parameters in primary
+    // constructors here too.
+    if (element case FieldFormalParameterElement(privateName: _?)) {
+      return element.name;
+    }
+
+    return null;
+  }
+
+  @override
   String get htmlId {
     final enclosingElement = element.enclosingElement;
     if (enclosingElement == null) {
@@ -43,16 +54,9 @@ class Parameter extends ModelElement with HasNoPage {
     if (enclosingName == 'new') {
       enclosingName = '';
     }
-    if (enclosingElement is GenericFunctionTypeElement) {
-      // TODO(jcollins-g): Drop when GenericFunctionTypeElement populates
-      // name. Also, allowing null here is allowed as a workaround for
-      // dart-lang/sdk#32005.
-      for (Element e = enclosingElement;
-          e.enclosingElement != null;
-          e = e.enclosingElement!) {
-        enclosingName = e.lookupName;
-        if (enclosingName != null && enclosingName.isNotEmpty) break;
-      }
+
+    if (enclosingName == null || enclosingName.isEmpty) {
+      return 'param-$name';
     }
     return '$enclosingName-param-$name';
   }
@@ -79,7 +83,7 @@ class Parameter extends ModelElement with HasNoPage {
   Kind get kind => Kind.parameter;
 
   @override
-  late final Map<String, CommentReferable> referenceChildren = {
+  late final Map<String, Referable> referenceChildren = {
     if (modelType is Callable)
       ...(modelType as Callable)
           .returnType
@@ -91,7 +95,7 @@ class Parameter extends ModelElement with HasNoPage {
   };
 
   @override
-  Iterable<CommentReferable> get referenceParents {
+  Iterable<Referable> get referenceParents {
     final enclosingElement = this.enclosingElement;
     return [if (enclosingElement != null) enclosingElement];
   }

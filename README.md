@@ -253,7 +253,7 @@ For CI/CD (GitHub Actions standard runner has ~7 GB RAM), use `--max-old-space-s
 
 ## Upstream
 
-Based on [dart-lang/dartdoc v9.0.2](https://github.com/dart-lang/dartdoc) (commit `af008503`).
+Based on [dart-lang/dartdoc v9.0.5-wip](https://github.com/dart-lang/dartdoc) and synced through commit `1c367092`.
 
 The VitePress backend is implemented as an additional `GeneratorBackend`, not a replacement — the original HTML generation is fully intact.
 

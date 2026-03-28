@@ -4,7 +4,7 @@
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:dartdoc_vitepress/src/element_type.dart';
-import 'package:dartdoc_vitepress/src/model/comment_referable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/kind.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:meta/meta.dart';
@@ -67,9 +67,9 @@ class ExtensionType extends InheritingContainer with Constructable {
   String get sidebarPath =>
       '${canonicalLibraryOrThrow.dirName}/$name-extension-type-sidebar.html';
 
-  Map<String, CommentReferable>? _referenceChildren;
+  Map<String, Referable>? _referenceChildren;
   @override
-  Map<String, CommentReferable> get referenceChildren {
+  Map<String, Referable> get referenceChildren {
     return _referenceChildren ??= {
       ...representationType.referenceChildren,
       // Override `representationType` entries with local items.
@@ -79,7 +79,7 @@ class ExtensionType extends InheritingContainer with Constructable {
 
   @override
   @visibleForOverriding
-  Map<String, CommentReferable> get extraReferenceChildren => const {};
+  Map<String, Referable> get extraReferenceChildren => const {};
 
   @override
   String get relationshipsClass => 'clazz-relationships';

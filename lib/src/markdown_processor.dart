@@ -10,7 +10,7 @@ import 'dart:math';
 
 import 'package:dartdoc_vitepress/src/comment_references/model_comment_reference.dart';
 import 'package:dartdoc_vitepress/src/matching_link_result.dart';
-import 'package:dartdoc_vitepress/src/model/comment_referable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/runtime_stats.dart';
 import 'package:dartdoc_vitepress/src/warnings.dart';
@@ -144,7 +144,7 @@ final RegExp _hideSchemas = RegExp('^(http|https)://');
 
 /// Returns false if [referable] is an unnamed [Constructor], or if it is
 /// shadowing another type of element, or is a parameter of one of the above.
-bool _rejectUnnamedAndShadowingConstructors(CommentReferable? referable) {
+bool _rejectUnnamedAndShadowingConstructors(Referable? referable) {
   if (referable is Constructor) {
     if (referable.isUnnamedConstructor) return false;
     if (referable.enclosingElement
@@ -158,7 +158,7 @@ bool _rejectUnnamedAndShadowingConstructors(CommentReferable? referable) {
 /// Returns false unless [referable] represents a callable object.
 ///
 /// Allows constructors but does not require them.
-bool _requireCallable(CommentReferable? referable) =>
+bool _requireCallable(Referable? referable) =>
     referable is ModelElement && referable.isCallable;
 
 MatchingLinkResult _getMatchingLinkElement(
@@ -186,7 +186,7 @@ MatchingLinkResult getMatchingLinkElement(
     String referenceText, Warnable element) {
   var result = _getMatchingLinkElement(referenceText, element);
   runtimeStats.totalReferences++;
-  if (result.commentReferable != null) {
+  if (result.referable != null) {
     runtimeStats.resolvedReferences++;
   }
   return result;
@@ -312,8 +312,13 @@ class MarkdownDocument extends md.Document {
     }
     var result = getMatchingLinkElement(referenceText, element);
     var textContent = _htmlEscape.convert(referenceText);
-    var linkedElement = result.commentReferable;
+    var linkedElement = result.referable;
     if (linkedElement != null) {
+      // If the element has a separate name to use in documentation, prefer it.
+      if (linkedElement.documentedName case var name?) {
+        textContent = name;
+      }
+
       if (linkedElement.href case var href?) {
         var anchor = md.Element.text('a', textContent);
         if (linkedElement is ModelElement && linkedElement.isDeprecated) {

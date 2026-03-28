@@ -5,7 +5,7 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
-import 'package:dartdoc_vitepress/src/model/comment_referable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/kind.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/model_utils.dart';
@@ -30,7 +30,7 @@ const String htmlBasePlaceholder = r'%%__HTMLBASE_dartdoc_internal__%%';
 /// A [LibraryContainer] that contains [Library] objects related to a particular
 /// package.
 final class Package extends LibraryContainer
-    with Nameable, Warnable, CommentReferable, MarkdownFileDocumentation {
+    with Referable, Warnable, MarkdownFileDocumentation {
   @override
   final String name;
 
@@ -364,7 +364,7 @@ final class Package extends LibraryContainer
   String get sortKey => name;
 
   @override
-  late final Map<String, CommentReferable> referenceChildren = {
+  late final Map<String, Referable> referenceChildren = {
     // Do not override any preexisting data, and insert based on the public
     // library sort order.
     // TODO(jcollins-g): warn when results require package-global lookups like
@@ -376,7 +376,7 @@ final class Package extends LibraryContainer
   };
 
   @override
-  Iterable<CommentReferable> get referenceParents => [packageGraph];
+  Iterable<Referable> get referenceParents => [packageGraph];
 
   p.Context get _pathContext => packageGraph.resourceProvider.pathContext;
 

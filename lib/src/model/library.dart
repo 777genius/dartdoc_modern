@@ -5,7 +5,7 @@
 import 'package:analyzer/dart/analysis/features.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/scope.dart';
-import 'package:dartdoc_vitepress/src/model/comment_referable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/kind.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/model_utils.dart';
@@ -438,8 +438,8 @@ class Library extends ModelElement with TopLevelContainer {
   ];
 
   @override
-  Map<String, CommentReferable> get referenceChildren {
-    var referenceChildrenBuilder = <String, CommentReferable>{};
+  Map<String, Referable> get referenceChildren {
+    var referenceChildrenBuilder = <String, Referable>{};
     var definedNamesModelElements =
         element.exportNamespace.definedNames2.values.map(getModelForElement);
     referenceChildrenBuilder
@@ -461,7 +461,7 @@ class Library extends ModelElement with TopLevelContainer {
   }
 
   @override
-  Iterable<CommentReferable> get referenceParents => [package];
+  Iterable<Referable> get referenceParents => [package];
 
   /// Checks [canonicalFor] for correctness and warn if it refers to non-
   /// existent elements (or those that this Library can not be canonical for).

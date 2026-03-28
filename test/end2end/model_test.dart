@@ -2352,8 +2352,8 @@ void main() async {
 
       test('Referring to a renamed library directly works', () {
         expect(
-            (referenceLookup(aFunctionUsingRenamedLib, 'renamedLib')
-                    .commentReferable as ModelElement)
+            (referenceLookup(aFunctionUsingRenamedLib, 'renamedLib').referable
+                    as ModelElement)
                 .canonicalModelElement,
             equals(mylibpub));
       });
@@ -3861,7 +3861,7 @@ String? topLevelFunction(int param1, bool param2, Cool coolBeans,
       expect(
           ParameterRendererHtml().renderLinkedParams(theConstructor.parameters),
           equals(
-              '<span class="parameter" id="-param-x"><span class="type-annotation"><a href="${htmlBasePlaceholder}ex/ParameterizedTypedef.html">ParameterizedTypedef</a><span class="signature">&lt;<wbr><span class="type-parameter">double</span>&gt;</span></span> <span class="parameter-name">x</span></span>'));
+              '<span class="parameter" id="param-x"><span class="type-annotation"><a href="${htmlBasePlaceholder}ex/ParameterizedTypedef.html">ParameterizedTypedef</a><span class="signature">&lt;<wbr><span class="type-parameter">double</span>&gt;</span></span> <span class="parameter-name">x</span></span>'));
     });
 
     test('anonymous nested functions inside typedefs are handled', () {
@@ -4237,7 +4237,7 @@ String? topLevelFunction(int param1, bool param2, Cool coolBeans,
   });
 }
 
-class StringName with Nameable {
+class StringName with Referable {
   @override
   final String name;
 
@@ -4248,9 +4248,15 @@ class StringName with Nameable {
 
   @override
   String toString() => name;
+
+  @override
+  Map<String, Referable> get referenceChildren => throw UnimplementedError();
+
+  @override
+  Iterable<Referable> get referenceParents => throw UnimplementedError();
 }
 
-class StringNameHashCode with Nameable {
+class StringNameHashCode with Referable {
   @override
   final String name;
 
@@ -4268,6 +4274,12 @@ class StringNameHashCode with Nameable {
   @override
   // ignore: unnecessary_overrides
   bool operator ==(Object other) => super == other;
+
+  @override
+  Map<String, Referable> get referenceChildren => throw UnimplementedError();
+
+  @override
+  Iterable<Referable> get referenceParents => throw UnimplementedError();
 }
 
 extension on Library {

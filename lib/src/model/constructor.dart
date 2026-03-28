@@ -4,7 +4,7 @@
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:dartdoc_vitepress/src/element_type.dart';
-import 'package:dartdoc_vitepress/src/model/comment_referable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/kind.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/model_utils.dart';
@@ -104,7 +104,7 @@ class Constructor extends ModelElement
   }
 
   @override
-  late final Map<String, CommentReferable> referenceChildren = () {
+  late final Map<String, Referable> referenceChildren = () {
     // Find the element that [parameter] is _really_ referring to.
     Element? dereferenceParameter(FormalParameterElement? parameter) =>
         switch (parameter) {

@@ -4,7 +4,7 @@
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/scope.dart';
-import 'package:dartdoc_vitepress/src/model/comment_referable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/kind.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 
@@ -64,8 +64,8 @@ class Prefix extends ModelElement with HasLibrary, HasNoPage {
   Kind get kind => Kind.prefix;
 
   @override
-  Map<String, CommentReferable> get referenceChildren => {};
+  Map<String, Referable> get referenceChildren => {};
 
   @override
-  Iterable<CommentReferable> get referenceParents => [library];
+  Iterable<Referable> get referenceParents => [library];
 }

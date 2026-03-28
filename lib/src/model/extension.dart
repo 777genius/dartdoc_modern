@@ -6,7 +6,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:dartdoc_vitepress/src/element_type.dart';
-import 'package:dartdoc_vitepress/src/model/comment_referable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/kind.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/model_utils.dart';
@@ -132,9 +132,9 @@ class Extension extends Container {
   String get sidebarPath =>
       '${canonicalLibraryOrThrow.dirName}/$name-extension-sidebar.html';
 
-  Map<String, CommentReferable>? _referenceChildren;
+  Map<String, Referable>? _referenceChildren;
   @override
-  Map<String, CommentReferable> get referenceChildren {
+  Map<String, Referable> get referenceChildren {
     return _referenceChildren ??= {
       ...extendedElement.referenceChildren,
       // Override extendedType entries with local items.
@@ -144,7 +144,7 @@ class Extension extends Container {
 
   @override
   @visibleForOverriding
-  Map<String, CommentReferable> get extraReferenceChildren => const {};
+  Map<String, Referable> get extraReferenceChildren => const {};
 
   @override
   String get relationshipsClass => 'clazz-relationships';

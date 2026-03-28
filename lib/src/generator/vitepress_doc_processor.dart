@@ -14,7 +14,7 @@ import 'package:dartdoc_vitepress/src/comment_references/model_comment_reference
 import 'package:dartdoc_vitepress/src/generator/vitepress_paths.dart';
 import 'package:dartdoc_vitepress/src/logging.dart';
 import 'package:dartdoc_vitepress/src/matching_link_result.dart';
-import 'package:dartdoc_vitepress/src/model/comment_referable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/runtime_stats.dart';
 import 'package:markdown/markdown.dart' as md;
@@ -58,7 +58,7 @@ final List<md.BlockSyntax> _blockSyntaxes = [
 /// shadowing another type of element, or is a parameter of one of the above.
 ///
 /// This mirrors the filter logic in `markdown_processor.dart`.
-bool _rejectUnnamedAndShadowingConstructors(CommentReferable? referable) {
+bool _rejectUnnamedAndShadowingConstructors(Referable? referable) {
   if (referable is Constructor) {
     if (referable.isUnnamedConstructor) return false;
     if (referable.enclosingElement
@@ -70,7 +70,7 @@ bool _rejectUnnamedAndShadowingConstructors(CommentReferable? referable) {
 }
 
 /// Returns `false` unless [referable] represents a callable object.
-bool _requireCallable(CommentReferable? referable) =>
+bool _requireCallable(Referable? referable) =>
     referable is ModelElement && referable.isCallable;
 
 /// Resolves a bracket reference [referenceText] against [element]'s scope.
@@ -92,7 +92,7 @@ MatchingLinkResult _resolveReference(
 
   var result = MatchingLinkResult(lookupResult);
   runtimeStats.totalReferences++;
-  if (result.commentReferable != null) {
+  if (result.referable != null) {
     runtimeStats.resolvedReferences++;
   }
   return result;
@@ -646,7 +646,7 @@ class VitePressDocProcessor {
   /// Uses the same resolution logic as dartdoc's `getMatchingLinkElement`
   /// function. For local elements, maps to VitePress URLs via
   /// [VitePressPathResolver]. For external elements (SDK, pub packages),
-  /// delegates to the model's built-in [CommentReferable.href] which
+  /// delegates to the model's built-in [Referable.href] which
   /// already computes correct remote URLs via [Package.baseHref] and the
   /// `linkToUrl`/`linkToRemote` options (matching the original dartdoc
   /// behavior in `_makeLinkNode`).
@@ -658,11 +658,11 @@ class VitePressDocProcessor {
     if (referenceText.isEmpty) return null;
 
     final result = _resolveReference(referenceText, element);
-    final linkedElement = result.commentReferable;
+    final linkedElement = result.referable;
 
     if (linkedElement != null) {
       if (linkedElement is Documentable) {
-        final documentable = linkedElement as Documentable;
+        final documentable = linkedElement;
 
         // Guard: private or internal elements have no generated page.
         // Render as inline code instead of producing a broken link.

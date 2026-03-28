@@ -5,7 +5,7 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:dartdoc_vitepress/src/element_type.dart';
 import 'package:dartdoc_vitepress/src/model/attribute.dart';
-import 'package:dartdoc_vitepress/src/model/comment_referable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/kind.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 
@@ -127,14 +127,14 @@ class Method extends ModelElement
   @override
   bool get isCovariant => false;
 
-  Map<String, CommentReferable>? _referenceChildren;
+  Map<String, Referable>? _referenceChildren;
   @override
-  Map<String, CommentReferable> get referenceChildren {
+  Map<String, Referable> get referenceChildren {
     var from = documentationFrom.first as Method;
     if (!identical(this, from)) {
       return from.referenceChildren;
     }
-    return _referenceChildren ??= <String, CommentReferable>{
+    return _referenceChildren ??= <String, Referable>{
       // If we want to include all types referred to in the signature of this
       // method, this is woefully incomplete. Notice we don't currently include
       // the element of the returned type itself, nor nested type arguments,

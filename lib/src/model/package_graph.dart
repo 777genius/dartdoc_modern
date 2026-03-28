@@ -7,6 +7,7 @@ import 'dart:collection';
 import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:analyzer/source/source.dart';
 import 'package:analyzer/source/timestamped_data.dart' show TimestampedData;
@@ -14,9 +15,10 @@ import 'package:analyzer/source/timestamped_data.dart' show TimestampedData;
 import 'package:analyzer/src/generated/sdk.dart' show DartSdk, SdkLibrary;
 import 'package:collection/collection.dart';
 import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
+import 'package:dartdoc_vitepress/src/element_type.dart';
 import 'package:dartdoc_vitepress/src/failure.dart';
 import 'package:dartdoc_vitepress/src/logging.dart';
-import 'package:dartdoc_vitepress/src/model/comment_referable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/model_utils.dart' as utils;
 import 'package:dartdoc_vitepress/src/package_meta.dart'
@@ -26,7 +28,7 @@ import 'package:dartdoc_vitepress/src/tool_runner.dart';
 import 'package:dartdoc_vitepress/src/warnings.dart';
 import 'package:meta/meta.dart';
 
-class PackageGraph with CommentReferable, Nameable {
+class PackageGraph with Referable {
   /// Dartdoc's configuration flags.
   final DartdocOptionContext config;
 
@@ -241,10 +243,11 @@ class PackageGraph with CommentReferable, Nameable {
             }
           case EnumDeclaration():
             if (declaration.declaredFragment?.element.isPublic ?? false) {
-              for (var constant in declaration.body.constants) {
+              final body = declaration.body;
+              for (var constant in body.constants) {
                 _populateModelNodeFor(constant);
               }
-              for (var member in declaration.body.members) {
+              for (var member in body.members) {
                 _populateModelNodeFor(member);
               }
             }
@@ -254,8 +257,10 @@ class PackageGraph with CommentReferable, Nameable {
             }
           case ExtensionDeclaration():
             if (declaration.declaredFragment?.element.isPublic ?? false) {
-              for (var member in declaration.body.members) {
-                _populateModelNodeFor(member);
+              if (declaration.body case BlockClassBody body) {
+                for (var member in body.members) {
+                  _populateModelNodeFor(member);
+                }
               }
             }
           case ExtensionTypeDeclaration():
@@ -386,6 +391,12 @@ class PackageGraph with CommentReferable, Nameable {
   final Map<String, String> _htmlFragments = {};
   bool allLibrariesAdded = false;
 
+  /// Cache of [ElementType]s instantiated during documentation generation.
+  ///
+  /// Key is a record of `(DartType, Library?, InstantiatedTypeAliasElement?)`.
+  final elementTypeCache =
+      <(DartType, Library?, InstantiatedTypeAliasElement?), ElementType>{};
+
   /// Whether the local documentation has been built, which is only complete
   /// after all of the work in [_precacheLocalDocs] is done.
   bool _localDocumentationBuilt = false;
@@ -467,7 +478,9 @@ class PackageGraph with CommentReferable, Nameable {
       PackageWarning.duplicateFile ||
       PackageWarning.orphanedFile ||
       PackageWarning.unknownFile ||
+      PackageWarning.internalError ||
       PackageWarning.missingFromSearchIndex ||
+      PackageWarning.missingExampleFile ||
       PackageWarning.typeAsHtml ||
       PackageWarning.invalidParameter ||
       PackageWarning.toolError ||
@@ -917,7 +930,7 @@ class PackageGraph with CommentReferable, Nameable {
   }
 
   @override
-  late final Map<String, CommentReferable> referenceChildren = () {
+  late final Map<String, Referable> referenceChildren = () {
     // We have to use a stable order or otherwise references depending on
     // ambiguous resolution (see below) will change where they resolve based on
     // internal implementation details.
@@ -957,7 +970,7 @@ class PackageGraph with CommentReferable, Nameable {
   }();
 
   @override
-  Iterable<CommentReferable> get referenceParents => const [];
+  Iterable<Referable> get referenceParents => const [];
 }
 
 class ConstructedModelElementsKey {
@@ -997,20 +1010,20 @@ extension on Comment {
 
     var referencesData = <String, CommentReferenceData>{};
     for (var reference in references) {
-      var commentReferable = reference.expression;
+      var referable = reference.expression;
       String name;
       Element? staticElement;
-      if (commentReferable case PropertyAccess(:var propertyName)) {
-        var target = commentReferable.target;
+      if (referable case PropertyAccess(:var propertyName)) {
+        var target = referable.target;
         if (target is! PrefixedIdentifier) continue;
         name = '${target.name}.${propertyName.name}';
         staticElement = propertyName.element;
-      } else if (commentReferable case PrefixedIdentifier(:var identifier)) {
-        name = commentReferable.name;
+      } else if (referable case PrefixedIdentifier(:var identifier)) {
+        name = referable.name;
         staticElement = identifier.element;
-      } else if (commentReferable case SimpleIdentifier()) {
-        name = commentReferable.name;
-        staticElement = commentReferable.element;
+      } else if (referable case SimpleIdentifier()) {
+        name = referable.name;
+        staticElement = referable.element;
       } else {
         continue;
       }
@@ -1019,8 +1032,8 @@ extension on Comment {
         referencesData[name] = CommentReferenceData(
           staticElement,
           name,
-          commentReferable.offset,
-          commentReferable.length,
+          referable.offset,
+          referable.length,
         );
       }
     }

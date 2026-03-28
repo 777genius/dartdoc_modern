@@ -10,7 +10,7 @@ library;
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:dartdoc_vitepress/src/model/comment_referable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/render/element_type_renderer.dart';
 import 'package:dartdoc_vitepress/src/runtime_stats.dart';
@@ -19,7 +19,7 @@ import 'package:meta/meta.dart';
 
 /// Base class representing a type in Dartdoc.  It wraps a [DartType], and
 /// may link to a [ModelElement].
-abstract class ElementType with CommentReferable, Nameable {
+abstract class ElementType with Referable {
   final DartType type;
   @override
   final PackageGraph packageGraph;
@@ -33,15 +33,21 @@ abstract class ElementType with CommentReferable, Nameable {
 
   factory ElementType.for_(
       DartType type, Library? library, PackageGraph packageGraph) {
+    var key = (type, library, type.alias);
+    var cached = packageGraph.elementTypeCache[key];
+    if (cached != null) return cached;
+
     runtimeStats.incrementAccumulator('elementTypeInstantiation');
     var fElement = type.documentableElement;
     if (fElement == null ||
         fElement.kind == ElementKind.DYNAMIC ||
         fElement.kind == ElementKind.NEVER) {
-      return UndefinedElementType._from(type, library, packageGraph);
+      return packageGraph.elementTypeCache[key] =
+          UndefinedElementType._from(type, library, packageGraph);
     }
     var modelElement = packageGraph.getModelForElement(fElement);
-    return DefinedElementType._from(type, modelElement, library, packageGraph);
+    return packageGraph.elementTypeCache[key] =
+        DefinedElementType._from(type, modelElement, library, packageGraph);
   }
 
   bool get isTypedef => false;
@@ -120,13 +126,13 @@ class UndefinedElementType extends ElementType {
   Iterable<ElementType> get typeArguments => const [];
 
   @override
-  Map<String, CommentReferable> get referenceChildren => const {};
+  Map<String, Referable> get referenceChildren => const {};
 
   @override
-  Iterable<CommentReferable> get referenceParents => const [];
+  Iterable<Referable> get referenceParents => const [];
 
   @override
-  Iterable<CommentReferable>? get referenceGrandparentOverrides => null;
+  Iterable<Referable>? get referenceGrandparentOverrides => null;
 }
 
 /// A [FunctionType] that does not have an underpinning [Element].
@@ -308,20 +314,19 @@ abstract class DefinedElementType extends ElementType {
   Iterable<ElementType> get typeArguments => [];
 
   @override
-  Map<String, CommentReferable> get referenceChildren =>
+  Map<String, Referable> get referenceChildren =>
       modelElement.referenceChildren;
 
   @override
-  Iterable<CommentReferable> get referenceParents =>
-      modelElement.referenceParents;
+  Iterable<Referable> get referenceParents => modelElement.referenceParents;
 
   @override
-  Iterable<CommentReferable>? get referenceGrandparentOverrides =>
+  Iterable<Referable>? get referenceGrandparentOverrides =>
       modelElement.referenceGrandparentOverrides;
 
   @internal
   @override
-  CommentReferable get definingCommentReferable =>
+  Referable get definingReferable =>
       ModelElement.forElement(modelElement.element, packageGraph);
 }
 

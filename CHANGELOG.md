@@ -24,6 +24,20 @@
   * Add `vitepress-mermaid-zoom` plugin for zoomable Mermaid diagrams.
   * Scaffold `CLAUDE.md` and `AGENTS.md` for LLM-aware documentation projects.
 
+## 9.0.5-wip
+
+* Require analyzer 12.0.0 APIs.
+
+## 9.0.4
+
+* Fix a bug where experiment flags passed via command-line were ignored.
+* Support specifying experimental features in `dartdoc_options.yaml`.
+* Document using the public name for private named parameters.
+* Deprecate the `--use-categories` option.
+* Gracefully handle missing library elements during comment reference lookup,
+  emitting an `internal-error` warning instead of crashing.
+* Require analyzer 10.2.0 APIs.
+
 ## 9.0.3
 * Require analyzer 10.1.0 APIs.
 * Remove usage of `EmbedderYamlLocator` and `EmbedderSdk.new`, internal

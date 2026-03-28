@@ -9,7 +9,7 @@ import 'package:dartdoc_vitepress/src/model/documentable.dart';
 import 'package:dartdoc_vitepress/src/model/inheritable.dart';
 import 'package:dartdoc_vitepress/src/model/library.dart';
 import 'package:dartdoc_vitepress/src/model/model_element.dart';
-import 'package:dartdoc_vitepress/src/model/nameable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 
 String generateCategoryJson(
     List<ModelElement> categorizedElements, bool pretty) {
@@ -141,7 +141,7 @@ int _compareElementRepresentations(Documentable a, Documentable b) {
   return value;
 }
 
-extension on Nameable {
+extension on Referable {
   /// The fully qualified name of this element, but using the canonical library,
   /// if it has one.
   String get canonicalQualifiedName {

@@ -4,7 +4,7 @@
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:dartdoc_vitepress/src/element_type.dart';
-import 'package:dartdoc_vitepress/src/model/comment_referable.dart';
+import 'package:dartdoc_vitepress/src/model/referable.dart';
 import 'package:dartdoc_vitepress/src/model/kind.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 
@@ -74,13 +74,13 @@ class ModelFunctionTyped extends ModelElement with HasLibrary, TypeParameters {
   bool get isInherited => false;
 
   @override
-  late final Map<String, CommentReferable> referenceChildren = {
+  late final Map<String, Referable> referenceChildren = {
     ...parameters.explicitOnCollisionWith(this),
     ...typeParameters.explicitOnCollisionWith(this),
   };
 
   @override
-  Iterable<CommentReferable> get referenceParents => [library];
+  Iterable<Referable> get referenceParents => [library];
 
   late final Callable modelType = getTypeFor(element.type, library) as Callable;
 
