@@ -577,6 +577,33 @@ class JasprGeneratorBackend extends GeneratorBackend {
   // ---------------------------------------------------------------------------
 
   /// Writes markdown content to the output directory (incremental).
+  // Pre-compiled patterns for VitePress syntax stripping.
+  static final _vitepressAnchor = RegExp(r'\s*\{#[\w-]+\}');
+  static final _vitepressFrontmatterLine =
+      RegExp(r'^(editLink|prev|next|outlineCollapsible):.*$', multiLine: true);
+  static final _apiBreadcrumb = RegExp(r'<ApiBreadcrumb\s*/?>');
+
+  /// Strips VitePress-specific syntax from markdown so Jaspr renders cleanly.
+  static String _stripVitePressSyntax(String content) {
+    // Remove {#anchor-id} from headings: ## Functions {#section-functions}
+    content = content.replaceAll(_vitepressAnchor, '');
+
+    // Remove VitePress-only frontmatter lines (editLink, prev, next, etc.)
+    content = content.replaceAll(_vitepressFrontmatterLine, '');
+
+    // Remove <ApiBreadcrumb /> Vue component
+    content = content.replaceAll(_apiBreadcrumb, '');
+
+    // Unescape Vue template braces: \{\{ -> {{
+    content = content.replaceAll(r'\{\{', '{{');
+    content = content.replaceAll(r'\}\}', '}}');
+
+    // Clean up blank lines left by removals (max 2 consecutive)
+    content = content.replaceAll(RegExp(r'\n{3,}'), '\n\n');
+
+    return content;
+  }
+
   /// Remaps VitePress-style paths to Jaspr content/ directory.
   ///
   /// `api/dart-core/index.md` -> `content/api/dart-core/index.md`
@@ -599,9 +626,13 @@ class JasprGeneratorBackend extends GeneratorBackend {
   /// of [_writtenCount].
   void _writeMarkdown(String filePath, String content) {
     // Jaspr expects markdown content in content/ directory.
-    // Remap api/ and guide/ paths, leave lib/generated/ as-is.
     final jasprPath = _remapToContentDir(filePath);
     _expectedFiles.add(jasprPath);
+
+    // Strip VitePress-specific syntax from markdown content.
+    if (jasprPath.endsWith('.md')) {
+      content = _stripVitePressSyntax(content);
+    }
 
     // Incremental generation: skip write if content is unchanged.
     // Normalize the path: filePath uses POSIX separators (/) but on Windows
