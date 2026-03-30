@@ -1398,7 +1398,7 @@ List<DartdocOption> createDartdocOptions(
   var resourceProvider = packageMetaProvider.resourceProvider;
   return [
     DartdocOptionArgFile<String>('format', 'html', resourceProvider,
-        help: 'Output format: html or vitepress.'),
+        help: 'Output format: html, vitepress, or jaspr.'),
     DartdocOptionArgOnly<bool>('allowTools', false, resourceProvider,
         help: 'Execute user-defined tools to fill in @tool directives.',
         negatable: true),

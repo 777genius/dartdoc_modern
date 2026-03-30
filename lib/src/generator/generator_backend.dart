@@ -2,6 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
 import 'package:dartdoc_vitepress/src/generator/generator.dart';
@@ -251,4 +253,37 @@ abstract class GeneratorBackend {
 
   /// Emits files not specific to a Dart language element (like a favicon, etc).
   Future<void> generateAdditionalFiles();
+
+  /// Called once before the documentation traversal begins.
+  ///
+  /// Use this to initialize format-specific state that depends on the
+  /// [PackageGraph] (e.g. path resolvers, doc processors, sidebar generators).
+  FutureOr<void> beforeGenerate(PackageGraph packageGraph) {}
+
+  /// Returns `true` if this backend wants to skip [library] during traversal.
+  ///
+  /// Override this to filter out duplicate SDK libraries, internal libraries,
+  /// or any other libraries that should not appear in the output.
+  bool shouldSkipLibrary(
+    PackageGraph packageGraph,
+    Package package,
+    Library library,
+    Iterable<Library> allPackageLibraries,
+  ) {
+    return false;
+  }
+
+  /// Called once after all documentation has been generated.
+  ///
+  /// Default implementation generates category JSON and search index.
+  /// Override to perform format-specific finalization (e.g. stale file
+  /// deletion, summary logging).
+  FutureOr<void> afterGenerate(
+    PackageGraph packageGraph,
+    List<Documentable> indexedElements,
+    List<ModelElement> categorizedElements,
+  ) {
+    generateCategoryJson(categorizedElements);
+    generateSearchIndex(indexedElements);
+  }
 }

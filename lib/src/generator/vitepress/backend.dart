@@ -1,0 +1,788 @@
+// Copyright (c) 2024, the Dart project authors. Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
+import 'package:analyzer/file_system/file_system.dart';
+import 'package:dartdoc_vitepress/src/generator/generator.dart';
+import 'package:dartdoc_vitepress/src/generator/generator_backend.dart';
+import 'package:dartdoc_vitepress/src/generator/template_data.dart';
+import 'package:dartdoc_vitepress/src/generator/templates.dart';
+import 'package:dartdoc_vitepress/src/generator/vitepress/docs.dart';
+import 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart'
+    show VitePressPathResolver, isDuplicateSdkLibrary, isInternalSdkLibrary;
+import 'package:dartdoc_vitepress/src/generator/vitepress/renderer.dart' as renderer;
+import 'package:dartdoc_vitepress/src/generator/vitepress/scaffold.dart';
+import 'package:dartdoc_vitepress/src/generator/vitepress/sidebar.dart'
+    show VitePressSidebarGenerator;
+import 'package:dartdoc_vitepress/src/generator/vitepress_guide_generator.dart';
+import 'package:dartdoc_vitepress/src/logging.dart';
+import 'package:dartdoc_vitepress/src/model/model.dart';
+import 'package:dartdoc_vitepress/src/runtime_stats.dart';
+import 'package:path/path.dart' as p;
+
+/// Essential CSS for API documentation pages.
+///
+/// Written to `.vitepress/generated/api-styles.css` on every generation run
+/// (not a scaffold file). This ensures existing sites get style updates
+/// without requiring users to regenerate their `custom.css`.
+const _apiStylesCss = '''
+/* Member signature blocks with clickable type links */
+
+.member-signature {
+  margin: 8px 0 16px;
+}
+.member-signature pre {
+  background: var(--vp-code-block-bg);
+  border-radius: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  margin: 0;
+}
+.member-signature code {
+  font-family: var(--vp-font-family-mono);
+  font-size: var(--vp-code-font-size);
+  color: #24292E;
+  line-height: var(--vp-code-line-height);
+}
+.dark .member-signature code {
+  color: #E1E4E8;
+}
+/* Shiki-matched syntax highlighting for member signatures.
+   Colors from --shiki-light / --shiki-dark CSS variables. */
+
+/* Keywords: const, factory, final, get, set, required, typedef, true, false, null */
+.member-signature .kw {
+  color: #D73A49;
+}
+/* Unlinked types: String, int, void, dynamic, type parameters */
+.member-signature .type {
+  color: #005CC5;
+}
+/* Linked types (clickable) — same color as .type, underline on hover */
+.member-signature .type-link {
+  color: #005CC5;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, #005CC5 40%, transparent);
+  text-underline-offset: 2px;
+}
+.member-signature .type-link:hover {
+  text-decoration-color: #005CC5;
+}
+/* Function/method/constructor/field/property names */
+.member-signature .fn {
+  color: #6F42C1;
+}
+/* String literals in default values */
+.member-signature .str-lit {
+  color: #032F62;
+}
+/* Numeric literals in default values */
+.member-signature .num-lit {
+  color: #005CC5;
+}
+/* Dark mode overrides */
+.dark .member-signature .kw {
+  color: #F97583;
+}
+.dark .member-signature .type {
+  color: #79B8FF;
+}
+.dark .member-signature .type-link {
+  color: #79B8FF;
+  text-decoration-color: color-mix(in srgb, #79B8FF 40%, transparent);
+}
+.dark .member-signature .type-link:hover {
+  text-decoration-color: #79B8FF;
+}
+.dark .member-signature .fn {
+  color: #B392F0;
+}
+.dark .member-signature .str-lit {
+  color: #9ECBFF;
+}
+.dark .member-signature .num-lit {
+  color: #79B8FF;
+}
+
+/* API auto-linker — inline code that links to API docs */
+
+a.api-link {
+  text-decoration: none;
+}
+
+a.api-link code {
+  color: var(--vp-c-brand-1);
+  border-bottom: 2px solid color-mix(in srgb, var(--vp-c-brand-1) 50%, transparent);
+  padding-bottom: 1px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+a.api-link:hover code {
+  color: var(--vp-c-brand-2);
+  border-bottom-color: var(--vp-c-brand-1);
+}
+''';
+
+/// Generator backend that produces VitePress-compatible markdown documentation.
+///
+/// Extends [GeneratorBackend] to reuse the model traversal loop from
+/// [Generator._generateDocs], but overrides ALL 17 `generate*()` methods to
+/// produce `.md` files instead of `.html` files.
+///
+/// Key design decisions:
+/// - Never calls `super.generate*()` (super produces HTML via templates).
+/// - Passes [_NoOpTemplates] stub to satisfy the base constructor's
+///   [Templates] requirement.
+/// - Member-level methods (`generateConstructor`, `generateMethod`,
+///   `generateProperty`) are no-ops because members are embedded inline
+///   on their container's page (class, enum, mixin, extension).
+/// - Sidebar is generated in [generatePackage] because it is called first
+///   by the traversal and has access to the full [PackageGraph].
+/// - Uses [_writeMarkdown] for all file writes; never uses the base class
+///   [write] method (which performs `htmlBasePlaceholder` replacement).
+class VitePressGeneratorBackend extends GeneratorBackend {
+  final VitePressPathResolver _paths;
+  late VitePressDocProcessor _docs;
+  late VitePressSidebarGenerator _sidebar;
+
+  final String _outputPath;
+  final String _packageName;
+  final String _repositoryUrl;
+  final List<String> _guideDirs;
+  final List<String> _guideInclude;
+  final List<String> _guideExclude;
+  final Set<String> _allowedIframeHosts;
+
+  /// Tracks all file paths written during this generation run.
+  ///
+  /// Used for incremental generation: after generation completes, files
+  /// in the output directory that are NOT in this set can be deleted
+  /// as stale artifacts from renamed/removed elements.
+  final Set<String> _expectedFiles = {};
+
+  /// Number of files actually written (content changed or new).
+  int _writtenCount = 0;
+
+  /// Number of files skipped because content was identical.
+  int _unchangedCount = 0;
+
+  VitePressGeneratorBackend(
+    DartdocGeneratorBackendOptions options,
+    FileWriter writer,
+    ResourceProvider resourceProvider, {
+    required String outputPath,
+    required String packageName,
+    String repositoryUrl = '',
+    List<String> guideDirs = const ['doc', 'docs'],
+    List<String> guideInclude = const [],
+    List<String> guideExclude = const [],
+    List<String> allowedIframeHosts = const [],
+  })  : _paths = VitePressPathResolver(),
+        _outputPath = outputPath,
+        _packageName = packageName,
+        _repositoryUrl = repositoryUrl,
+        _guideDirs = guideDirs,
+        _guideInclude = guideInclude,
+        _guideExclude = guideExclude,
+        _allowedIframeHosts = Set.of(allowedIframeHosts),
+        super(options, _NoOpTemplates(), writer, resourceProvider);
+
+  // ---------------------------------------------------------------------------
+  // Lifecycle hooks
+  // ---------------------------------------------------------------------------
+
+  @override
+  void beforeGenerate(PackageGraph packageGraph) {
+    _paths.initFromPackageGraph(packageGraph);
+    _docs = VitePressDocProcessor(packageGraph, _paths,
+        allowedIframeHosts: _allowedIframeHosts);
+    _sidebar = VitePressSidebarGenerator(_paths);
+  }
+
+  @override
+  bool shouldSkipLibrary(
+    PackageGraph packageGraph,
+    Package package,
+    Library library,
+    Iterable<Library> allPackageLibraries,
+  ) {
+    return isDuplicateSdkLibrary(library, allPackageLibraries) ||
+        isInternalSdkLibrary(library);
+  }
+
+  @override
+  void afterGenerate(
+    PackageGraph packageGraph,
+    List<Documentable> indexedElements,
+    List<ModelElement> categorizedElements,
+  ) {
+    _deleteStaleFiles();
+    _logSummary();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Package -- called first by the traversal (generator.dart:86-87).
+  // ---------------------------------------------------------------------------
+
+  /// Generates the package overview page and the VitePress sidebar.
+  @override
+  void generatePackage(PackageGraph packageGraph, Package package) {
+    final isMultiPackage = packageGraph.localPackages.length > 1;
+
+    if (isMultiPackage) {
+      logInfo('Generating VitePress docs for workspace '
+          '(${packageGraph.localPackages.length} packages)...');
+    } else {
+      logInfo('Generating VitePress docs for package ${package.name}...');
+    }
+
+    // Write package/workspace overview page: api/index.md
+    String content;
+    if (isMultiPackage) {
+      content = renderer.renderWorkspaceOverview(packageGraph, _paths, _docs);
+    } else {
+      content = renderer.renderPackagePage(package, _paths, _docs);
+    }
+    var filePath = _paths.filePathFor(package);
+    if (filePath != null) {
+      _writeMarkdown(filePath, content);
+    }
+
+    // Write essential API styles (always overwritten, not a scaffold file).
+    _writeMarkdown('.vitepress/generated/api-styles.css', _apiStylesCss);
+
+    // Generate sidebar from the full PackageGraph.
+    var sidebarContent = _sidebar.generate(packageGraph);
+    _writeMarkdown(
+      '.vitepress/generated/api-sidebar.ts',
+      sidebarContent,
+    );
+
+    // Generate guide files from doc/docs directories.
+    var guideGen = VitePressGuideGenerator(
+      resourceProvider: resourceProvider,
+      scanDirs: _guideDirs,
+      include: _guideInclude,
+      exclude: _guideExclude,
+      allowedIframeHosts: _allowedIframeHosts,
+    );
+    var guideEntries = guideGen.collectGuideEntries(
+      packageGraph: packageGraph,
+      isMultiPackage: isMultiPackage,
+    );
+
+    // Write guide files through _writeMarkdown for incremental checks.
+    for (final entry in guideEntries) {
+      _writeMarkdown(entry.relativePath, entry.content);
+    }
+
+    var guideSidebarContent = guideGen.generateSidebar(
+      guideEntries,
+      isMultiPackage: isMultiPackage,
+    );
+    _writeMarkdown(
+      '.vitepress/generated/guide-sidebar.ts',
+      guideSidebarContent,
+    );
+
+    runtimeStats.incrementAccumulator('writtenPackageFileCount');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Category
+  // ---------------------------------------------------------------------------
+
+  /// Generates a category (topic) page.
+  ///
+  /// Output: `topics/<CategoryName>.md`
+  ///
+  /// Unlike the HTML backend, no redirect file is generated -- VitePress
+  /// handles clean URLs natively.
+  @override
+  void generateCategory(PackageGraph packageGraph, Category category) {
+    logInfo(
+      'Generating docs for category ${category.name} '
+      'from ${category.package.fullyQualifiedName}...',
+    );
+
+    var content = renderer.renderCategoryPage(category, _paths, _docs);
+    var filePath = _paths.filePathFor(category);
+    if (filePath != null) {
+      _writeMarkdown(filePath, content);
+    }
+
+    runtimeStats.incrementAccumulator('writtenCategoryFileCount');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Library
+  // ---------------------------------------------------------------------------
+
+  /// Generates the library overview page.
+  ///
+  /// Output: `api/<dirName>/index.md`
+  ///
+  /// No redirect file is generated (the HTML backend writes one for the
+  /// old library path; VitePress does not need this).
+  @override
+  void generateLibrary(PackageGraph packageGraph, Library library) {
+    logInfo('Generating docs for library ${library.name}...');
+
+    var content = renderer.renderLibraryPage(library, _paths, _docs);
+    var filePath = _paths.filePathFor(library);
+    if (filePath != null) {
+      _writeMarkdown(filePath, content);
+    }
+
+    runtimeStats.incrementAccumulator('writtenLibraryFileCount');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Container-level: Class, Enum, Mixin, Extension, ExtensionType
+  //
+  // Each produces ONE markdown file with all members inlined as sections.
+  // ---------------------------------------------------------------------------
+
+  /// Generates a class page with all members (constructors, properties,
+  /// methods, operators) embedded as sections.
+  ///
+  /// Output: `api/<dirName>/<ClassName>.md`
+  @override
+  void generateClass(PackageGraph packageGraph, Library library, Class class_) {
+    try {
+      var content = renderer.renderClassPage(class_, library, _paths, _docs);
+      var filePath = _paths.filePathFor(class_);
+      if (filePath != null) {
+        _writeMarkdown(filePath, content);
+      }
+    } on Object catch (e) {
+      logWarning('Failed to generate page for class ${class_.name}: $e');
+    }
+
+    runtimeStats.incrementAccumulator('writtenClassFileCount');
+  }
+
+  /// Generates an enum page with enum values and all members embedded.
+  ///
+  /// Output: `api/<dirName>/<EnumName>.md`
+  @override
+  void generateEnum(PackageGraph packageGraph, Library library, Enum enum_) {
+    try {
+      var content = renderer.renderEnumPage(enum_, library, _paths, _docs);
+      var filePath = _paths.filePathFor(enum_);
+      if (filePath != null) {
+        _writeMarkdown(filePath, content);
+      }
+    } on Object catch (e) {
+      logWarning('Failed to generate page for enum ${enum_.name}: $e');
+    }
+
+    runtimeStats.incrementAccumulator('writtenEnumFileCount');
+  }
+
+  /// Generates a mixin page with superclass constraints and all members.
+  ///
+  /// Output: `api/<dirName>/<MixinName>.md`
+  @override
+  void generateMixin(PackageGraph packageGraph, Library library, Mixin mixin) {
+    try {
+      var content = renderer.renderMixinPage(mixin, library, _paths, _docs);
+      var filePath = _paths.filePathFor(mixin);
+      if (filePath != null) {
+        _writeMarkdown(filePath, content);
+      }
+    } on Object catch (e) {
+      logWarning('Failed to generate page for mixin ${mixin.name}: $e');
+    }
+
+    runtimeStats.incrementAccumulator('writtenMixinFileCount');
+  }
+
+  /// Generates an extension page with extended type and all members.
+  ///
+  /// Output: `api/<dirName>/<ExtensionName>.md`
+  @override
+  void generateExtension(
+      PackageGraph packageGraph, Library library, Extension extension) {
+    try {
+      var content =
+          renderer.renderExtensionPage(extension, library, _paths, _docs);
+      var filePath = _paths.filePathFor(extension);
+      if (filePath != null) {
+        _writeMarkdown(filePath, content);
+      }
+    } on Object catch (e) {
+      logWarning('Failed to generate page for extension ${extension.name}: $e');
+    }
+
+    runtimeStats.incrementAccumulator('writtenExtensionFileCount');
+  }
+
+  /// Generates an extension type page with representation type and all
+  /// members.
+  ///
+  /// Output: `api/<dirName>/<ExtensionTypeName>.md`
+  @override
+  void generateExtensionType(
+      PackageGraph packageGraph, Library library, ExtensionType extensionType) {
+    try {
+      var content = renderer.renderExtensionTypePage(
+          extensionType, library, _paths, _docs);
+      var filePath = _paths.filePathFor(extensionType);
+      if (filePath != null) {
+        _writeMarkdown(filePath, content);
+      }
+    } on Object catch (e) {
+      logWarning(
+          'Failed to generate page for extension type ${extensionType.name}: $e');
+    }
+
+    runtimeStats.incrementAccumulator('writtenExtensionTypeFileCount');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Top-level elements: Function, Property, Typedef
+  //
+  // Each produces one page per element.
+  // ---------------------------------------------------------------------------
+
+  /// Generates a top-level function page.
+  ///
+  /// Output: `api/<dirName>/<FunctionName>.md`
+  @override
+  void generateFunction(
+      PackageGraph packageGraph, Library library, ModelFunction function) {
+    try {
+      var content =
+          renderer.renderFunctionPage(function, library, _paths, _docs);
+      var filePath = _paths.filePathFor(function);
+      if (filePath != null) {
+        _writeMarkdown(filePath, content);
+      }
+    } on Object catch (e) {
+      logWarning('Failed to generate page for function ${function.name}: $e');
+    }
+
+    runtimeStats.incrementAccumulator('writtenFunctionFileCount');
+  }
+
+  /// Generates a top-level property or constant page.
+  ///
+  /// Output: `api/<dirName>/<PropertyName>.md`
+  @override
+  void generateTopLevelProperty(
+      PackageGraph packageGraph, Library library, TopLevelVariable property) {
+    try {
+      var content =
+          renderer.renderPropertyPage(property, library, _paths, _docs);
+      var filePath = _paths.filePathFor(property);
+      if (filePath != null) {
+        _writeMarkdown(filePath, content);
+      }
+    } on Object catch (e) {
+      logWarning('Failed to generate page for property ${property.name}: $e');
+    }
+
+    runtimeStats.incrementAccumulator('writtenTopLevelPropertyFileCount');
+  }
+
+  /// Generates a typedef page.
+  ///
+  /// Output: `api/<dirName>/<TypedefName>.md`
+  @override
+  void generateTypeDef(
+      PackageGraph packageGraph, Library library, Typedef typedef) {
+    try {
+      var content = renderer.renderTypedefPage(typedef, library, _paths, _docs);
+      var filePath = _paths.filePathFor(typedef);
+      if (filePath != null) {
+        _writeMarkdown(filePath, content);
+      }
+    } on Object catch (e) {
+      logWarning('Failed to generate page for typedef ${typedef.name}: $e');
+    }
+
+    runtimeStats.incrementAccumulator('writtenTypedefFileCount');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Member-level methods -- NO-OPs.
+  //
+  // Members (constructors, methods, properties, operators) are embedded
+  // directly on their container's page as anchored sections. The traversal
+  // in generator.dart still calls these methods, but we intentionally
+  // produce no output.
+  // ---------------------------------------------------------------------------
+
+  /// No-op: constructors are rendered inline on the class/enum page.
+  @override
+  void generateConstructor(PackageGraph packageGraph, Library library,
+      Constructable constructable, Constructor constructor) {
+    // Intentionally empty -- constructors are embedded on the container page.
+  }
+
+  /// No-op: methods are rendered inline on the container page.
+  @override
+  void generateMethod(PackageGraph packageGraph, Library library,
+      Container container, Method method) {
+    // Intentionally empty -- methods are embedded on the container page.
+  }
+
+  /// No-op: properties/fields are rendered inline on the container page.
+  @override
+  void generateProperty(PackageGraph packageGraph, Library library,
+      Container container, Field field) {
+    // Intentionally empty -- properties are embedded on the container page.
+  }
+
+  // ---------------------------------------------------------------------------
+  // Infrastructure -- NO-OPs for VitePress.
+  // ---------------------------------------------------------------------------
+
+  /// VitePress has built-in full-text search via MiniSearch, so no search
+  /// index is generated.
+  @override
+  void generateSearchIndex(List<Documentable> indexedElements) {
+    // No-op: finalization is handled by afterGenerate().
+  }
+
+  /// No-op: category JSON is only used by the HTML frontend.
+  @override
+  void generateCategoryJson(List<ModelElement> categorizedElements) {
+    // Intentionally empty -- not needed for VitePress.
+  }
+
+  /// Called BEFORE the traversal at `generator.dart:49`.
+  ///
+  /// Creates VitePress scaffold files (`package.json`, `.vitepress/config.ts`,
+  /// `index.md`) if they don't already exist. These are one-time setup files
+  /// that the user may customize afterwards.
+  @override
+  Future<void> generateAdditionalFiles() async {
+    var initGenerator = VitePressInitGenerator(
+      writer: writer,
+      resourceProvider: resourceProvider,
+      outputPath: _outputPath,
+    );
+    await initGenerator.generate(
+      packageName: _packageName,
+      repositoryUrl: _repositoryUrl,
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // File writing
+  // ---------------------------------------------------------------------------
+
+  /// Writes markdown content to the output directory (incremental).
+  ///
+  /// Tracks the file path in [_expectedFiles] for manifest-based stale file
+  /// deletion. Compares new content against the existing file on disk and
+  /// skips the write if identical, incrementing [_unchangedCount] instead
+  /// of [_writtenCount].
+  void _writeMarkdown(String filePath, String content) {
+    _expectedFiles.add(filePath);
+
+    // Incremental generation: skip write if content is unchanged.
+    // Normalize the path: filePath uses POSIX separators (/) but on Windows
+    // _outputPath uses backslashes. p.normalize resolves mixed separators.
+    final fullPath = p.normalize(p.join(_outputPath, filePath));
+    final existingFile = resourceProvider.getFile(fullPath);
+    if (existingFile.exists) {
+      try {
+        if (existingFile.readAsStringSync() == content) {
+          _unchangedCount++;
+          return;
+        }
+      } on FileSystemException {
+        // If we can't read the file, fall through to write.
+      }
+    }
+
+    writer.write(filePath, content);
+    _writtenCount++;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Stale file cleanup
+  // ---------------------------------------------------------------------------
+
+  /// Number of stale files deleted during cleanup.
+  int _deletedCount = 0;
+
+  /// Scans output directories and deletes files not in [_expectedFiles].
+  ///
+  /// Only deletes `.md` files under `api/` and `guide/` subdirectories,
+  /// and `.ts`/`.css` files under `.vitepress/generated/`.
+  /// Files in the `guide/` root are preserved (scaffold and user files).
+  void _deleteStaleFiles() {
+    _deletedCount = 0;
+    _deleteStaleInDir('api', '.md');
+    _deleteStaleInDir('guide', '.md', null, true);
+    _deleteStaleInDir(p.join('.vitepress', 'generated'), '.ts');
+    _deleteStaleInDir(p.join('.vitepress', 'generated'), '.css');
+  }
+
+  /// Recursively scans [dirRelative] under [_outputPath] and deletes files
+  /// with [extension] that are NOT in [_expectedFiles].
+  ///
+  /// When [skipRootFiles] is `true`, only files in subdirectories are
+  /// considered for deletion — files directly in [dirRelative] are preserved.
+  /// This protects scaffold and user-created files (e.g., `guide/index.md`).
+  ///
+  /// Uses a [visited] set to protect against symlink loops (same approach as
+  /// `_collectMarkdownFiles` in `vitepress_guide_generator.dart`).
+  /// Normalizes paths to POSIX separators for cross-platform consistency.
+  void _deleteStaleInDir(String dirRelative, String extension,
+      [Set<String>? visited, bool skipRootFiles = false]) {
+    visited ??= {};
+    final dirPath = p.join(_outputPath, dirRelative);
+    if (!visited.add(dirPath)) return; // Symlink loop protection.
+    final folder = resourceProvider.getFolder(dirPath);
+    if (!folder.exists) return;
+
+    final isRoot = visited.length == 1;
+    for (final child in folder.getChildren()) {
+      if (child is Folder) {
+        // Recurse into subdirectories (skipRootFiles only applies to root).
+        final relativePath = p.relative(child.path, from: _outputPath);
+        _deleteStaleInDir(relativePath, extension, visited);
+      } else {
+        // Skip files directly in the root directory when requested.
+        if (skipRootFiles && isRoot) continue;
+
+        // Normalize to POSIX separators so the path matches _expectedFiles
+        // (which always uses forward slashes).
+        final relativePath =
+            p.posix.joinAll(p.split(p.relative(child.path, from: _outputPath)));
+        if (relativePath.endsWith(extension) &&
+            !_expectedFiles.contains(relativePath)) {
+          try {
+            (child as File).delete();
+            _deletedCount++;
+          } on FileSystemException {
+            // If we can't delete the file, skip it silently.
+          }
+        }
+      }
+    }
+
+    // Remove empty subdirectories left after stale file deletion.
+    // Re-read children because files may have been deleted above.
+    if (!folder.exists) return;
+    for (final child in folder.getChildren()) {
+      if (child is Folder) {
+        try {
+          if (child.getChildren().isEmpty) {
+            child.delete();
+          }
+        } on FileSystemException {
+          // If we can't inspect or delete the directory, skip it silently.
+        }
+      }
+    }
+  }
+
+  /// Logs a summary of generation statistics.
+  void _logSummary() {
+    logInfo(
+      'Generated: $_writtenCount written, '
+      '$_unchangedCount unchanged, '
+      '$_deletedCount deleted',
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Accessors for generation statistics
+  // ---------------------------------------------------------------------------
+
+  /// All file paths written during this generation run.
+  Set<String> get expectedFiles => Set.unmodifiable(_expectedFiles);
+
+  /// Number of files that were written (new or changed content).
+  int get writtenCount => _writtenCount;
+
+  /// Number of files skipped because content was identical.
+  int get unchangedCount => _unchangedCount;
+
+  /// Number of stale files deleted during cleanup.
+  int get deletedCount => _deletedCount;
+}
+
+// ---------------------------------------------------------------------------
+// _NoOpTemplates
+// ---------------------------------------------------------------------------
+
+/// A no-op [Templates] implementation that satisfies [GeneratorBackend]'s
+/// constructor requirement.
+///
+/// [VitePressGeneratorBackend] never calls any template rendering methods
+/// because it overrides all `generate*()` methods and never delegates to
+/// `super`. All template methods return an empty string.
+class _NoOpTemplates implements Templates {
+  @override
+  String renderCategory(CategoryTemplateData context) => '';
+
+  @override
+  String renderCategoryRedirect(CategoryTemplateData context) => '';
+
+  @override
+  String renderClass<T extends Class>(ClassTemplateData context) => '';
+
+  @override
+  String renderConstructor(ConstructorTemplateData context) => '';
+
+  @override
+  String renderEnum(EnumTemplateData context) => '';
+
+  @override
+  String renderError(PackageTemplateData context) => '';
+
+  @override
+  String renderExtension(ExtensionTemplateData context) => '';
+
+  @override
+  String renderExtensionType(ExtensionTypeTemplateData context) => '';
+
+  @override
+  String renderFunction(FunctionTemplateData context) => '';
+
+  @override
+  String renderIndex(PackageTemplateData context) => '';
+
+  @override
+  String renderLibrary(LibraryTemplateData context) => '';
+
+  @override
+  String renderLibraryRedirect(LibraryTemplateData context) => '';
+
+  @override
+  String renderMethod(MethodTemplateData context) => '';
+
+  @override
+  String renderMixin(MixinTemplateData context) => '';
+
+  @override
+  String renderProperty(PropertyTemplateData context) => '';
+
+  @override
+  String renderSearchPage(PackageTemplateData context) => '';
+
+  @override
+  String renderSidebarForContainer(
+          TemplateDataWithContainer<Documentable> context) =>
+      '';
+
+  @override
+  String renderSidebarForLibrary(
+          TemplateDataWithLibrary<Documentable> context) =>
+      '';
+
+  @override
+  String renderTopLevelProperty(TopLevelPropertyTemplateData context) => '';
+
+  @override
+  String renderTypedef(TypedefTemplateData context) => '';
+}

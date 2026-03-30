@@ -166,9 +166,9 @@ class Dartdoc {
     PackageBuilder packageBuilder,
   ) {
     var format = context.format;
-    if (format != 'html' && format != 'vitepress') {
+    if (format != 'html' && format != 'vitepress' && format != 'jaspr') {
       throw DartdocOptionError(
-          "Invalid format '$format'. Allowed values: html, vitepress.");
+          "Invalid format '$format'. Allowed values: html, vitepress, jaspr.");
     }
 
     var resourceProvider = context.resourceProvider;
@@ -185,9 +185,10 @@ class Dartdoc {
     return Dartdoc._(
       context,
       outputDir,
-      format == 'vitepress'
-          ? initVitePressGenerator(context, writer: writer)
-          : initHtmlGenerator(context, writer: writer),
+      switch (format) {
+        'vitepress' => initVitePressGenerator(context, writer: writer),
+        _ => initHtmlGenerator(context, writer: writer),
+      },
       packageBuilder,
     );
   }

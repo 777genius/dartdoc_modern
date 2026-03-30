@@ -3,6 +3,8 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:analyzer/file_system/file_system.dart';
+import 'package:dartdoc_vitepress/src/generator/core/guide_collection.dart'
+    as guide_core;
 import 'package:dartdoc_vitepress/src/generator/vitepress_guide_generator.dart';
 import 'package:test/test.dart';
 
@@ -11,7 +13,7 @@ void main() {
     test('extracts H1 heading from markdown', () {
       var content = '# Getting Started\n\nSome content here.';
       expect(
-        VitePressGuideGenerator.extractTitle(content, 'getting-started.md'),
+        guide_core.extractTitle(content, 'getting-started.md'),
         equals('Getting Started'),
       );
     });
@@ -19,7 +21,7 @@ void main() {
     test('extracts H1 heading with leading whitespace', () {
       var content = '  # Installation Guide  \n\nContent.';
       expect(
-        VitePressGuideGenerator.extractTitle(content, 'install.md'),
+        guide_core.extractTitle(content, 'install.md'),
         equals('Installation Guide'),
       );
     });
@@ -27,14 +29,14 @@ void main() {
     test('ignores H2 and finds first H1', () {
       var content = '## Section\n\n### Subsection\n\n# Real Title';
       expect(
-        VitePressGuideGenerator.extractTitle(content, 'doc.md'),
+        guide_core.extractTitle(content, 'doc.md'),
         equals('Real Title'),
       );
     });
 
     test('falls back to filename for empty content', () {
       expect(
-        VitePressGuideGenerator.extractTitle('', 'getting-started.md'),
+        guide_core.extractTitle('', 'getting-started.md'),
         equals('Getting Started'),
       );
     });
@@ -42,28 +44,28 @@ void main() {
     test('falls back to filename when no H1 found', () {
       var content = 'No headings in this file.\nJust plain text.';
       expect(
-        VitePressGuideGenerator.extractTitle(content, 'my_guide.md'),
+        guide_core.extractTitle(content, 'my_guide.md'),
         equals('My Guide'),
       );
     });
 
     test('converts snake_case filename to Title Case', () {
       expect(
-        VitePressGuideGenerator.extractTitle('', 'quick_start_guide.md'),
+        guide_core.extractTitle('', 'quick_start_guide.md'),
         equals('Quick Start Guide'),
       );
     });
 
     test('converts kebab-case filename to Title Case', () {
       expect(
-        VitePressGuideGenerator.extractTitle('', 'api-reference.md'),
+        guide_core.extractTitle('', 'api-reference.md'),
         equals('Api Reference'),
       );
     });
 
     test('handles nested path for fallback', () {
       expect(
-        VitePressGuideGenerator.extractTitle('', 'sub/nested/overview.md'),
+        guide_core.extractTitle('', 'sub/nested/overview.md'),
         equals('Overview'),
       );
     });
@@ -71,7 +73,7 @@ void main() {
     test('handles content with only H2 heading', () {
       var content = '## Not an H1\n\nSome text.';
       expect(
-        VitePressGuideGenerator.extractTitle(content, 'fallback.md'),
+        guide_core.extractTitle(content, 'fallback.md'),
         equals('Fallback'),
       );
     });
