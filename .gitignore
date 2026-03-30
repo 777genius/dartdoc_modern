@@ -32,3 +32,18 @@ docs-site/guide/*.md
 # Testing: generated VitePress docs-site output
 testing/**/docs-site/
 **/node_modules/
+
+# Playwright MCP screenshots
+.playwright-mcp/
+
+# VitePress cache (local dev)
+.vitepress/
+
+# SQLite debug data
+data/
+
+# JS packages build artifacts (published separately)
+js-packages/vitepress-codeblock-collapse/dist/
+js-packages/vitepress-codeblock-collapse/node_modules/
+js-packages/vitepress-mermaid-zoom/dist/
+js-packages/vitepress-mermaid-zoom/node_modules/
