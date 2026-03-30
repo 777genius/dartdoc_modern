@@ -13,6 +13,8 @@ analyzer:
   exclude:
     - 'doc/**'
     - 'testing/**'
+    - 'lib/resources/jaspr/**'
+    - 'lib/src/generator/jaspr/renderer.dart'
 
 linter:
   rules:

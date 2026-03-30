@@ -187,6 +187,7 @@ class Dartdoc {
       outputDir,
       switch (format) {
         'vitepress' => initVitePressGenerator(context, writer: writer),
+        'jaspr' => initJasprGenerator(context, writer: writer),
         _ => initHtmlGenerator(context, writer: writer),
       },
       packageBuilder,

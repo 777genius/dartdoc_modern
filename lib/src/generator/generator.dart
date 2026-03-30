@@ -8,6 +8,7 @@ library;
 import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
 import 'package:dartdoc_vitepress/src/generator/generator_backend.dart';
 import 'package:dartdoc_vitepress/src/generator/html_generator_backend.dart';
+import 'package:dartdoc_vitepress/src/generator/jaspr/backend.dart';
 import 'package:dartdoc_vitepress/src/generator/templates.dart';
 import 'package:dartdoc_vitepress/src/generator/vitepress/backend.dart';
 import 'package:dartdoc_vitepress/src/logging.dart';
@@ -347,6 +348,30 @@ Generator initVitePressGenerator(
   var meta = context.topLevelPackageMeta;
   var options = DartdocGeneratorBackendOptions.fromContext(context);
   var generatorBackend = VitePressGeneratorBackend(
+    options,
+    writer,
+    resourceProvider,
+    outputPath: outputPath,
+    packageName: meta.name,
+    repositoryUrl: meta.repository.isNotEmpty ? meta.repository : meta.homepage,
+    guideDirs: context.guideDirs,
+    guideInclude: context.guideInclude,
+    guideExclude: context.guideExclude,
+    allowedIframeHosts: context.allowedIframeHosts,
+  );
+  return Generator(generatorBackend);
+}
+
+/// Creates a [Generator] with a [JasprGeneratorBackend] backend.
+Generator initJasprGenerator(
+  DartdocGeneratorOptionContext context, {
+  required FileWriter writer,
+}) {
+  var resourceProvider = context.resourceProvider;
+  var outputPath = resourceProvider.pathContext.absolute(context.output);
+  var meta = context.topLevelPackageMeta;
+  var options = DartdocGeneratorBackendOptions.fromContext(context);
+  var generatorBackend = JasprGeneratorBackend(
     options,
     writer,
     resourceProvider,

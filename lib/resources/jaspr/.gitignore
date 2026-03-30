@@ -1,0 +1,13 @@
+# Build output
+build/
+
+# Dart tool files
+.dart_tool/
+
+# Dependencies
+.packages
+
+# Generated files
+lib/main.server.options.dart
+lib/main.client.options.dart
+lib/generated/
