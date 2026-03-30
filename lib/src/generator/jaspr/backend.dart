@@ -577,18 +577,36 @@ class JasprGeneratorBackend extends GeneratorBackend {
   // ---------------------------------------------------------------------------
 
   /// Writes markdown content to the output directory (incremental).
+  /// Remaps VitePress-style paths to Jaspr content/ directory.
+  ///
+  /// `api/dart-core/index.md` -> `content/api/dart-core/index.md`
+  /// `guide/intro.md` -> `content/guide/intro.md`
+  /// `topics/category.md` -> `content/topics/category.md`
+  /// `lib/generated/api_sidebar.dart` -> unchanged
+  static String _remapToContentDir(String filePath) {
+    if (filePath.startsWith('api/') ||
+        filePath.startsWith('guide/') ||
+        filePath.startsWith('topics/')) {
+      return 'content/$filePath';
+    }
+    return filePath;
+  }
+
   ///
   /// Tracks the file path in [_expectedFiles] for manifest-based stale file
   /// deletion. Compares new content against the existing file on disk and
   /// skips the write if identical, incrementing [_unchangedCount] instead
   /// of [_writtenCount].
   void _writeMarkdown(String filePath, String content) {
-    _expectedFiles.add(filePath);
+    // Jaspr expects markdown content in content/ directory.
+    // Remap api/ and guide/ paths, leave lib/generated/ as-is.
+    final jasprPath = _remapToContentDir(filePath);
+    _expectedFiles.add(jasprPath);
 
     // Incremental generation: skip write if content is unchanged.
     // Normalize the path: filePath uses POSIX separators (/) but on Windows
     // _outputPath uses backslashes. p.normalize resolves mixed separators.
-    final fullPath = p.normalize(p.join(_outputPath, filePath));
+    final fullPath = p.normalize(p.join(_outputPath, jasprPath));
     final existingFile = resourceProvider.getFile(fullPath);
     if (existingFile.exists) {
       try {
@@ -601,7 +619,7 @@ class JasprGeneratorBackend extends GeneratorBackend {
       }
     }
 
-    writer.write(filePath, content);
+    writer.write(jasprPath, content);
     _writtenCount++;
   }
 
