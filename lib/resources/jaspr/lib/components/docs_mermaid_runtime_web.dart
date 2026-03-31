@@ -20,6 +20,7 @@ class DocsMermaidRuntime extends StatefulComponent {
 class _DocsMermaidRuntimeState extends State<DocsMermaidRuntime> {
   Timer? _themeTimer;
   String _theme = 'light';
+  JSFunction? _navigationListener;
 
   @override
   void initState() {
@@ -28,6 +29,10 @@ class _DocsMermaidRuntimeState extends State<DocsMermaidRuntime> {
 
     _theme = _currentTheme();
     Timer(const Duration(milliseconds: 50), _renderMermaid);
+    _navigationListener = ((web.Event _) {
+      Timer(const Duration(milliseconds: 50), () => _renderMermaid(force: true));
+    }).toJS;
+    web.window.addEventListener('docs:navigation', _navigationListener);
     _themeTimer = Timer.periodic(const Duration(milliseconds: 300), (_) {
       final nextTheme = _currentTheme();
       if (nextTheme == _theme) return;
@@ -39,6 +44,10 @@ class _DocsMermaidRuntimeState extends State<DocsMermaidRuntime> {
   @override
   void dispose() {
     _themeTimer?.cancel();
+    if (_navigationListener != null) {
+      web.window.removeEventListener('docs:navigation', _navigationListener);
+      _navigationListener = null;
+    }
     super.dispose();
   }
 

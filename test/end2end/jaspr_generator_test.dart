@@ -318,6 +318,18 @@ void main() {
         final content = _readOutput(outDir, 'lib/layouts/api_docs_layout.dart');
         final header = _readOutput(outDir, 'lib/components/docs_header.dart');
         final search = _readOutput(outDir, 'lib/components/docs_search.dart');
+        final navigationRuntime = _readOutput(
+          outDir,
+          'lib/components/docs_navigation_runtime.dart',
+        );
+        final navigationRuntimeStub = _readOutput(
+          outDir,
+          'lib/components/docs_navigation_runtime_stub.dart',
+        );
+        final navigationRuntimeWeb = _readOutput(
+          outDir,
+          'lib/components/docs_navigation_runtime_web.dart',
+        );
         final themeToggle = _readOutput(
           outDir,
           'lib/components/docs_theme_toggle.dart',
@@ -367,6 +379,7 @@ void main() {
         expect(themeToggle, contains("classes: 'theme-toggle'"));
         expect(themeToggle, contains("'data-docs-theme-toggle': ''"));
         expect(content, contains("import '../components/docs_nav_link.dart';"));
+        expect(search, contains("import 'docs_navigation_runtime.dart';"));
         expect(content, contains('const DocsSearchShell()'));
         expect(content, contains('const DocsDartPadRuntime()'));
         expect(content, contains('const DocsMermaidRuntime()'));
@@ -375,6 +388,7 @@ void main() {
         expect(content, isNot(contains('case final Sidebar sidebar')));
         expect(search, contains('@client'));
         expect(search, contains('class DocsSearchShell extends StatefulComponent'));
+        expect(search, contains('const DocsNavigationRuntime()'));
         expect(search, contains("classes: 'search-launcher'"));
         expect(search, contains("'data-docs-search-launcher': ''"));
         expect(search, contains('docs-search-overlay'));
@@ -400,7 +414,35 @@ void main() {
         expect(search, contains('docs.search.pages:'));
         expect(search, contains("'role': 'dialog'"));
         expect(search, contains("event.key == 'ArrowDown'"));
+        expect(
+          navigationRuntime,
+          contains("export 'docs_navigation_runtime_stub.dart'"),
+        );
+        expect(
+          navigationRuntimeStub,
+          contains('class DocsNavigationRuntime extends StatelessComponent'),
+        );
+        expect(
+          navigationRuntimeWeb,
+          contains('class DocsNavigationRuntime extends StatefulComponent'),
+        );
+        expect(navigationRuntimeWeb, contains("a[data-docs-nav-link]"));
+        expect(navigationRuntimeWeb, contains("web.window.history.pushState"));
+        expect(navigationRuntimeWeb, contains("web.DOMParser().parseFromString"));
+        expect(
+          navigationRuntimeWeb,
+          contains("querySelector('.main-container')"),
+        );
+        expect(
+          navigationRuntimeWeb,
+          contains("web.window.addEventListener('popstate'"),
+        );
+        expect(
+          navigationRuntimeWeb,
+          contains("web.window.dispatchEvent(web.CustomEvent('docs:navigation'))"),
+        );
         expect(navLink, contains('class DocsNavLink extends StatelessComponent'));
+        expect(navLink, contains("'data-docs-nav-link': 'true'"));
         expect(navLink, contains('Router.maybeOf(context)'));
         expect(navLink, contains('router.preload(to)'));
         expect(navLink, contains('router.push(to, extra: extra)'));
@@ -411,6 +453,7 @@ void main() {
         expect(sidebar, contains("import 'package:jaspr_content/jaspr_content.dart';"));
         expect(sidebar, contains("attributes: {'id': 'docs-sidebar'}"));
         expect(sidebar, contains("classes: 'sidebar-close'"));
+        expect(sidebar, contains("'data-docs-sidebar-close': 'true'"));
         expect(sidebar, contains('DocsNavLink('));
         expect(sidebarToggle, contains('class DocsSidebarToggle extends StatefulComponent'));
         expect(sidebarToggle, contains("'data-docs-sidebar-toggle': ''"));
@@ -433,6 +476,7 @@ void main() {
         expect(mermaidRuntimeWeb, contains("@JS('mermaid')"));
         expect(mermaidRuntimeWeb, contains('callMethod<JSPromise<JSObject>>('));
         expect(mermaidRuntimeWeb, contains("querySelectorAll('.mermaid-diagram')"));
+        expect(mermaidRuntimeWeb, contains("addEventListener('docs:navigation'"));
         expect(content, isNot(contains('route-progress')));
         expect(content, isNot(contains('window.history.pushState(')));
         expect(content, isNot(contains('const _runtimeScript')));

@@ -52,7 +52,11 @@ class ApiDocsLayout extends DocsLayout {
           const DocsSearchShell(),
         ]),
       div(classes: 'main-container', [
-        div(classes: 'sidebar-barrier', attributes: {'role': 'button'}, []),
+        div(
+          classes: 'sidebar-barrier',
+          attributes: {'role': 'button', 'data-docs-sidebar-barrier': 'true'},
+          [],
+        ),
         if (this.sidebar case final Component sidebar)
           div(classes: 'sidebar-container', [
             sidebar,
@@ -226,6 +230,12 @@ class ApiDocsLayout extends DocsLayout {
               color: Color('var(--docs-shell-border)'),
             ),
           ),
+        ),
+        css('[data-docs-nav-loading] body, [data-docs-nav-loading] .main-container')
+            .styles(
+          raw: {
+            'cursor': 'progress',
+          },
         ),
         css('.theme-toggle').styles(
           border: Border.all(

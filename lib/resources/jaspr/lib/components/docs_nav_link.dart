@@ -35,12 +35,17 @@ class DocsNavLink extends StatelessComponent {
     final isExternal = _isExternalTarget(to);
     final isHashOnly = to.startsWith('#');
     final isPlainAnchorOnly = isExternal || isHashOnly || target == Target.blank;
+    final mergedAttributes = {
+      ...?attributes,
+      'data-docs-nav-link': 'true',
+      if (replace) 'data-docs-nav-replace': 'true',
+    };
 
     return a(
       href: to,
       target: target,
       classes: classes,
-      attributes: attributes,
+      attributes: mergedAttributes,
       events: {
         if (preload && !isPlainAnchorOnly)
           'mouseover': (event) {

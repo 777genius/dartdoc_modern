@@ -1,0 +1,236 @@
+import 'dart:async';
+import 'dart:js_interop';
+
+import 'package:http/http.dart' as http;
+import 'package:jaspr/dom.dart';
+import 'package:jaspr/jaspr.dart';
+import 'package:web/web.dart' as web;
+
+@client
+class DocsNavigationRuntime extends StatefulComponent {
+  const DocsNavigationRuntime({super.key});
+
+  @override
+  State<DocsNavigationRuntime> createState() => _DocsNavigationRuntimeState();
+}
+
+class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
+  JSFunction? _clickListener;
+  JSFunction? _popStateListener;
+  int _navigationToken = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!kIsWeb) return;
+
+    web.document.documentElement?.setAttribute('data-docs-nav-runtime-ready', '');
+
+    _clickListener = ((web.Event rawEvent) {
+      if (rawEvent is! web.MouseEvent) return;
+      if (_isModifiedClick(rawEvent)) return;
+
+      final target = _resolveTargetElement(rawEvent.target);
+      if (target == null) return;
+
+      final closeSidebar = target.closest('[data-docs-sidebar-close]');
+      if (closeSidebar != null) {
+        rawEvent.preventDefault();
+        _closeSidebar();
+        return;
+      }
+
+      final barrier = target.closest('[data-docs-sidebar-barrier]');
+      if (barrier != null) {
+        rawEvent.preventDefault();
+        _closeSidebar();
+        return;
+      }
+
+      final anchor = target.closest('a[data-docs-nav-link]');
+      if (anchor is! web.HTMLAnchorElement) return;
+      if (!_shouldHandleClientNavigation(anchor)) return;
+
+      rawEvent.preventDefault();
+      unawaited(
+        _navigateTo(
+          Uri.parse(anchor.href),
+          replace: anchor.hasAttribute('data-docs-nav-replace'),
+        ),
+      );
+    }).toJS;
+    web.document.addEventListener('click', _clickListener);
+
+    _popStateListener = ((web.Event _) {
+      unawaited(
+        _navigateTo(
+          Uri.parse(web.window.location.href),
+          updateHistory: false,
+          restoreScroll: true,
+        ),
+      );
+    }).toJS;
+    web.window.addEventListener('popstate', _popStateListener);
+  }
+
+  @override
+  void dispose() {
+    web.document.documentElement?.removeAttribute('data-docs-nav-runtime-ready');
+    if (_clickListener != null) {
+      web.document.removeEventListener('click', _clickListener);
+      _clickListener = null;
+    }
+    if (_popStateListener != null) {
+      web.window.removeEventListener('popstate', _popStateListener);
+      _popStateListener = null;
+    }
+    super.dispose();
+  }
+
+  @override
+  Component build(BuildContext context) => span(
+        attributes: {
+          'hidden': 'hidden',
+          'data-docs-nav-runtime': '',
+        },
+        const [],
+      );
+
+  bool _shouldHandleClientNavigation(web.HTMLAnchorElement anchor) {
+    final rawHref = anchor.getAttribute('href');
+    if (rawHref == null || rawHref.isEmpty) return false;
+    if (rawHref.startsWith('#')) return false;
+    if (anchor.target == '_blank') return false;
+    if (anchor.hasAttribute('download')) return false;
+    if (rawHref.startsWith('mailto:') || rawHref.startsWith('tel:')) return false;
+
+    final targetUri = Uri.parse(anchor.href);
+    final currentUri = Uri.parse(web.window.location.href);
+    if (targetUri.scheme != currentUri.scheme || targetUri.host != currentUri.host) {
+      return false;
+    }
+
+    final samePath =
+        targetUri.path == currentUri.path && targetUri.query == currentUri.query;
+    if (samePath && targetUri.fragment.isNotEmpty) return false;
+
+    return true;
+  }
+
+  bool _isModifiedClick(web.MouseEvent event) {
+    return event.button != 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey;
+  }
+
+  web.Element? _resolveTargetElement(web.EventTarget? target) {
+    if (target is web.Element) return target;
+    if (target is web.Node) return target.parentElement;
+    return null;
+  }
+
+  Future<void> _navigateTo(
+    Uri targetUri, {
+    bool replace = false,
+    bool updateHistory = true,
+    bool restoreScroll = false,
+  }) async {
+    final token = ++_navigationToken;
+    _setBusy(true);
+
+    try {
+      final response = await http.get(Uri.parse(targetUri.toString()));
+      if (token != _navigationToken) return;
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        _hardNavigate(targetUri, replace: replace, updateHistory: updateHistory);
+        return;
+      }
+
+      final nextDocument = web.DOMParser().parseFromString(
+        response.body.toJS,
+        'text/html',
+      );
+      final nextMain = nextDocument.querySelector('.main-container');
+      final currentMain = web.document.querySelector('.main-container');
+      if (nextMain == null || currentMain == null) {
+        _hardNavigate(targetUri, replace: replace, updateHistory: updateHistory);
+        return;
+      }
+
+      currentMain.replaceWith(nextMain);
+
+      final nextTitle = nextDocument.querySelector('title')?.textContent;
+      if (nextTitle != null && nextTitle.isNotEmpty) {
+        web.document.title = nextTitle;
+      }
+
+      if (updateHistory) {
+        if (replace) {
+          web.window.history.replaceState(null, '', targetUri.toString());
+        } else {
+          web.window.history.pushState(null, '', targetUri.toString());
+        }
+      }
+
+      _closeSidebar();
+      _notifyNavigation();
+      _syncScroll(targetUri, restoreScroll: restoreScroll);
+    } catch (_) {
+      if (token != _navigationToken) return;
+      _hardNavigate(targetUri, replace: replace, updateHistory: updateHistory);
+    } finally {
+      if (token == _navigationToken) {
+        _setBusy(false);
+      }
+    }
+  }
+
+  void _hardNavigate(
+    Uri targetUri, {
+    required bool replace,
+    required bool updateHistory,
+  }) {
+    if (!updateHistory) return;
+    if (replace) {
+      web.window.location.replace(targetUri.toString());
+    } else {
+      web.window.location.assign(targetUri.toString());
+    }
+  }
+
+  void _setBusy(bool value) {
+    final root = web.document.documentElement;
+    if (root == null) return;
+    if (value) {
+      root.setAttribute('data-docs-nav-loading', '');
+    } else {
+      root.removeAttribute('data-docs-nav-loading');
+    }
+  }
+
+  void _closeSidebar() {
+    final sidebar = web.document.querySelector('.sidebar-container');
+    sidebar?.classList.remove('open');
+    web.document.body?.style.overflow = '';
+  }
+
+  void _notifyNavigation() {
+    web.window.dispatchEvent(web.CustomEvent('docs:navigation'));
+  }
+
+  void _syncScroll(Uri targetUri, {required bool restoreScroll}) {
+    if (targetUri.fragment.isNotEmpty) {
+      final node = web.document.getElementById(targetUri.fragment);
+      if (node != null) {
+        node.scrollIntoView();
+        return;
+      }
+    }
+
+    if (!restoreScroll) {
+      web.window.scrollTo(0.toJS, 0);
+    }
+  }
+}

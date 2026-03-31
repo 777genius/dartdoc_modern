@@ -36,6 +36,7 @@ class DocsSidebar extends StatelessComponent {
           classes: 'sidebar-close',
           attributes: {
             'type': 'button',
+            'data-docs-sidebar-close': 'true',
             'aria-label': 'Close navigation',
           },
           [Component.text('×')],

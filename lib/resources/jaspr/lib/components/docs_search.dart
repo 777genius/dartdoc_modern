@@ -6,6 +6,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:universal_web/web.dart' as web;
 
+import 'docs_navigation_runtime.dart';
 import 'docs_nav_link.dart';
 
 @client
@@ -51,6 +52,7 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
     final results = _results;
 
     return Component.fragment([
+      const DocsNavigationRuntime(),
       div(classes: 'header-search-shell', [
         button(
           classes: 'search-launcher',
