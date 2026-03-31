@@ -8,6 +8,7 @@ import 'package:universal_web/web.dart' as web;
 
 import 'docs_navigation_runtime.dart';
 import 'docs_nav_link.dart';
+import 'docs_mermaid_runtime.dart';
 import 'docs_toc_runtime.dart';
 
 @client
@@ -54,6 +55,7 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
 
     return Component.fragment([
       const DocsNavigationRuntime(),
+      const DocsMermaidRuntime(),
       const DocsTocRuntime(),
       div(classes: 'header-search-shell', [
         button(

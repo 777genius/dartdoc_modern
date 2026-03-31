@@ -728,7 +728,9 @@ void main() {
 
       // -- Admonition blocks in library docs ---------------------------------
 
-      test('library documentation converts admonition blocks to VitePress containers', () {
+      test(
+          'library documentation converts admonition blocks to VitePress containers',
+          () {
         var content = _readOutput(outDir, 'api/fake/index.md');
         expect(content, contains(':::info'));
         expect(content, contains(':::tip'));
@@ -1119,9 +1121,8 @@ void main() {
         var content = _readOutput(outDir, 'api/fake/paintImage1.md');
         expect(content, contains('member-signature'));
         // Should have newlines (tall format)
-        var sigMatch = RegExp(
-                r'<pre><code>([\s\S]*?)</code></pre>')
-            .firstMatch(content);
+        var sigMatch =
+            RegExp(r'<pre><code>([\s\S]*?)</code></pre>').firstMatch(content);
         expect(sigMatch, isNotNull);
         var sigContent = sigMatch!.group(1)!;
         expect(sigContent, contains('\n'));
@@ -1134,9 +1135,8 @@ void main() {
         // topLevelFunction(int param1, bool param2, Cool coolBeans,
         //     [double optionalPositional = 0.0]) — over 80 chars
         var content = _readOutput(outDir, 'api/fake/topLevelFunction.md');
-        var sigMatch = RegExp(
-                r'<pre><code>([\s\S]*?)</code></pre>')
-            .firstMatch(content);
+        var sigMatch =
+            RegExp(r'<pre><code>([\s\S]*?)</code></pre>').firstMatch(content);
         expect(sigMatch, isNotNull);
         var sigContent = sigMatch!.group(1)!;
         expect(sigContent, contains('\n'));
@@ -1205,8 +1205,7 @@ void main() {
 
       test('property with both getter and setter docs shows separate sections',
           () {
-        var content =
-            _readOutput(outDir, 'api/fake/WithGetterAndSetter.md');
+        var content = _readOutput(outDir, 'api/fake/WithGetterAndSetter.md');
         expect(content, contains('**getter:**'));
         expect(content, contains('**setter:**'));
         expect(content, contains('Returns a length'));
@@ -1268,6 +1267,12 @@ void main() {
             _outputExists(outDir, 'guide/advanced/configuration.md'), isTrue);
         var content = _readOutput(outDir, 'guide/advanced/configuration.md');
         expect(content, contains('# Configuration'));
+        expect(_outputExists(outDir, 'guide/advanced/architecture.md'), isTrue);
+        expect(_outputExists(outDir, 'guide/recipes/testing-workflows.md'),
+            isTrue);
+        expect(_outputExists(outDir, 'guide/recipes/pipeline-patterns.md'),
+            isTrue);
+        expect(_outputExists(outDir, 'guide/ui/showcase.md'), isTrue);
       });
 
       test('guide-sidebar.ts contains guide entries', () {
@@ -1275,6 +1280,10 @@ void main() {
             _readOutput(outDir, '.vitepress/generated/guide-sidebar.ts');
         expect(content, contains('Getting Started'));
         expect(content, contains('Configuration'));
+        expect(content, contains('Architecture'));
+        expect(content, contains('Testing Workflows'));
+        expect(content, contains('Pipeline Patterns'));
+        expect(content, contains('UI Showcase'));
       });
 
       test('sidebar links do not contain .md extension', () {
@@ -1506,8 +1515,8 @@ void main() {
           _resourceProvider
               .getFolder(p.join(outDir.path, 'guide', 'subdir'))
               .create();
-          var staleGuide = _resourceProvider.getFile(
-              p.join(outDir.path, 'guide', 'subdir', 'old-guide.md'));
+          var staleGuide = _resourceProvider
+              .getFile(p.join(outDir.path, 'guide', 'subdir', 'old-guide.md'));
           staleGuide.writeAsStringSync('# Old Guide\nThis is stale.');
           expect(staleGuide.exists, isTrue);
 
@@ -1515,7 +1524,8 @@ void main() {
           await dartdoc2.generateDocs();
 
           expect(staleGuide.exists, isFalse,
-              reason: 'Stale .md file in guide/ subdirectory should be deleted');
+              reason:
+                  'Stale .md file in guide/ subdirectory should be deleted');
         } finally {
           outDir.delete();
         }
@@ -1544,8 +1554,7 @@ void main() {
       });
 
       test('stale .css file in .vitepress/generated/ is deleted', () async {
-        var outDir =
-            _resourceProvider.createSystemTemp('vitepress_stale_css.');
+        var outDir = _resourceProvider.createSystemTemp('vitepress_stale_css.');
         try {
           var dartdoc1 = _buildVitePressDartdoc([], _testPackageDir, outDir);
           await dartdoc1.generateDocs();
@@ -1577,11 +1586,10 @@ void main() {
           var indexTs = _resourceProvider
               .getFile(p.join(outDir.path, '.vitepress', 'theme', 'index.ts'));
           var content = indexTs.readAsStringSync();
-          content = content.replaceAll(
-              "import '../generated/api-styles.css'\n", '');
+          content =
+              content.replaceAll("import '../generated/api-styles.css'\n", '');
           indexTs.writeAsStringSync(content);
-          expect(indexTs.readAsStringSync(),
-              isNot(contains('api-styles.css')));
+          expect(indexTs.readAsStringSync(), isNot(contains('api-styles.css')));
 
           // Re-run generation — should auto-patch index.ts.
           var dartdoc2 = _buildVitePressDartdoc([], _testPackageDir, outDir);

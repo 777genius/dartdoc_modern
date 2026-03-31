@@ -31,7 +31,9 @@ class DocsSidebar extends StatelessComponent {
 
     return Component.fragment([
       Document.head(children: [Style(styles: _styles)]),
-      nav(classes: 'sidebar', attributes: {'id': 'docs-sidebar'}, [
+      nav(classes: 'sidebar', attributes: {
+        'id': 'docs-sidebar'
+      }, [
         button(
           classes: 'sidebar-close',
           attributes: {
@@ -48,12 +50,13 @@ class DocsSidebar extends StatelessComponent {
               ul([
                 for (final item in group.items)
                   li([
-                    div(classes: activeRoute == item.href ? 'active' : null, [
-                      DocsNavLink(
-                        to: item.href,
-                        children: [Component.text(item.text)],
-                      ),
-                    ]),
+                    DocsNavLink(
+                      to: item.href,
+                      classes: activeRoute == item.href
+                          ? 'sidebar-link active'
+                          : 'sidebar-link',
+                      children: [Component.text(item.text)],
+                    ),
                   ]),
               ]),
             ]),
@@ -68,7 +71,8 @@ class DocsSidebar extends StatelessComponent {
             position: Position.relative(),
             fontSize: 0.875.rem,
             lineHeight: 1.25.rem,
-            padding: Padding.only(left: 0.5.rem, bottom: 1.25.rem, top: 0.75.rem),
+            padding:
+                Padding.only(left: 0.5.rem, bottom: 1.25.rem, top: 0.75.rem),
           ),
           css.media(MediaQuery.all(maxWidth: 1023.px), [
             css('&').styles(
@@ -117,41 +121,55 @@ class DocsSidebar extends StatelessComponent {
               margin: Margin.zero,
               padding: Padding.zero,
             ),
-            css('li', [
-              css('div', [
-                css('&').styles(
-                  opacity: 0.75,
-                  margin: Margin.only(bottom: 1.px),
-                  whiteSpace: WhiteSpace.noWrap,
-                  overflow: Overflow.hidden,
-                  textOverflow: TextOverflow.ellipsis,
-                  radius: BorderRadius.circular(.375.rem),
-                  display: Display.flex,
-                  transition: Transition(
-                    'all',
-                    duration: 150.ms,
-                    curve: Curve.easeInOut,
-                  ),
-                ),
-                css('&:hover').styles(
-                  opacity: 1,
-                  backgroundColor: Color('#0000000d'),
-                ),
-                css('&.active').styles(
-                  opacity: 1,
-                  color: ContentColors.primary,
-                  fontWeight: FontWeight.w700,
-                  backgroundColor: Color(
-                    'color-mix(in srgb, currentColor 15%, transparent)',
-                  ),
-                ),
-              ]),
-              css('a').styles(
-                padding: Padding.only(left: 12.px, top: .5.rem, bottom: .5.rem),
-                display: Display.inlineFlex,
-                flex: Flex(grow: 1),
+            css('li').styles(margin: Margin.only(bottom: 0.18.rem)),
+            css('.sidebar-link').styles(
+              opacity: 0.92,
+              display: Display.block,
+              padding:
+                  Padding.symmetric(vertical: 0.72.rem, horizontal: 0.92.rem),
+              whiteSpace: WhiteSpace.noWrap,
+              overflow: Overflow.hidden,
+              textOverflow: TextOverflow.ellipsis,
+              radius: BorderRadius.circular(0.9.rem),
+              color: ContentColors.text,
+              transition: Transition(
+                'background-color, color, transform, box-shadow',
+                duration: 150.ms,
+                curve: Curve.easeInOut,
               ),
-            ]),
+              raw: {
+                'position': 'relative',
+              },
+            ),
+            css('.sidebar-link:hover').styles(
+              opacity: 1,
+              backgroundColor: Color('#0000000d'),
+              raw: {'transform': 'translateX(2px)'},
+            ),
+            css('.sidebar-link.active').styles(
+              opacity: 1,
+              color: ContentColors.primary,
+              fontWeight: FontWeight.w700,
+              backgroundColor: Color(
+                'color-mix(in srgb, currentColor 15%, transparent)',
+              ),
+              shadow: BoxShadow(
+                offsetX: Unit.zero,
+                offsetY: 12.px,
+                blur: 24.px,
+                color: Color('rgba(37, 99, 235, 0.14)'),
+              ),
+            ),
+            css('.sidebar-link.active::before').styles(
+              raw: {
+                'content': '""',
+                'position': 'absolute',
+                'inset': '0 auto 0 0',
+                'width': '0.28rem',
+                'border-radius': '999px',
+                'background': 'currentColor',
+              },
+            ),
           ]),
         ]),
       ];

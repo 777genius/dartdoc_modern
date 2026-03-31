@@ -18,6 +18,7 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
   JSFunction? _resizeListener;
   JSFunction? _navigationListener;
   Timer? _updateTimer;
+  String? _lastActiveId;
 
   @override
   void initState() {
@@ -88,17 +89,8 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
 
     if (targets.isEmpty) return;
 
-    const offset = 140.0;
-    _TocTarget active = targets.first;
-
-    for (final target in targets) {
-      final top = target.heading.getBoundingClientRect().top;
-      if (top - offset <= 0) {
-        active = target;
-      } else {
-        break;
-      }
-    }
+    final offset = _offsetForViewport();
+    final active = _resolveActiveTarget(targets, offset);
 
     for (final target in targets) {
       final isActive = identical(target, active);
@@ -117,6 +109,22 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
     }
 
     _openAncestorDetails(active.link);
+    _ensureLinkVisible(active.link, active.id);
+  }
+
+  double _offsetForViewport() {
+    final width = web.window.innerWidth.toDouble();
+    final header = web.document.querySelector('.header-container');
+    final headerHeight = header is web.HTMLElement
+        ? header.getBoundingClientRect().height
+        : 0.0;
+
+    final breathingRoom = width < 960
+        ? 20.0
+        : width < 1280
+            ? 28.0
+            : 36.0;
+    return headerHeight + breathingRoom;
   }
 
   void _openAncestorDetails(web.HTMLElement link) {
@@ -127,6 +135,41 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
       }
       current = current.parentElement;
     }
+  }
+
+  void _ensureLinkVisible(web.HTMLElement link, String activeId) {
+    if (_lastActiveId == activeId) return;
+    _lastActiveId = activeId;
+
+    final container = link.closest('.toc > div');
+    if (container is! web.HTMLElement) return;
+
+    final targetScroll =
+        link.offsetTop - ((container.clientHeight - link.clientHeight) / 2);
+    final clampedScroll = targetScroll.clamp(0, container.scrollHeight.toDouble());
+    if ((container.scrollTop - clampedScroll).abs() < 8) return;
+    container.scrollTop = clampedScroll;
+  }
+
+  _TocTarget _resolveActiveTarget(List<_TocTarget> targets, double offset) {
+    for (var index = 0; index < targets.length; index++) {
+      final current = targets[index];
+      final currentTop = current.heading.getBoundingClientRect().top;
+      final nextTop = index + 1 < targets.length
+          ? targets[index + 1].heading.getBoundingClientRect().top
+          : double.infinity;
+
+      if (currentTop - offset <= 0 && nextTop - offset > 0) {
+        return current;
+      }
+    }
+
+    final firstTop = targets.first.heading.getBoundingClientRect().top;
+    if (firstTop - offset > 0) {
+      return targets.first;
+    }
+
+    return targets.last;
   }
 }
 

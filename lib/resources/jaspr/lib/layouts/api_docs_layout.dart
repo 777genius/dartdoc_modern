@@ -5,7 +5,6 @@ import 'package:jaspr_content/theme.dart';
 
 import '../components/docs_dartpad_runtime.dart';
 import '../components/docs_nav_link.dart';
-import '../components/docs_mermaid_runtime.dart';
 
 class ApiDocsLayout extends DocsLayout {
   const ApiDocsLayout({
@@ -42,7 +41,6 @@ class ApiDocsLayout extends DocsLayout {
 
     return div(classes: 'docs', [
       const DocsDartPadRuntime(),
-      const DocsMermaidRuntime(),
       if (this.header case final Component header)
         div(classes: 'header-container', attributes: {
           if (this.sidebar != null) 'data-has-sidebar': '',
@@ -823,12 +821,55 @@ class ApiDocsLayout extends DocsLayout {
             margin: Margin.only(top: 1.rem, bottom: 1.25.rem),
             overflow: Overflow.auto,
           ),
-          css('svg').styles(maxWidth: 100.percent),
+          css('.mermaid-frame').styles(
+            display: Display.grid,
+            gap: Gap.row(0.9.rem),
+          ),
+          css('.mermaid-placeholder').styles(
+            display: Display.flex,
+            alignItems: AlignItems.center,
+            justifyContent: JustifyContent.center,
+            padding: Padding.symmetric(vertical: 1.2.rem, horizontal: 1.rem),
+            radius: BorderRadius.circular(0.85.rem),
+            border: Border.all(
+              width: 1.px,
+              color: Color('var(--docs-shell-border)'),
+            ),
+            backgroundColor: Color('var(--docs-shell-surface-soft)'),
+          ),
+          css('.mermaid-placeholder-label').styles(
+            color: Color('var(--docs-shell-muted-text)'),
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.02.rem,
+          ),
+          css('.mermaid-host').styles(
+            display: Display.block,
+            overflow: Overflow.auto,
+            raw: {
+              'opacity': '0',
+              'transition': 'opacity 180ms ease',
+            },
+          ),
+          css('.mermaid-host svg').styles(
+            maxWidth: 100.percent,
+            display: Display.block,
+            margin: Margin.symmetric(horizontal: auto),
+          ),
+          css('.mermaid-fallback').styles(
+            display: Display.grid,
+            gap: Gap.row(0.75.rem),
+          ),
+          css('.mermaid-fallback-message').styles(
+            color: Color('var(--docs-shell-muted-text)'),
+            fontSize: 0.95.rem,
+            lineHeight: LineHeight.number(1.5),
+          ),
         ]),
         css('.docs', [
           css('&').styles(
             backgroundColor: ContentColors.background,
             raw: {
+              'overflow': 'visible',
               'background-image':
                   'radial-gradient(circle at top left, var(--docs-shell-accent-soft) 0, transparent 30rem), radial-gradient(circle at top right, var(--docs-shell-accent-soft) 0, transparent 24rem)',
             },
@@ -836,13 +877,16 @@ class ApiDocsLayout extends DocsLayout {
           css('.main-container').styles(
             maxWidth: 100.percent,
             margin: Margin.zero,
+            raw: {'overflow': 'visible'},
           ),
           css('main').styles(
             width: 100.percent,
+            raw: {'overflow': 'visible'},
           ),
           css('main > div').styles(
             display: Display.grid,
             raw: {
+              'overflow': 'visible',
               'grid-template-columns': 'minmax(0, 1fr) 18rem',
               'gap': '2.25rem',
               'max-width': 'min(96rem, calc(100vw - 3rem))',
@@ -937,27 +981,34 @@ class ApiDocsLayout extends DocsLayout {
             padding: Padding.only(
               top: 1.45.rem,
               left: 1.rem,
-              right: 0.5.rem,
-              bottom: 2.rem,
+              right: 1.rem,
+              bottom: 2.25.rem,
             ),
+            raw: {
+              'overflow': 'visible',
+            },
           ),
           css('.sidebar').styles(
             position: Position.sticky(top: 5.65.rem),
             maxHeight: 84.vh,
-            overflow: Overflow.auto,
-            padding: Padding.all(1.rem),
+            overflow: Overflow.visible,
+            padding: Padding.zero,
             radius: BorderRadius.circular(1.15.rem),
             backgroundColor: Color('var(--docs-shell-surface)'),
             border: Border.all(
               width: 1.px,
               color: Color('var(--docs-shell-border)'),
             ),
-            shadow: BoxShadow(
-              offsetX: Unit.zero,
-              offsetY: 18.px,
-              blur: 30.px,
-              color: Color('var(--docs-shell-shadow)'),
-            ),
+            shadow: BoxShadow.unset,
+            raw: {
+              'filter': 'drop-shadow(0 18px 30px var(--docs-shell-shadow))',
+            },
+          ),
+          css('.sidebar > div').styles(
+            maxHeight: 84.vh,
+            overflow: Overflow.auto,
+            padding: Padding.all(1.rem),
+            radius: BorderRadius.circular(1.15.rem),
           ),
           css('.sidebar .sidebar-header').styles(
             margin: Margin.only(bottom: 1.rem),
@@ -1011,6 +1062,10 @@ class ApiDocsLayout extends DocsLayout {
             ),
             css('.sidebar').styles(
               shadow: BoxShadow.unset,
+            ),
+            css('.sidebar > div').styles(
+              maxHeight: Unit.auto,
+              overflow: Overflow.visible,
             ),
             css('.sidebar .sidebar-close').styles(
               position: Position.sticky(top: 0.1.rem),
@@ -1159,7 +1214,7 @@ class ApiDocsLayout extends DocsLayout {
         ),
         css('.toc', [
           css('&').styles(
-            padding: Padding.only(top: 1.45.rem, bottom: 2.rem),
+            padding: Padding.only(top: 1.2.rem, bottom: 2.rem),
           ),
           css('ul').styles(
             listStyle: ListStyle.none,
@@ -1170,26 +1225,32 @@ class ApiDocsLayout extends DocsLayout {
             margin: Margin.only(top: 0.2.rem),
           ),
           css('> div').styles(
-            position: Position.sticky(top: 5.65.rem),
-            maxHeight: 84.vh,
+            position: Position.sticky(top: 5.15.rem),
+            maxHeight: 80.vh,
             overflow: Overflow.auto,
             padding: Padding.only(
-                top: 1.rem, right: 1.rem, bottom: 1.rem, left: 1.rem),
+                top: 0.95.rem,
+                right: 0.95.rem,
+                bottom: 0.95.rem,
+                left: 0.95.rem),
             radius: BorderRadius.circular(1.1.rem),
-            backgroundColor: Color('var(--docs-shell-surface)'),
+            backgroundColor: Color('var(--docs-shell-surface-elevated)'),
             border: Border.all(
               width: 1.px,
               color: Color('var(--docs-shell-border)'),
             ),
             shadow: BoxShadow(
               offsetX: Unit.zero,
-              offsetY: 18.px,
-              blur: 28.px,
+              offsetY: 16.px,
+              blur: 24.px,
               color: Color('var(--docs-shell-shadow)'),
             ),
+            raw: {
+              'overscroll-behavior': 'contain',
+            },
           ),
           css('h3').styles(
-            margin: Margin.only(bottom: 0.9.rem),
+            margin: Margin.only(bottom: 0.8.rem),
             fontSize: 0.8.rem,
             fontWeight: FontWeight.w800,
             textTransform: TextTransform.upperCase,
@@ -1198,10 +1259,12 @@ class ApiDocsLayout extends DocsLayout {
           ),
           css('.toc-link').styles(
             display: Display.block,
-            padding: Padding.symmetric(vertical: 0.45.rem, horizontal: 0.7.rem),
+            padding:
+                Padding.symmetric(vertical: 0.42.rem, horizontal: 0.68.rem),
             radius: BorderRadius.circular(0.75.rem),
             color: ContentColors.text,
             textDecoration: TextDecoration.none,
+            fontSize: 0.93.rem,
             transition: Transition(
               'background-color, color, transform, box-shadow',
               duration: Duration(milliseconds: 150),
@@ -1236,6 +1299,13 @@ class ApiDocsLayout extends DocsLayout {
                 color: Color('var(--docs-shell-border)'),
               ),
             ),
+          ),
+          css('.toc ul ul .toc-link').styles(
+            fontSize: 0.87.rem,
+            color: Color('var(--docs-shell-muted)'),
+          ),
+          css('.toc ul ul .toc-link.active').styles(
+            color: Color('var(--docs-shell-accent)'),
           ),
           css.media(MediaQuery.all(maxWidth: 959.px), [
             css('&').styles(display: Display.none),
@@ -1322,5 +1392,30 @@ class ApiDocsLayout extends DocsLayout {
             color: Color('var(--docs-shell-shadow)'),
           ),
         ),
+        css('.mermaid-diagram[data-mermaid-state="rendered"] .mermaid-host')
+            .styles(
+          display: Display.block,
+          raw: {
+            'opacity': '1',
+          },
+        ),
+        css('.mermaid-diagram[data-mermaid-state="error"] .mermaid-fallback')
+            .styles(
+          display: Display.grid,
+        ),
+        css('.content h2[id], .content h3[id], .content h4[id], .content h5[id], .content h6[id]')
+            .styles(
+          raw: {
+            'scroll-margin-top': '7rem',
+          },
+        ),
+        css.media(MediaQuery.all(maxWidth: 959.px), [
+          css('.content h2[id], .content h3[id], .content h4[id], .content h5[id], .content h6[id]')
+              .styles(
+            raw: {
+              'scroll-margin-top': '6rem',
+            },
+          ),
+        ]),
       ];
 }

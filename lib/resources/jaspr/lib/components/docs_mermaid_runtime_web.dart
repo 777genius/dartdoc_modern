@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
+import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:web/web.dart' as web;
 
@@ -18,9 +18,11 @@ class DocsMermaidRuntime extends StatefulComponent {
 }
 
 class _DocsMermaidRuntimeState extends State<DocsMermaidRuntime> {
+  Timer? _bootTimer;
   Timer? _themeTimer;
   String _theme = 'light';
   JSFunction? _navigationListener;
+  int _bootAttempts = 0;
 
   @override
   void initState() {
@@ -28,9 +30,18 @@ class _DocsMermaidRuntimeState extends State<DocsMermaidRuntime> {
     if (!kIsWeb) return;
 
     _theme = _currentTheme();
-    Timer(const Duration(milliseconds: 50), _renderMermaid);
+    _bootTimer =
+        Timer.periodic(const Duration(milliseconds: 250), (timer) async {
+      _bootAttempts++;
+      final rendered = await _renderMermaid();
+      if (rendered || _bootAttempts >= 24) {
+        timer.cancel();
+        _bootTimer = null;
+      }
+    });
     _navigationListener = ((web.Event _) {
-      Timer(const Duration(milliseconds: 50), () => _renderMermaid(force: true));
+      Timer(
+          const Duration(milliseconds: 50), () => _renderMermaid(force: true));
     }).toJS;
     web.window.addEventListener('docs:navigation', _navigationListener);
     _themeTimer = Timer.periodic(const Duration(milliseconds: 300), (_) {
@@ -43,6 +54,7 @@ class _DocsMermaidRuntimeState extends State<DocsMermaidRuntime> {
 
   @override
   void dispose() {
+    _bootTimer?.cancel();
     _themeTimer?.cancel();
     if (_navigationListener != null) {
       web.window.removeEventListener('docs:navigation', _navigationListener);
@@ -52,16 +64,26 @@ class _DocsMermaidRuntimeState extends State<DocsMermaidRuntime> {
   }
 
   @override
-  Component build(BuildContext context) => Component.fragment(const []);
+  Component build(BuildContext context) => span(
+        attributes: {
+          'data-docs-mermaid-runtime': '',
+          'hidden': 'hidden',
+          'aria-hidden': 'true',
+        },
+        const [],
+      );
 
   String _currentTheme() =>
       web.document.documentElement?.getAttribute('data-theme') == 'dark'
           ? 'dark'
           : 'light';
 
-  Future<void> _renderMermaid({bool force = false}) async {
+  Future<bool> _renderMermaid({bool force = false}) async {
     final mermaid = _mermaid;
-    if (mermaid == null) return;
+    if (mermaid == null) return false;
+
+    final nodes = web.document.querySelectorAll('.mermaid-diagram');
+    if (nodes.length == 0) return true;
 
     mermaid.callMethod(
       'initialize'.toJS,
@@ -70,38 +92,92 @@ class _DocsMermaidRuntimeState extends State<DocsMermaidRuntime> {
           'startOnLoad': false,
           'theme': _currentTheme() == 'dark' ? 'dark' : 'default',
           'securityLevel': 'loose',
+          'suppressErrorRendering': true,
         }.jsify(),
       ].jsify(),
     );
 
-    final nodes = web.document.querySelectorAll('.mermaid-diagram');
+    var preparedAny = false;
     for (var index = 0; index < nodes.length; index++) {
       final node = nodes.item(index);
       if (node is! web.HTMLElement) continue;
-      if (!force && node.dataset['rendered'] == 'true') continue;
+      if (!force && node.getAttribute('data-rendered') == 'true') continue;
 
-      final source = utf8.decode(base64Decode(node.dataset['sourceBase64']));
-      final renderId = 'mermaid-${index + 1}-${DateTime.now().millisecondsSinceEpoch}';
+      final source = node.getAttribute('data-source-base64');
+      if (source == null || source.isEmpty) continue;
+      final host = node.querySelector('[data-mermaid-host]');
+      if (host is! web.HTMLElement) continue;
 
-      try {
-        final result = await mermaid
-            .callMethod<JSPromise<JSObject>>(
-              'render'.toJS,
-              <Object?>[renderId.toJS, source.toJS].jsify(),
-            )
-            .toDart;
-        final svg = result.getProperty<JSString>('svg'.toJS).toDart;
-        node.innerHTML = svg.toJS;
-        node.dataset['rendered'] = 'true';
-      } catch (_) {
-        node.innerHTML = _fallbackMarkup(source).toJS;
-        node.dataset['rendered'] = 'true';
+      final placeholder = node.querySelector('[data-mermaid-placeholder]');
+      final fallback = node.querySelector('[data-mermaid-fallback]');
+      if (placeholder is web.HTMLElement) {
+        placeholder.hidden = false;
+      }
+      if (fallback is web.HTMLElement) {
+        fallback.hidden = true;
+      }
+
+      host.hidden = false;
+      host.setAttribute('aria-hidden', 'false');
+      host.removeAttribute('data-processed');
+      host.innerHTML = '';
+      host.textContent = web.window.atob(source);
+      node.setAttribute('data-rendered', 'false');
+      node.setAttribute('data-mermaid-state', 'pending');
+      preparedAny = true;
+    }
+
+    if (!preparedAny && !force) return true;
+
+    try {
+      await mermaid
+          .callMethod<JSPromise<JSAny?>>(
+            'run'.toJS,
+            <Object?>[
+              {
+                'suppressErrors': true,
+              }.jsify(),
+            ].jsify(),
+          )
+          .toDart;
+    } catch (_) {
+      return false;
+    }
+
+    var renderedAny = false;
+    for (var index = 0; index < nodes.length; index++) {
+      final node = nodes.item(index);
+      if (node is! web.HTMLElement) continue;
+      final host = node.querySelector('[data-mermaid-host]');
+      if (host is! web.HTMLElement) continue;
+
+      final placeholder = node.querySelector('[data-mermaid-placeholder]');
+      final fallback = node.querySelector('[data-mermaid-fallback]');
+      final rendered = host.querySelector('svg') != null;
+      if (rendered) {
+        node.setAttribute('data-rendered', 'true');
+        node.setAttribute('data-mermaid-state', 'rendered');
+        if (placeholder is web.HTMLElement) {
+          placeholder.hidden = true;
+        }
+        if (fallback is web.HTMLElement) {
+          fallback.hidden = true;
+        }
+        renderedAny = true;
+      } else {
+        node.setAttribute('data-rendered', 'false');
+        node.setAttribute('data-mermaid-state', 'error');
+        if (placeholder is web.HTMLElement) {
+          placeholder.hidden = true;
+        }
+        if (fallback is web.HTMLElement) {
+          fallback.hidden = false;
+        }
+        host.hidden = true;
+        host.setAttribute('aria-hidden', 'true');
       }
     }
-  }
 
-  String _fallbackMarkup(String source) {
-    final escaped = const HtmlEscape(HtmlEscapeMode.element).convert(source);
-    return '<pre class="mermaid-fallback"><code>$escaped</code></pre>';
+    return renderedAny;
   }
 }

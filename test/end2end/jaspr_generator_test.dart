@@ -371,6 +371,10 @@ void main() {
           outDir,
           'lib/components/docs_mermaid_runtime_web.dart',
         );
+        final mermaidDiagram = _readOutput(
+          outDir,
+          'lib/components/mermaid_diagram.dart',
+        );
         final tocRuntime = _readOutput(
           outDir,
           'lib/components/docs_toc_runtime.dart',
@@ -389,7 +393,7 @@ void main() {
         );
         expect(
           content,
-          contains("import '../components/docs_mermaid_runtime.dart';"),
+          isNot(contains("import '../components/docs_mermaid_runtime.dart';")),
         );
         expect(header, contains('class DocsHeader extends StatelessComponent'));
         expect(header, contains('const DocsSidebarToggle()'));
@@ -413,7 +417,7 @@ void main() {
             isNot(contains("import '../components/docs_search.dart';")));
         expect(content, isNot(contains('const DocsSearchShell()')));
         expect(content, contains('const DocsDartPadRuntime()'));
-        expect(content, contains('const DocsMermaidRuntime()'));
+        expect(content, isNot(contains('const DocsMermaidRuntime()')));
         expect(content, contains('DocsNavLink('));
         expect(content, isNot(contains('case final Header header')));
         expect(content, isNot(contains('case final Sidebar sidebar')));
@@ -427,6 +431,7 @@ void main() {
         expect(search, contains("'data-docs-search-overlay': ''"));
         expect(search, contains('http.get(Uri.parse(path))'));
         expect(search, contains("import 'docs_nav_link.dart';"));
+        expect(search, contains("import 'docs_mermaid_runtime.dart';"));
         expect(search, contains("import 'docs_toc_runtime.dart';"));
         expect(search, contains('_loadSearchManifest()'));
         expect(search, contains('_ensurePagesReady()'));
@@ -438,6 +443,7 @@ void main() {
         expect(search, contains('_runSearch('));
         expect(search, contains('return DocsNavLink('));
         expect(search, contains('onNavigate: _closeSearch'));
+        expect(search, contains('const DocsMermaidRuntime()'));
         expect(search, contains('const DocsTocRuntime()'));
         expect(search, contains('node.click();'));
         expect(search, contains('docs-search-footer'));
@@ -490,10 +496,11 @@ void main() {
             sidebar, contains('class DocsSidebar extends StatelessComponent'));
         expect(sidebar,
             contains("import 'package:jaspr_content/jaspr_content.dart';"));
-        expect(sidebar, contains("attributes: {'id': 'docs-sidebar'}"));
+        expect(sidebar, contains("'id': 'docs-sidebar'"));
         expect(sidebar, contains("classes: 'sidebar-close'"));
         expect(sidebar, contains("'data-docs-sidebar-close': 'true'"));
         expect(sidebar, contains('DocsNavLink('));
+        expect(sidebar, contains("'sidebar-link active'"));
         expect(sidebarToggle,
             contains('class DocsSidebarToggle extends StatefulComponent'));
         expect(sidebarToggle, contains("'data-docs-sidebar-toggle': ''"));
@@ -517,11 +524,22 @@ void main() {
           contains('class DocsMermaidRuntime extends StatefulComponent'),
         );
         expect(mermaidRuntimeWeb, contains("@JS('mermaid')"));
-        expect(mermaidRuntimeWeb, contains('callMethod<JSPromise<JSObject>>('));
+        expect(mermaidRuntimeWeb, contains("'suppressErrorRendering': true"));
+        expect(
+          mermaidRuntimeWeb,
+          contains("host.textContent = web.window.atob(source)"),
+        );
+        expect(mermaidRuntimeWeb, contains("'run'.toJS"));
         expect(mermaidRuntimeWeb,
             contains("querySelectorAll('.mermaid-diagram')"));
         expect(
             mermaidRuntimeWeb, contains("addEventListener('docs:navigation'"));
+        expect(
+          mermaidDiagram,
+          contains("Component.text('Rendering Mermaid diagram')"),
+        );
+        expect(mermaidDiagram, contains("'data-mermaid-host': ''"));
+        expect(mermaidDiagram, contains("'data-mermaid-fallback': ''"));
         expect(tocRuntime, contains("export 'docs_toc_runtime_stub.dart'"));
         expect(
           tocRuntimeStub,
@@ -650,6 +668,22 @@ void main() {
           _outputExists(outDir, 'content/guide/advanced/configuration.md'),
           isTrue,
         );
+        expect(
+          _outputExists(outDir, 'content/guide/advanced/architecture.md'),
+          isTrue,
+        );
+        expect(
+          _outputExists(outDir, 'content/guide/recipes/testing-workflows.md'),
+          isTrue,
+        );
+        expect(
+          _outputExists(outDir, 'content/guide/recipes/pipeline-patterns.md'),
+          isTrue,
+        );
+        expect(
+          _outputExists(outDir, 'content/guide/ui/showcase.md'),
+          isTrue,
+        );
       });
 
       test('guide sidebar is generated as Dart data', () {
@@ -657,6 +691,10 @@ void main() {
         expect(content, contains('const guideSidebarGroups = <SidebarGroup>['));
         expect(content, contains('Getting Started'));
         expect(content, contains('Configuration'));
+        expect(content, contains('Architecture'));
+        expect(content, contains('Testing Workflows'));
+        expect(content, contains('Pipeline Patterns'));
+        expect(content, contains('UI Showcase'));
         expect(content, isNot(contains('export const guideSidebar')));
         expect(
           content.indexOf("SidebarItem(text: 'Getting Started'"),
@@ -685,8 +723,12 @@ void main() {
         expect(content, contains('```dart'));
         expect(content, isNot(contains('<<< snippets/hello.dart')));
         expect(content, contains('String greetingFor(String name)'));
+        expect(content, isNot(contains('<<< snippets/pipeline_showcase.dart')));
+        expect(content, contains('String buildPipelineDemo()'));
         expect(content, contains('```dartpad height=420 run=false'));
         expect(content, contains('```mermaid'));
+        expect(content, contains('## UI Showcase'));
+        expect(content, contains('### Outline Depth'));
       });
 
       test('advanced guide keeps container syntax for runtime preprocessing',
@@ -695,21 +737,41 @@ void main() {
             _readOutput(outDir, 'content/guide/advanced/configuration.md');
         expect(content, contains(':::details Configuration Notes'));
         expect(content, contains(':::warning Caveat'));
+        expect(content, contains(':::tip Recommended Setup'));
+      });
+
+      test('expanded package generates multiple public library pages', () {
+        expect(
+            _outputExists(
+                outDir, 'content/api/test_package_with_docs/index.md'),
+            isTrue);
+        expect(_outputExists(outDir, 'content/api/pipeline/index.md'), isTrue);
+        expect(
+            _outputExists(outDir, 'content/api/showcase_ui/index.md'), isTrue);
+        expect(_outputExists(outDir, 'content/api/testing_support/index.md'),
+            isTrue);
       });
 
       test('search index includes guide pages and sections', () {
         final pages = _readOutput(outDir, 'web/generated/search_pages.json');
         expect(pages, contains('"/guide/getting-started"'));
         expect(pages, contains('Getting Started'));
+        expect(pages, contains('"/guide/advanced/architecture"'));
+        expect(pages, contains('"/guide/ui/showcase"'));
+        expect(pages, contains('ShowcasePageSpec'));
 
         final sections =
             _readOutput(outDir, 'web/generated/search_sections.json');
         expect(sections, contains('"version":3'));
         expect(sections, contains('"installation"'));
+        expect(sections, contains('"outline-depth"'));
+        expect(sections, contains('"why-multiple-libraries"'));
 
         final sectionContent =
             _readOutput(outDir, 'web/generated/search_sections_content.json');
         expect(sectionContent, contains('Пример'));
+        expect(sectionContent, contains('PrefixStage'));
+        expect(sectionContent, contains('ShowcasePageSpec'));
       });
 
       test('generated Jaspr scaffold passes pub get, analyze, and build', () {
