@@ -34,9 +34,8 @@ class JasprInitGenerator {
     required String packageName,
     String repositoryUrl = '',
   }) async {
-    final safeName = packageName
-        .replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '-')
-        .toLowerCase();
+    final safeName =
+        packageName.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '-').toLowerCase();
     final placeholders = {
       '{{packageName}}': packageName,
       '{{safePackageName}}': safeName,
@@ -140,13 +139,15 @@ class JasprInitGenerator {
     );
     _writeTemplateIfAbsent(
       templateDir: templateDir,
-      templateFile: p.join('lib', 'components', 'docs_dartpad_runtime_stub.dart'),
+      templateFile:
+          p.join('lib', 'components', 'docs_dartpad_runtime_stub.dart'),
       outputFile: 'lib/components/docs_dartpad_runtime_stub.dart',
       placeholders: placeholders,
     );
     _writeTemplateIfAbsent(
       templateDir: templateDir,
-      templateFile: p.join('lib', 'components', 'docs_dartpad_runtime_web.dart'),
+      templateFile:
+          p.join('lib', 'components', 'docs_dartpad_runtime_web.dart'),
       outputFile: 'lib/components/docs_dartpad_runtime_web.dart',
       placeholders: placeholders,
     );
@@ -158,14 +159,34 @@ class JasprInitGenerator {
     );
     _writeTemplateIfAbsent(
       templateDir: templateDir,
-      templateFile: p.join('lib', 'components', 'docs_mermaid_runtime_stub.dart'),
+      templateFile:
+          p.join('lib', 'components', 'docs_mermaid_runtime_stub.dart'),
       outputFile: 'lib/components/docs_mermaid_runtime_stub.dart',
       placeholders: placeholders,
     );
     _writeTemplateIfAbsent(
       templateDir: templateDir,
-      templateFile: p.join('lib', 'components', 'docs_mermaid_runtime_web.dart'),
+      templateFile:
+          p.join('lib', 'components', 'docs_mermaid_runtime_web.dart'),
       outputFile: 'lib/components/docs_mermaid_runtime_web.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_toc_runtime.dart'),
+      outputFile: 'lib/components/docs_toc_runtime.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_toc_runtime_stub.dart'),
+      outputFile: 'lib/components/docs_toc_runtime_stub.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_toc_runtime_web.dart'),
+      outputFile: 'lib/components/docs_toc_runtime_web.dart',
       placeholders: placeholders,
     );
     _writeTemplateIfAbsent(
@@ -194,7 +215,8 @@ class JasprInitGenerator {
     );
     _writeTemplateIfAbsent(
       templateDir: templateDir,
-      templateFile: p.join('lib', 'template_engine', 'docs_template_engine.dart'),
+      templateFile:
+          p.join('lib', 'template_engine', 'docs_template_engine.dart'),
       outputFile: 'lib/template_engine/docs_template_engine.dart',
       placeholders: placeholders,
     );

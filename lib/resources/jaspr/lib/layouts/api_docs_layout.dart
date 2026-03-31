@@ -60,7 +60,7 @@ class ApiDocsLayout extends DocsLayout {
             sidebar,
           ]),
         main_([
-            div([
+          div([
             div(classes: 'content-container', [
               if (breadcrumb != null) breadcrumb,
               if (hasContentHeader)
@@ -177,6 +177,8 @@ class ApiDocsLayout extends DocsLayout {
     yield li([
       DocsNavLink(
         to: '$baseUrl#${entry.id}',
+        classes: 'toc-link',
+        attributes: {'data-toc-link': entry.id},
         children: [Component.text(entry.text)],
       ),
       if (entry.children.isNotEmpty)
@@ -191,6 +193,8 @@ class ApiDocsLayout extends DocsLayout {
       return li([
         DocsNavLink(
           to: '$baseUrl#${entry.id}',
+          classes: 'toc-link',
+          attributes: {'data-toc-link': entry.id},
           children: [Component.text(entry.text)],
         ),
       ]);
@@ -201,6 +205,8 @@ class ApiDocsLayout extends DocsLayout {
         summary([
           DocsNavLink(
             to: '$baseUrl#${entry.id}',
+            classes: 'toc-link',
+            attributes: {'data-toc-link': entry.id},
             children: [Component.text(entry.text)],
           ),
         ]),
@@ -408,7 +414,11 @@ class ApiDocsLayout extends DocsLayout {
             display: Display.grid,
             alignItems: AlignItems.center,
             gap: Gap.column(0.65.rem),
-            padding: Padding.only(top: 0.95.rem, right: 0.95.rem, bottom: 0.85.rem, left: 0.95.rem),
+            padding: Padding.only(
+                top: 0.95.rem,
+                right: 0.95.rem,
+                bottom: 0.85.rem,
+                left: 0.95.rem),
             border: Border.only(
               bottom: BorderSide(
                 width: 1.px,
@@ -434,7 +444,8 @@ class ApiDocsLayout extends DocsLayout {
           css('.docs-search-input').styles(
             raw: {'grid-area': 'input'},
             width: 100.percent,
-            padding: Padding.symmetric(vertical: 0.78.rem, horizontal: 0.92.rem),
+            padding:
+                Padding.symmetric(vertical: 0.78.rem, horizontal: 0.92.rem),
             border: Border.all(
               width: 1.px,
               color: Color('var(--docs-shell-border-strong)'),
@@ -472,7 +483,8 @@ class ApiDocsLayout extends DocsLayout {
             ),
           ),
           css('.docs-search-status').styles(
-            padding: Padding.symmetric(vertical: 0.65.rem, horizontal: 0.95.rem),
+            padding:
+                Padding.symmetric(vertical: 0.65.rem, horizontal: 0.95.rem),
             fontSize: 0.88.rem,
             color: Color('var(--docs-shell-muted)'),
           ),
@@ -487,7 +499,8 @@ class ApiDocsLayout extends DocsLayout {
             alignItems: AlignItems.center,
             flexWrap: FlexWrap.wrap,
             gap: Gap.row(0.75.rem),
-            padding: Padding.symmetric(vertical: 0.72.rem, horizontal: 0.95.rem),
+            padding:
+                Padding.symmetric(vertical: 0.72.rem, horizontal: 0.95.rem),
             border: Border.only(
               top: BorderSide(
                 width: 1.px,
@@ -507,8 +520,7 @@ class ApiDocsLayout extends DocsLayout {
             justifyContent: JustifyContent.center,
             alignItems: AlignItems.center,
             minWidth: 2.rem,
-            padding:
-                Padding.symmetric(vertical: 0.22.rem, horizontal: 0.4.rem),
+            padding: Padding.symmetric(vertical: 0.22.rem, horizontal: 0.4.rem),
             border: Border.all(
               width: 1.px,
               color: Color('var(--docs-shell-border-strong)'),
@@ -532,7 +544,8 @@ class ApiDocsLayout extends DocsLayout {
           css('.docs-search-result').styles(
             display: Display.flex,
             gap: Gap.column(1.rem),
-            padding: Padding.symmetric(vertical: 0.78.rem, horizontal: 0.95.rem),
+            padding:
+                Padding.symmetric(vertical: 0.78.rem, horizontal: 0.95.rem),
             textDecoration: TextDecoration.none,
             color: ContentColors.text,
             border: Border.only(
@@ -849,7 +862,8 @@ class ApiDocsLayout extends DocsLayout {
           css.media(MediaQuery.all(maxWidth: 959.px), [
             css('main > div').styles(
               display: Display.block,
-              padding: Padding.only(top: 1.35.rem, right: 1.rem, bottom: 2.rem, left: 1.rem),
+              padding: Padding.only(
+                  top: 1.35.rem, right: 1.rem, bottom: 2.rem, left: 1.rem),
             ),
           ]),
         ]),
@@ -975,7 +989,8 @@ class ApiDocsLayout extends DocsLayout {
           ),
           css('.sidebar a').styles(
             radius: BorderRadius.circular(0.9.rem),
-            padding: Padding.symmetric(vertical: 0.72.rem, horizontal: 0.85.rem),
+            padding:
+                Padding.symmetric(vertical: 0.72.rem, horizontal: 0.85.rem),
             transition: Transition(
               'background-color, color, transform',
               duration: Duration(milliseconds: 150),
@@ -1050,7 +1065,8 @@ class ApiDocsLayout extends DocsLayout {
               'inset': '0 auto auto 0',
               'width': '8rem',
               'height': '0.35rem',
-              'background': 'linear-gradient(90deg, var(--docs-shell-accent), transparent)',
+              'background':
+                  'linear-gradient(90deg, var(--docs-shell-accent), transparent)',
             },
           ),
           css('h1').styles(
@@ -1145,11 +1161,20 @@ class ApiDocsLayout extends DocsLayout {
           css('&').styles(
             padding: Padding.only(top: 1.45.rem, bottom: 2.rem),
           ),
+          css('ul').styles(
+            listStyle: ListStyle.none,
+            margin: Margin.zero,
+            padding: Padding.zero,
+          ),
+          css('li + li').styles(
+            margin: Margin.only(top: 0.2.rem),
+          ),
           css('> div').styles(
             position: Position.sticky(top: 5.65.rem),
             maxHeight: 84.vh,
             overflow: Overflow.auto,
-            padding: Padding.only(top: 1.rem, right: 1.rem, bottom: 1.rem, left: 1.rem),
+            padding: Padding.only(
+                top: 1.rem, right: 1.rem, bottom: 1.rem, left: 1.rem),
             radius: BorderRadius.circular(1.1.rem),
             backgroundColor: Color('var(--docs-shell-surface)'),
             border: Border.all(
@@ -1170,6 +1195,47 @@ class ApiDocsLayout extends DocsLayout {
             textTransform: TextTransform.upperCase,
             color: Color('var(--docs-shell-muted)'),
             raw: {'letter-spacing': '0.12em'},
+          ),
+          css('.toc-link').styles(
+            display: Display.block,
+            padding: Padding.symmetric(vertical: 0.45.rem, horizontal: 0.7.rem),
+            radius: BorderRadius.circular(0.75.rem),
+            color: ContentColors.text,
+            textDecoration: TextDecoration.none,
+            transition: Transition(
+              'background-color, color, transform, box-shadow',
+              duration: Duration(milliseconds: 150),
+            ),
+            raw: {'line-height': '1.35'},
+          ),
+          css('.toc-link:hover').styles(
+            backgroundColor: Color('var(--docs-shell-accent-soft)'),
+            color: Color('var(--docs-shell-accent-strong)'),
+          ),
+          css('.toc-link.active').styles(
+            backgroundColor: Color('var(--docs-shell-accent-soft)'),
+            color: Color('var(--docs-shell-accent)'),
+            fontWeight: FontWeight.w700,
+            shadow: BoxShadow(
+              offsetX: Unit.zero,
+              offsetY: 10.px,
+              blur: 18.px,
+              color: Color('var(--docs-shell-shadow)'),
+            ),
+            raw: {
+              'box-shadow':
+                  'inset 3px 0 0 var(--docs-shell-accent), 0 10px 18px var(--docs-shell-shadow)',
+            },
+          ),
+          css('.toc ul ul').styles(
+            margin: Margin.only(top: 0.25.rem, left: 0.55.rem),
+            padding: Padding.only(left: 0.55.rem),
+            border: Border.only(
+              left: BorderSide(
+                width: 1.px,
+                color: Color('var(--docs-shell-border)'),
+              ),
+            ),
           ),
           css.media(MediaQuery.all(maxWidth: 959.px), [
             css('&').styles(display: Display.none),

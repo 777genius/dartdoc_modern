@@ -11,17 +11,18 @@ class DartPadComponent extends CustomComponent {
 
   @override
   Component? create(Node node, NodesBuilder builder) {
-    if (node case ElementNode(
-      tag: 'pre',
-      attributes: final preAttributes,
-      children: [
-        ElementNode(
-          tag: 'code',
-          attributes: final codeAttributes,
-          children: final children,
-        ),
-      ],
-    )) {
+    if (node
+        case ElementNode(
+          tag: 'pre',
+          attributes: final preAttributes,
+          children: [
+            ElementNode(
+              tag: 'code',
+              attributes: final codeAttributes,
+              children: final children,
+            ),
+          ],
+        )) {
       final language = codeAttributes['class'];
       if (language != 'language-dartpad') return null;
 

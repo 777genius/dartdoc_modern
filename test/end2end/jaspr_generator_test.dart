@@ -174,21 +174,27 @@ void main() {
         expect(_outputExists(outDir, 'lib/main.client.dart'), isTrue);
         expect(_outputExists(outDir, 'web/index.html'), isTrue);
         expect(_outputExists(outDir, 'lib/theme/docs_theme.dart'), isTrue);
-        expect(_outputExists(outDir, 'lib/components/docs_search.dart'), isTrue);
-        expect(_outputExists(outDir, 'lib/components/docs_header.dart'), isTrue);
+        expect(
+            _outputExists(outDir, 'lib/components/docs_search.dart'), isTrue);
+        expect(
+            _outputExists(outDir, 'lib/components/docs_header.dart'), isTrue);
         expect(
           _outputExists(outDir, 'lib/components/docs_theme_toggle.dart'),
           isTrue,
         );
-        expect(_outputExists(outDir, 'lib/components/docs_nav_link.dart'), isTrue);
-        expect(_outputExists(outDir, 'lib/components/docs_sidebar.dart'), isTrue);
-        expect(_outputExists(outDir, 'lib/components/docs_sidebar_toggle.dart'), isTrue);
+        expect(
+            _outputExists(outDir, 'lib/components/docs_nav_link.dart'), isTrue);
+        expect(
+            _outputExists(outDir, 'lib/components/docs_sidebar.dart'), isTrue);
+        expect(_outputExists(outDir, 'lib/components/docs_sidebar_toggle.dart'),
+            isTrue);
         expect(
           _outputExists(outDir, 'lib/components/docs_dartpad_runtime.dart'),
           isTrue,
         );
         expect(
-          _outputExists(outDir, 'lib/components/docs_dartpad_runtime_stub.dart'),
+          _outputExists(
+              outDir, 'lib/components/docs_dartpad_runtime_stub.dart'),
           isTrue,
         );
         expect(
@@ -200,7 +206,8 @@ void main() {
           isTrue,
         );
         expect(
-          _outputExists(outDir, 'lib/components/docs_mermaid_runtime_stub.dart'),
+          _outputExists(
+              outDir, 'lib/components/docs_mermaid_runtime_stub.dart'),
           isTrue,
         );
         expect(
@@ -271,7 +278,8 @@ void main() {
         );
         expect(content, contains("href: '/generated/api_styles.css'"));
         expect(content, contains("rel: 'stylesheet'"));
-        expect(content, contains('Jaspr.initializeApp(options: defaultServerOptions);'));
+        expect(content,
+            contains('Jaspr.initializeApp(options: defaultServerOptions);'));
         expect(content, contains("packageName: 'test_package'"));
         expect(content, contains('themePreset: themePreset'));
         expect(content, contains('templateEngine: DocsTemplateEngine()'));
@@ -295,14 +303,16 @@ void main() {
         expect(app, contains('templateEngine: templateEngine,'));
         expect(
           app,
-          isNot(contains("import 'template_engine/docs_template_engine.dart';")),
+          isNot(
+              contains("import 'template_engine/docs_template_engine.dart';")),
         );
         expect(app, contains("import 'components/docs_header.dart';"));
         expect(app, contains("import 'components/docs_search.dart';"));
         expect(app, contains("import 'components/docs_sidebar.dart';"));
         expect(app, contains("import 'components/docs_theme_toggle.dart';"));
         expect(app, contains("import 'generated/api_sidebar.dart' as api;"));
-        expect(app, contains("import 'generated/guide_sidebar.dart' as guide;"));
+        expect(
+            app, contains("import 'generated/guide_sidebar.dart' as guide;"));
         expect(app, contains('header: DocsHeader('));
         expect(app, contains('homeHref: overviewHref,'));
         expect(app, contains('const DocsSearchShell()'));
@@ -311,7 +321,8 @@ void main() {
         expect(app, contains('DocsSidebarGroup('));
         expect(app, contains('DocsSidebarItem('));
         expect(client, contains("import 'main.client.options.dart';"));
-        expect(client, contains('Jaspr.initializeApp(options: defaultClientOptions);'));
+        expect(client,
+            contains('Jaspr.initializeApp(options: defaultClientOptions);'));
         expect(client, contains('runApp(const ClientApp());'));
         expect(client, isNot(contains("import 'app.dart';")));
         expect(client, isNot(contains('buildDocsApp(')));
@@ -337,7 +348,8 @@ void main() {
           outDir,
           'lib/components/docs_theme_toggle.dart',
         );
-        final navLink = _readOutput(outDir, 'lib/components/docs_nav_link.dart');
+        final navLink =
+            _readOutput(outDir, 'lib/components/docs_nav_link.dart');
         final sidebar = _readOutput(outDir, 'lib/components/docs_sidebar.dart');
         final sidebarToggle = _readOutput(
           outDir,
@@ -359,6 +371,18 @@ void main() {
           outDir,
           'lib/components/docs_mermaid_runtime_web.dart',
         );
+        final tocRuntime = _readOutput(
+          outDir,
+          'lib/components/docs_toc_runtime.dart',
+        );
+        final tocRuntimeStub = _readOutput(
+          outDir,
+          'lib/components/docs_toc_runtime_stub.dart',
+        );
+        final tocRuntimeWeb = _readOutput(
+          outDir,
+          'lib/components/docs_toc_runtime_web.dart',
+        );
         expect(
           content,
           contains("import '../components/docs_dartpad_runtime.dart';"),
@@ -371,18 +395,22 @@ void main() {
         expect(header, contains('const DocsSidebarToggle()'));
         expect(header, contains("classes: 'header-title'"));
         expect(header, contains('DocsNavLink('));
-        expect(themeToggle, contains('class DocsThemeToggle extends StatefulComponent'));
+        expect(themeToggle,
+            contains('class DocsThemeToggle extends StatefulComponent'));
         expect(themeToggle, contains("id: 'docs-theme-script'"));
-        expect(themeToggle, contains("window.localStorage.getItem('jaspr:theme')"));
+        expect(themeToggle,
+            contains("window.localStorage.getItem('jaspr:theme')"));
         expect(
           themeToggle,
-          contains("document.documentElement.setAttribute('data-theme', resolvedTheme)"),
+          contains(
+              "document.documentElement.setAttribute('data-theme', resolvedTheme)"),
         );
         expect(themeToggle, contains("classes: 'theme-toggle'"));
         expect(themeToggle, contains("'data-docs-theme-toggle': ''"));
         expect(content, contains("import '../components/docs_nav_link.dart';"));
         expect(search, contains("import 'docs_navigation_runtime.dart';"));
-        expect(content, isNot(contains("import '../components/docs_search.dart';")));
+        expect(content,
+            isNot(contains("import '../components/docs_search.dart';")));
         expect(content, isNot(contains('const DocsSearchShell()')));
         expect(content, contains('const DocsDartPadRuntime()'));
         expect(content, contains('const DocsMermaidRuntime()'));
@@ -390,7 +418,8 @@ void main() {
         expect(content, isNot(contains('case final Header header')));
         expect(content, isNot(contains('case final Sidebar sidebar')));
         expect(search, contains('@client'));
-        expect(search, contains('class DocsSearchShell extends StatefulComponent'));
+        expect(search,
+            contains('class DocsSearchShell extends StatefulComponent'));
         expect(search, contains('const DocsNavigationRuntime()'));
         expect(search, contains("classes: 'search-launcher'"));
         expect(search, contains("'data-docs-search-launcher': ''"));
@@ -398,6 +427,7 @@ void main() {
         expect(search, contains("'data-docs-search-overlay': ''"));
         expect(search, contains('http.get(Uri.parse(path))'));
         expect(search, contains("import 'docs_nav_link.dart';"));
+        expect(search, contains("import 'docs_toc_runtime.dart';"));
         expect(search, contains('_loadSearchManifest()'));
         expect(search, contains('_ensurePagesReady()'));
         expect(search, contains('_ensureSectionsReady()'));
@@ -408,6 +438,7 @@ void main() {
         expect(search, contains('_runSearch('));
         expect(search, contains('return DocsNavLink('));
         expect(search, contains('onNavigate: _closeSearch'));
+        expect(search, contains('const DocsTocRuntime()'));
         expect(search, contains('node.click();'));
         expect(search, contains('docs-search-footer'));
         expect(search, contains('_latestQueryToken'));
@@ -431,7 +462,8 @@ void main() {
         );
         expect(navigationRuntimeWeb, contains("a[data-docs-nav-link]"));
         expect(navigationRuntimeWeb, contains("web.window.history.pushState"));
-        expect(navigationRuntimeWeb, contains("web.DOMParser().parseFromString"));
+        expect(
+            navigationRuntimeWeb, contains("web.DOMParser().parseFromString"));
         expect(
           navigationRuntimeWeb,
           contains("querySelector('.main-container')"),
@@ -442,9 +474,11 @@ void main() {
         );
         expect(
           navigationRuntimeWeb,
-          contains("web.window.dispatchEvent(web.CustomEvent('docs:navigation'))"),
+          contains(
+              "web.window.dispatchEvent(web.CustomEvent('docs:navigation'))"),
         );
-        expect(navLink, contains('class DocsNavLink extends StatelessComponent'));
+        expect(
+            navLink, contains('class DocsNavLink extends StatelessComponent'));
         expect(navLink, contains("'data-docs-nav-link': 'true'"));
         expect(navLink, contains('Router.maybeOf(context)'));
         expect(navLink, contains('router.preload(to)'));
@@ -452,18 +486,23 @@ void main() {
         expect(navLink, contains('onNavigate?.call()'));
         expect(navLink, contains('_isModifiedClick('));
         expect(navLink, contains("value.startsWith('https://')"));
-        expect(sidebar, contains('class DocsSidebar extends StatelessComponent'));
-        expect(sidebar, contains("import 'package:jaspr_content/jaspr_content.dart';"));
+        expect(
+            sidebar, contains('class DocsSidebar extends StatelessComponent'));
+        expect(sidebar,
+            contains("import 'package:jaspr_content/jaspr_content.dart';"));
         expect(sidebar, contains("attributes: {'id': 'docs-sidebar'}"));
         expect(sidebar, contains("classes: 'sidebar-close'"));
         expect(sidebar, contains("'data-docs-sidebar-close': 'true'"));
         expect(sidebar, contains('DocsNavLink('));
-        expect(sidebarToggle, contains('class DocsSidebarToggle extends StatefulComponent'));
+        expect(sidebarToggle,
+            contains('class DocsSidebarToggle extends StatefulComponent'));
         expect(sidebarToggle, contains("'data-docs-sidebar-toggle': ''"));
         expect(sidebarToggle, contains("aria-controls': 'docs-sidebar'"));
         expect(sidebarToggle, contains("sidebar.classList.add('open')"));
-        expect(sidebarToggle, contains("web.document.body?.style.overflow = 'hidden'"));
-        expect(dartPadRuntime, contains("export 'docs_dartpad_runtime_stub.dart'"));
+        expect(sidebarToggle,
+            contains("web.document.body?.style.overflow = 'hidden'"));
+        expect(dartPadRuntime,
+            contains("export 'docs_dartpad_runtime_stub.dart'"));
         expect(
           dartPadRuntimeWeb,
           contains('class DocsDartPadRuntime extends StatefulComponent'),
@@ -471,15 +510,36 @@ void main() {
         expect(dartPadRuntimeWeb, contains('candidate.contentWindow'));
         expect(dartPadRuntimeWeb, contains('navigator.clipboard'));
         expect(dartPadRuntimeWeb, contains('https://dartpad.dev'));
-        expect(mermaidRuntime, contains("export 'docs_mermaid_runtime_stub.dart'"));
+        expect(mermaidRuntime,
+            contains("export 'docs_mermaid_runtime_stub.dart'"));
         expect(
           mermaidRuntimeWeb,
           contains('class DocsMermaidRuntime extends StatefulComponent'),
         );
         expect(mermaidRuntimeWeb, contains("@JS('mermaid')"));
         expect(mermaidRuntimeWeb, contains('callMethod<JSPromise<JSObject>>('));
-        expect(mermaidRuntimeWeb, contains("querySelectorAll('.mermaid-diagram')"));
-        expect(mermaidRuntimeWeb, contains("addEventListener('docs:navigation'"));
+        expect(mermaidRuntimeWeb,
+            contains("querySelectorAll('.mermaid-diagram')"));
+        expect(
+            mermaidRuntimeWeb, contains("addEventListener('docs:navigation'"));
+        expect(tocRuntime, contains("export 'docs_toc_runtime_stub.dart'"));
+        expect(
+          tocRuntimeStub,
+          contains('class DocsTocRuntime extends StatelessComponent'),
+        );
+        expect(
+          tocRuntimeWeb,
+          contains('class DocsTocRuntime extends StatefulComponent'),
+        );
+        expect(tocRuntimeWeb, contains("querySelectorAll('.toc .toc-link')"));
+        expect(tocRuntimeWeb, contains("target.link.classList.add('active')"));
+        expect(
+          tocRuntimeWeb,
+          contains("target.link.classList.remove('active')"),
+        );
+        expect(tocRuntimeWeb, contains("window.addEventListener('scroll'"));
+        expect(content, contains("'data-toc-link': entry.id"));
+        expect(content, contains("classes: 'toc-link'"));
         expect(content, isNot(contains('route-progress')));
         expect(content, isNot(contains('window.history.pushState(')));
         expect(content, isNot(contains('const _runtimeScript')));
@@ -498,7 +558,8 @@ void main() {
         expect(content, contains('DocsThemePreset.ocean'));
         expect(content, contains('DocsThemePreset.graphite'));
         expect(content, contains('DocsThemePreset.forest'));
-        expect(content, contains('extension DocsThemePresetX on DocsThemePreset'));
+        expect(
+            content, contains('extension DocsThemePresetX on DocsThemePreset'));
         expect(content, contains('static DocsThemePreset parse(String value)'));
         expect(content, contains('class DocsThemeConfig'));
         expect(content, contains('class DocsThemeExtension'));
@@ -541,10 +602,12 @@ void main() {
         );
       });
 
-      test('api symbols are generated as pure Dart data for runtime linking', () {
+      test('api symbols are generated as pure Dart data for runtime linking',
+          () {
         final content = _readOutput(outDir, 'lib/generated/api_symbols.dart');
         expect(content, contains('class ApiSymbolEntry'));
-        expect(content, contains('const apiSymbolMap = <String, List<ApiSymbolEntry>>{'));
+        expect(content,
+            contains('const apiSymbolMap = <String, List<ApiSymbolEntry>>{'));
         expect(content, contains("'Apple': ["));
         expect(content, contains("href: '/api/ex/Apple'"));
       });
@@ -601,10 +664,15 @@ void main() {
         );
       });
 
-      test('root preview entry boots the app shell and rewrites to overview', () {
+      test('root preview entry boots the app shell and rewrites to overview',
+          () {
         final content = _readOutput(outDir, 'web/index.html');
-        expect(content, contains('<meta http-equiv="refresh" content="0; url=/guide/getting-started">'));
-        expect(content, contains('window.location.replace("/guide/getting-started");'));
+        expect(
+            content,
+            contains(
+                '<meta http-equiv="refresh" content="0; url=/guide/getting-started">'));
+        expect(content,
+            contains('window.location.replace("/guide/getting-started");'));
         expect(content, contains('Redirecting to the documentation overview'));
         expect(_outputExists(outDir, 'web/404.html'), isTrue);
       });

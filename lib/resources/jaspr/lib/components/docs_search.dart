@@ -8,6 +8,7 @@ import 'package:universal_web/web.dart' as web;
 
 import 'docs_navigation_runtime.dart';
 import 'docs_nav_link.dart';
+import 'docs_toc_runtime.dart';
 
 @client
 class DocsSearchShell extends StatefulComponent {
@@ -53,6 +54,7 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
 
     return Component.fragment([
       const DocsNavigationRuntime(),
+      const DocsTocRuntime(),
       div(classes: 'header-search-shell', [
         button(
           classes: 'search-launcher',
@@ -293,7 +295,8 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
         _selectedIndex >= 0 &&
         _selectedIndex < _results.length) {
       event.preventDefault();
-      final results = web.window.document.querySelectorAll('.docs-search-result');
+      final results =
+          web.window.document.querySelectorAll('.docs-search-result');
       if (_selectedIndex < results.length) {
         final node = results.item(_selectedIndex);
         if (node is web.HTMLElement) {
@@ -490,8 +493,9 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
           ..sort((a, b) => b.score.compareTo(a.score));
         if (ranked.length > 20) ranked = ranked.take(20).toList();
 
-        final shouldLoadSectionContent = !_DocsSearchCache.sectionsContentReady &&
-            (phrase.length >= 4 || ranked.length < 8);
+        final shouldLoadSectionContent =
+            !_DocsSearchCache.sectionsContentReady &&
+                (phrase.length >= 4 || ranked.length < 8);
         if (shouldLoadSectionContent) {
           if (!mounted || queryToken != _latestQueryToken) return;
           setState(() {
@@ -580,7 +584,8 @@ class _DocsSearchCache {
 
   static bool get pagesReady => pages.isNotEmpty;
   static bool get sectionsReady =>
-      sections.isNotEmpty || loadingSections == null && manifest?['entries'] != null;
+      sections.isNotEmpty ||
+      loadingSections == null && manifest?['entries'] != null;
 }
 
 Future<Map<String, Object?>> _loadSearchManifest() async {
@@ -613,7 +618,8 @@ Future<List<_SearchEntry>> _ensurePagesReady() async {
       return _DocsSearchCache.pages;
     }
 
-    final pagesPath = (manifest['pages'] as String?) ?? '/generated/search_pages.json';
+    final pagesPath =
+        (manifest['pages'] as String?) ?? '/generated/search_pages.json';
     final cacheKey = 'docs.search.pages:$pagesPath';
     final cached = _readSessionJson(cacheKey);
     if (cached != null) {
@@ -659,7 +665,8 @@ Future<List<_SearchEntry>> _ensureSectionsReady() async {
 
 Future<List<_SearchEntry>> _ensureSectionContentReady() async {
   if (_DocsSearchCache.sectionsContentReady) return _DocsSearchCache.sections;
-  if (_DocsSearchCache.loadingSectionContent case final loading?) return loading;
+  if (_DocsSearchCache.loadingSectionContent case final loading?)
+    return loading;
 
   final future = _loadSearchManifest().then((manifest) async {
     final contentPath = manifest['sectionsContent'] as String?;
@@ -812,7 +819,9 @@ String _normalizeSearchText(String value) {
 
 String _normalizeTitleStem(String value) {
   return _normalizeSearchText(
-    value.replaceAll(RegExp(r'<[^>]+>'), ' ').replaceAll(RegExp(r'\([^)]*\)'), ' '),
+    value
+        .replaceAll(RegExp(r'<[^>]+>'), ' ')
+        .replaceAll(RegExp(r'\([^)]*\)'), ' '),
   );
 }
 
@@ -820,7 +829,8 @@ double _frameworkUrlBoost(String url, {required bool shortSingle}) {
   if (RegExp(r'^/api/(widgets|material|cupertino|foundation)/').hasMatch(url)) {
     return shortSingle ? 158 : 32;
   }
-  if (RegExp(r'^/api/(rendering|services|animation|gestures|painting|semantics)/')
+  if (RegExp(
+          r'^/api/(rendering|services|animation|gestures|painting|semantics)/')
       .hasMatch(url)) {
     return shortSingle ? 108 : 22;
   }
@@ -870,16 +880,17 @@ double _scoreEntry(_SearchEntry entry, List<String> tokens, String phrase) {
   final shortSingleQuery = tokens.length == 1 && phrase.length <= 7;
   final compactTitle = entry.title.replaceAll(RegExp(r'<[^>]+>'), '');
   final phraseIndex = compactTitle.toLowerCase().indexOf(phrase);
-  final charAfterPhrase = phraseIndex >= 0 &&
-          phraseIndex + phrase.length < compactTitle.length
-      ? compactTitle[phraseIndex + phrase.length]
-      : '';
+  final charAfterPhrase =
+      phraseIndex >= 0 && phraseIndex + phrase.length < compactTitle.length
+          ? compactTitle[phraseIndex + phrase.length]
+          : '';
   final hasUppercaseBoundaryAfterPhrase =
       charAfterPhrase.isNotEmpty && RegExp(r'[A-Z]').hasMatch(charAfterPhrase);
   final hasLowercaseContinuationAfterPhrase =
       charAfterPhrase.isNotEmpty && RegExp(r'[a-z]').hasMatch(charAfterPhrase);
   final titleWordCount = _camelWordCount(compactTitle);
-  final extraTitleChars = (entry.titleStem.length - phrase.length).clamp(0, 1000);
+  final extraTitleChars =
+      (entry.titleStem.length - phrase.length).clamp(0, 1000);
   final looksLikeConstantTitle =
       RegExp(r'[A-Z0-9]+_[A-Z0-9_]+').hasMatch(entry.title);
 
@@ -905,10 +916,14 @@ double _scoreEntry(_SearchEntry entry, List<String> tokens, String phrase) {
   }
 
   if (shortSingleQuery && titleStemEndsWithPhrase) score += 80;
-  if (shortSingleQuery && titleStartsWithPhrase && hasUppercaseBoundaryAfterPhrase) {
+  if (shortSingleQuery &&
+      titleStartsWithPhrase &&
+      hasUppercaseBoundaryAfterPhrase) {
     score += 42;
   }
-  if (shortSingleQuery && titleStartsWithPhrase && hasLowercaseContinuationAfterPhrase) {
+  if (shortSingleQuery &&
+      titleStartsWithPhrase &&
+      hasLowercaseContinuationAfterPhrase) {
     score -= 18;
   }
   if (shortSingleQuery && titleStemEndsWithPhrase) {
@@ -958,7 +973,8 @@ List<_RankedSearchEntry> _dedupeRankedResults(
   final exactPageBases = ranked
       .where((item) => item.entry.section.isEmpty)
       .where((item) =>
-          item.entry.normalizedTitle == phrase || item.entry.titleStem == phrase)
+          item.entry.normalizedTitle == phrase ||
+          item.entry.titleStem == phrase)
       .map((item) => _baseUrlForEntry(item.entry))
       .toSet();
 
