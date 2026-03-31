@@ -405,9 +405,8 @@ class ApiDocsLayout extends DocsLayout {
             },
           ),
           css('.docs-search-header').styles(
-            display: Display.flex,
+            display: Display.grid,
             alignItems: AlignItems.center,
-            flexWrap: FlexWrap.wrap,
             gap: Gap.column(0.65.rem),
             padding: Padding.only(top: 0.95.rem, right: 0.95.rem, bottom: 0.85.rem, left: 0.95.rem),
             border: Border.only(
@@ -416,6 +415,10 @@ class ApiDocsLayout extends DocsLayout {
                 color: Color('var(--docs-shell-border)'),
               ),
             ),
+            raw: {
+              'grid-template-columns': 'minmax(0, 1fr) auto',
+              'grid-template-areas': '"heading heading" "input close"',
+            },
           ),
           css('.docs-search-heading').styles(
             width: 100.percent,
@@ -423,9 +426,13 @@ class ApiDocsLayout extends DocsLayout {
             fontWeight: FontWeight.w800,
             textTransform: TextTransform.upperCase,
             color: Color('var(--docs-shell-muted)'),
-            raw: {'letter-spacing': '0.12em'},
+            raw: {
+              'grid-area': 'heading',
+              'letter-spacing': '0.12em',
+            },
           ),
           css('.docs-search-input').styles(
+            raw: {'grid-area': 'input'},
             width: 100.percent,
             padding: Padding.symmetric(vertical: 0.78.rem, horizontal: 0.92.rem),
             border: Border.all(
@@ -445,6 +452,8 @@ class ApiDocsLayout extends DocsLayout {
             ),
           ),
           css('.docs-search-close').styles(
+            raw: {'grid-area': 'close'},
+            alignSelf: AlignSelf.center,
             padding: Padding.symmetric(vertical: 0.45.rem, horizontal: 0.7.rem),
             border: Border.all(
               width: 1.px,
@@ -647,6 +656,10 @@ class ApiDocsLayout extends DocsLayout {
             ),
             css('.docs-search-header').styles(
               display: Display.block,
+              raw: {
+                'grid-template-columns': 'none',
+                'grid-template-areas': 'none',
+              },
             ),
             css('.docs-search-heading').styles(
               margin: Margin.only(bottom: 0.8.rem),
