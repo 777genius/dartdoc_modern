@@ -820,7 +820,7 @@ class ApiDocsLayout extends DocsLayout {
               'gap': '2.25rem',
               'max-width': 'min(96rem, calc(100vw - 3rem))',
               'margin': '0 auto',
-              'padding': '1.5rem 0 3.5rem',
+              'padding': '2.15rem 0 3.5rem',
             },
           ),
           css.media(MediaQuery.all(maxWidth: 1180.px), [
@@ -835,7 +835,7 @@ class ApiDocsLayout extends DocsLayout {
           css.media(MediaQuery.all(maxWidth: 959.px), [
             css('main > div').styles(
               display: Display.block,
-              padding: Padding.only(top: 1.rem, right: 1.rem, bottom: 2.rem, left: 1.rem),
+              padding: Padding.only(top: 1.35.rem, right: 1.rem, bottom: 2.rem, left: 1.rem),
             ),
           ]),
         ]),
@@ -847,8 +847,8 @@ class ApiDocsLayout extends DocsLayout {
               'backdrop-filter': 'blur(20px)',
               '-webkit-backdrop-filter': 'blur(20px)',
               'background':
-                  'color-mix(in srgb, var(--background) 84%, transparent)',
-              'box-shadow': '0 20px 45px -36px var(--docs-shell-shadow)',
+                  'color-mix(in srgb, var(--background) 94%, transparent)',
+              'box-shadow': '0 16px 32px -28px var(--docs-shell-shadow)',
             },
           ),
           css('[data-has-sidebar] .header').styles(
@@ -896,7 +896,7 @@ class ApiDocsLayout extends DocsLayout {
         css('.sidebar-container', [
           css('&').styles(
             alignSelf: AlignSelf.start,
-            padding: Padding.only(top: 1.4.rem, left: 1.rem, right: 0.5.rem, bottom: 2.rem),
+            padding: Padding.only(top: 1.9.rem, left: 1.rem, right: 0.5.rem, bottom: 2.rem),
           ),
           css('.sidebar').styles(
             position: Position.sticky(top: 7.5.rem),
@@ -911,8 +911,8 @@ class ApiDocsLayout extends DocsLayout {
             ),
             shadow: BoxShadow(
               offsetX: Unit.zero,
-              offsetY: 24.px,
-              blur: 45.px,
+              offsetY: 18.px,
+              blur: 30.px,
               color: Color('var(--docs-shell-shadow)'),
             ),
           ),
@@ -976,7 +976,7 @@ class ApiDocsLayout extends DocsLayout {
         ]),
         css('.content-container', [
           css('&').styles(
-            padding: Padding.only(top: 1.35.rem, right: 0.25.rem, bottom: 3.rem),
+            padding: Padding.only(top: 1.85.rem, right: 0.25.rem, bottom: 3.rem),
           ),
           css('img').styles(
             maxWidth: 100.percent,
@@ -1000,8 +1000,8 @@ class ApiDocsLayout extends DocsLayout {
             backgroundColor: Color('var(--docs-shell-surface)'),
             shadow: BoxShadow(
               offsetX: Unit.zero,
-              offsetY: 28.px,
-              blur: 46.px,
+              offsetY: 18.px,
+              blur: 32.px,
               color: Color('var(--docs-shell-shadow)'),
             ),
             raw: {
@@ -1059,7 +1059,7 @@ class ApiDocsLayout extends DocsLayout {
           ]),
         ]),
         css('.api-breadcrumb').styles(
-          margin: Margin.only(bottom: 1.2.rem),
+          margin: Margin.only(bottom: 1.35.rem),
           padding: Padding.only(top: 0.25.rem, bottom: 0.15.rem),
         ),
         css('.header-search-shell', [
@@ -1114,7 +1114,7 @@ class ApiDocsLayout extends DocsLayout {
         ),
         css('.toc', [
           css('&').styles(
-            padding: Padding.only(top: 1.4.rem, bottom: 2.rem),
+            padding: Padding.only(top: 1.9.rem, bottom: 2.rem),
           ),
           css('> div').styles(
             position: Position.sticky(top: 7.5.rem),
@@ -1129,8 +1129,8 @@ class ApiDocsLayout extends DocsLayout {
             ),
             shadow: BoxShadow(
               offsetX: Unit.zero,
-              offsetY: 24.px,
-              blur: 42.px,
+              offsetY: 18.px,
+              blur: 28.px,
               color: Color('var(--docs-shell-shadow)'),
             ),
           ),

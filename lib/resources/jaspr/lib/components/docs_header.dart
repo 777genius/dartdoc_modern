@@ -8,12 +8,14 @@ class DocsHeader extends StatelessComponent {
   const DocsHeader({
     required this.logo,
     required this.title,
+    required this.homeHref,
     this.items = const [],
     super.key,
   });
 
   final String logo;
   final String title;
+  final String homeHref;
   final List<Component> items;
 
   @override
@@ -23,7 +25,7 @@ class DocsHeader extends StatelessComponent {
       header(classes: 'header', [
         const DocsSidebarToggle(),
         DocsNavLink(
-          to: '/',
+          to: homeHref,
           classes: 'header-title',
           children: [
             img(src: logo, alt: 'Logo'),

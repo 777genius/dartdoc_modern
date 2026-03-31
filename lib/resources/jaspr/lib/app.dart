@@ -48,6 +48,7 @@ Component buildDocsApp({
         header: DocsHeader(
           title: '$packageName API',
           logo: '/favicon.ico',
+          homeHref: overviewHref,
           items: [
             const DocsThemeToggle(),
           ],

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:js_interop';
 
 import 'package:http/http.dart' as http;
@@ -149,7 +150,7 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
       }
 
       final nextDocument = web.DOMParser().parseFromString(
-        response.body.toJS,
+        utf8.decode(response.bodyBytes).toJS,
         'text/html',
       );
       final nextMain = nextDocument.querySelector('.main-container');
@@ -164,6 +165,13 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
       final nextTitle = nextDocument.querySelector('title')?.textContent;
       if (nextTitle != null && nextTitle.isNotEmpty) {
         web.document.title = nextTitle;
+      } else {
+        final fallbackTitle = nextDocument
+            .querySelector('.content-header h1, .content h1')
+            ?.textContent;
+        if (fallbackTitle != null && fallbackTitle.isNotEmpty) {
+          web.document.title = fallbackTitle;
+        }
       }
 
       if (updateHistory) {

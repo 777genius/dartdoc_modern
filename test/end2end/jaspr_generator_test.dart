@@ -303,6 +303,7 @@ void main() {
         expect(app, contains("import 'generated/api_sidebar.dart' as api;"));
         expect(app, contains("import 'generated/guide_sidebar.dart' as guide;"));
         expect(app, contains('header: DocsHeader('));
+        expect(app, contains('homeHref: overviewHref,'));
         expect(app, contains('const DocsThemeToggle()'));
         expect(app, contains('sidebar: DocsSidebar('));
         expect(app, contains('DocsSidebarGroup('));
