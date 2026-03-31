@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
+import 'package:jaspr/server.dart';
 import 'package:jaspr_content/jaspr_content.dart';
+import 'package:syntax_highlight_lite/syntax_highlight_lite.dart' hide Color;
 
 class DartPadComponent extends CustomComponent {
   DartPadComponent() : super.base();
@@ -65,9 +67,17 @@ class _DartPadBlock extends StatelessComponent {
   final bool run;
   final int height;
 
+  static bool _highlighterInitialized = false;
+  static HighlighterTheme? _darkTheme;
+
   @override
   Component build(BuildContext context) {
     final encoded = base64Encode(utf8.encode(source));
+
+    if (!_highlighterInitialized) {
+      Highlighter.initialize(['dart']);
+      _highlighterInitialized = true;
+    }
 
     return div(
       classes: 'dartpad-wrapper',
@@ -80,12 +90,21 @@ class _DartPadBlock extends StatelessComponent {
       },
       [
         div(classes: 'dartpad-preview', [
-          pre([
-            code(
-              attributes: {'class': 'language-dart'},
-              [Component.text(source)],
-            ),
-          ]),
+          AsyncBuilder(
+            builder: (_) async {
+              final highlighter = Highlighter(
+                language: 'dart',
+                theme: _darkTheme ??= await HighlighterTheme.loadDarkTheme(),
+              );
+
+              return pre([
+                code(
+                  attributes: {'class': 'language-dart'},
+                  [_buildSpan(highlighter.highlight(source))],
+                ),
+              ]);
+            },
+          ),
         ]),
         div(classes: 'dartpad-toolbar', [
           button(
@@ -109,5 +128,29 @@ class _DartPadBlock extends StatelessComponent {
         div(classes: 'dartpad-stage', []),
       ],
     );
+  }
+
+  Component _buildSpan(TextSpan textSpan) {
+    Styles? styles;
+
+    if (textSpan.style case final style?) {
+      styles = Styles(
+        color: Color.value(style.foreground.argb & 0x00FFFFFF),
+        fontWeight: style.bold ? FontWeight.bold : null,
+        fontStyle: style.italic ? FontStyle.italic : null,
+        textDecoration: style.underline
+            ? TextDecoration(line: TextDecorationLine.underline)
+            : null,
+      );
+    }
+
+    if (styles == null && textSpan.children.isEmpty) {
+      return Component.text(textSpan.text ?? '');
+    }
+
+    return span(styles: styles, [
+      if (textSpan.text != null) Component.text(textSpan.text!),
+      for (final child in textSpan.children) _buildSpan(child),
+    ]);
   }
 }
