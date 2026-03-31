@@ -581,6 +581,14 @@ class PackageWarningCounter {
         ? PackageWarningMode.ignore
         : config.packageWarningOptions.getMode(kind);
 
+    final package = e?.package;
+    if (warningMode == PackageWarningMode.error &&
+        kind == PackageWarning.noLibraryLevelDocs &&
+        package is Package &&
+        package.isAutoIncludedDependencyPackage) {
+      warningMode = PackageWarningMode.warn;
+    }
+
     if (warningMode == PackageWarningMode.warn) {
       _warningCount += 1;
     } else if (warningMode == PackageWarningMode.error) {

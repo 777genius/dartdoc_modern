@@ -24,6 +24,9 @@ elif [ "$DARTDOC_BOT" = "packages" ]; then
   dart run tool/task.dart doc package --name=access --version=">=3.0.0"
   # Negative test for flutter_plugin_tools, make sure right error message is displayed.
   dart run tool/task.dart doc package --name=flutter_plugin_tools --version=">=0.0.14+1" 2>&1 | grep "warning: package:flutter_plugin_tools has no documentable libraries"
+elif [ "$DARTDOC_BOT" = "jaspr-theme" ]; then
+  echo "Running Jaspr theme validation bot"
+  dart run tool/task.dart validate jaspr-theme
 else
   echo "Running main dartdoc bot"
   dart run tool/task.dart buildbot

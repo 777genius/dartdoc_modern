@@ -23,7 +23,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         sdk: [3.10.0, dev]
-        job: [main, flutter, packages, sdk-docs]
+        job: [main, flutter, packages, sdk-docs, jaspr-theme]
         include:
           - os: macos-latest
             sdk: dev
@@ -31,6 +31,11 @@ jobs:
           - os: windows-latest
             sdk: dev
             job: main
+        exclude:
+          - os: macos-latest
+            job: jaspr-theme
+          - os: windows-latest
+            job: jaspr-theme
 
     steps:
       - name: Store date
@@ -48,7 +53,7 @@ jobs:
           key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ steps.date.outputs.today }}
       - name: Cache .pub-cache
         uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306
-        if: matrix.job == 'flutter'
+        if: matrix.job == 'flutter' || matrix.job == 'jaspr-theme'
         env:
           # Increment version to invalidate bad/obsolete caches.
           cache-name: cache-dart-pub-v1

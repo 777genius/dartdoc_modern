@@ -59,6 +59,9 @@ const builtinAllowedHosts = {
   'www.dartpad.cn',
 };
 
+const _maxSanitizerLogsPerKind = 5;
+final _sanitizerLogCounts = <String, int>{};
+
 /// Sanitizes HTML by removing dangerous elements and attributes.
 ///
 /// Removes:
@@ -112,15 +115,23 @@ String sanitizeHtml(String html,
               extraAllowedHosts.contains(host)) {
             return tag; // Keep allowed iframe embeds.
           }
-          logWarning('sanitizeHtml: removed <iframe> with host "$host". '
-              'To allow it, add "$host" to the allowedIframeHosts option '
-              'in dartdoc_options.yaml.');
+          _logSanitizerWarning(
+            'removed <iframe> with host "$host"',
+            'sanitizeHtml: removed <iframe> with host "$host". '
+                'To allow it, add "$host" to the allowedIframeHosts option '
+                'in dartdoc_options.yaml.',
+          );
         } else {
-          logWarning(
-              'sanitizeHtml: removed <iframe> with disallowed src: $src');
+          _logSanitizerWarning(
+            'removed <iframe> with disallowed src',
+            'sanitizeHtml: removed <iframe> with disallowed src: $src',
+          );
         }
       } else {
-        logWarning('sanitizeHtml: removed <iframe> without src attribute');
+        _logSanitizerWarning(
+          'removed <iframe> without src attribute',
+          'sanitizeHtml: removed <iframe> without src attribute',
+        );
       }
       return '';
     },
@@ -130,7 +141,10 @@ String sanitizeHtml(String html,
   html = html.replaceAllMapped(
     _javascriptUrl,
     (match) {
-      logWarning('sanitizeHtml: removed javascript: URL');
+      _logSanitizerWarning(
+        'removed javascript: URL',
+        'sanitizeHtml: removed javascript: URL',
+      );
       return '${match[1]}="';
     },
   );
@@ -139,7 +153,10 @@ String sanitizeHtml(String html,
   html = html.replaceAllMapped(
     _dataUrl,
     (match) {
-      logWarning('sanitizeHtml: removed data: URI');
+      _logSanitizerWarning(
+        'removed data: URI',
+        'sanitizeHtml: removed data: URI',
+      );
       return '${match[1]}="';
     },
   );
@@ -156,8 +173,26 @@ String _warnOnRemoval(String html, Pattern pattern, String description) {
   return html.replaceAllMapped(
     pattern,
     (match) {
-      logWarning('sanitizeHtml: removed $description tag');
+      _logSanitizerWarning(
+        'removed $description tag',
+        'sanitizeHtml: removed $description tag',
+      );
       return '';
     },
   );
+}
+
+void _logSanitizerWarning(String key, String message) {
+  final count = (_sanitizerLogCounts[key] ?? 0) + 1;
+  _sanitizerLogCounts[key] = count;
+
+  if (count <= _maxSanitizerLogsPerKind) {
+    logWarning(message);
+    if (count == _maxSanitizerLogsPerKind) {
+      logWarning(
+        'sanitizeHtml: suppressing further "$key" warnings after '
+        '$_maxSanitizerLogsPerKind occurrences',
+      );
+    }
+  }
 }

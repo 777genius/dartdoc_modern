@@ -70,6 +70,8 @@ class Generator {
 
   Set<String> get writtenFiles => _generatorBackend.writer.writtenFiles;
 
+  bool get supportsLinkValidation => _generatorBackend.supportsLinkValidation;
+
   /// Traverses the [packageGraph] and generates documentation for all contained
   /// elements.
   List<Documentable> _generateDocs(PackageGraph packageGraph) {

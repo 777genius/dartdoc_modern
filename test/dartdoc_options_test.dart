@@ -4,12 +4,15 @@
 
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:analyzer/file_system/memory_file_system.dart';
+import 'package:analyzer/src/test_utilities/mock_sdk.dart';
 import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
 import 'package:dartdoc_vitepress/src/io_utils.dart';
 import 'package:dartdoc_vitepress/src/package_meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
+
+import 'src/utils.dart' show writeMockSdkFiles;
 
 class ConvertedOption {
   final String? param1;
@@ -33,6 +36,62 @@ class ConvertedOption {
     }
     return ConvertedOption._(p1, p2, canonicalYamlPath);
   }
+}
+
+Folder _createFlutterPackage(
+  MemoryResourceProvider resourceProvider,
+  String packagePath,
+) {
+  final packageDir = resourceProvider.getFolder(packagePath)..create();
+  resourceProvider
+      .getFile(path.join(packageDir.path, 'pubspec.yaml'))
+      .writeAsStringSync('''
+name: flutter_pkg
+environment:
+  sdk: ^3.0.0
+dependencies:
+  flutter:
+    sdk: flutter
+''');
+  return packageDir;
+}
+
+PackageMetaProvider _createTestPackageMetaProvider(
+  MemoryResourceProvider resourceProvider, {
+  required String sdkRootPath,
+  bool withFlutterRoot = false,
+}) {
+  final sdkRoot = resourceProvider.getFolder(sdkRootPath)..create();
+  createMockSdk(resourceProvider: resourceProvider, root: sdkRoot);
+  writeMockSdkFiles(sdkRoot);
+
+  if (withFlutterRoot) {
+    resourceProvider
+        .getFile(path.join(path.dirname(path.dirname(path.dirname(sdkRootPath))), 'bin', 'flutter'))
+        .writeAsStringSync('');
+  }
+
+  return PackageMetaProvider(
+    PubPackageMeta.fromElement,
+    PubPackageMeta.fromFilename,
+    PubPackageMeta.fromDir,
+    resourceProvider,
+    sdkRoot,
+    {},
+  );
+}
+
+DartdocOptionContext _createProgramContext(
+  PackageMetaProvider packageMetaProvider,
+  Folder packageDir,
+) {
+  final optionSet = DartdocOptionRoot.fromOptionGenerators(
+    'dartdoc',
+    [createDartdocProgramOptions, createDartdocOptions],
+    packageMetaProvider,
+  );
+  optionSet.parseArguments(['--input', packageDir.path]);
+  return DartdocOptionContext(optionSet, packageDir, packageMetaProvider.resourceProvider);
 }
 
 void main() {
@@ -784,6 +843,45 @@ CategoryOne:
       final item = definition.externalItems.first;
       expect(item.name, 'package:web');
       expect(item.url, 'https://pub.dev/documentation/web/latest/');
+    });
+  });
+
+  group('Flutter SDK resolution', () {
+    test('infers flutterRoot from default Flutter sdk dir', () {
+      final resourceProvider = MemoryResourceProvider();
+      final packageDir = _createFlutterPackage(resourceProvider, '/pkg');
+      final packageMetaProvider = _createTestPackageMetaProvider(
+        resourceProvider,
+        sdkRootPath: '/flutter/bin/cache/dart-sdk',
+        withFlutterRoot: true,
+      );
+
+      final context = _createProgramContext(packageMetaProvider, packageDir);
+
+      expect(context.flutterRoot, path.canonicalize('/flutter'));
+      expect(context.sdkDir, path.canonicalize('/flutter/bin/cache/dart-sdk'));
+    });
+
+    test('throws a helpful error when Flutter sdk cannot be resolved', () {
+      final resourceProvider = MemoryResourceProvider();
+      final packageDir = _createFlutterPackage(resourceProvider, '/pkg');
+      final packageMetaProvider = _createTestPackageMetaProvider(
+        resourceProvider,
+        sdkRootPath: '/sdk',
+      );
+
+      final context = _createProgramContext(packageMetaProvider, packageDir);
+
+      expect(
+        () => context.sdkDir,
+        throwsA(
+          isA<DartdocOptionError>().having(
+            (error) => error.message,
+            'message',
+            contains('Flutter package detected'),
+          ),
+        ),
+      );
     });
   });
 }

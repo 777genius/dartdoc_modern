@@ -10,7 +10,8 @@ import 'package:dartdoc_vitepress/src/generator/templates.dart';
 import 'package:dartdoc_vitepress/src/generator/vitepress/docs.dart';
 import 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart'
     show VitePressPathResolver, isDuplicateSdkLibrary, isInternalSdkLibrary;
-import 'package:dartdoc_vitepress/src/generator/vitepress/renderer.dart' as renderer;
+import 'package:dartdoc_vitepress/src/generator/vitepress/renderer.dart'
+    as renderer;
 import 'package:dartdoc_vitepress/src/generator/vitepress/scaffold.dart';
 import 'package:dartdoc_vitepress/src/generator/vitepress/sidebar.dart'
     show VitePressSidebarGenerator;
@@ -192,6 +193,9 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   // ---------------------------------------------------------------------------
   // Lifecycle hooks
   // ---------------------------------------------------------------------------
+
+  @override
+  bool get supportsLinkValidation => false;
 
   @override
   void beforeGenerate(PackageGraph packageGraph) {

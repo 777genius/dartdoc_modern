@@ -7,7 +7,8 @@ import 'dart:async';
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
 import 'package:dartdoc_vitepress/src/generator/generator.dart';
-import 'package:dartdoc_vitepress/src/generator/generator_utils.dart' as generator_util;
+import 'package:dartdoc_vitepress/src/generator/generator_utils.dart'
+    as generator_util;
 import 'package:dartdoc_vitepress/src/generator/template_data.dart';
 import 'package:dartdoc_vitepress/src/generator/templates.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
@@ -253,6 +254,13 @@ abstract class GeneratorBackend {
 
   /// Emits files not specific to a Dart language element (like a favicon, etc).
   Future<void> generateAdditionalFiles();
+
+  /// Whether this backend supports the post-generation HTML link validator.
+  ///
+  /// The built-in validator traverses generated `index.html` and `index.json`
+  /// files. Markdown-first backends such as VitePress and Jaspr should return
+  /// `false` until they have a dedicated validator for their output layout.
+  bool get supportsLinkValidation => true;
 
   /// Called once before the documentation traversal begins.
   ///

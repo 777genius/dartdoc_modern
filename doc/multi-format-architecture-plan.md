@@ -1,6 +1,6 @@
 # Multi-Format Architecture Plan
 
-Status: proposed
+Status: implemented through Phase 5
 
 Target:
 - add `--format jaspr` alongside `html` and `vitepress`
@@ -1140,6 +1140,24 @@ dart run /Users/belief/dev/projects/dartdoc-vitepress/bin/dartdoc_vitepress.dart
 ```
 
 Future Jaspr equivalent should be added once scaffold exists.
+
+Implemented Jaspr verification:
+
+```bash
+tmpdir=$(mktemp -d /tmp/dart-sdk-jaspr.XXXXXX) && \
+dart run /Users/belief/dev/projects/dartdoc-vitepress/bin/dartdoc_vitepress.dart \
+  --sdk-docs --format jaspr --output "$tmpdir"
+
+dart run tool/jaspr_search_benchmark.dart \
+  "$tmpdir/lib/generated/search_index.json" \
+  Future Stream Uri File
+```
+
+Latest verification notes are recorded in:
+
+```text
+doc/jaspr-search-verification.md
+```
 
 ## Risk Register
 

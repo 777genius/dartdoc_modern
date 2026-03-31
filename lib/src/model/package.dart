@@ -153,6 +153,14 @@ final class Package extends LibraryContainer
       packageGraph.config.autoIncludeDependencies ||
       packageGraph.workspacePackageNames.contains(name);
 
+  /// True when this package is local only because dependencies are being
+  /// auto-included, not because it is a primary/workspace package.
+  bool get isAutoIncludedDependencyPackage =>
+      packageGraph.config.autoIncludeDependencies &&
+      !_isExcluded &&
+      packageMeta != packageGraph.packageMeta &&
+      !packageGraph.workspacePackageNames.contains(name);
+
   /// Returns the location of documentation for this package, for making
   /// decisions regarding the 'linkToRemote' option and canonicalization.
   @override

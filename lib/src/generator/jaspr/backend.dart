@@ -2,27 +2,34 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:analyzer/file_system/file_system.dart';
+import 'package:dartdoc_vitepress/src/generator/core/guide_collection.dart'
+    as guide_core;
+import 'package:dartdoc_vitepress/src/generator/core/html_sanitizer.dart';
 import 'package:dartdoc_vitepress/src/generator/generator.dart';
 import 'package:dartdoc_vitepress/src/generator/generator_backend.dart';
+import 'package:dartdoc_vitepress/src/generator/jaspr/docs.dart';
+import 'package:dartdoc_vitepress/src/generator/jaspr/paths.dart'
+    show JasprPathResolver, isDuplicateSdkLibrary, isInternalSdkLibrary;
 import 'package:dartdoc_vitepress/src/generator/jaspr/scaffold.dart';
+import 'package:dartdoc_vitepress/src/generator/jaspr/search_index.dart';
 import 'package:dartdoc_vitepress/src/generator/jaspr/sidebar.dart'
     show JasprSidebarGenerator;
 import 'package:dartdoc_vitepress/src/generator/template_data.dart';
 import 'package:dartdoc_vitepress/src/generator/templates.dart';
-import 'package:dartdoc_vitepress/src/generator/vitepress/docs.dart';
-import 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart'
-    show VitePressPathResolver, isDuplicateSdkLibrary, isInternalSdkLibrary;
-import 'package:dartdoc_vitepress/src/generator/vitepress/renderer.dart' as renderer;
-import 'package:dartdoc_vitepress/src/generator/vitepress_guide_generator.dart';
+import 'package:dartdoc_vitepress/src/generator/vitepress/renderer.dart'
+    as renderer;
 import 'package:dartdoc_vitepress/src/logging.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/runtime_stats.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
 /// Essential CSS for API documentation pages.
 ///
-/// Written to `lib/generated/api_styles.css` on every generation run
+/// Written to `web/generated/api_styles.css` on every generation run
 /// (not a scaffold file). This ensures existing sites get style updates
 /// without requiring users to regenerate their `custom.css`.
 const _apiStylesCss = '''
@@ -32,7 +39,7 @@ const _apiStylesCss = '''
   margin: 8px 0 16px;
 }
 .member-signature pre {
-  background: var(--vp-code-block-bg);
+  background: var(--content-pre-bg);
   border-radius: 8px;
   padding: 12px 16px;
   overflow-x: auto;
@@ -41,13 +48,10 @@ const _apiStylesCss = '''
   margin: 0;
 }
 .member-signature code {
-  font-family: var(--vp-font-family-mono);
-  font-size: var(--vp-code-font-size);
-  color: #24292E;
-  line-height: var(--vp-code-line-height);
-}
-.dark .member-signature code {
-  color: #E1E4E8;
+  font-family: var(--content-code-font);
+  font-size: 0.95rem;
+  color: var(--content-pre-code);
+  line-height: 1.7;
 }
 /* Shiki-matched syntax highlighting for member signatures.
    Colors from --shiki-light / --shiki-dark CSS variables. */
@@ -113,15 +117,15 @@ a.api-link {
 }
 
 a.api-link code {
-  color: var(--vp-c-brand-1);
-  border-bottom: 2px solid color-mix(in srgb, var(--vp-c-brand-1) 50%, transparent);
+  color: var(--content-links);
+  border-bottom: 2px solid color-mix(in srgb, var(--content-links) 50%, transparent);
   padding-bottom: 1px;
   transition: color 0.2s, border-color 0.2s;
 }
 
 a.api-link:hover code {
-  color: var(--vp-c-brand-2);
-  border-bottom-color: var(--vp-c-brand-1);
+  color: var(--content-headings);
+  border-bottom-color: var(--content-links);
 }
 ''';
 
@@ -143,8 +147,8 @@ a.api-link:hover code {
 /// - Uses [_writeMarkdown] for all file writes; never uses the base class
 ///   [write] method (which performs `htmlBasePlaceholder` replacement).
 class JasprGeneratorBackend extends GeneratorBackend {
-  final VitePressPathResolver _paths;
-  late VitePressDocProcessor _docs;
+  final JasprPathResolver _paths;
+  late JasprDocProcessor _docs;
   late JasprSidebarGenerator _sidebar;
 
   final String _outputPath;
@@ -179,7 +183,7 @@ class JasprGeneratorBackend extends GeneratorBackend {
     List<String> guideInclude = const [],
     List<String> guideExclude = const [],
     List<String> allowedIframeHosts = const [],
-  })  : _paths = VitePressPathResolver(),
+  })  : _paths = JasprPathResolver(),
         _outputPath = outputPath,
         _packageName = packageName,
         _repositoryUrl = repositoryUrl,
@@ -194,9 +198,12 @@ class JasprGeneratorBackend extends GeneratorBackend {
   // ---------------------------------------------------------------------------
 
   @override
+  bool get supportsLinkValidation => false;
+
+  @override
   void beforeGenerate(PackageGraph packageGraph) {
     _paths.initFromPackageGraph(packageGraph);
-    _docs = VitePressDocProcessor(packageGraph, _paths,
+    _docs = JasprDocProcessor(packageGraph, _paths,
         allowedIframeHosts: _allowedIframeHosts);
     _sidebar = JasprSidebarGenerator(_paths);
   }
@@ -218,6 +225,8 @@ class JasprGeneratorBackend extends GeneratorBackend {
     List<Documentable> indexedElements,
     List<ModelElement> categorizedElements,
   ) {
+    generateSearchIndex(indexedElements);
+    generateApiSymbolMap();
     _deleteStaleFiles();
     _logSummary();
   }
@@ -251,26 +260,36 @@ class JasprGeneratorBackend extends GeneratorBackend {
     }
 
     // Write essential API styles (always overwritten, not a scaffold file).
-    _writeMarkdown('lib/generated/api_styles.css', _apiStylesCss);
+    _writeMarkdown('web/generated/api_styles.css', _apiStylesCss);
 
     // Generate sidebar from the full PackageGraph.
-    var sidebarContent = _sidebar.generate(packageGraph);
+    var sidebarContent = _sidebar.generateApi(packageGraph);
     _writeMarkdown(
       'lib/generated/api_sidebar.dart',
       sidebarContent,
     );
 
     // Generate guide files from doc/docs directories.
-    var guideGen = VitePressGuideGenerator(
+    final guideCollector = guide_core.GuideCollector(
       resourceProvider: resourceProvider,
       scanDirs: _guideDirs,
       include: _guideInclude,
       exclude: _guideExclude,
-      allowedIframeHosts: _allowedIframeHosts,
     );
-    var guideEntries = guideGen.collectGuideEntries(
+    final guideEntries = guideCollector.collectGuideEntries(
       packageGraph: packageGraph,
       isMultiPackage: isMultiPackage,
+      transformContent: (content, _, sourcePath) {
+        final expandedImports = _expandCodeImports(content, sourcePath);
+        final withoutTocDirective = expandedImports.replaceAll(
+          RegExp(r'^\[TOC\]\s*$', multiLine: true),
+          '',
+        );
+        return sanitizeHtml(
+          withoutTocDirective,
+          extraAllowedHosts: _allowedIframeHosts,
+        );
+      },
     );
 
     // Write guide files through _writeMarkdown for incremental checks.
@@ -278,7 +297,16 @@ class JasprGeneratorBackend extends GeneratorBackend {
       _writeMarkdown(entry.relativePath, entry.content);
     }
 
-    var guideSidebarContent = guideGen.generateSidebar(
+    _writeMarkdown(
+      'web/index.html',
+      _buildRootIndexHtml(_overviewHrefFor(guideEntries)),
+    );
+    _writeMarkdown(
+      'web/404.html',
+      _buildRootIndexHtml(_overviewHrefFor(guideEntries)),
+    );
+
+    var guideSidebarContent = _sidebar.generateGuide(
       guideEntries,
       isMultiPackage: isMultiPackage,
     );
@@ -541,11 +569,71 @@ class JasprGeneratorBackend extends GeneratorBackend {
   // Infrastructure -- NO-OPs for Jaspr.
   // ---------------------------------------------------------------------------
 
-  /// Jaspr has built-in full-text search via MiniSearch, so no search
-  /// index is generated.
+  /// Generates a static JSON search index for the Jaspr scaffold runtime.
   @override
   void generateSearchIndex(List<Documentable> indexedElements) {
-    // No-op: finalization is handled by afterGenerate().
+    final builder = JasprSearchIndexBuilder(
+      resourceProvider: resourceProvider,
+      outputPath: _outputPath,
+    );
+    final output = builder.build(_expectedFiles);
+    _writeMarkdown(
+      'web/generated/search_index.json',
+      output.manifestJson,
+    );
+    _writeMarkdown(
+      'web/generated/search_pages.json',
+      output.pagesJson,
+    );
+    _writeMarkdown(
+      'web/generated/search_sections.json',
+      output.sectionsJson,
+    );
+    _writeMarkdown(
+      'web/generated/search_sections_content.json',
+      output.sectionsContentJson,
+    );
+  }
+
+  void generateApiSymbolMap() {
+    final apiEntries = _collectApiSymbolEntries();
+    final buffer = StringBuffer()
+      ..writeln('// Generated by dartdoc_vitepress. Do not edit.')
+      ..writeln()
+      ..writeln('class ApiSymbolEntry {')
+      ..writeln('  final String href;')
+      ..writeln('  final String relativePath;')
+      ..writeln('  final String apiDir;')
+      ..writeln()
+      ..writeln('  const ApiSymbolEntry({')
+      ..writeln('    required this.href,')
+      ..writeln('    required this.relativePath,')
+      ..writeln('    required this.apiDir,')
+      ..writeln('  });')
+      ..writeln('}')
+      ..writeln()
+      ..writeln('const apiSymbolMap = <String, List<ApiSymbolEntry>>{');
+
+    final symbolNames = apiEntries.keys.toList()..sort();
+    for (final symbolName in symbolNames) {
+      final entries = apiEntries[symbolName]!..sort((a, b) {
+        final dirCompare = a.apiDir.compareTo(b.apiDir);
+        if (dirCompare != 0) return dirCompare;
+        return a.relativePath.compareTo(b.relativePath);
+      });
+      buffer.writeln("  '${_dartEscape(symbolName)}': [");
+      for (final entry in entries) {
+        buffer.writeln(
+          "    ApiSymbolEntry(href: '${_dartEscape(entry.href)}', relativePath: '${_dartEscape(entry.relativePath)}', apiDir: '${_dartEscape(entry.apiDir)}'),",
+        );
+      }
+      buffer.writeln('  ],');
+    }
+
+    buffer
+      ..writeln('};');
+
+    _writeMarkdown('lib/generated/api_symbols.dart', buffer.toString());
   }
 
   /// No-op: category JSON is only used by the HTML frontend.
@@ -556,9 +644,9 @@ class JasprGeneratorBackend extends GeneratorBackend {
 
   /// Called BEFORE the traversal at `generator.dart:49`.
   ///
-  /// Creates Jaspr scaffold files (`package.json`, `.vitepress/config.ts`,
-  /// `index.md`) if they don't already exist. These are one-time setup files
-  /// that the user may customize afterwards.
+  /// Creates Jaspr scaffold files (`pubspec.yaml`, `main.server.dart`,
+  /// `main.client.dart`, `content/index.md`) if they don't already exist.
+  /// These are one-time setup files that the user may customize afterwards.
   @override
   Future<void> generateAdditionalFiles() async {
     var initGenerator = JasprInitGenerator(
@@ -578,30 +666,142 @@ class JasprGeneratorBackend extends GeneratorBackend {
 
   /// Writes markdown content to the output directory (incremental).
   // Pre-compiled patterns for VitePress syntax stripping.
-  static final _vitepressAnchor = RegExp(r'\s*\{#[\w-]+\}');
-  static final _vitepressFrontmatterLine =
-      RegExp(r'^(editLink|prev|next|outlineCollapsible):.*$', multiLine: true);
-  static final _apiBreadcrumb = RegExp(r'<ApiBreadcrumb\s*/?>');
+  static final _vitepressHeadingAnchor =
+      RegExp(r'^(#{1,6}[^\n]*?)\s+\{#[\w-]+\}[ \t]*$');
+  static final _vitepressFrontmatterLine = RegExp(r'^(editLink|prev|next):.*$');
+  static final _apiBreadcrumbLine = RegExp(r'^\s*<ApiBreadcrumb\s*/?>\s*$');
+  static final _tocMarkerLine = RegExp(r'^\s*\[\[toc\]\]\s*$');
+  static final _badgeComponent = RegExp(r'\s*<Badge\b[^>]*/>\s*');
+  static final _codeFenceLine = RegExp(r'^\s*(```|~~~)');
+  static final _codeImportLine = RegExp(r'^<<<\s+(.+?)\s*$');
+  static final _codeImportSpec = RegExp(
+    r'^(?<path>[^#]+?)(?:#L(?<start>\d+)(?:-L?(?<end>\d+))?)?$',
+  );
 
   /// Strips VitePress-specific syntax from markdown so Jaspr renders cleanly.
-  static String _stripVitePressSyntax(String content) {
-    // Remove {#anchor-id} from headings: ## Functions {#section-functions}
-    content = content.replaceAll(_vitepressAnchor, '');
+  @visibleForTesting
+  static String stripVitePressSyntaxForJaspr(String content) {
+    final lines = content.split('\n');
+    final output = <String>[];
+    var index = 0;
 
-    // Remove VitePress-only frontmatter lines (editLink, prev, next, etc.)
-    content = content.replaceAll(_vitepressFrontmatterLine, '');
+    if (lines.isNotEmpty && lines.first.trim() == '---') {
+      output.add(lines.first);
+      index = 1;
 
-    // Remove <ApiBreadcrumb /> Vue component
-    content = content.replaceAll(_apiBreadcrumb, '');
+      for (; index < lines.length; index++) {
+        final line = lines[index];
+        if (line.trim() == '---') {
+          while (output.length > 1 && output.last.trim().isEmpty) {
+            output.removeLast();
+          }
+          output.add(line);
+          index++;
+          break;
+        }
+        if (_vitepressFrontmatterLine.hasMatch(line)) {
+          continue;
+        }
+        output.add(line);
+      }
+    }
 
-    // Unescape Vue template braces: \{\{ -> {{
-    content = content.replaceAll(r'\{\{', '{{');
-    content = content.replaceAll(r'\}\}', '}}');
+    var inCodeFence = false;
+    for (; index < lines.length; index++) {
+      var line = lines[index];
 
-    // Clean up blank lines left by removals (max 2 consecutive)
-    content = content.replaceAll(RegExp(r'\n{3,}'), '\n\n');
+      if (!inCodeFence && _apiBreadcrumbLine.hasMatch(line)) {
+        continue;
+      }
 
-    return content;
+      if (!inCodeFence) {
+        if (_tocMarkerLine.hasMatch(line)) {
+          continue;
+        }
+
+        if (_badgeComponent.hasMatch(line)) {
+          line = line.replaceAll(_badgeComponent, ' ').trimRight();
+        }
+
+        final match = _vitepressHeadingAnchor.firstMatch(line);
+        if (match != null) {
+          line = match.group(1)!;
+        }
+      }
+
+      output.add(line);
+
+      if (_codeFenceLine.hasMatch(line)) {
+        inCodeFence = !inCodeFence;
+      }
+    }
+
+    var result = output.join('\n');
+    result = result.replaceAll(r'\{\{', '{{');
+    result = result.replaceAll(r'\}\}', '}}');
+    result = result.replaceFirst(RegExp(r'^\n+'), '');
+    result = result.replaceAll(RegExp(r'\n{3,}'), '\n\n');
+    return result;
+  }
+
+  String _expandCodeImports(String content, String sourcePath) {
+    final sourceDir = p.dirname(sourcePath);
+    final lines = content.split('\n');
+    final output = <String>[];
+    var inCodeFence = false;
+
+    for (final line in lines) {
+      if (_codeFenceLine.hasMatch(line)) {
+        inCodeFence = !inCodeFence;
+        output.add(line);
+        continue;
+      }
+
+      if (!inCodeFence) {
+        final match = _codeImportLine.firstMatch(line.trim());
+        if (match != null) {
+          final expanded = _readImportedCode(match.group(1)!, sourceDir);
+          if (expanded != null) {
+            output.add(expanded.trimRight());
+            output.add('');
+            continue;
+          }
+        }
+      }
+
+      output.add(line);
+    }
+
+    return output.join('\n').replaceAll(RegExp(r'\n{3,}'), '\n\n');
+  }
+
+  String? _readImportedCode(String spec, String sourceDir) {
+    final match = _codeImportSpec.firstMatch(spec.trim());
+    if (match == null) return null;
+
+    final importPath = match.namedGroup('path')!.trim();
+    final fullPath = p.normalize(p.join(sourceDir, importPath));
+    final file = resourceProvider.getFile(fullPath);
+    if (!file.exists) {
+      logWarning('Guide code import not found: $importPath');
+      return null;
+    }
+
+    final startLine = int.tryParse(match.namedGroup('start') ?? '');
+    final endLine = int.tryParse(match.namedGroup('end') ?? '');
+    final fileLines = file.readAsStringSync().split('\n');
+
+    var selectedLines = fileLines;
+    if (startLine != null) {
+      final normalizedStart = startLine.clamp(1, fileLines.length);
+      final normalizedEnd =
+          (endLine ?? startLine).clamp(normalizedStart, fileLines.length);
+      selectedLines = fileLines.sublist(normalizedStart - 1, normalizedEnd);
+    }
+
+    final extension = p.extension(importPath).replaceFirst('.', '').trim();
+    final language = extension.isEmpty ? 'text' : extension;
+    return '```$language\n${selectedLines.join('\n')}\n```';
   }
 
   /// Remaps VitePress-style paths to Jaspr content/ directory.
@@ -619,6 +819,100 @@ class JasprGeneratorBackend extends GeneratorBackend {
     return filePath;
   }
 
+  String _overviewHrefFor(List<guide_core.GuideEntry> guideEntries) {
+    if (guideEntries.isEmpty) return '/api';
+
+    final sorted = guide_core.sortGuideEntries([...guideEntries]);
+    sorted.sort((a, b) {
+      final depthA = '/'.allMatches(a.relativePath).length;
+      final depthB = '/'.allMatches(b.relativePath).length;
+      if (depthA != depthB) {
+        return depthA.compareTo(depthB);
+      }
+      return 0;
+    });
+    final firstGuide = sorted.first.relativePath.replaceAll('.md', '');
+    return '/$firstGuide';
+  }
+
+  String _buildRootIndexHtml(String overviewHref) => '''
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${_escapeHtml(_packageName)} API</title>
+    <link rel="stylesheet" href="/generated/api_styles.css">
+    <meta http-equiv="refresh" content="0; url=$overviewHref">
+    <script>
+      window.location.replace(${jsonEncode(overviewHref)});
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to the documentation overview...</p>
+  </body>
+</html>
+''';
+
+  Map<String, List<_ApiSymbolEntry>> _collectApiSymbolEntries() {
+    final apiRoot = p.join(_outputPath, 'content', 'api');
+    final folder = resourceProvider.getFolder(apiRoot);
+    if (!folder.exists) return const {};
+
+    final entries = <String, List<_ApiSymbolEntry>>{};
+
+    void visit(Folder current) {
+      for (final child in current.getChildren()) {
+        if (child is Folder) {
+          visit(child);
+          continue;
+        }
+        if (child is! File || !child.path.endsWith('.md')) continue;
+
+        final relativeFromOutput =
+            p.relative(child.path, from: p.normalize(_outputPath));
+        final normalizedRelative =
+            p.posix.joinAll(p.split(relativeFromOutput));
+        if (!normalizedRelative.startsWith('content/api/')) continue;
+
+        final relativePath =
+            normalizedRelative.replaceFirst(RegExp(r'^content/'), '');
+        if (relativePath.endsWith('/index.md') || relativePath == 'api/index.md') {
+          continue;
+        }
+
+        final symbolName = p.basenameWithoutExtension(relativePath);
+        final href = '/${relativePath.replaceFirst('.md', '')}';
+        final apiDir = _apiDirForRelativePath(relativePath);
+
+        entries.putIfAbsent(symbolName, () => []).add(
+              _ApiSymbolEntry(
+                href: href,
+                relativePath: relativePath,
+                apiDir: apiDir,
+              ),
+            );
+      }
+    }
+
+    visit(folder);
+    return entries;
+  }
+
+  String _apiDirForRelativePath(String relativePath) {
+    final parts = relativePath.split('/');
+    return parts.length >= 2 ? parts[1] : '';
+  }
+
+  String _dartEscape(String value) =>
+      value.replaceAll(r'\', r'\\').replaceAll("'", r"\'");
+
+  String _escapeHtml(String value) => value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;');
+
   ///
   /// Tracks the file path in [_expectedFiles] for manifest-based stale file
   /// deletion. Compares new content against the existing file on disk and
@@ -631,7 +925,7 @@ class JasprGeneratorBackend extends GeneratorBackend {
 
     // Strip VitePress-specific syntax from markdown content.
     if (jasprPath.endsWith('.md')) {
-      content = _stripVitePressSyntax(content);
+      content = stripVitePressSyntaxForJaspr(content);
     }
 
     // Incremental generation: skip write if content is unchanged.
@@ -664,14 +958,16 @@ class JasprGeneratorBackend extends GeneratorBackend {
   /// Scans output directories and deletes files not in [_expectedFiles].
   ///
   /// Only deletes `.md` files under `api/` and `guide/` subdirectories,
-  /// and `.ts`/`.css` files under `lib/generated/`.
+  /// `.dart` files under `lib/generated/`, and static runtime assets under
+  /// `web/generated/`.
   /// Files in the `guide/` root are preserved (scaffold and user files).
   void _deleteStaleFiles() {
     _deletedCount = 0;
     _deleteStaleInDir('content/api', '.md');
     _deleteStaleInDir('content/guide', '.md', null, true);
     _deleteStaleInDir(p.join('lib', 'generated'), '.dart');
-    _deleteStaleInDir(p.join('lib', 'generated'), '.css');
+    _deleteStaleInDir(p.join('web', 'generated'), '.css');
+    _deleteStaleInDir(p.join('web', 'generated'), '.json');
   }
 
   /// Recursively scans [dirRelative] under [_outputPath] and deletes files
@@ -681,8 +977,8 @@ class JasprGeneratorBackend extends GeneratorBackend {
   /// considered for deletion — files directly in [dirRelative] are preserved.
   /// This protects scaffold and user-created files (e.g., `guide/index.md`).
   ///
-  /// Uses a [visited] set to protect against symlink loops (same approach as
-  /// `_collectMarkdownFiles` in `vitepress_guide_generator.dart`).
+  /// Uses a [visited] set to protect against symlink loops, matching the
+  /// shared guide collection traversal logic.
   /// Normalizes paths to POSIX separators for cross-platform consistency.
   void _deleteStaleInDir(String dirRelative, String extension,
       [Set<String>? visited, bool skipRootFiles = false]) {
@@ -758,6 +1054,18 @@ class JasprGeneratorBackend extends GeneratorBackend {
 
   /// Number of stale files deleted during cleanup.
   int get deletedCount => _deletedCount;
+}
+
+class _ApiSymbolEntry {
+  const _ApiSymbolEntry({
+    required this.href,
+    required this.relativePath,
+    required this.apiDir,
+  });
+
+  final String href;
+  final String relativePath;
+  final String apiDir;
 }
 
 // ---------------------------------------------------------------------------

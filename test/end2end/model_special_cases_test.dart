@@ -15,6 +15,7 @@ import 'package:dartdoc_vitepress/src/matching_link_result.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/model_utils.dart';
 import 'package:dartdoc_vitepress/src/package_meta.dart';
+import 'package:dartdoc_vitepress/src/warnings.dart';
 import 'package:html/parser.dart' as html;
 import 'package:test/test.dart';
 
@@ -322,6 +323,29 @@ void main() {
         () {
       expect(ginormousPackageGraph.packages.map((p) => p.documentedWhere),
           everyElement((DocumentLocation x) => x == DocumentLocation.local));
+    });
+
+    test(
+        'Verify that auto-included dependency package doc warnings are downgraded to warnings',
+        () {
+      final dependencyPackage = ginormousPackageGraph.localPackages.firstWhere(
+        (package) => package.isAutoIncludedDependencyPackage,
+      );
+      final undocumentedLibrary = dependencyPackage.libraries.firstWhere(
+        (library) => !library.hasDocumentation,
+      );
+
+      final warningCounter = ginormousPackageGraph.packageWarningCounter;
+      final errorCountBefore = warningCounter.errorCount;
+      final warningCountBefore = warningCounter.warningCount;
+
+      ginormousPackageGraph.warnOnElement(
+        undocumentedLibrary,
+        PackageWarning.noLibraryLevelDocs,
+      );
+
+      expect(warningCounter.errorCount, errorCountBefore);
+      expect(warningCounter.warningCount, warningCountBefore + 1);
     });
 
     test('Verify that ginormousPackageGraph takes in the SDK', () {

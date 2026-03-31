@@ -13,6 +13,8 @@ library;
 import 'package:dartdoc_vitepress/src/comment_references/model_comment_reference.dart';
 import 'package:dartdoc_vitepress/src/generator/core/html_sanitizer.dart'
     as core_sanitize;
+import 'package:dartdoc_vitepress/src/generator/core/path_utils.dart'
+    as path_utils;
 import 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart';
 import 'package:dartdoc_vitepress/src/matching_link_result.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
@@ -299,8 +301,6 @@ class VitePressDocProcessor {
   /// - Group 1: the internal library dirName (e.g. `dart.io`, `dart.dom.html`,
   ///   `dart._http`)
   /// - The rest of the path follows after a `/` or end of string.
-  static final _internalSdkDirPattern = RegExp(r'^(dart\.[a-z_.]+)(/|$)');
-
   /// Normalizes internal SDK library directory names in a path.
   ///
   /// Rewrites the first path segment when it matches `dart.xxx`:
@@ -309,30 +309,8 @@ class VitePressDocProcessor {
   ///   generated pages; the caller should render as inline code)
   /// - `dart.xxx/...` -> `dart-xxx/...` (replace first `.` with `-`)
   @visibleForTesting
-  static String normalizeSdkLibraryPath(String path) {
-    final match = _internalSdkDirPattern.firstMatch(path);
-    if (match == null) return path;
-
-    final internalDir = match.group(1)!;
-    final hadSeparator = match.group(2) == '/';
-    final rest = path.substring(match.end);
-
-    // Private SDK libraries (dart._http, dart._internal) have no pages.
-    if (internalDir.startsWith('dart._')) return '';
-
-    String canonicalDir;
-    if (internalDir.startsWith('dart.dom.')) {
-      // `dart.dom.html` -> `dart-html`, `dart.dom.svg` -> `dart-svg`
-      canonicalDir = 'dart-${internalDir.substring('dart.dom.'.length)}';
-    } else {
-      // `dart.io` -> `dart-io`, `dart.async` -> `dart-async`
-      canonicalDir = 'dart-${internalDir.substring('dart.'.length)}';
-    }
-
-    if (rest.isNotEmpty) return '$canonicalDir/$rest';
-    if (hadSeparator) return '$canonicalDir/';
-    return canonicalDir;
-  }
+  static String normalizeSdkLibraryPath(String path) =>
+      path_utils.normalizeSdkLibraryPath(path);
 
   /// Non-HTML marker for `{@inject-html}` placeholders.
   ///

@@ -54,6 +54,12 @@ class JasprInitGenerator {
     );
     _writeTemplateIfAbsent(
       templateDir: templateDir,
+      templateFile: p.join('lib', 'app.dart'),
+      outputFile: 'lib/app.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
       templateFile: p.join('lib', 'main.server.dart'),
       outputFile: 'lib/main.server.dart',
       placeholders: placeholders,
@@ -62,6 +68,114 @@ class JasprInitGenerator {
       templateDir: templateDir,
       templateFile: p.join('lib', 'main.client.dart'),
       outputFile: 'lib/main.client.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_search.dart'),
+      outputFile: 'lib/components/docs_search.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_header.dart'),
+      outputFile: 'lib/components/docs_header.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_theme_toggle.dart'),
+      outputFile: 'lib/components/docs_theme_toggle.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_nav_link.dart'),
+      outputFile: 'lib/components/docs_nav_link.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_sidebar.dart'),
+      outputFile: 'lib/components/docs_sidebar.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_sidebar_toggle.dart'),
+      outputFile: 'lib/components/docs_sidebar_toggle.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_dartpad_runtime.dart'),
+      outputFile: 'lib/components/docs_dartpad_runtime.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_dartpad_runtime_stub.dart'),
+      outputFile: 'lib/components/docs_dartpad_runtime_stub.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_dartpad_runtime_web.dart'),
+      outputFile: 'lib/components/docs_dartpad_runtime_web.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_mermaid_runtime.dart'),
+      outputFile: 'lib/components/docs_mermaid_runtime.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_mermaid_runtime_stub.dart'),
+      outputFile: 'lib/components/docs_mermaid_runtime_stub.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_mermaid_runtime_web.dart'),
+      outputFile: 'lib/components/docs_mermaid_runtime_web.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'dart_pad.dart'),
+      outputFile: 'lib/components/dart_pad.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'mermaid_diagram.dart'),
+      outputFile: 'lib/components/mermaid_diagram.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'extensions', 'api_linker_extension.dart'),
+      outputFile: 'lib/extensions/api_linker_extension.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'layouts', 'api_docs_layout.dart'),
+      outputFile: 'lib/layouts/api_docs_layout.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'template_engine', 'docs_template_engine.dart'),
+      outputFile: 'lib/template_engine/docs_template_engine.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'theme', 'docs_theme.dart'),
+      outputFile: 'lib/theme/docs_theme.dart',
       placeholders: placeholders,
     );
     _writeTemplateIfAbsent(
@@ -80,15 +194,15 @@ class JasprInitGenerator {
     // Generate empty sidebar stub so the app compiles before first generation.
     _writeFileToDisk(
       outputFile: 'lib/generated/api_sidebar.dart',
-      content:
-          '// Generated by dartdoc_vitepress. Do not edit.\n'
-          'const apiSidebarGroups = <dynamic>[];\n',
+      content: _emptySidebarStub('apiSidebarGroups'),
     );
     _writeFileToDisk(
       outputFile: 'lib/generated/guide_sidebar.dart',
-      content:
-          '// Generated by dartdoc_vitepress. Do not edit.\n'
-          'const guideSidebarGroups = <dynamic>[];\n',
+      content: _emptySidebarStub('guideSidebarGroups'),
+    );
+    _writeFileToDisk(
+      outputFile: 'lib/generated/api_symbols.dart',
+      content: _emptyApiSymbolsStub(),
     );
   }
 
@@ -124,4 +238,40 @@ class JasprInitGenerator {
 
     writer.write(outputFile, content);
   }
+
+  static String _emptySidebarStub(String constantName) => '''
+// Generated by dartdoc_vitepress. Do not edit.
+class SidebarItem {
+  final String text;
+  final String link;
+
+  const SidebarItem({required this.text, required this.link});
+}
+
+class SidebarGroup {
+  final String? title;
+  final List<SidebarItem> items;
+
+  const SidebarGroup({this.title, required this.items});
+}
+
+const $constantName = <SidebarGroup>[];
+''';
+
+  static String _emptyApiSymbolsStub() => '''
+// Generated by dartdoc_vitepress. Do not edit.
+class ApiSymbolEntry {
+  final String href;
+  final String relativePath;
+  final String apiDir;
+
+  const ApiSymbolEntry({
+    required this.href,
+    required this.relativePath,
+    required this.apiDir,
+  });
+}
+
+const apiSymbolMap = <String, List<ApiSymbolEntry>>{};
+''';
 }

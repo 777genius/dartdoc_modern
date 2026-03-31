@@ -212,7 +212,7 @@ class Dartdoc {
     var writtenFiles = generator.writtenFiles;
     if (config.validateLinks &&
         writtenFiles.isNotEmpty &&
-        config.format != 'vitepress') {
+        generator.supportsLinkValidation) {
       runtimeStats.startPerfTask('validateLinks');
       Validator(packageGraph, config, _outputDir.path, writtenFiles,
               _onCheckProgress)

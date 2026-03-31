@@ -9,6 +9,9 @@
 /// objects. Sidebar output formatting is format-specific and NOT included here.
 library;
 
+import 'package:analyzer/file_system/file_system.dart';
+import 'package:dartdoc_vitepress/src/logging.dart';
+import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:path/path.dart' as p;
 
 /// Matches a markdown level-1 heading (e.g. `# My Title`).
@@ -39,6 +42,12 @@ class GuideEntry {
   /// The raw markdown content read from the source file.
   final String content;
 
+  /// Absolute source path of the original markdown file.
+  ///
+  /// Used by format-specific preprocessors that need filesystem context,
+  /// for example resolving `<<<` code imports relative to the guide file.
+  final String? sourcePath;
+
   /// Optional sidebar position from frontmatter `sidebar_position`.
   /// Lower values appear first. `null` means no explicit order (sorted last).
   final int? sidebarPosition;
@@ -48,8 +57,150 @@ class GuideEntry {
     required this.relativePath,
     required this.title,
     required this.content,
+    this.sourcePath,
     this.sidebarPosition,
   });
+}
+
+/// Applies format-specific content transformations to collected guide files.
+typedef GuideContentTransformer = String Function(
+  String content,
+  String relativePath,
+  String sourcePath,
+);
+
+/// Scans and collects markdown guide files in a format-agnostic way.
+///
+/// This class is responsible only for:
+/// - directory scanning
+/// - include/exclude filtering
+/// - title extraction
+/// - sidebar position extraction
+/// - duplicate output path protection
+///
+/// Output formatting and content rendering remain format-specific.
+class GuideCollector {
+  final ResourceProvider resourceProvider;
+  final List<String> scanDirs;
+  final List<RegExp> _includeRegexps;
+  final List<RegExp> _excludeRegexps;
+
+  GuideCollector({
+    required this.resourceProvider,
+    required this.scanDirs,
+    List<String> include = const [],
+    List<String> exclude = const [],
+  })  : _includeRegexps = compilePatterns(include, 'include'),
+        _excludeRegexps = compilePatterns(exclude, 'exclude');
+
+  /// Compiles regex patterns with validation.
+  static List<RegExp> compilePatterns(List<String> patterns, String label) {
+    return patterns.map((pattern) {
+      try {
+        return RegExp(pattern);
+      } on FormatException catch (e) {
+        throw FormatException(
+          'Invalid guide $label regex "$pattern": ${e.message}',
+        );
+      }
+    }).toList();
+  }
+
+  /// Scans `doc/`/`docs/` in each local package and collects `.md` files.
+  List<GuideEntry> collectGuideEntries({
+    required PackageGraph packageGraph,
+    required bool isMultiPackage,
+    required GuideContentTransformer transformContent,
+  }) {
+    final entries = <GuideEntry>[];
+    final usedPaths = <String>{};
+
+    for (final package in packageGraph.localPackages) {
+      final packageDir = package.packagePath;
+
+      for (final dirName in scanDirs) {
+        final docDirPath = p.join(packageDir, dirName);
+        final docFolder = resourceProvider.getFolder(docDirPath);
+        if (!docFolder.exists) continue;
+
+        final mdFiles = collectMarkdownFiles(docFolder);
+        for (final mdFile in mdFiles) {
+          var relativeToDocs = p.relative(mdFile.path, from: docDirPath);
+          relativeToDocs = relativeToDocs.replaceAll(r'\', '/');
+
+          if (!matchesFilters(relativeToDocs)) continue;
+
+          final originalContent = mdFile.readAsStringSync();
+          final transformedContent =
+              transformContent(originalContent, relativeToDocs, mdFile.path);
+          final title = extractTitle(originalContent, relativeToDocs);
+
+          final outputRelative = isMultiPackage
+              ? p.posix.join('guide', package.name, relativeToDocs)
+              : p.posix.join('guide', relativeToDocs);
+
+          if (!usedPaths.add(outputRelative)) {
+            logWarning('Duplicate guide file path: $outputRelative (skipping)');
+            continue;
+          }
+
+          entries.add(
+            GuideEntry(
+              packageName: package.name,
+              relativePath: outputRelative,
+              title: title,
+              content: transformedContent,
+              sourcePath: mdFile.path,
+              sidebarPosition: extractSidebarPosition(originalContent),
+            ),
+          );
+        }
+      }
+    }
+
+    if (entries.isNotEmpty) {
+      logInfo('Guide: ${entries.length} markdown file(s) collected.');
+    }
+
+    return entries;
+  }
+
+  /// Checks if [relativePath] passes the include/exclude filters.
+  bool matchesFilters(String relativePath) {
+    if (_includeRegexps.isNotEmpty) {
+      final matches = _includeRegexps.any((re) => re.hasMatch(relativePath));
+      if (!matches) return false;
+    }
+
+    if (_excludeRegexps.isNotEmpty) {
+      final excluded = _excludeRegexps.any((re) => re.hasMatch(relativePath));
+      if (excluded) return false;
+    }
+
+    return true;
+  }
+
+  /// Recursively collects all `.md` files in [folder].
+  ///
+  /// Tracks visited canonical paths to prevent infinite loops from symlinks.
+  List<File> collectMarkdownFiles(Folder folder, [Set<String>? visited]) {
+    visited ??= {};
+    final resolvedPath = folder.resolveSymbolicLinksSync().path;
+    if (!visited.add(resolvedPath)) return [];
+
+    final files = <File>[];
+
+    for (final child in folder.getChildren()) {
+      if (child is Folder) {
+        files.addAll(collectMarkdownFiles(child, visited));
+      } else if (child is File && child.path.endsWith('.md')) {
+        files.add(child);
+      }
+    }
+
+    files.sort((a, b) => a.path.compareTo(b.path));
+    return files;
+  }
 }
 
 /// Extracts a title from the markdown content.
@@ -94,10 +245,18 @@ int? extractSidebarPosition(String content) {
 List<GuideEntry> sortGuideEntries(List<GuideEntry> entries) {
   entries.sort((a, b) {
     if (a.sidebarPosition != null && b.sidebarPosition != null) {
-      return a.sidebarPosition!.compareTo(b.sidebarPosition!);
+      final byPosition = a.sidebarPosition!.compareTo(b.sidebarPosition!);
+      if (byPosition != 0) return byPosition;
     }
     if (a.sidebarPosition != null) return -1;
     if (b.sidebarPosition != null) return 1;
+
+    final depthA = '/'.allMatches(a.relativePath).length;
+    final depthB = '/'.allMatches(b.relativePath).length;
+    if (depthA != depthB) {
+      return depthA.compareTo(depthB);
+    }
+
     return a.title.compareTo(b.title);
   });
   return entries;

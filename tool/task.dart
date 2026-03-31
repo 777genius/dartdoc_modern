@@ -207,6 +207,7 @@ Future<void> runBuildbot() async {
   await _section('Analyze package', analyzePackage);
   await _section('Validate format', validateFormat);
   await _section('Validate build', validateBuild);
+  await _section('Validate Jaspr theme', validateJasprTheme);
   await _section('Run try publish', runTryPublish);
   await _section('Run test', runTest);
   await _section('Validate dartdoc docs', validateDartdocDocs);
@@ -819,10 +820,86 @@ Future<void> runValidate(ArgResults commandResults) async {
       'build' => validateBuild(),
       'dartdoc-docs' => validateDartdocDocs(),
       'format' => validateFormat(),
+      'jaspr-theme' => validateJasprTheme(),
       'sdk-docs' => validateSdkDocs(),
       _ => throw UnimplementedError('Unknown validation target: "$target"'),
     };
   }
+}
+
+Future<void> validateJasprTheme() async {
+  await SubprocessLauncher('analyze-theme-e2e').runStreamedDartCommand([
+    'analyze',
+    path.join('test', 'end2end', 'jaspr_generator_test.dart'),
+  ]);
+
+  await SubprocessLauncher('theme-preview-script').runStreamed(
+    'bash',
+    ['-n', path.join('tool', 'jaspr_theme_preview.sh')],
+  );
+  await SubprocessLauncher('theme-snapshot-script').runStreamed(
+    'bash',
+    ['-n', path.join('tool', 'jaspr_theme_snapshot.sh')],
+  );
+
+  final outputDir =
+      Directory.systemTemp.createTempSync('dartdoc-jaspr-theme-validate');
+  final pubCacheDir =
+      Directory.systemTemp.createTempSync('dartdoc-jaspr-pub-cache');
+
+  try {
+    _prepareOfflinePubCache(pubCacheDir);
+
+    await SubprocessLauncher('generate-jaspr-theme').runStreamedDartCommand([
+      'run',
+      path.join(Directory.current.path, 'bin', 'dartdoc_vitepress.dart'),
+      '--format',
+      'jaspr',
+      '--output',
+      outputDir.path,
+    ], workingDirectory: path.join('testing', 'test_package_with_docs'));
+
+    await SubprocessLauncher('theme-pub-get').runStreamedDartCommand([
+      'pub',
+      'get',
+      '--offline',
+    ], workingDirectory: outputDir.path, environment: {
+      'PUB_CACHE': pubCacheDir.path,
+    });
+
+    await SubprocessLauncher('theme-analyze').runStreamedDartCommand([
+      'analyze',
+    ], workingDirectory: outputDir.path, environment: {
+      'PUB_CACHE': pubCacheDir.path,
+    });
+  } finally {
+    if (outputDir.existsSync()) {
+      outputDir.deleteSync(recursive: true);
+    }
+    if (pubCacheDir.existsSync()) {
+      pubCacheDir.deleteSync(recursive: true);
+    }
+  }
+}
+
+void _prepareOfflinePubCache(Directory pubCacheDir) {
+  final homeDirPath = Platform.environment['HOME'] ??
+      Platform.environment['USERPROFILE'];
+  if (homeDirPath == null || homeDirPath.isEmpty) {
+    throw StateError('Unable to determine the user home directory.');
+  }
+
+  void linkIfPresent(String name) {
+    final target = Directory(path.join(homeDirPath, '.pub-cache', name));
+    final linkPath = path.join(pubCacheDir.path, name);
+    if (target.existsSync() && !Link(linkPath).existsSync()) {
+      Link(linkPath).createSync(target.path);
+    }
+  }
+
+  linkIfPresent('hosted');
+  linkIfPresent('git');
+  linkIfPresent('hosted-hashes');
 }
 
 Future<void> validateBuild() async {

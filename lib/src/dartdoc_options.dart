@@ -44,6 +44,26 @@ const String compileArgsTagName = 'compile_args';
 
 int get _usageLineLength => stdout.hasTerminal ? stdout.terminalColumns : 80;
 
+String? _inferFlutterRoot(PackageMetaProvider packageMetaProvider) {
+  final resourceProvider = packageMetaProvider.resourceProvider;
+  final pathContext = resourceProvider.pathContext;
+  final defaultSdkDir = packageMetaProvider.defaultSdkDir.path;
+  final flutterRoot = pathContext.normalize(
+    pathContext.join(defaultSdkDir, '..', '..', '..'),
+  );
+  final flutterBinCandidates = [
+    pathContext.join(flutterRoot, 'bin', 'flutter'),
+    pathContext.join(flutterRoot, 'bin', 'flutter.bat'),
+    pathContext.join(flutterRoot, 'bin', 'flutter.exe'),
+  ];
+  if (flutterBinCandidates.any(
+    (candidate) => resourceProvider.getFile(candidate).exists,
+  )) {
+    return flutterRoot;
+  }
+  return null;
+}
+
 typedef ConvertYamlToType<T> = T Function(YamlMap, String, ResourceProvider);
 
 class DartdocOptionError extends DartdocFailure {
@@ -1453,9 +1473,10 @@ List<DartdocOption> createDartdocOptions(
         (DartdocSyntheticOption<String?> option, Folder dir) {
       var flutterRootEnv =
           packageMetaProvider.environmentProvider['FLUTTER_ROOT'];
-      return flutterRootEnv == null
-          ? null
-          : resourceProvider.pathContext.resolveTildePath(flutterRootEnv);
+      if (flutterRootEnv != null) {
+        return resourceProvider.pathContext.resolveTildePath(flutterRootEnv);
+      }
+      return _inferFlutterRoot(packageMetaProvider);
     }, resourceProvider,
         optionIs: OptionKind.dir,
         help: 'Root of the Flutter SDK, specified from the environment.',
@@ -1565,10 +1586,14 @@ List<DartdocOption> createDartdocOptions(
           (option.root['topLevelPackageMeta'].valueAt(dir) as PackageMeta)
               .requiresFlutter) {
         String? flutterRoot = option.root['flutterRoot'].valueAt(dir);
-        return flutterRoot == null
-            ? null
-            : resourceProvider.pathContext
-                .join(flutterRoot, 'bin', 'cache', 'dart-sdk');
+        if (flutterRoot == null) {
+          throw DartdocOptionError(
+            'Flutter package detected, but no Flutter SDK root could be '
+            'resolved. Set FLUTTER_ROOT or pass --sdk-dir explicitly.',
+          );
+        }
+        return resourceProvider.pathContext
+            .join(flutterRoot, 'bin', 'cache', 'dart-sdk');
       }
       return packageMetaProvider.defaultSdkDir.path;
     }, packageMetaProvider.resourceProvider,

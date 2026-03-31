@@ -71,6 +71,37 @@ String normalizeDots(String dirName) {
   return dirName;
 }
 
+final _internalSdkDirPattern = RegExp(r'^(dart\.[a-z_.]+)(/|$)');
+
+/// Normalizes internal SDK library directory names in a path.
+///
+/// Rewrites the first path segment when it matches `dart.xxx`:
+/// - `dart.dom.xxx/...` -> `dart-xxx/...` (strip `.dom.` prefix)
+/// - `dart._xxx/...` -> returns empty string (private SDK libraries have no
+///   generated pages; the caller should render as inline code)
+/// - `dart.xxx/...` -> `dart-xxx/...` (replace first `.` with `-`)
+String normalizeSdkLibraryPath(String path) {
+  final match = _internalSdkDirPattern.firstMatch(path);
+  if (match == null) return path;
+
+  final internalDir = match.group(1)!;
+  final hadSeparator = match.group(2) == '/';
+  final rest = path.substring(match.end);
+
+  if (internalDir.startsWith('dart._')) return '';
+
+  String canonicalDir;
+  if (internalDir.startsWith('dart.dom.')) {
+    canonicalDir = 'dart-${internalDir.substring('dart.dom.'.length)}';
+  } else {
+    canonicalDir = 'dart-${internalDir.substring('dart.'.length)}';
+  }
+
+  if (rest.isNotEmpty) return '$canonicalDir/$rest';
+  if (hadSeparator) return '$canonicalDir/';
+  return canonicalDir;
+}
+
 /// Returns `true` if the library is a dot-prefixed SDK duplicate that has a
 /// canonical colon-prefixed counterpart (e.g. `dart.io` -> `dart:io`).
 ///
