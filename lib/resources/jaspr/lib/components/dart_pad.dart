@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:jaspr/dom.dart';
-import 'package:jaspr/jaspr.dart';
 import 'package:jaspr/server.dart';
 import 'package:jaspr_content/jaspr_content.dart';
 import 'package:syntax_highlight_lite/syntax_highlight_lite.dart' hide Color;

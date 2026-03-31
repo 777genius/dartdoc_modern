@@ -5,6 +5,7 @@ import 'package:jaspr_content/theme.dart';
 
 import '../components/docs_dartpad_runtime.dart';
 import '../components/docs_nav_link.dart';
+import '../theme/docs_responsive.dart';
 
 class ApiDocsLayout extends DocsLayout {
   const ApiDocsLayout({
@@ -20,10 +21,7 @@ class ApiDocsLayout extends DocsLayout {
   Iterable<Component> buildHead(Page page) sync* {
     yield* super.buildHead(page);
     yield Style(styles: _styles);
-    yield script(
-      src: 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js',
-      defer: true,
-    );
+    yield script(src: 'docs_mermaid_runtime.js?v=5', defer: true);
   }
 
   @override
@@ -200,7 +198,12 @@ class ApiDocsLayout extends DocsLayout {
 
     return li([
       details(classes: 'toc-section', [
-        summary([
+        summary(classes: 'toc-summary', [
+          span(
+            classes: 'toc-summary-chevron',
+            attributes: {'aria-hidden': 'true'},
+            [Component.text('›')],
+          ),
           DocsNavLink(
             to: '$baseUrl#${entry.id}',
             classes: 'toc-link',
@@ -222,6 +225,7 @@ class ApiDocsLayout extends DocsLayout {
       );
 
   static List<StyleRule> get _styles => [
+        ...docsResponsiveRootStyles(),
         css('.header-container').styles(
           position: Position.sticky(top: Unit.zero),
           zIndex: ZIndex(20),
@@ -272,6 +276,7 @@ class ApiDocsLayout extends DocsLayout {
           css('.breadcrumb-link').styles(
             color: Color('var(--docs-shell-accent)'),
             textDecoration: TextDecoration.none,
+            fontWeight: FontWeight.w600,
           ),
           css('.breadcrumb-link:hover').styles(
             textDecoration: TextDecoration(line: TextDecorationLine.underline),
@@ -321,6 +326,19 @@ class ApiDocsLayout extends DocsLayout {
               'border-color, background-color, transform',
               duration: Duration(milliseconds: 150),
             ),
+            raw: {
+              'position': 'relative',
+              'flex': '0 1 auto',
+              'max-width': '100%',
+            },
+          ),
+          css('.search-launcher::before').styles(
+            display: Display.none,
+            raw: {
+              'content': '"⌕"',
+              'font-size': '0.96rem',
+              'line-height': '1',
+            },
           ),
           css('.search-launcher:hover').styles(
             border: Border.all(
@@ -348,16 +366,58 @@ class ApiDocsLayout extends DocsLayout {
             backgroundColor: Color('var(--docs-shell-surface-elevated)'),
             raw: {'line-height': '1'},
           ),
-          css.media(MediaQuery.all(maxWidth: 767.px), [
+          downMobile([
             css('&').styles(
               justifyContent: JustifyContent.end,
             ),
             css('.search-launcher').styles(
-              minWidth: 9.75.rem,
+              minWidth: 0.rem,
+              gap: Gap.column(0.55.rem),
               padding: Padding.symmetric(
-                vertical: 0.58.rem,
-                horizontal: 0.78.rem,
+                vertical: 0.54.rem,
+                horizontal: 0.72.rem,
               ),
+              raw: {
+                'min-width': 'var(--docs-shell-search-launcher-min)',
+              },
+            ),
+            css('.search-launcher-label').styles(
+              fontSize: 0.88.rem,
+            ),
+            css('.search-launcher-shortcut').styles(
+              fontSize: 0.75.rem,
+              padding:
+                  Padding.symmetric(vertical: 0.14.rem, horizontal: 0.34.rem),
+            ),
+          ]),
+          downCompact([
+            css('&').styles(
+              justifyContent: JustifyContent.end,
+              raw: {
+                'flex': '0 0 auto',
+              },
+            ),
+            css('.search-launcher').styles(
+              minWidth: 0.rem,
+              gap: Gap.column(0.38.rem),
+              padding: Padding.symmetric(
+                vertical: 0.5.rem,
+                horizontal: 0.62.rem,
+              ),
+              raw: {
+                'width': 'var(--docs-shell-search-launcher-min)',
+                'max-width': 'var(--docs-shell-search-launcher-min)',
+                'justify-content': 'center',
+              },
+            ),
+            css('.search-launcher::before').styles(
+              display: Display.inlineFlex,
+              justifyContent: JustifyContent.center,
+              alignItems: AlignItems.center,
+            ),
+            css('.search-launcher-label').styles(display: Display.none),
+            css('.search-launcher-shortcut').styles(
+              display: Display.none,
             ),
           ]),
         ]),
@@ -385,25 +445,26 @@ class ApiDocsLayout extends DocsLayout {
           ),
           css('.docs-search-panel').styles(
             position: Position.relative(),
-            margin: Margin.only(top: 8.vh),
+            margin: Margin.only(top: 7.vh),
             width: 100.percent,
-            maxWidth: 44.rem,
+            maxWidth: 100.percent,
             backgroundColor: Color('var(--docs-shell-surface-elevated)'),
             border: Border.all(
               width: 1.px,
               color: Color('var(--docs-shell-border)'),
             ),
-            radius: BorderRadius.circular(1.rem),
+            radius: BorderRadius.circular(1.15.rem),
             shadow: BoxShadow(
               offsetX: Unit.zero,
-              offsetY: Unit.zero,
-              blur: 40.px,
+              offsetY: 22.px,
+              blur: 42.px,
               color: Color('var(--docs-shell-shadow)'),
             ),
             overflow: Overflow.hidden,
             raw: {
               'margin-left': 'auto',
               'margin-right': 'auto',
+              'max-width': 'var(--docs-shell-search-panel-width)',
               'backdrop-filter': 'blur(18px)',
               '-webkit-backdrop-filter': 'blur(18px)',
             },
@@ -413,10 +474,10 @@ class ApiDocsLayout extends DocsLayout {
             alignItems: AlignItems.center,
             gap: Gap.column(0.65.rem),
             padding: Padding.only(
-                top: 0.95.rem,
-                right: 0.95.rem,
-                bottom: 0.85.rem,
-                left: 0.95.rem),
+                top: 1.05.rem,
+                right: 1.05.rem,
+                bottom: 0.9.rem,
+                left: 1.05.rem),
             border: Border.only(
               bottom: BorderSide(
                 width: 1.px,
@@ -443,14 +504,20 @@ class ApiDocsLayout extends DocsLayout {
             raw: {'grid-area': 'input'},
             width: 100.percent,
             padding:
-                Padding.symmetric(vertical: 0.78.rem, horizontal: 0.92.rem),
+                Padding.symmetric(vertical: 0.84.rem, horizontal: 0.98.rem),
             border: Border.all(
               width: 1.px,
               color: Color('var(--docs-shell-border-strong)'),
             ),
-            radius: BorderRadius.circular(0.75.rem),
+            radius: BorderRadius.circular(0.82.rem),
             backgroundColor: Color('var(--docs-shell-surface-soft)'),
             color: ContentColors.text,
+            shadow: BoxShadow(
+              offsetX: Unit.zero,
+              offsetY: 10.px,
+              blur: 22.px,
+              color: Color('var(--docs-shell-shadow)'),
+            ),
           ),
           css('.docs-search-input:focus-visible').styles(
             outline: Outline(
@@ -463,12 +530,13 @@ class ApiDocsLayout extends DocsLayout {
           css('.docs-search-close').styles(
             raw: {'grid-area': 'close'},
             alignSelf: AlignSelf.center,
-            padding: Padding.symmetric(vertical: 0.45.rem, horizontal: 0.7.rem),
+            padding:
+                Padding.symmetric(vertical: 0.48.rem, horizontal: 0.74.rem),
             border: Border.all(
               width: 1.px,
               color: Color('var(--docs-shell-border-strong)'),
             ),
-            radius: BorderRadius.circular(0.75.rem),
+            radius: BorderRadius.circular(0.82.rem),
             backgroundColor: Color('var(--docs-shell-surface-soft)'),
             cursor: Cursor.pointer,
             color: ContentColors.text,
@@ -482,14 +550,66 @@ class ApiDocsLayout extends DocsLayout {
           ),
           css('.docs-search-status').styles(
             padding:
-                Padding.symmetric(vertical: 0.65.rem, horizontal: 0.95.rem),
+                Padding.symmetric(vertical: 0.72.rem, horizontal: 1.05.rem),
             fontSize: 0.88.rem,
             color: Color('var(--docs-shell-muted)'),
+            backgroundColor: Color('var(--docs-shell-surface-soft)'),
+          ),
+          css('.docs-search-status[data-search-state="loading"]').styles(
+            color: Color('var(--docs-shell-accent-strong)'),
+          ),
+          css('.docs-search-status[data-search-state="error"]').styles(
+            color: Color('var(--docs-shell-accent-strong)'),
+            backgroundColor: Color('var(--docs-shell-callout-bg)'),
           ),
           css('.docs-search-results').styles(
             maxHeight: 65.vh,
             overflow: Overflow.auto,
-            padding: Padding.only(bottom: 0.35.rem),
+            padding: Padding.only(
+              top: 0.42.rem,
+              right: 0.42.rem,
+              bottom: 0.5.rem,
+              left: 0.42.rem,
+            ),
+            backgroundColor: Color('var(--docs-shell-surface)'),
+          ),
+          css('.docs-search-empty-state').styles(
+            display: Display.flex,
+            alignItems: AlignItems.center,
+            gap: Gap.column(0.95.rem),
+            padding: Padding.symmetric(vertical: 1.1.rem, horizontal: 1.05.rem),
+            border: Border.all(
+              width: 1.px,
+              color: Color('var(--docs-shell-border)'),
+            ),
+            radius: BorderRadius.circular(1.rem),
+            backgroundColor: Color('var(--docs-shell-surface-elevated)'),
+          ),
+          css('.docs-search-empty-icon').styles(
+            display: Display.inlineFlex,
+            justifyContent: JustifyContent.center,
+            alignItems: AlignItems.center,
+            width: 2.35.rem,
+            height: 2.35.rem,
+            fontSize: 1.05.rem,
+            fontWeight: FontWeight.w800,
+            radius: BorderRadius.circular(999.px),
+            backgroundColor: Color('var(--docs-shell-accent-soft)'),
+            color: Color('var(--docs-shell-accent-strong)'),
+            raw: {'flex': '0 0 auto'},
+          ),
+          css('.docs-search-empty-copy').styles(
+            minWidth: Unit.zero,
+            raw: {'flex': '1 1 auto'},
+          ),
+          css('.docs-search-empty-title').styles(
+            fontWeight: FontWeight.w700,
+            margin: Margin.only(bottom: 0.16.rem),
+          ),
+          css('.docs-search-empty-text').styles(
+            fontSize: 0.9.rem,
+            color: Color('var(--docs-shell-muted)'),
+            raw: {'line-height': '1.55'},
           ),
           css('.docs-search-footer').styles(
             display: Display.flex,
@@ -542,32 +662,38 @@ class ApiDocsLayout extends DocsLayout {
           css('.docs-search-result').styles(
             display: Display.flex,
             gap: Gap.column(1.rem),
+            margin: Margin.only(bottom: 0.45.rem),
             padding:
-                Padding.symmetric(vertical: 0.78.rem, horizontal: 0.95.rem),
+                Padding.symmetric(vertical: 0.84.rem, horizontal: 0.95.rem),
             textDecoration: TextDecoration.none,
             color: ContentColors.text,
-            border: Border.only(
-              bottom: BorderSide(
-                width: 1.px,
-                color: Color('var(--docs-shell-border)'),
-              ),
+            border: Border.all(
+              width: 1.px,
+              color: Color('var(--docs-shell-border)'),
             ),
+            radius: BorderRadius.circular(0.95.rem),
+            backgroundColor: Color('var(--docs-shell-surface-elevated)'),
             transition: Transition(
               'background-color, border-color, transform, box-shadow',
               duration: Duration(milliseconds: 150),
             ),
           ),
+          css('.docs-search-result:last-child').styles(
+            margin: Margin.only(bottom: Unit.zero),
+          ),
           css('.docs-search-result:hover').styles(
             backgroundColor: Color('var(--docs-shell-accent-soft)'),
+            border: Border.all(
+              width: 1.px,
+              color: Color('var(--docs-shell-border-strong)'),
+            ),
             raw: {'transform': 'translateY(-1px)'},
           ),
           css('.docs-search-result.active').styles(
             backgroundColor: Color('var(--docs-shell-accent-soft)'),
-            border: Border.only(
-              bottom: BorderSide(
-                width: 1.px,
-                color: Color('var(--docs-shell-accent)'),
-              ),
+            border: Border.all(
+              width: 1.px,
+              color: Color('var(--docs-shell-accent)'),
             ),
             shadow: BoxShadow(
               offsetX: Unit.zero,
@@ -618,6 +744,7 @@ class ApiDocsLayout extends DocsLayout {
           css('.docs-search-title').styles(
             fontWeight: FontWeight.w700,
             margin: Margin.only(bottom: 0.24.rem),
+            raw: {'line-height': '1.32'},
           ),
           css('.docs-search-title mark, .docs-search-summary mark').styles(
             backgroundColor: Color('var(--docs-shell-accent-soft)'),
@@ -638,11 +765,21 @@ class ApiDocsLayout extends DocsLayout {
           css('.docs-search-url').styles(
             fontSize: 0.8.rem,
             color: Color('var(--docs-shell-muted)'),
+            raw: {
+              'word-break': 'break-word',
+            },
           ),
           css('.docs-search-summary').styles(
             fontSize: 0.89.rem,
             opacity: 0.9,
-            raw: {'line-height': '1.45'},
+            color: Color('var(--docs-shell-muted)'),
+            raw: {
+              'line-height': '1.48',
+              'display': '-webkit-box',
+              '-webkit-box-orient': 'vertical',
+              '-webkit-line-clamp': '2',
+              'overflow': 'hidden',
+            },
           ),
           css('.docs-search-kind-guide').styles(
             backgroundColor: Color('var(--docs-shell-surface-elevated)'),
@@ -656,7 +793,7 @@ class ApiDocsLayout extends DocsLayout {
             backgroundColor: Color('var(--docs-shell-callout-bg)'),
             color: Color('var(--docs-shell-accent-strong)'),
           ),
-          css.media(MediaQuery.all(maxWidth: 767.px), [
+          downMobile([
             css('.docs-search-panel').styles(
               margin: Margin.only(top: 2.5.vh),
               maxWidth: 100.percent,
@@ -687,6 +824,16 @@ class ApiDocsLayout extends DocsLayout {
             ),
             css('.docs-search-result').styles(
               display: Display.block,
+              padding:
+                  Padding.symmetric(vertical: 0.78.rem, horizontal: 0.82.rem),
+            ),
+            css('.docs-search-empty-state').styles(
+              display: Display.block,
+              padding:
+                  Padding.symmetric(vertical: 0.95.rem, horizontal: 0.9.rem),
+            ),
+            css('.docs-search-empty-icon').styles(
+              margin: Margin.only(bottom: 0.55.rem),
             ),
             css('.docs-search-kind').styles(
               margin: Margin.only(bottom: 0.4.rem),
@@ -837,6 +984,14 @@ class ApiDocsLayout extends DocsLayout {
             ),
             backgroundColor: Color('var(--docs-shell-surface-soft)'),
           ),
+          css(
+            '.mermaid-placeholder[hidden], .mermaid-host[hidden], .mermaid-fallback[hidden]',
+          ).styles(
+            display: Display.none,
+            raw: {
+              'display': 'none !important',
+            },
+          ),
           css('.mermaid-placeholder-label').styles(
             color: Color('var(--docs-shell-muted-text)'),
             fontWeight: FontWeight.w600,
@@ -853,7 +1008,10 @@ class ApiDocsLayout extends DocsLayout {
           css('.mermaid-host svg').styles(
             maxWidth: 100.percent,
             display: Display.block,
-            margin: Margin.symmetric(horizontal: auto),
+            raw: {
+              'margin-left': 'auto',
+              'margin-right': 'auto',
+            },
           ),
           css('.mermaid-fallback').styles(
             display: Display.grid,
@@ -862,7 +1020,9 @@ class ApiDocsLayout extends DocsLayout {
           css('.mermaid-fallback-message').styles(
             color: Color('var(--docs-shell-muted-text)'),
             fontSize: 0.95.rem,
-            lineHeight: LineHeight.number(1.5),
+            raw: {
+              'line-height': '1.5',
+            },
           ),
         ]),
         css('.docs', [
@@ -887,27 +1047,31 @@ class ApiDocsLayout extends DocsLayout {
             display: Display.grid,
             raw: {
               'overflow': 'visible',
-              'grid-template-columns': 'minmax(0, 1fr) 18rem',
-              'gap': '2.25rem',
-              'max-width': 'min(96rem, calc(100vw - 3rem))',
+              'grid-template-columns':
+                  'minmax(0, 1fr) var(--docs-shell-toc-width)',
+              'gap': 'var(--docs-shell-grid-gap)',
+              'max-width': 'var(--docs-shell-main-max-width)',
               'margin': '0 auto',
-              'padding': '2.15rem 0 3.5rem',
+              'padding':
+                  'var(--docs-shell-main-pad-top) var(--docs-shell-main-pad-inline) var(--docs-shell-main-pad-bottom)',
             },
           ),
-          css.media(MediaQuery.all(maxWidth: 1180.px), [
+          downWide([
             css('main > div').styles(
               raw: {
-                'grid-template-columns': 'minmax(0, 1fr) 16rem',
-                'gap': '1.5rem',
-                'max-width': 'calc(100vw - 2rem)',
+                'grid-template-columns':
+                    'minmax(0, 1fr) var(--docs-shell-toc-width)',
               },
             ),
           ]),
-          css.media(MediaQuery.all(maxWidth: 959.px), [
+          downContent([
             css('main > div').styles(
               display: Display.block,
-              padding: Padding.only(
-                  top: 1.35.rem, right: 1.rem, bottom: 2.rem, left: 1.rem),
+              raw: {
+                'overflow-x': 'clip',
+                'padding':
+                    'var(--docs-shell-main-pad-top) var(--docs-shell-main-pad-inline) var(--docs-shell-main-pad-bottom)',
+              },
             ),
           ]),
         ]),
@@ -929,17 +1093,14 @@ class ApiDocsLayout extends DocsLayout {
             },
           ),
           css('[data-has-sidebar] .header').styles(
-            maxWidth: 96.rem,
+            maxWidth: 100.percent,
             margin: Margin.zero,
-            padding: Padding.only(
-              top: 0.9.rem,
-              right: 1.5.rem,
-              bottom: 0.9.rem,
-              left: 1.5.rem,
-            ),
             raw: {
               'margin-left': 'auto',
               'margin-right': 'auto',
+              'max-width': 'var(--docs-shell-main-max-width)',
+              'padding-block': 'var(--docs-shell-header-block-pad)',
+              'padding-inline': 'var(--docs-shell-header-inline-pad)',
             },
           ),
           css('.header .header-title').styles(
@@ -980,7 +1141,7 @@ class ApiDocsLayout extends DocsLayout {
             alignSelf: AlignSelf.start,
             padding: Padding.only(
               top: 1.45.rem,
-              left: 1.rem,
+              left: 0.85.rem,
               right: 1.rem,
               bottom: 2.25.rem,
             ),
@@ -1007,7 +1168,12 @@ class ApiDocsLayout extends DocsLayout {
           css('.sidebar > div').styles(
             maxHeight: 84.vh,
             overflow: Overflow.auto,
-            padding: Padding.all(1.rem),
+            padding: Padding.only(
+              top: 1.rem,
+              right: 0.9.rem,
+              bottom: 1.rem,
+              left: 0.92.rem,
+            ),
             radius: BorderRadius.circular(1.15.rem),
           ),
           css('.sidebar .sidebar-header').styles(
@@ -1056,20 +1222,86 @@ class ApiDocsLayout extends DocsLayout {
             color: Color('var(--docs-shell-accent)'),
             fontWeight: FontWeight.w700,
           ),
-          css.media(MediaQuery.all(maxWidth: 959.px), [
+          downContent([
             css('&').styles(
-              padding: Padding.only(left: 1.rem, right: 1.rem, bottom: 1.rem),
+              position: Position.fixed(
+                top: 0.rem,
+                left: 0.rem,
+                bottom: 0.rem,
+              ),
+              zIndex: ZIndex(55),
+              width: 100.percent,
+              maxWidth: 88.vw,
+              padding: Padding.only(
+                top: 0.9.rem,
+                left: 0.8.rem,
+                right: 0.8.rem,
+                bottom: 0.9.rem,
+              ),
+              raw: {
+                'width': 'var(--docs-shell-drawer-width)',
+                'transform': 'translateX(-108%)',
+                'opacity': '0',
+                'pointer-events': 'none',
+                'transition': 'transform 220ms ease, opacity 180ms ease',
+              },
+            ),
+            css('&.open').styles(
+              raw: {
+                'transform': 'translateX(0)',
+                'opacity': '1',
+                'pointer-events': 'auto',
+              },
             ),
             css('.sidebar').styles(
+              position: Position.relative(),
+              maxHeight: 100.vh,
+              height: 100.percent,
+              radius: BorderRadius.circular(1.25.rem),
               shadow: BoxShadow.unset,
+              raw: {
+                'filter': 'drop-shadow(0 24px 40px var(--docs-shell-shadow))',
+              },
             ),
             css('.sidebar > div').styles(
-              maxHeight: Unit.auto,
-              overflow: Overflow.visible,
+              maxHeight: 100.percent,
+              overflow: Overflow.auto,
+              padding: Padding.only(
+                top: 1.rem,
+                right: 0.8.rem,
+                bottom: 1.rem,
+                left: 0.8.rem,
+              ),
             ),
             css('.sidebar .sidebar-close').styles(
               position: Position.sticky(top: 0.1.rem),
               raw: {'margin-left': 'auto'},
+            ),
+          ]),
+        ]),
+        css('.sidebar-barrier', [
+          css('&').styles(display: Display.none),
+          downContent([
+            css('&').styles(
+              position: Position.fixed(
+                top: Unit.zero,
+                left: Unit.zero,
+                right: Unit.zero,
+                bottom: Unit.zero,
+              ),
+              zIndex: ZIndex(54),
+              backgroundColor: Color('var(--docs-shell-overlay)'),
+              opacity: 0,
+              transition: Transition(
+                'opacity',
+                duration: Duration(milliseconds: 180),
+              ),
+              raw: {'pointer-events': 'none'},
+            ),
+            css('body.sidebar-open &').styles(
+              display: Display.block,
+              opacity: 1,
+              raw: {'pointer-events': 'auto'},
             ),
           ]),
         ]),
@@ -1080,21 +1312,29 @@ class ApiDocsLayout extends DocsLayout {
               right: 0.25.rem,
               bottom: 3.rem,
             ),
+            minWidth: Unit.zero,
           ),
           css('img').styles(
             maxWidth: 100.percent,
             radius: BorderRadius.circular(1.rem),
           ),
+          downMobile([
+            css('&').styles(
+              padding:
+                  Padding.only(top: 1.15.rem, right: Unit.zero, bottom: 2.rem),
+              raw: {
+                'padding-top': 'var(--docs-shell-content-pad-top)',
+                'padding-right': 'var(--docs-shell-content-pad-right)',
+                'padding-bottom': 'var(--docs-shell-content-pad-bottom)',
+              },
+            ),
+          ]),
         ]),
         css('.content-header', [
           css('&').styles(
             margin: Margin.only(bottom: 2.rem),
             padding: Padding.only(
-              top: 1.75.rem,
-              right: 1.8.rem,
-              bottom: 1.7.rem,
-              left: 1.8.rem,
-            ),
+                top: 1.75.rem, right: 1.8.rem, bottom: 1.7.rem, left: 1.8.rem),
             radius: BorderRadius.circular(1.5.rem),
             border: Border.all(
               width: 1.px,
@@ -1110,6 +1350,12 @@ class ApiDocsLayout extends DocsLayout {
             raw: {
               'position': 'relative',
               'overflow': 'hidden',
+              'box-sizing': 'border-box',
+              'width': '100%',
+              'max-width': '100%',
+              'padding':
+                  'var(--docs-shell-content-header-pad-y) var(--docs-shell-content-header-pad-x) calc(var(--docs-shell-content-header-pad-y) - 0.05rem)',
+              'border-radius': 'var(--docs-shell-content-header-radius)',
             },
           ),
           css('&:empty').styles(display: Display.none),
@@ -1139,16 +1385,9 @@ class ApiDocsLayout extends DocsLayout {
             color: Color('var(--docs-shell-muted)'),
             raw: {'line-height': '1.75'},
           ),
-          css.media(MediaQuery.all(maxWidth: 767.px), [
+          downMobile([
             css('&').styles(
               margin: Margin.only(bottom: 1.35.rem),
-              padding: Padding.only(
-                top: 1.1.rem,
-                right: 1.rem,
-                bottom: 1.rem,
-                left: 1.rem,
-              ),
-              radius: BorderRadius.circular(1.1.rem),
             ),
             css('h1').styles(
               raw: {
@@ -1171,7 +1410,7 @@ class ApiDocsLayout extends DocsLayout {
             maxWidth: Unit.auto,
           ),
           css('.search-launcher').styles(
-            minWidth: 12.75.rem,
+            minWidth: 0.rem,
             padding:
                 Padding.symmetric(vertical: 0.76.rem, horizontal: 0.95.rem),
             backgroundColor: Color('var(--docs-shell-surface)'),
@@ -1182,6 +1421,7 @@ class ApiDocsLayout extends DocsLayout {
               color: Color('var(--docs-shell-shadow)'),
             ),
             raw: {
+              'min-width': 'var(--docs-shell-search-launcher-min)',
               'backdrop-filter': 'blur(8px)',
               '-webkit-backdrop-filter': 'blur(8px)',
             },
@@ -1189,12 +1429,38 @@ class ApiDocsLayout extends DocsLayout {
           css('.search-launcher-label').styles(
             fontWeight: FontWeight.w700,
           ),
+          downMobile([
+            css('.search-launcher').styles(
+              minWidth: 0.rem,
+            ),
+          ]),
+          downCompact([
+            css('&').styles(
+              raw: {
+                'flex': '0 0 auto',
+              },
+            ),
+            css('.search-launcher').styles(
+              minWidth: 0.rem,
+              padding: Padding.symmetric(
+                vertical: 0.48.rem,
+                horizontal: 0.62.rem,
+              ),
+              raw: {
+                'max-width': '7rem',
+              },
+            ),
+            css('.search-launcher-label').styles(
+              fontSize: 0.82.rem,
+            ),
+          ]),
         ]),
         css('.docs-search-overlay .docs-search-panel').styles(
           radius: BorderRadius.circular(1.25.rem),
           raw: {
             'backdrop-filter': 'blur(18px)',
             '-webkit-backdrop-filter': 'blur(18px)',
+            'max-width': 'var(--docs-shell-search-panel-width)',
           },
         ),
         css('.docs-search-overlay .docs-search-input').styles(
@@ -1307,11 +1573,11 @@ class ApiDocsLayout extends DocsLayout {
           css('.toc ul ul .toc-link.active').styles(
             color: Color('var(--docs-shell-accent)'),
           ),
-          css.media(MediaQuery.all(maxWidth: 959.px), [
+          downContent([
             css('&').styles(display: Display.none),
           ]),
         ]),
-        css.media(MediaQuery.all(maxWidth: 959.px), [
+        downContent([
           css('.code-block button').styles(opacity: 1),
         ]),
         css('.toc .toc-section', [
@@ -1326,8 +1592,48 @@ class ApiDocsLayout extends DocsLayout {
           ),
           css('&:last-child').styles(border: Border.unset),
           css('summary').styles(
-            padding: Padding.only(bottom: 0.2.rem),
+            padding: Padding.zero,
             fontWeight: FontWeight.w600,
+            listStyle: ListStyle.none,
+            cursor: Cursor.pointer,
+          ),
+          css('summary::-webkit-details-marker').styles(
+            display: Display.none,
+          ),
+          css('.toc-summary').styles(
+            display: Display.flex,
+            alignItems: AlignItems.center,
+            gap: Gap.column(0.45.rem),
+            padding: Padding.only(bottom: 0.15.rem),
+          ),
+          css('.toc-summary-chevron').styles(
+            display: Display.inlineFlex,
+            alignItems: AlignItems.center,
+            justifyContent: JustifyContent.center,
+            width: 1.rem,
+            color: Color('var(--docs-shell-muted)'),
+            transition: Transition(
+              'transform, color',
+              duration: Duration(milliseconds: 150),
+            ),
+            raw: {
+              'flex': '0 0 auto',
+              'font-size': '1rem',
+              'line-height': '1',
+            },
+          ),
+          css('&[open] .toc-summary-chevron').styles(
+            color: Color('var(--docs-shell-accent)'),
+            raw: {
+              'transform': 'rotate(90deg)',
+            },
+          ),
+          css('.toc-summary .toc-link').styles(
+            padding:
+                Padding.symmetric(vertical: 0.42.rem, horizontal: 0.68.rem),
+            raw: {
+              'flex': '1 1 auto',
+            },
           ),
           css('a').styles(
             color: ContentColors.text,
@@ -1344,6 +1650,117 @@ class ApiDocsLayout extends DocsLayout {
             color: Color('var(--docs-shell-shadow)'),
           ),
         ),
+        css('.content p, .content li').styles(
+          fontSize: 1.01.rem,
+          raw: {
+            'line-height': '1.74',
+            'text-wrap': 'pretty',
+          },
+        ),
+        css('.content a').styles(
+          color: Color('var(--docs-shell-accent)'),
+          textDecoration: TextDecoration.none,
+          fontWeight: FontWeight.w600,
+          raw: {
+            'text-decoration-thickness': '0.08em',
+            'text-underline-offset': '0.16em',
+          },
+        ),
+        css('.content a:hover').styles(
+          textDecoration: TextDecoration(line: TextDecorationLine.underline),
+        ),
+        css('.content ul, .content ol').styles(
+          padding: Padding.only(left: 1.18.rem),
+        ),
+        css('.content li + li').styles(
+          margin: Margin.only(top: 0.22.rem),
+        ),
+        css('.content h2').styles(
+          margin: Margin.only(top: 2.4.rem, bottom: 0.8.rem),
+          raw: {
+            'letter-spacing': '-0.03em',
+          },
+        ),
+        css('.content h3').styles(
+          margin: Margin.only(top: 1.85.rem, bottom: 0.65.rem),
+          raw: {
+            'letter-spacing': '-0.02em',
+          },
+        ),
+        css('.content table', [
+          css('&').styles(
+            width: 100.percent,
+            margin: Margin.only(top: 1.35.rem, bottom: 1.75.rem),
+            border: Border.all(
+              width: 1.px,
+              color: Color('var(--docs-shell-border)'),
+            ),
+            radius: BorderRadius.circular(1.rem),
+            backgroundColor: Color('var(--docs-shell-surface)'),
+            raw: {
+              'border-collapse': 'separate',
+              'border-spacing': '0',
+              'overflow': 'hidden',
+              'display': 'block',
+              'overflow-x': 'auto',
+            },
+          ),
+          css('thead th').styles(
+            padding: Padding.symmetric(vertical: 0.86.rem, horizontal: 1.rem),
+            backgroundColor: Color('var(--docs-shell-surface-soft)'),
+            border: Border.only(
+              bottom: BorderSide(
+                width: 1.px,
+                color: Color('var(--docs-shell-border)'),
+              ),
+            ),
+            fontWeight: FontWeight.w700,
+            fontSize: 0.92.rem,
+            raw: {
+              'white-space': 'nowrap',
+              'text-align': 'left',
+            },
+          ),
+          css('tbody td').styles(
+            padding: Padding.symmetric(vertical: 0.85.rem, horizontal: 1.rem),
+            border: Border.only(
+              bottom: BorderSide(
+                width: 1.px,
+                color: Color('var(--docs-shell-border)'),
+              ),
+            ),
+            fontSize: 0.96.rem,
+            raw: {'vertical-align': 'top'},
+          ),
+          css('tbody tr:last-child td').styles(
+            border: Border.unset,
+          ),
+          css('tbody tr:hover td').styles(
+            backgroundColor: Color('var(--docs-shell-accent-soft)'),
+          ),
+          css('th:first-child, td:first-child').styles(
+            fontWeight: FontWeight.w600,
+          ),
+          css('tbody td:last-child').styles(
+            color: Color('var(--docs-shell-muted)'),
+          ),
+          css('tbody td a').styles(
+            fontWeight: FontWeight.w600,
+          ),
+          downMobile([
+            css('&').styles(
+              margin: Margin.only(top: 1.1.rem, bottom: 1.45.rem),
+            ),
+            css('thead th').styles(
+              padding:
+                  Padding.symmetric(vertical: 0.75.rem, horizontal: 0.82.rem),
+            ),
+            css('tbody td').styles(
+              padding:
+                  Padding.symmetric(vertical: 0.75.rem, horizontal: 0.82.rem),
+            ),
+          ]),
+        ]),
         css('.content pre').styles(
           radius: BorderRadius.circular(1.rem),
           border: Border.all(
@@ -1376,6 +1793,27 @@ class ApiDocsLayout extends DocsLayout {
         ),
         css('.dartpad-toolbar').styles(
           backgroundColor: Color('var(--docs-shell-surface)'),
+          justifyContent: JustifyContent.spaceBetween,
+          flexWrap: FlexWrap.wrap,
+        ),
+        css('.dartpad-btn').styles(
+          fontWeight: FontWeight.w600,
+          shadow: BoxShadow(
+            offsetX: Unit.zero,
+            offsetY: 12.px,
+            blur: 22.px,
+            color: Color('var(--docs-shell-shadow)'),
+          ),
+          transition: Transition(
+            'background-color, border-color, transform, box-shadow',
+            duration: Duration(milliseconds: 150),
+          ),
+        ),
+        css('.dartpad-btn:hover').styles(
+          raw: {'transform': 'translateY(-1px)'},
+        ),
+        css('.dartpad-open:hover').styles(
+          backgroundColor: Color('var(--docs-shell-surface-soft)'),
         ),
         css('.mermaid-diagram').styles(
           padding: Padding.all(1.rem),
@@ -1399,21 +1837,55 @@ class ApiDocsLayout extends DocsLayout {
             'opacity': '1',
           },
         ),
+        css('.mermaid-diagram[data-mermaid-state="pending"] .mermaid-placeholder')
+            .styles(
+          raw: {
+            'background':
+                'linear-gradient(135deg, var(--docs-shell-surface-soft), color-mix(in srgb, var(--docs-shell-accent-soft) 38%, var(--docs-shell-surface-soft)))',
+            'min-height': '7rem',
+          },
+        ),
         css('.mermaid-diagram[data-mermaid-state="error"] .mermaid-fallback')
             .styles(
           display: Display.grid,
         ),
+        css('.mermaid-diagram[data-mermaid-state="error"] .mermaid-fallback-message')
+            .styles(
+          padding: Padding.symmetric(vertical: 0.75.rem, horizontal: 0.9.rem),
+          radius: BorderRadius.circular(0.8.rem),
+          backgroundColor: Color('var(--docs-shell-surface-soft)'),
+        ),
+        css('.mermaid-placeholder-label').styles(
+          raw: {'font-size': '0.98rem'},
+        ),
+        css('.mermaid-fallback-message').styles(
+          raw: {'position': 'relative'},
+        ),
+        css('.mermaid-fallback-message::before').styles(
+          raw: {
+            'content': '"Mermaid"',
+            'display': 'inline-block',
+            'margin-right': '0.55rem',
+            'padding': '0.18rem 0.45rem',
+            'border-radius': '999px',
+            'background': 'var(--docs-shell-accent-soft)',
+            'color': 'var(--docs-shell-accent-strong)',
+            'font-weight': '700',
+            'font-size': '0.75rem',
+            'vertical-align': 'middle',
+          },
+        ),
         css('.content h2[id], .content h3[id], .content h4[id], .content h5[id], .content h6[id]')
             .styles(
           raw: {
-            'scroll-margin-top': '7rem',
+            'scroll-margin-top': 'var(--docs-shell-anchor-offset)',
           },
         ),
-        css.media(MediaQuery.all(maxWidth: 959.px), [
-          css('.content h2[id], .content h3[id], .content h4[id], .content h5[id], .content h6[id]')
-              .styles(
+        downMobile([
+          css('.content p, .content li').styles(
+            fontSize: 0.98.rem,
             raw: {
-              'scroll-margin-top': '6rem',
+              'line-height': '1.68',
             },
           ),
         ]),

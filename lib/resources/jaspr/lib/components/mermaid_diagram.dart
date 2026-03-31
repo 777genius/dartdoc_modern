@@ -64,6 +64,9 @@ class MermaidDiagramComponent extends CustomComponent {
               [
                 div(
                   classes: 'mermaid-fallback-message',
+                  attributes: {
+                    'data-mermaid-fallback-message': '',
+                  },
                   [
                     Component.text(
                         'Unable to render diagram. Showing Mermaid source instead.'),

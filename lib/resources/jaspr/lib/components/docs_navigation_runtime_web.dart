@@ -221,6 +221,7 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
   void _closeSidebar() {
     final sidebar = web.document.querySelector('.sidebar-container');
     sidebar?.classList.remove('open');
+    web.document.body?.classList.remove('sidebar-open');
     web.document.body?.style.overflow = '';
   }
 

@@ -2,6 +2,8 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:universal_web/web.dart' as web;
 
+import '../theme/docs_responsive.dart';
+
 @client
 class DocsSidebarToggle extends StatefulComponent {
   const DocsSidebarToggle({super.key});
@@ -22,7 +24,8 @@ class _DocsSidebarToggleState extends State<DocsSidebarToggle> {
         attributes: {
           'type': 'button',
           'data-docs-sidebar-toggle': '',
-          'aria-label': _isOpen ? 'Close navigation menu' : 'Open navigation menu',
+          'aria-label':
+              _isOpen ? 'Close navigation menu' : 'Open navigation menu',
           'aria-expanded': _isOpen ? 'true' : 'false',
           'aria-controls': 'docs-sidebar',
         },
@@ -41,9 +44,11 @@ class _DocsSidebarToggleState extends State<DocsSidebarToggle> {
     if (sidebar == null) return;
     if (_isOpen) {
       sidebar.classList.add('open');
+      web.document.body?.classList.add('sidebar-open');
       web.document.body?.style.overflow = 'hidden';
     } else {
       sidebar.classList.remove('open');
+      web.document.body?.classList.remove('sidebar-open');
       web.document.body?.style.overflow = '';
     }
   }
@@ -72,7 +77,7 @@ class _DocsSidebarToggleState extends State<DocsSidebarToggle> {
             offset: 2.px,
           ),
         ),
-        css.media(MediaQuery.all(maxWidth: 1024.px), [
+        downContent([
           css('[data-has-sidebar] .sidebar-toggle-button')
               .styles(display: Display.flex),
         ]),

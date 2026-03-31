@@ -228,6 +228,12 @@ class JasprInitGenerator {
     );
     _writeTemplateIfAbsent(
       templateDir: templateDir,
+      templateFile: p.join('lib', 'theme', 'docs_responsive.dart'),
+      outputFile: 'lib/theme/docs_responsive.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
       templateFile: p.join('content', 'index.md'),
       outputFile: 'content/index.md',
       placeholders: placeholders,
@@ -236,6 +242,12 @@ class JasprInitGenerator {
       templateDir: templateDir,
       templateFile: '.gitignore',
       outputFile: '.gitignore',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('web', 'docs_mermaid_runtime.js'),
+      outputFile: 'web/docs_mermaid_runtime.js',
       placeholders: placeholders,
     );
 

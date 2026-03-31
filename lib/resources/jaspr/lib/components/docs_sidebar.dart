@@ -4,6 +4,7 @@ import 'package:jaspr_content/jaspr_content.dart';
 import 'package:jaspr_content/theme.dart';
 
 import 'docs_nav_link.dart';
+import '../theme/docs_responsive.dart';
 
 final class DocsSidebarGroup {
   const DocsSidebarGroup({this.title, required this.items});
@@ -45,21 +46,26 @@ class DocsSidebar extends StatelessComponent {
         ),
         div([
           for (final group in groups)
-            div(classes: 'sidebar-group', [
-              if (group.title case final title?) h3([Component.text(title)]),
-              ul([
-                for (final item in group.items)
-                  li([
-                    DocsNavLink(
-                      to: item.href,
-                      classes: activeRoute == item.href
-                          ? 'sidebar-link active'
-                          : 'sidebar-link',
-                      children: [Component.text(item.text)],
-                    ),
+            div(
+                classes: group.title == null
+                    ? 'sidebar-group sidebar-group-libraries'
+                    : 'sidebar-group',
+                [
+                  if (group.title case final title?)
+                    h3([Component.text(title)]),
+                  ul([
+                    for (final item in group.items)
+                      li([
+                        DocsNavLink(
+                          to: item.href,
+                          classes: activeRoute == item.href
+                              ? 'sidebar-link active'
+                              : 'sidebar-link',
+                          children: [Component.text(item.text)],
+                        ),
+                      ]),
                   ]),
-              ]),
-            ]),
+                ]),
         ]),
       ]),
     ]);
@@ -74,9 +80,9 @@ class DocsSidebar extends StatelessComponent {
             padding:
                 Padding.only(left: 0.5.rem, bottom: 1.25.rem, top: 0.75.rem),
           ),
-          css.media(MediaQuery.all(maxWidth: 1023.px), [
+          downContent([
             css('&').styles(
-              width: 18.5.rem,
+              width: 100.percent,
               maxWidth: 88.vw,
               padding: Padding.only(
                 left: 0.35.rem,
@@ -84,11 +90,12 @@ class DocsSidebar extends StatelessComponent {
                 bottom: 1.rem,
                 top: 0.75.rem,
               ),
+              raw: {
+                'width': 'var(--docs-shell-drawer-width)',
+              },
             ),
           ]),
-          css.media(MediaQuery.all(minWidth: 1024.px), [
-            css('&').styles(padding: Padding.only(top: Unit.zero)),
-          ]),
+          css('&').styles(padding: Padding.only(top: Unit.zero)),
           css('.sidebar-close', [
             css('&').styles(
               position: Position.absolute(top: 0.75.rem, right: 0.75.rem),
@@ -102,8 +109,9 @@ class DocsSidebar extends StatelessComponent {
               cursor: Cursor.pointer,
               color: ContentColors.text,
             ),
-            css.media(MediaQuery.all(minWidth: 1024.px), [
-              css('&').styles(display: Display.none),
+            css('&').styles(display: Display.none),
+            downContent([
+              css('&').styles(display: Display.block),
             ]),
           ]),
           css('.sidebar-group', [
@@ -111,25 +119,27 @@ class DocsSidebar extends StatelessComponent {
               padding: Padding.only(top: 1.5.rem, right: 0.75.rem),
             ),
             css('h3').styles(
-              fontWeight: FontWeight.w600,
-              fontSize: 14.px,
+              fontWeight: FontWeight.w800,
+              fontSize: 0.74.rem,
               padding: Padding.only(left: 0.75.rem),
               margin: Margin.only(bottom: 1.rem, top: Unit.zero),
+              color: Color('var(--docs-shell-muted)'),
+              textTransform: TextTransform.upperCase,
+              raw: {'letter-spacing': '0.12em'},
             ),
             css('ul').styles(
               listStyle: ListStyle.none,
               margin: Margin.zero,
               padding: Padding.zero,
             ),
-            css('li').styles(margin: Margin.only(bottom: 0.18.rem)),
+            css('li').styles(margin: Margin.only(bottom: 0.24.rem)),
             css('.sidebar-link').styles(
               opacity: 0.92,
               display: Display.block,
+              margin: Margin.symmetric(horizontal: 0.18.rem),
               padding:
                   Padding.symmetric(vertical: 0.72.rem, horizontal: 0.92.rem),
-              whiteSpace: WhiteSpace.noWrap,
               overflow: Overflow.hidden,
-              textOverflow: TextOverflow.ellipsis,
               radius: BorderRadius.circular(0.9.rem),
               color: ContentColors.text,
               transition: Transition(
@@ -139,6 +149,12 @@ class DocsSidebar extends StatelessComponent {
               ),
               raw: {
                 'position': 'relative',
+                'line-height': '1.35',
+                'display': '-webkit-box',
+                '-webkit-box-orient': 'vertical',
+                '-webkit-line-clamp': '2',
+                'white-space': 'normal',
+                'text-wrap': 'pretty',
               },
             ),
             css('.sidebar-link:hover').styles(
@@ -155,20 +171,26 @@ class DocsSidebar extends StatelessComponent {
               ),
               shadow: BoxShadow(
                 offsetX: Unit.zero,
-                offsetY: 12.px,
-                blur: 24.px,
-                color: Color('rgba(37, 99, 235, 0.14)'),
+                offsetY: 10.px,
+                blur: 16.px,
+                color: Color('var(--docs-shell-shadow)'),
               ),
-            ),
-            css('.sidebar-link.active::before').styles(
               raw: {
-                'content': '""',
-                'position': 'absolute',
-                'inset': '0 auto 0 0',
-                'width': '0.28rem',
-                'border-radius': '999px',
-                'background': 'currentColor',
+                'box-shadow':
+                    'inset 4px 0 0 currentColor, 0 10px 16px var(--docs-shell-shadow)',
               },
+            ),
+            css('.sidebar-group-libraries').styles(
+              margin: Margin.only(top: 0.6.rem),
+            ),
+            css('.sidebar-group-libraries .sidebar-link').styles(
+              fontSize: 0.94.rem,
+              opacity: 0.86,
+              padding:
+                  Padding.symmetric(vertical: 0.64.rem, horizontal: 0.92.rem),
+            ),
+            css('.sidebar-group-libraries .sidebar-link.active').styles(
+              opacity: 1,
             ),
           ]),
         ]),

@@ -80,8 +80,8 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
     for (var index = 0; index < tocLinks.length; index++) {
       final node = tocLinks.item(index);
       if (node is! web.HTMLElement) continue;
-      final id = node.dataset['tocLink'];
-      if (id == null || id.isEmpty) continue;
+      final id = node.getAttribute('data-toc-link') ?? '';
+      if (id.isEmpty) continue;
       final heading = web.document.getElementById(id);
       if (heading == null) continue;
       targets.add(_TocTarget(id: id, link: node, heading: heading));

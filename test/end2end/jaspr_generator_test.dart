@@ -175,6 +175,10 @@ void main() {
         expect(_outputExists(outDir, 'web/index.html'), isTrue);
         expect(_outputExists(outDir, 'lib/theme/docs_theme.dart'), isTrue);
         expect(
+          _outputExists(outDir, 'lib/theme/docs_responsive.dart'),
+          isTrue,
+        );
+        expect(
             _outputExists(outDir, 'lib/components/docs_search.dart'), isTrue);
         expect(
             _outputExists(outDir, 'lib/components/docs_header.dart'), isTrue);
@@ -371,6 +375,10 @@ void main() {
           outDir,
           'lib/components/docs_mermaid_runtime_web.dart',
         );
+        final mermaidRuntimeHelper = _readOutput(
+          outDir,
+          'web/docs_mermaid_runtime.js',
+        );
         final mermaidDiagram = _readOutput(
           outDir,
           'lib/components/mermaid_diagram.dart',
@@ -521,19 +529,25 @@ void main() {
             contains("export 'docs_mermaid_runtime_stub.dart'"));
         expect(
           mermaidRuntimeWeb,
-          contains('class DocsMermaidRuntime extends StatefulComponent'),
+          contains('class DocsMermaidRuntime extends StatelessComponent'),
         );
-        expect(mermaidRuntimeWeb, contains("@JS('mermaid')"));
-        expect(mermaidRuntimeWeb, contains("'suppressErrorRendering': true"));
+        expect(mermaidRuntimeWeb, contains("'data-docs-mermaid-runtime': ''"));
         expect(
-          mermaidRuntimeWeb,
-          contains("host.textContent = web.window.atob(source)"),
+          mermaidRuntimeHelper,
+          contains(
+            "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js",
+          ),
         );
-        expect(mermaidRuntimeWeb, contains("'run'.toJS"));
-        expect(mermaidRuntimeWeb,
+        expect(mermaidRuntimeHelper, contains('suppressErrorRendering: true'));
+        expect(
+          mermaidRuntimeHelper,
+          contains("host.innerHTML = svg"),
+        );
+        expect(mermaidRuntimeHelper, contains('window.docsRenderMermaid'));
+        expect(mermaidRuntimeHelper,
             contains("querySelectorAll('.mermaid-diagram')"));
-        expect(
-            mermaidRuntimeWeb, contains("addEventListener('docs:navigation'"));
+        expect(mermaidRuntimeHelper,
+            contains("addEventListener('docs:navigation'"));
         expect(
           mermaidDiagram,
           contains("Component.text('Rendering Mermaid diagram')"),
@@ -583,6 +597,77 @@ void main() {
         expect(content, contains('class DocsThemeExtension'));
         expect(content, contains('FontFamily.list(['));
         expect(content, contains("'--docs-shell-accent'"));
+      });
+
+      test(
+          'responsive foundation centralizes canonical breakpoints and shell tokens',
+          () {
+        final responsive =
+            _readOutput(outDir, 'lib/theme/docs_responsive.dart');
+        final layout = _readOutput(outDir, 'lib/layouts/api_docs_layout.dart');
+        final header = _readOutput(outDir, 'lib/components/docs_header.dart');
+        final sidebar = _readOutput(outDir, 'lib/components/docs_sidebar.dart');
+        final sidebarToggle = _readOutput(
+          outDir,
+          'lib/components/docs_sidebar_toggle.dart',
+        );
+
+        expect(
+          responsive,
+          contains('const docsCompactBreakpoint = 479;'),
+        );
+        expect(
+          responsive,
+          contains('const docsMobileBreakpoint = 767;'),
+        );
+        expect(
+          responsive,
+          contains('const docsContentBreakpoint = 959;'),
+        );
+        expect(
+          responsive,
+          contains('const docsWideBreakpoint = 1180;'),
+        );
+        expect(responsive, contains('StyleRule downCompact('));
+        expect(responsive, contains('StyleRule downMobile('));
+        expect(responsive, contains('StyleRule downContent('));
+        expect(responsive, contains('StyleRule downWide('));
+        expect(responsive, contains('docsResponsiveRootStyles() => ['));
+        expect(responsive, contains("'--docs-shell-grid-gap'"));
+        expect(responsive, contains("'--docs-shell-sidebar-width'"));
+        expect(responsive, contains("'--docs-shell-toc-width'"));
+        expect(responsive, contains("'--docs-shell-search-panel-width'"));
+        expect(responsive, contains("'--docs-shell-drawer-width'"));
+
+        expect(layout, contains("import '../theme/docs_responsive.dart';"));
+        expect(layout, contains('...docsResponsiveRootStyles(),'));
+        expect(layout, contains('downMobile(['));
+        expect(layout, contains('downContent(['));
+        expect(layout, contains('downWide(['));
+        expect(
+          layout,
+          isNot(contains('MediaQuery.all(maxWidth: 767.px)')),
+        );
+        expect(
+          layout,
+          isNot(contains('MediaQuery.all(maxWidth: 959.px)')),
+        );
+        expect(
+          layout,
+          isNot(contains('MediaQuery.all(maxWidth: 1180.px)')),
+        );
+        expect(header, contains("import '../theme/docs_responsive.dart';"));
+        expect(header, contains('downMobile(['));
+        expect(header, contains('downCompact(['));
+        expect(sidebar, contains("import '../theme/docs_responsive.dart';"));
+        expect(sidebar, contains('downContent(['));
+        expect(
+          sidebarToggle,
+          contains("import '../theme/docs_responsive.dart';"),
+        );
+        expect(sidebarToggle, contains('downContent(['));
+        expect(sidebar, isNot(contains('1023')));
+        expect(sidebarToggle, isNot(contains('1024')));
       });
 
       test('search index is generated for API pages', () {

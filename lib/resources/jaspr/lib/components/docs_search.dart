@@ -52,6 +52,18 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
   @override
   Component build(BuildContext context) {
     final results = _results;
+    final isBusy = _status == 'Loading search...' ||
+        _status == 'Searching...' ||
+        _status == 'Searching sections...' ||
+        _status == 'Searching pages and sections...' ||
+        _status == 'Deepening search...' ||
+        _status == 'Searching full section content...';
+    final searchState = switch (_status) {
+      'Search is unavailable.' => 'error',
+      'No results found.' => 'empty',
+      _ when isBusy => 'loading',
+      _ => results.isEmpty ? 'idle' : 'results',
+    };
 
     return Component.fragment([
       const DocsNavigationRuntime(),
@@ -87,6 +99,7 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
         attributes: {
           if (!_isOpen) 'hidden': 'hidden',
           'data-docs-search-overlay': '',
+          'data-search-state': searchState,
           'role': 'dialog',
           'aria-modal': 'true',
           'aria-labelledby': 'docs-search-title',
@@ -141,6 +154,7 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
               classes: 'docs-search-status',
               attributes: {
                 'aria-live': 'polite',
+                'data-search-state': searchState,
               },
               [Component.text(_status)],
             ),
@@ -149,8 +163,48 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
               attributes: {
                 'role': 'listbox',
                 'aria-label': 'Search results',
+                'data-search-state': searchState,
               },
               [
+                if (results.isEmpty)
+                  div(classes: 'docs-search-empty-state', [
+                    div(classes: 'docs-search-empty-icon', [
+                      Component.text(
+                        switch (searchState) {
+                          'loading' => '…',
+                          'error' => '!',
+                          'empty' => '0',
+                          _ => '⌕',
+                        },
+                      ),
+                    ]),
+                    div(classes: 'docs-search-empty-copy', [
+                      div(classes: 'docs-search-empty-title', [
+                        Component.text(
+                          switch (searchState) {
+                            'loading' => 'Preparing results',
+                            'error' => 'Search unavailable',
+                            'empty' => 'No matching pages',
+                            _ => 'Search the docs',
+                          },
+                        ),
+                      ]),
+                      div(classes: 'docs-search-empty-text', [
+                        Component.text(
+                          switch (searchState) {
+                            'loading' =>
+                              'Loading indexed pages and sections for this query.',
+                            'error' =>
+                              'The search index could not be loaded in this session.',
+                            'empty' =>
+                              'Try a shorter query, a type name, or a guide title.',
+                            _ =>
+                              'Search across API pages, section headings, and guides.',
+                          },
+                        ),
+                      ]),
+                    ]),
+                  ]),
                 for (var index = 0; index < results.length; index++)
                   _buildResultCard(results[index], index),
               ],
