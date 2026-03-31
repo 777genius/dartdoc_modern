@@ -9,6 +9,7 @@ import 'package:jaspr_content/src/page_parser/markdown_parser.dart';
 import 'package:jaspr_content/src/template_engine/template_engine.dart';
 
 import 'components/docs_header.dart';
+import 'components/docs_search.dart';
 import 'components/docs_sidebar.dart';
 import 'components/docs_theme_toggle.dart';
 import 'components/dart_pad.dart';
@@ -50,6 +51,7 @@ Component buildDocsApp({
           logo: '/favicon.ico',
           homeHref: overviewHref,
           items: [
+            const DocsSearchShell(),
             const DocsThemeToggle(),
           ],
         ),

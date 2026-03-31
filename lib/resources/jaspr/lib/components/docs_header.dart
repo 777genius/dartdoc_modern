@@ -76,22 +76,23 @@ class DocsHeader extends StatelessComponent {
               },
             ),
           ]),
-          css('.header-content', [
-            css('&').styles(
-              display: Display.flex,
-              flex: Flex(grow: 1, shrink: 1),
-              justifyContent: JustifyContent.end,
-              minWidth: Unit.zero,
-            ),
-          ]),
-          css('.header-items', [
-            css('&').styles(
-              display: Display.flex,
-              gap: Gap.column(0.25.rem),
-              alignItems: AlignItems.center,
-              minWidth: Unit.zero,
-            ),
-          ]),
+        css('.header-content', [
+          css('&').styles(
+            display: Display.flex,
+            flex: Flex(grow: 1, shrink: 1),
+            justifyContent: JustifyContent.end,
+            alignItems: AlignItems.center,
+            minWidth: Unit.zero,
+          ),
+        ]),
+        css('.header-items', [
+          css('&').styles(
+            display: Display.flex,
+            gap: Gap.column(0.65.rem),
+            alignItems: AlignItems.center,
+            minWidth: Unit.zero,
+          ),
+        ]),
           css.media(MediaQuery.all(maxWidth: 767.px), [
             css('&').styles(
               gap: Gap.column(0.6.rem),
@@ -103,6 +104,9 @@ class DocsHeader extends StatelessComponent {
             css('.header-title img').styles(height: 1.3.rem),
             css('.header-title span').styles(
               fontSize: 0.95.rem,
+            ),
+            css('.header-items').styles(
+              gap: Gap.column(0.45.rem),
             ),
           ]),
         ]),

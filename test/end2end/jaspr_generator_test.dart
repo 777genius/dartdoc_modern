@@ -298,12 +298,14 @@ void main() {
           isNot(contains("import 'template_engine/docs_template_engine.dart';")),
         );
         expect(app, contains("import 'components/docs_header.dart';"));
+        expect(app, contains("import 'components/docs_search.dart';"));
         expect(app, contains("import 'components/docs_sidebar.dart';"));
         expect(app, contains("import 'components/docs_theme_toggle.dart';"));
         expect(app, contains("import 'generated/api_sidebar.dart' as api;"));
         expect(app, contains("import 'generated/guide_sidebar.dart' as guide;"));
         expect(app, contains('header: DocsHeader('));
         expect(app, contains('homeHref: overviewHref,'));
+        expect(app, contains('const DocsSearchShell()'));
         expect(app, contains('const DocsThemeToggle()'));
         expect(app, contains('sidebar: DocsSidebar('));
         expect(app, contains('DocsSidebarGroup('));
@@ -357,7 +359,6 @@ void main() {
           outDir,
           'lib/components/docs_mermaid_runtime_web.dart',
         );
-        expect(content, contains("import '../components/docs_search.dart';"));
         expect(
           content,
           contains("import '../components/docs_dartpad_runtime.dart';"),
@@ -381,7 +382,8 @@ void main() {
         expect(themeToggle, contains("'data-docs-theme-toggle': ''"));
         expect(content, contains("import '../components/docs_nav_link.dart';"));
         expect(search, contains("import 'docs_navigation_runtime.dart';"));
-        expect(content, contains('const DocsSearchShell()'));
+        expect(content, isNot(contains("import '../components/docs_search.dart';")));
+        expect(content, isNot(contains('const DocsSearchShell()')));
         expect(content, contains('const DocsDartPadRuntime()'));
         expect(content, contains('const DocsMermaidRuntime()'));
         expect(content, contains('DocsNavLink('));
