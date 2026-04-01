@@ -51,10 +51,12 @@ class _DocsThemeToggleState extends State<DocsThemeToggle> {
         onClick: _toggle,
         [
           span(
+            classes: 'theme-toggle-icon',
             styles: Styles(display: _isDark ? Display.none : null),
             [RawText(_moonIcon)],
           ),
           span(
+            classes: 'theme-toggle-icon',
             styles: Styles(display: _isDark ? null : Display.none),
             [RawText(_sunIcon)],
           ),

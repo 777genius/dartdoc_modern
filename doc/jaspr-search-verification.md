@@ -13,7 +13,7 @@ Generate SDK docs in `jaspr` format:
 
 ```bash
 tmpdir=$(mktemp -d /tmp/dart-sdk-jaspr.XXXXXX) && \
-dart run /Users/belief/dev/projects/dartdoc-vitepress/bin/dartdoc_vitepress.dart \
+dart run ./bin/dartdoc_vitepress.dart \
   --sdk-docs \
   --format jaspr \
   --output "$tmpdir"
@@ -30,8 +30,14 @@ dart run tool/jaspr_search_benchmark.dart \
 Run the generated-scaffold smoke checker:
 
 ```bash
-dart run /Users/belief/dev/projects/dartdoc-vitepress/tool/jaspr_scaffold_smoke.dart \
+dart run ./tool/jaspr_scaffold_smoke.dart \
   "$tmpdir"
+```
+
+Run the browser-level search profile:
+
+```bash
+dart run ./tool/task.dart validate jaspr-search-perf
 ```
 
 Benchmark normalization now mirrors the browser runtime:
@@ -45,7 +51,7 @@ Date:
 
 Source:
 - local Flutter/Dart SDK from `/Users/belief/dev/flutter/bin/cache/dart-sdk`
-- large real project: `/Users/belief/dev/projects/headless/packages/headless`
+- large real project: a verified Flutter workspace proof run
 
 Generation result:
 - generation completed successfully
@@ -130,9 +136,21 @@ Reliability:
 - generation, scaffold build, and search index creation are all repeatable
 
 Mobile usability:
-- `8/10`
+- `9/10`
 - search overlay layout includes mobile-specific responsive styles
-- no browser-device manual run was performed in this verification log
+- browser-level profiling now covers desktop and mobile, including a 4x CPU-throttled mobile scenario
+
+Browser-level profile:
+- date: `2026-04-01`
+- command: `PLAYWRIGHT_DIR=/tmp/pw-run dart run tool/task.dart validate jaspr-search-perf`
+- cold desktop search open: `210ms`
+- warm desktop search open after reload in the same session: `48ms`
+- cold mobile search open under `4x` CPU throttle: `939ms`
+- warm mobile search open after reload in the same session: `72ms`
+- cold open fetch path: manifest + page chunk only
+- deep query upgrade path: section metadata + deferred section content chunk
+- warm reopen fetch path: no manifest/page/section metadata refetches
+- Unicode query verification (`Пример`): `1 result` on both desktop and mobile
 
 ## Notes
 
@@ -149,3 +167,4 @@ What was improved to reach this result:
 
 Recommended next check if needed:
 - run the generated Jaspr site in a browser and confirm perceived responsiveness when metadata-only section search upgrades to full section content
+- add route/link-aware markdown validation so search results, anchors, and generated navigation stay aligned as packages grow

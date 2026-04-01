@@ -1,10 +1,10 @@
 name: dartdoc_vitepress
 version: 1.2.1
-description: Fork of dartdoc with VitePress backend — generates modern static documentation sites with auto-linking, interactive DartPad embeds, and full Vue.js theming.
+description: Fork of dartdoc with VitePress and Jaspr backends for generating modern API and guide documentation sites.
 repository: https://github.com/777genius/dartdoc_vitepress
 
 environment:
-  sdk: ^3.6.0
+  sdk: ^3.8.0
 
 dependencies:
   analyzer: ^12.0.0
@@ -13,6 +13,10 @@ dependencies:
   crypto: ^3.0.3
   glob: ^2.1.1
   html: ^0.15.3
+  http: ^1.6.0
+  jaspr: ^0.22.4
+  jaspr_content: ^0.5.1
+  jaspr_router: ^0.8.1
   logging: ^1.1.1
   markdown: ^7.2.1
   meta: ^1.9.1
@@ -20,6 +24,9 @@ dependencies:
   path: ^1.8.3
   pub_semver: ^2.1.4
   source_span: ^1.10.0
+  syntax_highlight_lite: ^0.0.1
+  universal_web: ^1.1.1+1
+  web: ^1.1.1
   yaml: ^3.1.2
 
 dev_dependencies:
@@ -33,7 +40,6 @@ dev_dependencies:
   test_descriptor: ^2.0.1
   test_process: ^2.0.3
   test_reflective_loader: ">=0.2.2 <0.5.0"
-  web: ^1.1.0
 
 executables:
   dartdoc: dartdoc_vitepress

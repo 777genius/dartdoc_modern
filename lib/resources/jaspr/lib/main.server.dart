@@ -2,6 +2,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/server.dart';
 
 import 'app.dart';
+import 'docs_base.dart';
 import 'main.server.options.dart';
 import 'template_engine/docs_template_engine.dart';
 import 'theme/docs_theme.dart';
@@ -13,10 +14,16 @@ void main() {
 
   runApp(
     Document(
+      base: hasDocsBasePath ? '$docsBasePath/' : '/',
       head: [
         link(
-          href: '/generated/api_styles.css',
+          href: withDocsBasePath('/generated/api_styles.css'),
           rel: 'stylesheet',
+        ),
+        link(
+          href: withDocsBasePath('/favicon.svg'),
+          rel: 'icon',
+          attributes: {'type': 'image/svg+xml'},
         ),
       ],
       body: div(

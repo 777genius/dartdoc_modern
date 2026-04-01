@@ -1358,7 +1358,7 @@ DartdocProgramOptionContext? parseOptions(
         createDartdocProgramOptions,
         createLoggingOptions,
         createGeneratorOptions,
-        if (additionalOptions != null) additionalOptions,
+        ?additionalOptions,
       ],
       packageMetaProvider);
 

@@ -74,6 +74,29 @@ Directory get testPackage =>
 Directory get testPackageExperiments =>
     Directory(path.joinAll(['testing', 'test_package_experiments']));
 
+final class _JasprPreviewWorkspace {
+  _JasprPreviewWorkspace({
+    required this.outputDir,
+    required this.pubCacheDir,
+    required this.theme,
+    required this.basePath,
+  });
+
+  final Directory outputDir;
+  final Directory pubCacheDir;
+  final String theme;
+  final String basePath;
+
+  void dispose() {
+    if (outputDir.existsSync()) {
+      outputDir.deleteSync(recursive: true);
+    }
+    if (pubCacheDir.existsSync()) {
+      pubCacheDir.deleteSync(recursive: true);
+    }
+  }
+}
+
 Future<void> runAnalyze(ArgResults commandResults) async {
   for (var target in commandResults.rest) {
     await switch (target) {
@@ -207,7 +230,7 @@ Future<void> runBuildbot() async {
   await _section('Analyze package', analyzePackage);
   await _section('Validate format', validateFormat);
   await _section('Validate build', validateBuild);
-  await _section('Validate Jaspr theme', validateJasprTheme);
+  await _section('Validate Jaspr launch', validateJasprLaunch);
   await _section('Run try publish', runTryPublish);
   await _section('Run test', runTest);
   await _section('Validate dartdoc docs', validateDartdocDocs);
@@ -810,8 +833,65 @@ Future<void> runTest() async {
 }
 
 Future<void> runTryPublish() async {
-  await SubprocessLauncher('try-publish')
-      .runStreamed(Platform.resolvedExecutable, ['pub', 'publish', '-n']);
+  const arguments = ['pub', 'publish', '-n'];
+  stderr.writeln(
+    'try-publish: + ${Platform.resolvedExecutable} ${arguments.join(' ')}',
+  );
+
+  final result = await Process.run(
+    Platform.resolvedExecutable,
+    arguments,
+    includeParentEnvironment: true,
+  );
+
+  if (result.stdout case final String stdoutText when stdoutText.isNotEmpty) {
+    stdout.write(
+      stdoutText.endsWith('\n') ? stdoutText : '$stdoutText\n',
+    );
+  }
+  if (result.stderr case final String stderrText when stderrText.isNotEmpty) {
+    stderr.write(
+      stderrText.endsWith('\n') ? stderrText : '$stderrText\n',
+    );
+  }
+
+  if (result.exitCode == 0) {
+    return;
+  }
+
+  final combinedOutput =
+      '${result.stdout is String ? result.stdout : ''}\n'
+      '${result.stderr is String ? result.stderr : ''}';
+  if (_isPublishDryRunWarningOnly(result.exitCode, combinedOutput)) {
+    stderr.writeln(
+      'try-publish: continuing after warning-only pub publish dry-run result.',
+    );
+    return;
+  }
+
+  throw SubprocessException(
+    command: '${Platform.resolvedExecutable} ${arguments.join(' ')}',
+    workingDirectory: null,
+    exitCode: result.exitCode,
+    environment: const {},
+  );
+}
+
+bool _isPublishDryRunWarningOnly(int exitCode, String output) {
+  if (exitCode != 65) return false;
+  if (!output.contains('Package has ') || !output.contains('warning.')) {
+    return false;
+  }
+  if (output.contains("can't be published yet")) {
+    return false;
+  }
+  if (output.contains('missing a requirement')) {
+    return false;
+  }
+  if (output.contains('found the following error')) {
+    return false;
+  }
+  return true;
 }
 
 Future<void> runValidate(ArgResults commandResults) async {
@@ -820,14 +900,94 @@ Future<void> runValidate(ArgResults commandResults) async {
       'build' => validateBuild(),
       'dartdoc-docs' => validateDartdocDocs(),
       'format' => validateFormat(),
+      'jaspr-launch' => validateJasprLaunch(),
+      'package-release' => validatePackageRelease(),
+      'jaspr-release' => validateJasprRelease(),
+      'jaspr-route-smoke' => validateJasprRouteSmoke(),
+      'jaspr-route-smoke-base-path' => validateJasprRouteSmokeBasePath(),
+      'vitepress-smoke' => validateVitePressSmoke(),
       'jaspr-theme' => validateJasprTheme(),
+      'jaspr-search-perf' => validateJasprSearchPerf(),
+      'jaspr-theme-golden' => validateJasprThemeGolden(),
+      'jaspr-theme-visual' => validateJasprThemeVisual(),
       'sdk-docs' => validateSdkDocs(),
       _ => throw UnimplementedError('Unknown validation target: "$target"'),
     };
   }
 }
 
+Future<void> validateJasprLaunch() async {
+  await _validateJasprThemePrerequisites();
+
+  final primaryWorkspace = await _prepareJasprPreviewWorkspace(
+    labelPrefix: 'launch-theme',
+    theme: 'forest',
+  );
+  final basePathWorkspace = await _prepareJasprPreviewWorkspace(
+    labelPrefix: 'launch-theme-base-path',
+    theme: 'forest',
+    basePath: '/dartdoc-preview',
+  );
+
+  try {
+    _assertJasprBuiltGuideExists(primaryWorkspace.outputDir.path);
+    _assertJasprBuiltGuideExists(basePathWorkspace.outputDir.path);
+
+    await validateJasprRouteSmoke(
+      previewDir: primaryWorkspace.outputDir.path,
+      theme: primaryWorkspace.theme,
+      reuseBuild: true,
+    );
+    await validateJasprRouteSmokeBasePath(
+      previewDir: basePathWorkspace.outputDir.path,
+      theme: basePathWorkspace.theme,
+      reuseBuild: true,
+    );
+    await validateJasprSearchPerf(
+      previewDir: primaryWorkspace.outputDir.path,
+      theme: primaryWorkspace.theme,
+      reuseBuild: true,
+    );
+  } finally {
+    primaryWorkspace.dispose();
+    basePathWorkspace.dispose();
+  }
+}
+
+Future<void> validateJasprRelease() async {
+  await analyzePackage();
+  await runTryPublish();
+  await validateJasprLaunch();
+}
+
+Future<void> validatePackageRelease() async {
+  await validateJasprRelease();
+  await validateVitePressSmoke();
+}
+
+Future<void> validateVitePressSmoke() async {
+  await SubprocessLauncher('vitepress-smoke').runStreamedDartCommand([
+    'test',
+    path.join('test', 'end2end', 'vitepress_generator_test.dart'),
+  ]);
+}
+
 Future<void> validateJasprTheme() async {
+  await _validateJasprThemePrerequisites();
+
+  final workspace = await _prepareJasprPreviewWorkspace(
+    labelPrefix: 'theme',
+    theme: 'forest',
+  );
+
+  try {
+    _assertJasprBuiltGuideExists(workspace.outputDir.path);
+  } finally {
+    workspace.dispose();
+  }
+}
+
+Future<void> _validateJasprThemePrerequisites() async {
   await SubprocessLauncher('analyze-theme-e2e').runStreamedDartCommand([
     'analyze',
     path.join('test', 'end2end', 'jaspr_generator_test.dart'),
@@ -841,16 +1001,30 @@ Future<void> validateJasprTheme() async {
     'bash',
     ['-n', path.join('tool', 'jaspr_theme_snapshot.sh')],
   );
+  await SubprocessLauncher('search-profile-script').runStreamed(
+    'bash',
+    ['-n', path.join('tool', 'jaspr_search_profile.sh')],
+  );
+  await SubprocessLauncher('route-smoke-script').runStreamed(
+    'bash',
+    ['-n', path.join('tool', 'jaspr_route_smoke.sh')],
+  );
+}
 
+Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
+  required String labelPrefix,
+  required String theme,
+  String basePath = '',
+}) async {
   final outputDir =
-      Directory.systemTemp.createTempSync('dartdoc-jaspr-theme-validate');
+      Directory.systemTemp.createTempSync('dartdoc-jaspr-$labelPrefix');
   final pubCacheDir =
-      Directory.systemTemp.createTempSync('dartdoc-jaspr-pub-cache');
+      Directory.systemTemp.createTempSync('dartdoc-jaspr-$labelPrefix-pub');
 
   try {
     _prepareOfflinePubCache(pubCacheDir);
 
-    await SubprocessLauncher('generate-jaspr-theme').runStreamedDartCommand([
+    await SubprocessLauncher('generate-$labelPrefix').runStreamedDartCommand([
       'run',
       path.join(Directory.current.path, 'bin', 'dartdoc_vitepress.dart'),
       '--format',
@@ -859,7 +1033,7 @@ Future<void> validateJasprTheme() async {
       outputDir.path,
     ], workingDirectory: path.join('testing', 'test_package_with_docs'));
 
-    await SubprocessLauncher('theme-pub-get').runStreamedDartCommand([
+    await SubprocessLauncher('$labelPrefix-pub-get').runStreamedDartCommand([
       'pub',
       'get',
       '--offline',
@@ -867,27 +1041,454 @@ Future<void> validateJasprTheme() async {
       'PUB_CACHE': pubCacheDir.path,
     });
 
-    await SubprocessLauncher('theme-analyze').runStreamedDartCommand([
+    await SubprocessLauncher('$labelPrefix-analyze').runStreamedDartCommand([
       'analyze',
     ], workingDirectory: outputDir.path, environment: {
       'PUB_CACHE': pubCacheDir.path,
     });
-  } finally {
+
+    final homeDirPath = _resolveHomeDirPath();
+    final jasprBinDir = path.join(homeDirPath, '.pub-cache', 'bin');
+    await SubprocessLauncher('$labelPrefix-build').runStreamed(
+      'jaspr',
+      [
+        'build',
+        '--dart-define',
+        'DOCS_THEME=$theme',
+        '--dart-define',
+        'DOCS_BASE_PATH=$basePath',
+      ],
+      workingDirectory: outputDir.path,
+      environment: {
+        'PUB_CACHE': pubCacheDir.path,
+        'PATH': '$jasprBinDir:${Platform.environment['PATH'] ?? ''}',
+      },
+    );
+
+    return _JasprPreviewWorkspace(
+      outputDir: outputDir,
+      pubCacheDir: pubCacheDir,
+      theme: theme,
+      basePath: basePath,
+    );
+  } catch (_) {
     if (outputDir.existsSync()) {
       outputDir.deleteSync(recursive: true);
     }
     if (pubCacheDir.existsSync()) {
       pubCacheDir.deleteSync(recursive: true);
     }
+    rethrow;
+  }
+}
+
+void _assertJasprBuiltGuideExists(String outputDirPath) {
+  final builtGuide = File(path.joinAll([
+    outputDirPath,
+    'build',
+    'jaspr',
+    'guide',
+    'getting-started',
+    'index.html',
+  ]));
+  if (!builtGuide.existsSync()) {
+    throw StateError(
+      'Expected static Jaspr preview route at ${builtGuide.path}, but it was not generated.',
+    );
+  }
+}
+
+Future<void> validateJasprThemeVisual() async {
+  final playwrightDir = _resolvePlaywrightDirPath();
+  final outputDir =
+      Directory.systemTemp.createTempSync('dartdoc-jaspr-theme-shots');
+
+  try {
+    await SubprocessLauncher('theme-snapshot-run').runStreamed(
+      'bash',
+      [path.join('tool', 'jaspr_theme_snapshot.sh')],
+      environment: {
+        'PLAYWRIGHT_DIR': playwrightDir,
+        'OUTPUT_DIR': outputDir.path,
+      },
+    );
+
+    for (final fileName in [
+      'index.html',
+      'manifest.json',
+      for (final theme in ['ocean', 'graphite', 'forest'])
+        ...[
+          '$theme-desktop-light.png',
+          '$theme-desktop-dark.png',
+          '$theme-mobile-light.png',
+          '$theme-mobile-dark.png',
+        ],
+    ]) {
+      final file = File(path.join(outputDir.path, fileName));
+      if (!file.existsSync()) {
+        throw StateError(
+          'Expected visual artifact at ${file.path}, but it was not generated.',
+        );
+      }
+      if (file.lengthSync() == 0) {
+        throw StateError(
+          'Expected visual artifact at ${file.path} to be non-empty.',
+        );
+      }
+    }
+
+    final manifestFile = File(path.join(outputDir.path, 'manifest.json'));
+    final manifestText = manifestFile.readAsStringSync();
+    for (final needle in [
+      '"theme": "ocean"',
+      '"theme": "graphite"',
+      '"theme": "forest"',
+      '"viewport": "desktop"',
+      '"viewport": "mobile"',
+      '"mode": "light"',
+      '"mode": "dark"',
+    ]) {
+      if (!manifestText.contains(needle)) {
+        throw StateError(
+          'Visual manifest did not include expected marker: $needle',
+        );
+      }
+    }
+
+    final reportFile = File(path.join(outputDir.path, 'index.html'));
+    final reportText = reportFile.readAsStringSync();
+    for (final needle in [
+      'Jaspr Theme Snapshot Report',
+      'desktop / light',
+      'desktop / dark',
+      'mobile / light',
+      'mobile / dark',
+    ]) {
+      if (!reportText.contains(needle)) {
+        throw StateError(
+          'Visual snapshot report did not include expected marker: $needle',
+        );
+      }
+    }
+  } finally {
+    if (outputDir.existsSync()) {
+      outputDir.deleteSync(recursive: true);
+    }
+  }
+}
+
+Future<void> validateJasprThemeGolden() async {
+  final playwrightDir = _resolvePlaywrightDirPath();
+  await SubprocessLauncher('theme-golden-script').runStreamed(
+    'bash',
+    [path.join('tool', 'jaspr_theme_golden.sh'), 'verify'],
+    environment: {
+      'PLAYWRIGHT_DIR': playwrightDir,
+    },
+  );
+}
+
+Future<void> validateJasprRouteSmoke({
+  String? previewDir,
+  String theme = 'ocean',
+  bool reuseBuild = false,
+}) async {
+  final playwrightDir = _resolvePlaywrightDirPath();
+  final outputDir =
+      Directory.systemTemp.createTempSync('dartdoc-jaspr-route-smoke');
+
+  try {
+    final reportFile = path.join(outputDir.path, 'report.json');
+    await SubprocessLauncher('route-smoke-run').runStreamed(
+      'bash',
+      [path.join('tool', 'jaspr_route_smoke.sh')],
+      environment: {
+        'PLAYWRIGHT_DIR': playwrightDir,
+        'OUTPUT_DIR': outputDir.path,
+        ...?previewDir == null ? null : {'PREVIEW_DIR': previewDir},
+        'THEME': theme,
+        'REUSE_BUILD': reuseBuild ? '1' : '0',
+      },
+    );
+
+    final report = File(reportFile);
+    if (!report.existsSync()) {
+      throw StateError(
+        'Expected Jaspr route smoke report at $reportFile, but it was not generated.',
+      );
+    }
+
+    final payload =
+        jsonDecode(report.readAsStringSync()) as Map<String, Object?>;
+    final routes = payload['routes'] as Map<String, Object?>? ?? const {};
+    final diagnostics =
+        payload['diagnostics'] as Map<String, Object?>? ?? const {};
+    final desktop = payload['desktop'] as Map<String, Object?>? ?? const {};
+    final mobile = payload['mobile'] as Map<String, Object?>? ?? const {};
+
+    for (final key in ['entryGuide', 'secondaryGuide', 'greeterApi']) {
+      final value = routes[key] as String? ?? '';
+      if (!value.startsWith('/')) {
+        throw StateError(
+          'Expected Jaspr route smoke report to contain a normalized route for $key, got "$value".',
+        );
+      }
+    }
+
+    final consoleErrors =
+        (diagnostics['consoleErrors'] as List<Object?>? ?? const [])
+            .cast<Object?>();
+    final pageErrors =
+        (diagnostics['pageErrors'] as List<Object?>? ?? const [])
+            .cast<Object?>();
+    final httpErrors =
+        (diagnostics['httpErrors'] as List<Object?>? ?? const [])
+            .cast<Object?>();
+    final requestFailures =
+        (diagnostics['requestFailures'] as List<Object?>? ?? const [])
+            .cast<Object?>();
+
+    if (consoleErrors.isNotEmpty ||
+        pageErrors.isNotEmpty ||
+        httpErrors.isNotEmpty ||
+        requestFailures.isNotEmpty) {
+      throw StateError(
+        'Expected Jaspr route smoke diagnostics to be empty.\n'
+        'consoleErrors: $consoleErrors\n'
+        'pageErrors: $pageErrors\n'
+        'httpErrors: $httpErrors\n'
+        'requestFailures: $requestFailures',
+      );
+    }
+
+    final desktopGuideHeading =
+        (desktop['visitedGuideHeading'] as String? ?? '').toLowerCase();
+    final desktopApiHeading =
+        (desktop['visitedApiHeading'] as String? ?? '').toLowerCase();
+    final mobileHeading = (mobile['heading'] as String? ?? '').toLowerCase();
+    final breadcrumbCount = (desktop['breadcrumbCount'] as num?)?.toInt() ?? 0;
+
+    if (!desktopGuideHeading.contains('configuration')) {
+      throw StateError(
+        'Expected desktop route smoke to reach the configuration guide, got "${desktop['visitedGuideHeading']}".',
+      );
+    }
+    if (!desktopApiHeading.contains('greeter')) {
+      throw StateError(
+        'Expected desktop route smoke to reach a Greeter API page, got "${desktop['visitedApiHeading']}".',
+      );
+    }
+    if (!mobileHeading.contains('configuration')) {
+      throw StateError(
+        'Expected mobile route smoke to reach the configuration guide, got "${mobile['heading']}".',
+      );
+    }
+    if (breadcrumbCount <= 0) {
+      throw StateError(
+        'Expected desktop route smoke to confirm breadcrumbs on the API page.',
+      );
+    }
+  } finally {
+    if (outputDir.existsSync()) {
+      outputDir.deleteSync(recursive: true);
+    }
+  }
+}
+
+Future<void> validateJasprRouteSmokeBasePath({
+  String? previewDir,
+  String theme = 'ocean',
+  bool reuseBuild = false,
+}) async {
+  final playwrightDir = _resolvePlaywrightDirPath();
+  final outputDir =
+      Directory.systemTemp.createTempSync('dartdoc-jaspr-route-smoke-base');
+
+  try {
+    final reportFile = path.join(outputDir.path, 'report.json');
+    const basePath = '/dartdoc-preview';
+    await SubprocessLauncher('route-smoke-base-path-run').runStreamed(
+      'bash',
+      [path.join('tool', 'jaspr_route_smoke.sh')],
+      environment: {
+        'PLAYWRIGHT_DIR': playwrightDir,
+        'OUTPUT_DIR': outputDir.path,
+        'BASE_PATH': basePath,
+        ...?previewDir == null ? null : {'PREVIEW_DIR': previewDir},
+        'THEME': theme,
+        'REUSE_BUILD': reuseBuild ? '1' : '0',
+      },
+    );
+
+    final report = File(reportFile);
+    if (!report.existsSync()) {
+      throw StateError(
+        'Expected Jaspr base-path route smoke report at $reportFile, but it was not generated.',
+      );
+    }
+
+    final payload =
+        jsonDecode(report.readAsStringSync()) as Map<String, Object?>;
+    final reportedBasePath = payload['basePath'] as String? ?? '';
+    if (reportedBasePath != basePath) {
+      throw StateError(
+        'Expected Jaspr base-path route smoke to report "$basePath", got "$reportedBasePath".',
+      );
+    }
+
+    final routes = payload['routes'] as Map<String, Object?>? ?? const {};
+    for (final key in ['entryGuide', 'secondaryGuide', 'greeterApi']) {
+      final value = routes[key] as String? ?? '';
+      if (!value.startsWith('/')) {
+        throw StateError(
+          'Expected Jaspr base-path route smoke report to contain a normalized route for $key, got "$value".',
+        );
+      }
+      if (value.startsWith(basePath)) {
+        throw StateError(
+          'Expected Jaspr base-path route smoke to normalize $key without the base path, got "$value".',
+        );
+      }
+    }
+  } finally {
+    if (outputDir.existsSync()) {
+      outputDir.deleteSync(recursive: true);
+    }
+  }
+}
+
+Future<void> validateJasprSearchPerf({
+  String? previewDir,
+  String theme = 'ocean',
+  bool reuseBuild = false,
+}) async {
+  final playwrightDir = _resolvePlaywrightDirPath();
+  final outputDir =
+      Directory.systemTemp.createTempSync('dartdoc-jaspr-search-profile');
+
+  try {
+    final reportFile = path.join(outputDir.path, 'report.json');
+    await SubprocessLauncher('search-profile-run').runStreamed(
+      'bash',
+      [path.join('tool', 'jaspr_search_profile.sh')],
+      environment: {
+        'PLAYWRIGHT_DIR': playwrightDir,
+        'OUTPUT_DIR': outputDir.path,
+        ...?previewDir == null ? null : {'PREVIEW_DIR': previewDir},
+        'THEME': theme,
+        'REUSE_BUILD': reuseBuild ? '1' : '0',
+      },
+    );
+
+    final report = File(reportFile);
+    if (!report.existsSync()) {
+      throw StateError(
+        'Expected Jaspr search profile report at $reportFile, but it was not generated.',
+      );
+    }
+
+    final payload =
+        jsonDecode(report.readAsStringSync()) as Map<String, Object?>;
+    final scenarios = (payload['scenarios'] as List<Object?>? ?? const [])
+        .cast<Map<String, Object?>>();
+    if (scenarios.length < 2) {
+      throw StateError('Expected desktop and mobile search perf scenarios.');
+    }
+
+    for (final scenario in scenarios) {
+      final scenarioId = scenario['id'] as String? ?? 'unknown';
+      final firstOpenMs = (scenario['firstOpenMs'] as num?)?.toDouble() ?? 0;
+      final warmOpenMs = (scenario['warmOpenMs'] as num?)?.toDouble() ?? 0;
+      final firstOpenRequests =
+          (scenario['firstOpenRequests'] as List<Object?>? ?? const [])
+              .cast<String>();
+      final warmOpenRequests =
+          (scenario['warmOpenRequests'] as List<Object?>? ?? const [])
+              .cast<String>();
+      final deepQuery = scenario['deepQuery'] as Map<String, Object?>? ?? const {};
+      final unicodeQuery =
+          scenario['unicodeQuery'] as Map<String, Object?>? ?? const {};
+
+      if (!firstOpenRequests.any(
+        (entry) => entry.endsWith('/search_index.json'),
+      )) {
+        throw StateError(
+          'Expected cold search open to load the search manifest for $scenarioId.',
+        );
+      }
+      if (!firstOpenRequests.any(
+        (entry) => entry.endsWith('/search_pages.json'),
+      )) {
+        throw StateError(
+          'Expected cold search open to load page entries for $scenarioId.',
+        );
+      }
+      if (warmOpenRequests.any((entry) => entry.endsWith('/search_pages.json'))) {
+        throw StateError(
+          'Warm search open unexpectedly refetched page entries for $scenarioId.',
+        );
+      }
+      if (warmOpenRequests.any((entry) => entry.endsWith('/search_sections.json'))) {
+        throw StateError(
+          'Warm search open unexpectedly refetched section metadata for $scenarioId.',
+        );
+      }
+      if (warmOpenRequests.any((entry) => entry.endsWith('/search_index.json'))) {
+        throw StateError(
+          'Warm search open unexpectedly refetched the manifest for $scenarioId.',
+        );
+      }
+
+      final deepResultCount =
+          (deepQuery['resultCount'] as num?)?.toInt() ?? 0;
+      final deepRequests = (deepQuery['requests'] as List<Object?>? ?? const [])
+          .cast<String>();
+      if (deepResultCount < 0) {
+        throw StateError('Deep query result count was invalid for $scenarioId.');
+      }
+      if (!deepRequests.any((entry) => entry.endsWith('/search_sections.json'))) {
+        throw StateError(
+          'Expected deep query to load section metadata for $scenarioId.',
+        );
+      }
+      if (!deepRequests.any(
+        (entry) => entry.endsWith('/search_sections_content.json'),
+      )) {
+        throw StateError(
+          'Expected deep query to trigger deferred section content for $scenarioId.',
+        );
+      }
+
+      final unicodeResultCount =
+          (unicodeQuery['resultCount'] as num?)?.toInt() ?? 0;
+      if (unicodeResultCount <= 0) {
+        throw StateError(
+          'Expected Unicode query to resolve to the seeded fixture for $scenarioId.',
+        );
+      }
+
+      final firstOpenBudget = scenarioId == 'mobile' ? 3200 : 1600;
+      final warmOpenBudget = scenarioId == 'mobile' ? 1800 : 900;
+      if (firstOpenMs > firstOpenBudget) {
+        throw StateError(
+          'Cold search open exceeded the budget for $scenarioId: ${firstOpenMs.toStringAsFixed(1)}ms > ${firstOpenBudget}ms.',
+        );
+      }
+      if (warmOpenMs > warmOpenBudget) {
+        throw StateError(
+          'Warm search open exceeded the budget for $scenarioId: ${warmOpenMs.toStringAsFixed(1)}ms > ${warmOpenBudget}ms.',
+        );
+      }
+    }
+  } finally {
+    if (outputDir.existsSync()) {
+      outputDir.deleteSync(recursive: true);
+    }
   }
 }
 
 void _prepareOfflinePubCache(Directory pubCacheDir) {
-  final homeDirPath = Platform.environment['HOME'] ??
-      Platform.environment['USERPROFILE'];
-  if (homeDirPath == null || homeDirPath.isEmpty) {
-    throw StateError('Unable to determine the user home directory.');
-  }
+  final homeDirPath = _resolveHomeDirPath();
 
   void linkIfPresent(String name) {
     final target = Directory(path.join(homeDirPath, '.pub-cache', name));
@@ -900,6 +1501,35 @@ void _prepareOfflinePubCache(Directory pubCacheDir) {
   linkIfPresent('hosted');
   linkIfPresent('git');
   linkIfPresent('hosted-hashes');
+}
+
+String _resolveHomeDirPath() {
+  final homeDirPath = Platform.environment['HOME'] ??
+      Platform.environment['USERPROFILE'];
+  if (homeDirPath == null || homeDirPath.isEmpty) {
+    throw StateError('Unable to determine the user home directory.');
+  }
+  return homeDirPath;
+}
+
+String _resolvePlaywrightDirPath() {
+  final candidates = [
+    Platform.environment['PLAYWRIGHT_DIR'],
+    '/tmp/pw-run',
+  ].whereType<String>().where((value) => value.isNotEmpty);
+
+  for (final playwrightDir in candidates) {
+    final playwrightPackageDir = Directory(
+      path.join(playwrightDir, 'node_modules', 'playwright'),
+    );
+    if (playwrightPackageDir.existsSync()) {
+      return playwrightDir;
+    }
+  }
+
+  throw StateError(
+    'Playwright was not found. Set PLAYWRIGHT_DIR or install it into /tmp/pw-run.',
+  );
 }
 
 Future<void> validateBuild() async {

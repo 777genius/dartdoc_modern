@@ -119,4 +119,56 @@ Paragraph with {{ value }}
       expect(output, isNot(contains('export const guideSidebar')));
     });
   });
+
+  group('JasprGeneratorBackend.rewriteGuideLinksForJaspr', () {
+    test('rewrites relative markdown links to Jaspr guide routes', () {
+      final entries = [
+        GuideEntry(
+          packageName: 'pkg',
+          relativePath: 'guide/getting-started.md',
+          title: 'Getting Started',
+          content: '''
+# Getting Started
+
+See the [Configuration](advanced/configuration.md) guide.
+''',
+        ),
+        GuideEntry(
+          packageName: 'pkg',
+          relativePath: 'guide/advanced/configuration.md',
+          title: 'Configuration',
+          content: '# Configuration\n',
+        ),
+      ];
+
+      final rewritten = JasprGeneratorBackend.rewriteGuideLinksForJaspr(entries);
+      expect(
+        rewritten.first.content,
+        contains('[Configuration](/guide/advanced/configuration)'),
+      );
+    });
+
+    test('rewrites same-page anchors to Jaspr heading ids', () {
+      final entries = [
+        GuideEntry(
+          packageName: 'pkg',
+          relativePath: 'guide/spec.md',
+          title: 'Spec',
+          content: '''
+# Spec
+
+## 5.2. Scope Precedence Hierarchy
+
+See [Section 5.2](#_5-2-scope-precedence-hierarchy).
+''',
+        ),
+      ];
+
+      final rewritten = JasprGeneratorBackend.rewriteGuideLinksForJaspr(entries);
+      expect(
+        rewritten.single.content,
+        contains('[Section 5.2](#52-scope-precedence-hierarchy)'),
+      );
+    });
+  });
 }

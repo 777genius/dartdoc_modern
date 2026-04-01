@@ -1,6 +1,9 @@
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_router/jaspr_router.dart';
+import 'package:universal_web/web.dart' as web;
+
+import '../docs_base.dart';
 
 class DocsNavLink extends StatelessComponent {
   const DocsNavLink({
@@ -32,9 +35,12 @@ class DocsNavLink extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
+    final resolvedTo = withDocsBasePath(to);
     final isExternal = _isExternalTarget(to);
     final isHashOnly = to.startsWith('#');
-    final isPlainAnchorOnly = isExternal || isHashOnly || target == Target.blank;
+    final useClientRouter = !hasDocsBasePath;
+    final isPlainAnchorOnly =
+        isExternal || isHashOnly || target == Target.blank || !useClientRouter;
     final mergedAttributes = {
       ...?attributes,
       'data-docs-nav-link': 'true',
@@ -42,7 +48,7 @@ class DocsNavLink extends StatelessComponent {
     };
 
     return a(
-      href: to,
+      href: resolvedTo,
       target: target,
       classes: classes,
       attributes: mergedAttributes,
@@ -72,7 +78,10 @@ class DocsNavLink extends StatelessComponent {
           }
         },
       },
-      [?child, ...?children],
+      [
+        if (child != null) child!,
+        ...?children,
+      ],
     );
   }
 
@@ -83,7 +92,9 @@ class DocsNavLink extends StatelessComponent {
         value.startsWith('tel:');
   }
 
-  bool _isModifiedClick(dynamic event) {
+  bool _isModifiedClick(web.Event event) {
+    if (event is! web.MouseEvent) return false;
+
     final button = event.button;
     final metaKey = event.metaKey;
     final ctrlKey = event.ctrlKey;

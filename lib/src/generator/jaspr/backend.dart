@@ -2,9 +2,11 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:analyzer/file_system/file_system.dart';
+import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
 import 'package:dartdoc_vitepress/src/generator/core/guide_collection.dart'
     as guide_core;
 import 'package:dartdoc_vitepress/src/generator/core/html_sanitizer.dart';
@@ -22,8 +24,10 @@ import 'package:dartdoc_vitepress/src/generator/templates.dart';
 import 'package:dartdoc_vitepress/src/generator/vitepress/renderer.dart'
     as renderer;
 import 'package:dartdoc_vitepress/src/logging.dart';
+import 'package:dartdoc_vitepress/src/markdown_validator.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/runtime_stats.dart';
+import 'package:markdown/markdown.dart' as md;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
@@ -36,22 +40,23 @@ const _apiStylesCss = '''
 /* Member signature blocks with clickable type links */
 
 .member-signature {
-  margin: 8px 0 16px;
+  margin: 6px 0 12px;
 }
-.member-signature pre {
+.member-signature .member-signature-code {
   background: var(--content-pre-bg);
-  border-radius: 8px;
-  padding: 12px 16px;
+  border-radius: 10px;
+  padding: 8px 12px;
   overflow-x: auto;
-  white-space: pre-wrap;
+  white-space: pre-line;
   overflow-wrap: break-word;
   margin: 0;
-}
-.member-signature code {
   font-family: var(--content-code-font);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: var(--content-pre-code);
-  line-height: 1.7;
+  line-height: 1.34;
+}
+.member-signature .member-signature-line {
+  display: block;
 }
 /* Shiki-matched syntax highlighting for member signatures.
    Colors from --shiki-light / --shiki-dark CSS variables. */
@@ -67,12 +72,17 @@ const _apiStylesCss = '''
 /* Linked types (clickable) — same color as .type, underline on hover */
 .member-signature .type-link {
   color: #005CC5;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 400;
+  line-height: inherit;
   text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, #005CC5 40%, transparent);
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1.5px;
   text-underline-offset: 2px;
 }
 .member-signature .type-link:hover {
-  text-decoration-color: #005CC5;
+  text-decoration-thickness: 2px;
 }
 /* Function/method/constructor/field/property names */
 .member-signature .fn {
@@ -95,10 +105,10 @@ const _apiStylesCss = '''
 }
 .dark .member-signature .type-link {
   color: #79B8FF;
-  text-decoration-color: color-mix(in srgb, #79B8FF 40%, transparent);
+  text-decoration-color: currentColor;
 }
 .dark .member-signature .type-link:hover {
-  text-decoration-color: #79B8FF;
+  text-decoration-thickness: 2px;
 }
 .dark .member-signature .fn {
   color: #B392F0;
@@ -198,9 +208,6 @@ class JasprGeneratorBackend extends GeneratorBackend {
   // ---------------------------------------------------------------------------
 
   @override
-  bool get supportsLinkValidation => false;
-
-  @override
   void beforeGenerate(PackageGraph packageGraph) {
     _paths.initFromPackageGraph(packageGraph);
     _docs = JasprDocProcessor(packageGraph, _paths,
@@ -229,6 +236,24 @@ class JasprGeneratorBackend extends GeneratorBackend {
     generateApiSymbolMap();
     _deleteStaleFiles();
     _logSummary();
+  }
+
+  @override
+  void validateGeneratedLinks(
+    PackageGraph packageGraph,
+    DartdocOptionContext config,
+    String origin,
+    Set<String> writtenFiles,
+    StreamController<String> onCheckProgress,
+  ) {
+    MarkdownValidator(
+      packageGraph,
+      config,
+      origin,
+      writtenFiles,
+      onCheckProgress,
+      anchorStrategy: MarkdownAnchorStrategy.jaspr,
+    ).validateLinks();
   }
 
   // ---------------------------------------------------------------------------
@@ -291,23 +316,24 @@ class JasprGeneratorBackend extends GeneratorBackend {
         );
       },
     );
+    final rewrittenGuideEntries = rewriteGuideLinksForJaspr(guideEntries);
 
     // Write guide files through _writeMarkdown for incremental checks.
-    for (final entry in guideEntries) {
+    for (final entry in rewrittenGuideEntries) {
       _writeMarkdown(entry.relativePath, entry.content);
     }
 
     _writeMarkdown(
       'web/index.html',
-      _buildRootIndexHtml(_overviewHrefFor(guideEntries)),
+      _buildRootIndexHtml(_overviewHrefFor(rewrittenGuideEntries)),
     );
     _writeMarkdown(
       'web/404.html',
-      _buildRootIndexHtml(_overviewHrefFor(guideEntries)),
+      _buildRootIndexHtml(_overviewHrefFor(rewrittenGuideEntries)),
     );
 
     var guideSidebarContent = _sidebar.generateGuide(
-      guideEntries,
+      rewrittenGuideEntries,
       isMultiPackage: isMultiPackage,
     );
     _writeMarkdown(
@@ -630,8 +656,7 @@ class JasprGeneratorBackend extends GeneratorBackend {
       buffer.writeln('  ],');
     }
 
-    buffer
-      ..writeln('};');
+    buffer.writeln('};');
 
     _writeMarkdown('lib/generated/api_symbols.dart', buffer.toString());
   }
@@ -677,6 +702,12 @@ class JasprGeneratorBackend extends GeneratorBackend {
   static final _codeImportSpec = RegExp(
     r'^(?<path>[^#]+?)(?:#L(?<start>\d+)(?:-L?(?<end>\d+))?)?$',
   );
+  static final _markdownLinkPattern = RegExp(r'(!?\[[^\]]*\]\()([^)]+)(\))');
+  static final _frontMatterFence = RegExp(r'^---\s*$');
+  static final _headingPattern = RegExp(r'^\s{0,3}#{1,6}\s+(.*?)\s*$');
+  static final _explicitHeadingAnchor =
+      RegExp(r'\s+\{#([A-Za-z0-9:_\-.]+)\}\s*$');
+  static final _schemePattern = RegExp(r'^[a-zA-Z][a-zA-Z0-9+.-]*:');
 
   /// Strips VitePress-specific syntax from markdown so Jaspr renders cleanly.
   @visibleForTesting
@@ -842,10 +873,11 @@ class JasprGeneratorBackend extends GeneratorBackend {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${_escapeHtml(_packageName)} API</title>
-    <link rel="stylesheet" href="/generated/api_styles.css">
-    <meta http-equiv="refresh" content="0; url=$overviewHref">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="generated/api_styles.css">
+    <meta http-equiv="refresh" content="0; url=${overviewHref.replaceFirst('/', '')}">
     <script>
-      window.location.replace(${jsonEncode(overviewHref)});
+      window.location.replace(${jsonEncode(overviewHref.replaceFirst('/', ''))});
     </script>
   </head>
   <body>
@@ -853,6 +885,203 @@ class JasprGeneratorBackend extends GeneratorBackend {
   </body>
 </html>
 ''';
+
+  @visibleForTesting
+  static List<guide_core.GuideEntry> rewriteGuideLinksForJaspr(
+    List<guide_core.GuideEntry> entries,
+  ) {
+    if (entries.isEmpty) return entries;
+
+    final routeByRelativePath = <String, String>{
+      for (final entry in entries)
+        entry.relativePath: '/${entry.relativePath.replaceAll('.md', '')}',
+    };
+    final relativePathByRoute = <String, String>{
+      for (final entry in entries)
+        '/${entry.relativePath.replaceAll('.md', '')}': entry.relativePath,
+    };
+    final anchorMapByRelativePath = <String, Map<String, String>>{
+      for (final entry in entries)
+        entry.relativePath: _buildJasprAnchorRewriteMap(entry.content),
+    };
+
+    return [
+      for (final entry in entries)
+        guide_core.GuideEntry(
+          packageName: entry.packageName,
+          relativePath: entry.relativePath,
+          title: entry.title,
+          content: _rewriteGuideMarkdownLinks(
+            entry.content,
+            currentRelativePath: entry.relativePath,
+            routeByRelativePath: routeByRelativePath,
+            relativePathByRoute: relativePathByRoute,
+            anchorMapByRelativePath: anchorMapByRelativePath,
+          ),
+          sourcePath: entry.sourcePath,
+          sidebarPosition: entry.sidebarPosition,
+        ),
+    ];
+  }
+
+  static String _rewriteGuideMarkdownLinks(
+    String content, {
+    required String currentRelativePath,
+    required Map<String, String> routeByRelativePath,
+    required Map<String, String> relativePathByRoute,
+    required Map<String, Map<String, String>> anchorMapByRelativePath,
+  }) {
+    return content.replaceAllMapped(_markdownLinkPattern, (match) {
+      final prefix = match.group(1)!;
+      final destination = match.group(2)!;
+      final suffix = match.group(3)!;
+
+      final rewritten = _rewriteGuideDestination(
+        destination,
+        currentRelativePath: currentRelativePath,
+        routeByRelativePath: routeByRelativePath,
+        relativePathByRoute: relativePathByRoute,
+        anchorMapByRelativePath: anchorMapByRelativePath,
+      );
+
+      return '$prefix$rewritten$suffix';
+    });
+  }
+
+  static String _rewriteGuideDestination(
+    String destination, {
+    required String currentRelativePath,
+    required Map<String, String> routeByRelativePath,
+    required Map<String, String> relativePathByRoute,
+    required Map<String, Map<String, String>> anchorMapByRelativePath,
+  }) {
+    final trimmed = destination.trim();
+    if (trimmed.isEmpty || _schemePattern.hasMatch(trimmed)) return destination;
+    if (trimmed.startsWith('//')) return destination;
+
+    final hashIndex = trimmed.indexOf('#');
+    final pathPart = hashIndex == -1 ? trimmed : trimmed.substring(0, hashIndex);
+    final fragment = hashIndex == -1 ? null : trimmed.substring(hashIndex + 1);
+
+    String rewriteFragment(String relativePath, String? currentFragment) {
+      if (currentFragment == null || currentFragment.isEmpty) return '';
+      final anchorMap = anchorMapByRelativePath[relativePath];
+      final rewritten = anchorMap?[currentFragment] ?? currentFragment;
+      return '#$rewritten';
+    }
+
+    if (pathPart.isEmpty) {
+      return rewriteFragment(currentRelativePath, fragment);
+    }
+
+    if (pathPart.startsWith('/')) {
+      final normalizedRoute = p.posix.normalize(pathPart);
+      final targetRelativePath = relativePathByRoute[normalizedRoute];
+      if (targetRelativePath == null) return destination;
+      return '$normalizedRoute${rewriteFragment(targetRelativePath, fragment)}';
+    }
+
+    final currentDir = p.posix.dirname(currentRelativePath);
+    final relativeFile = p.posix.normalize(
+      p.posix.join(currentDir, pathPart),
+    );
+    if (p.posix.extension(relativeFile) != '.md') return destination;
+
+    final route = routeByRelativePath[relativeFile];
+    if (route == null) return destination;
+    return '$route${rewriteFragment(relativeFile, fragment)}';
+  }
+
+  static Map<String, String> _buildJasprAnchorRewriteMap(String content) {
+    final sourceAnchors = _extractSourceHeadingAnchors(content);
+    final jasprAnchors = _extractJasprHeadingAnchors(content);
+    final anchorMap = <String, String>{};
+    final pairCount = sourceAnchors.length < jasprAnchors.length
+        ? sourceAnchors.length
+        : jasprAnchors.length;
+
+    for (var i = 0; i < pairCount; i++) {
+      final sourceAnchor = sourceAnchors[i];
+      final jasprAnchor = jasprAnchors[i];
+      if (sourceAnchor.isEmpty || jasprAnchor.isEmpty) continue;
+      anchorMap[sourceAnchor] = jasprAnchor;
+      if (RegExp(r'^\d').hasMatch(sourceAnchor)) {
+        anchorMap['_$sourceAnchor'] = jasprAnchor;
+      }
+    }
+
+    return anchorMap;
+  }
+
+  static List<String> _extractSourceHeadingAnchors(String content) {
+    final anchors = <String>[];
+    var inFrontMatter = false;
+    var frontMatterHandled = false;
+    var inFence = false;
+
+    for (final line in content.split('\n')) {
+      final trimmed = line.trim();
+      if (!frontMatterHandled && _frontMatterFence.hasMatch(trimmed)) {
+        inFrontMatter = !inFrontMatter;
+        if (!inFrontMatter) {
+          frontMatterHandled = true;
+        }
+        continue;
+      }
+      if (inFrontMatter) continue;
+
+      if (_codeFenceLine.hasMatch(line)) {
+        inFence = !inFence;
+        continue;
+      }
+      if (inFence) continue;
+
+      final headingMatch = _headingPattern.firstMatch(line);
+      if (headingMatch == null) continue;
+
+      final rawHeading = headingMatch.group(1)!.trim();
+      final explicitAnchor = _explicitHeadingAnchor.firstMatch(rawHeading);
+      if (explicitAnchor != null) {
+        anchors.add(explicitAnchor.group(1)!);
+        continue;
+      }
+
+      final headingText = rawHeading.replaceFirst(_explicitHeadingAnchor, '');
+      final sanitized = JasprPathResolver.sanitizeAnchor(headingText);
+      if (sanitized.isNotEmpty) {
+        anchors.add(sanitized);
+      }
+    }
+
+    return anchors;
+  }
+
+  static List<String> _extractJasprHeadingAnchors(String content) {
+    final document = md.Document(extensionSet: md.ExtensionSet.gitHubWeb);
+    final nodes = document.parse(content);
+    final anchors = <String>[];
+
+    void visit(md.Node node) {
+      if (node is! md.Element) return;
+
+      if (RegExp(r'^h[1-6]$').hasMatch(node.tag)) {
+        final generatedId = node.generatedId;
+        if (generatedId != null && generatedId.isNotEmpty) {
+          anchors.add(generatedId);
+        }
+      }
+
+      for (final child in node.children ?? const <md.Node>[]) {
+        visit(child);
+      }
+    }
+
+    for (final node in nodes) {
+      visit(node);
+    }
+
+    return anchors;
+  }
 
   Map<String, List<_ApiSymbolEntry>> _collectApiSymbolEntries() {
     final apiRoot = p.join(_outputPath, 'content', 'api');
@@ -877,7 +1106,9 @@ class JasprGeneratorBackend extends GeneratorBackend {
 
         final relativePath =
             normalizedRelative.replaceFirst(RegExp(r'^content/'), '');
-        if (relativePath.endsWith('/index.md') || relativePath == 'api/index.md') {
+        if (relativePath.endsWith('/index.md') ||
+            relativePath.endsWith('/library.md') ||
+            relativePath == 'api/index.md') {
           continue;
         }
 

@@ -59,6 +59,12 @@ class JasprInitGenerator {
     );
     _writeTemplateIfAbsent(
       templateDir: templateDir,
+      templateFile: p.join('lib', 'docs_base.dart'),
+      outputFile: 'lib/docs_base.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
       templateFile: p.join('lib', 'main.server.dart'),
       outputFile: 'lib/main.server.dart',
       placeholders: placeholders,
@@ -67,6 +73,24 @@ class JasprInitGenerator {
       templateDir: templateDir,
       templateFile: p.join('lib', 'main.client.dart'),
       outputFile: 'lib/main.client.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'main.client.options.dart'),
+      outputFile: 'lib/main.client.options.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'main.server.options.dart'),
+      outputFile: 'lib/main.server.options.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_code_block.dart'),
+      outputFile: 'lib/components/docs_code_block.dart',
       placeholders: placeholders,
     );
     _writeTemplateIfAbsent(
@@ -99,6 +123,58 @@ class JasprInitGenerator {
         'docs_navigation_runtime_web.dart',
       ),
       outputFile: 'lib/components/docs_navigation_runtime_web.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_disclosure_runtime.dart'),
+      outputFile: 'lib/components/docs_disclosure_runtime.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join(
+        'lib',
+        'components',
+        'docs_disclosure_runtime_stub.dart',
+      ),
+      outputFile: 'lib/components/docs_disclosure_runtime_stub.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join(
+        'lib',
+        'components',
+        'docs_disclosure_runtime_web.dart',
+      ),
+      outputFile: 'lib/components/docs_disclosure_runtime_web.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('lib', 'components', 'docs_lightbox_runtime.dart'),
+      outputFile: 'lib/components/docs_lightbox_runtime.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join(
+        'lib',
+        'components',
+        'docs_lightbox_runtime_stub.dart',
+      ),
+      outputFile: 'lib/components/docs_lightbox_runtime_stub.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join(
+        'lib',
+        'components',
+        'docs_lightbox_runtime_web.dart',
+      ),
+      outputFile: 'lib/components/docs_lightbox_runtime_web.dart',
       placeholders: placeholders,
     );
     _writeTemplateIfAbsent(
@@ -248,6 +324,18 @@ class JasprInitGenerator {
       templateDir: templateDir,
       templateFile: p.join('web', 'docs_mermaid_runtime.js'),
       outputFile: 'web/docs_mermaid_runtime.js',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('web', 'docs_lightbox_runtime.js'),
+      outputFile: 'web/docs_lightbox_runtime.js',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('web', 'favicon.svg'),
+      outputFile: 'web/favicon.svg',
       placeholders: placeholders,
     );
 

@@ -7,14 +7,23 @@
 .pub
 .settings/
 .vscode/
+.tmp-playwright-check.spec.js
+AGENTS.md
+CLAUDE.md
 build/
+data/
 doc/
 docs-site/
+docs-site-jaspr-self/
+GEMINI.md
+ITERATION_PLAN.md
 js-packages/
 lcov.info
 packages
 test_data/
 testing/
+test-results/
+test/goldens/
 pubspec.lock
 
 *.iml

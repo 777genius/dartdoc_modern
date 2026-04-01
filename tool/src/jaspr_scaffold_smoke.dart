@@ -14,6 +14,7 @@ class JasprScaffoldSmokeChecker {
     _requireFile('lib/main.server.dart');
     _requireFile('lib/main.client.dart');
     _requireFile('web/index.html');
+    _requireFile('web/favicon.svg');
     _requireFile('web/generated/search_index.json');
     _requireFile('web/generated/search_pages.json');
     _requireFile('web/generated/search_sections.json');

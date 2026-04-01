@@ -75,10 +75,9 @@ class DocsSidebar extends StatelessComponent {
         css('.sidebar', [
           css('&').styles(
             position: Position.relative(),
-            fontSize: 0.875.rem,
-            lineHeight: 1.25.rem,
-            padding:
-                Padding.only(left: 0.5.rem, bottom: 1.25.rem, top: 0.75.rem),
+            fontSize: 0.93.rem,
+            lineHeight: 1.35.rem,
+            padding: Padding.zero,
           ),
           downContent([
             css('&').styles(
@@ -95,7 +94,6 @@ class DocsSidebar extends StatelessComponent {
               },
             ),
           ]),
-          css('&').styles(padding: Padding.only(top: Unit.zero)),
           css('.sidebar-close', [
             css('&').styles(
               position: Position.absolute(top: 0.75.rem, right: 0.75.rem),
@@ -116,78 +114,59 @@ class DocsSidebar extends StatelessComponent {
           ]),
           css('.sidebar-group', [
             css('&').styles(
-              padding: Padding.only(top: 1.5.rem, right: 0.75.rem),
+              padding: Padding.only(top: 1.05.rem, right: 0.2.rem),
             ),
             css('h3').styles(
               fontWeight: FontWeight.w800,
-              fontSize: 0.74.rem,
-              padding: Padding.only(left: 0.75.rem),
-              margin: Margin.only(bottom: 1.rem, top: Unit.zero),
-              color: Color('var(--docs-shell-muted)'),
-              textTransform: TextTransform.upperCase,
-              raw: {'letter-spacing': '0.12em'},
+              fontSize: 0.92.rem,
+              padding: Padding.zero,
+              margin: Margin.only(bottom: 0.65.rem, top: Unit.zero),
+              color: ContentColors.text,
             ),
             css('ul').styles(
               listStyle: ListStyle.none,
               margin: Margin.zero,
               padding: Padding.zero,
             ),
-            css('li').styles(margin: Margin.only(bottom: 0.24.rem)),
+            css('li').styles(margin: Margin.only(bottom: 0.08.rem)),
             css('.sidebar-link').styles(
               opacity: 0.92,
               display: Display.block,
-              margin: Margin.symmetric(horizontal: 0.18.rem),
+              margin: Margin.zero,
               padding:
-                  Padding.symmetric(vertical: 0.72.rem, horizontal: 0.92.rem),
+                  Padding.symmetric(vertical: 0.5.rem, horizontal: Unit.zero),
               overflow: Overflow.hidden,
-              radius: BorderRadius.circular(0.9.rem),
+              radius: BorderRadius.circular(Unit.zero),
               color: ContentColors.text,
               transition: Transition(
-                'background-color, color, transform, box-shadow',
+                'color, opacity',
                 duration: 150.ms,
                 curve: Curve.easeInOut,
               ),
               raw: {
-                'position': 'relative',
                 'line-height': '1.35',
-                'display': '-webkit-box',
-                '-webkit-box-orient': 'vertical',
-                '-webkit-line-clamp': '2',
                 'white-space': 'normal',
-                'text-wrap': 'pretty',
               },
             ),
             css('.sidebar-link:hover').styles(
               opacity: 1,
-              backgroundColor: Color('#0000000d'),
-              raw: {'transform': 'translateX(2px)'},
+              color: ContentColors.primary,
             ),
             css('.sidebar-link.active').styles(
               opacity: 1,
               color: ContentColors.primary,
               fontWeight: FontWeight.w700,
-              backgroundColor: Color(
-                'color-mix(in srgb, currentColor 15%, transparent)',
-              ),
-              shadow: BoxShadow(
-                offsetX: Unit.zero,
-                offsetY: 10.px,
-                blur: 16.px,
-                color: Color('var(--docs-shell-shadow)'),
-              ),
-              raw: {
-                'box-shadow':
-                    'inset 4px 0 0 currentColor, 0 10px 16px var(--docs-shell-shadow)',
-              },
+              backgroundColor: Color('transparent'),
+              shadow: BoxShadow.unset,
             ),
             css('.sidebar-group-libraries').styles(
-              margin: Margin.only(top: 0.6.rem),
+              margin: Margin.only(top: 0.2.rem),
             ),
             css('.sidebar-group-libraries .sidebar-link').styles(
               fontSize: 0.94.rem,
               opacity: 0.86,
               padding:
-                  Padding.symmetric(vertical: 0.64.rem, horizontal: 0.92.rem),
+                  Padding.symmetric(vertical: 0.46.rem, horizontal: Unit.zero),
             ),
             css('.sidebar-group-libraries .sidebar-link.active').styles(
               opacity: 1,

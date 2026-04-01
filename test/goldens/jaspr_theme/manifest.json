@@ -1,0 +1,74 @@
+[
+  {
+    "file": "ocean-desktop-light.png",
+    "theme": "ocean",
+    "viewport": "desktop",
+    "mode": "light"
+  },
+  {
+    "file": "ocean-desktop-dark.png",
+    "theme": "ocean",
+    "viewport": "desktop",
+    "mode": "dark"
+  },
+  {
+    "file": "ocean-mobile-light.png",
+    "theme": "ocean",
+    "viewport": "mobile",
+    "mode": "light"
+  },
+  {
+    "file": "ocean-mobile-dark.png",
+    "theme": "ocean",
+    "viewport": "mobile",
+    "mode": "dark"
+  },
+  {
+    "file": "graphite-desktop-light.png",
+    "theme": "graphite",
+    "viewport": "desktop",
+    "mode": "light"
+  },
+  {
+    "file": "graphite-desktop-dark.png",
+    "theme": "graphite",
+    "viewport": "desktop",
+    "mode": "dark"
+  },
+  {
+    "file": "graphite-mobile-light.png",
+    "theme": "graphite",
+    "viewport": "mobile",
+    "mode": "light"
+  },
+  {
+    "file": "graphite-mobile-dark.png",
+    "theme": "graphite",
+    "viewport": "mobile",
+    "mode": "dark"
+  },
+  {
+    "file": "forest-desktop-light.png",
+    "theme": "forest",
+    "viewport": "desktop",
+    "mode": "light"
+  },
+  {
+    "file": "forest-desktop-dark.png",
+    "theme": "forest",
+    "viewport": "desktop",
+    "mode": "dark"
+  },
+  {
+    "file": "forest-mobile-light.png",
+    "theme": "forest",
+    "viewport": "mobile",
+    "mode": "light"
+  },
+  {
+    "file": "forest-mobile-dark.png",
+    "theme": "forest",
+    "viewport": "mobile",
+    "mode": "dark"
+  }
+]

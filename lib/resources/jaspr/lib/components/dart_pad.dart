@@ -110,19 +110,28 @@ class _DartPadBlock extends StatelessComponent {
           button(
             classes: 'dartpad-btn dartpad-run',
             attributes: {'type': 'button'},
-            [Component.text('Run')],
+            [
+              span(classes: 'dartpad-btn-icon', [Component.text('▶')]),
+              span(classes: 'dartpad-btn-label', [Component.text('Run')]),
+            ],
           ),
           button(
             classes: 'dartpad-btn dartpad-copy',
             attributes: {'type': 'button'},
-            [Component.text('Copy')],
+            [
+              span(classes: 'dartpad-btn-icon', [Component.text('⧉')]),
+              span(classes: 'dartpad-btn-label', [Component.text('Copy')]),
+            ],
           ),
           a(
             href: 'https://dartpad.dev',
             target: Target.blank,
             attributes: {'rel': 'noopener'},
             classes: 'dartpad-btn dartpad-open',
-            [Component.text('Open')],
+            [
+              span(classes: 'dartpad-btn-icon', [Component.text('↗')]),
+              span(classes: 'dartpad-btn-label', [Component.text('Open')]),
+            ],
           ),
         ]),
         div(classes: 'dartpad-stage', []),

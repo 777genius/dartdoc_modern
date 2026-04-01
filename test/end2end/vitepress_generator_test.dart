@@ -2,13 +2,17 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_vitepress/src/dartdoc.dart' show Dartdoc;
+import 'package:dartdoc_vitepress/src/dartdoc.dart'
+    show Dartdoc, DartdocResults;
 import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
 import 'package:dartdoc_vitepress/src/io_utils.dart';
 import 'package:dartdoc_vitepress/src/logging.dart';
 import 'package:dartdoc_vitepress/src/model/package_builder.dart';
 import 'package:dartdoc_vitepress/src/package_meta.dart';
+import 'package:dartdoc_vitepress/src/warnings.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -65,6 +69,33 @@ bool _dirExists(Folder outDir, String relativePath) {
   return _resourceProvider
       .getFolder(p.normalize(p.join(outDir.path, relativePath)))
       .exists;
+}
+
+Folder _createSystemTemp(String prefix) =>
+    _resourceProvider.getFolder(io.Directory.systemTemp.createTempSync(prefix).path);
+
+Folder _copyPackageFixture(Folder source, String prefix) {
+  final destination = io.Directory.systemTemp.createTempSync(prefix);
+
+  void copyDirectory(io.Directory from, io.Directory to) {
+    for (final entity in from.listSync(recursive: false)) {
+      final targetPath = p.join(to.path, p.basename(entity.path));
+      if (entity is io.Directory) {
+        final next = io.Directory(targetPath)..createSync();
+        copyDirectory(entity, next);
+      } else if (entity is io.File) {
+        entity.copySync(targetPath);
+      }
+    }
+  }
+
+  copyDirectory(io.Directory(source.path), destination);
+  return _resourceProvider.getFolder(destination.path);
+}
+
+bool _hasWarning(DartdocResults results, PackageWarning warning) {
+  return results.packageGraph.packageWarningCounter.countedWarnings.values
+      .any((warningsByKind) => warningsByKind.containsKey(warning));
 }
 
 void main() {
@@ -134,7 +165,7 @@ void main() {
             _readOutput(outDir, '.vitepress/generated/api-styles.css');
         expect(content, contains('.member-signature'));
         expect(content, contains('.kw'));
-        expect(content, contains('pre-wrap'));
+        expect(content, contains('pre-line'));
         expect(content, contains('a.api-link'));
       });
 
@@ -944,10 +975,10 @@ void main() {
 
       // -- Clickable type links in signatures --------------------------------
 
-      test('member signature uses HTML div with pre/code', () {
+      test('member signature uses HTML div wrapper', () {
         var content = _readOutput(outDir, 'api/ex/Apple.md');
         expect(content, contains('class="member-signature"'));
-        expect(content, contains('<pre><code>'));
+        expect(content, contains('class="member-signature-code"'));
       });
 
       test('constructor signature has kw spans for keywords', () {
@@ -1120,28 +1151,19 @@ void main() {
         // paintImage1 has 5 named params — way over 80 chars
         var content = _readOutput(outDir, 'api/fake/paintImage1.md');
         expect(content, contains('member-signature'));
-        // Should have newlines (tall format)
-        var sigMatch =
-            RegExp(r'<pre><code>([\s\S]*?)</code></pre>').firstMatch(content);
-        expect(sigMatch, isNotNull);
-        var sigContent = sigMatch!.group(1)!;
-        expect(sigContent, contains('\n'));
+        expect(content, contains('member-signature-line'));
         // Each param on its own line with 2-space indent and trailing comma
-        expect(sigContent, contains('">canvas</span>,'));
-        expect(sigContent, contains('">rect</span>,'));
+        expect(content, contains('>canvas</span>,'));
+        expect(content, contains('>rect</span>,'));
       });
 
       test('long optional-positional signature uses tall style', () {
         // topLevelFunction(int param1, bool param2, Cool coolBeans,
         //     [double optionalPositional = 0.0]) — over 80 chars
         var content = _readOutput(outDir, 'api/fake/topLevelFunction.md');
-        var sigMatch =
-            RegExp(r'<pre><code>([\s\S]*?)</code></pre>').firstMatch(content);
-        expect(sigMatch, isNotNull);
-        var sigContent = sigMatch!.group(1)!;
-        expect(sigContent, contains('\n'));
+        expect(content, contains('member-signature-line'));
         // Should have trailing commas on parameter lines
-        expect(sigContent, contains('">param1</span>,'));
+        expect(content, contains('>param1</span>,'));
       });
 
       test('short mixed-param signature stays single-line', () {
@@ -1654,5 +1676,55 @@ void main() {
         }
       });
     });
+
+    group('markdown link validation', () {
+      late Folder pkgDir;
+      late Folder outDir;
+
+      tearDown(() {
+        if (pkgDir.exists) {
+          pkgDir.delete();
+        }
+        if (outDir.exists) {
+          outDir.delete();
+        }
+      });
+
+      test('relative markdown guide links resolve without warnings', () async {
+        pkgDir =
+            _copyPackageFixture(_testPackageWithDocsDir, 'vitepress_links_ok.');
+        outDir = _createSystemTemp('vitepress_links_out_ok.');
+
+        final guideFile = _resourceProvider
+            .getFile(p.join(pkgDir.path, 'doc', 'getting-started.md'));
+        guideFile.writeAsStringSync(
+          '${guideFile.readAsStringSync()}\n\nSee the [Configuration](advanced/configuration.md) guide.\n',
+        );
+
+        runPubGet(pkgDir.path);
+        final dartdoc = _buildVitePressDartdoc([], pkgDir, outDir);
+        final results = await dartdoc.generateDocs();
+
+        expect(_hasWarning(results, PackageWarning.brokenLink), isFalse);
+      });
+
+      test('broken guide links emit broken-link warnings', () async {
+        pkgDir = _copyPackageFixture(
+            _testPackageWithDocsDir, 'vitepress_links_bad.');
+        outDir = _createSystemTemp('vitepress_links_out_bad.');
+
+        final guideFile = _resourceProvider
+            .getFile(p.join(pkgDir.path, 'doc', 'getting-started.md'));
+        guideFile.writeAsStringSync(
+          '${guideFile.readAsStringSync()}\n\nBroken: [Missing Guide](/guide/missing-page).\n',
+        );
+
+        runPubGet(pkgDir.path);
+        final dartdoc = _buildVitePressDartdoc([], pkgDir, outDir);
+        final results = await dartdoc.generateDocs();
+
+        expect(_hasWarning(results, PackageWarning.brokenLink), isTrue);
+      });
+    }, timeout: Timeout.factor(4));
   }, timeout: Timeout.factor(12));
 }

@@ -20,22 +20,44 @@ Supported presets:
 Example:
 
 ```bash
-dart run --dart-define=DOCS_THEME=graphite jaspr_builder serve
+jaspr serve --dart-define DOCS_THEME=graphite
 ```
 
 The default preset is `ocean`.
 
+For a subpath deployment, pair the theme with a base path:
+
+```bash
+jaspr build \
+  --dart-define DOCS_THEME=graphite \
+  --dart-define DOCS_BASE_PATH=/my-package-docs
+```
+
 For local preview of the generated demo site, use:
 
 ```bash
-THEME=forest /Users/belief/dev/projects/dartdoc-vitepress/tool/jaspr_theme_preview.sh
+THEME=forest ./tool/jaspr_theme_preview.sh
 ```
+
+The preview script now uses `jaspr build` and serves the generated static site. This is slower than `jaspr serve`, but it matches production output and keeps route previews accurate.
 
 For a screenshot matrix across presets, use:
 
 ```bash
-/Users/belief/dev/projects/dartdoc-vitepress/tool/jaspr_theme_snapshot.sh
+./tool/jaspr_theme_snapshot.sh
 ```
+
+This now captures:
+
+- `desktop / light`
+- `desktop / dark`
+- `mobile / light`
+- `mobile / dark`
+
+It also writes:
+
+- `manifest.json`
+- `index.html` snapshot gallery report
 
 For local validation of the generated theme scaffold and scripts, use:
 
@@ -43,14 +65,39 @@ For local validation of the generated theme scaffold and scripts, use:
 dart run tool/task.dart validate jaspr-theme
 ```
 
+For the heavier visual verification pass, use:
+
+```bash
+PLAYWRIGHT_DIR=/tmp/pw-run dart run tool/task.dart validate jaspr-theme-visual
+```
+
+For a real golden regression check against the committed baseline, use:
+
+```bash
+PLAYWRIGHT_DIR=/tmp/pw-run dart run tool/task.dart validate jaspr-theme-golden
+```
+
+To refresh the baseline after an intentional visual redesign, use:
+
+```bash
+PLAYWRIGHT_DIR=/tmp/pw-run ./tool/jaspr_theme_golden.sh update
+```
+
 Optional env vars:
 
 - `THEME=ocean|graphite|forest`
+- `BASE_PATH=/my-package-docs`
 - `PORT=4312`
-- `WEB_PORT=5470`
 - `OUTPUT_DIR=/tmp/dartdoc-jaspr-preview`
 - `PUB_CACHE_DIR=/tmp/dartdoc-pub-cache`
 - `PLAYWRIGHT_DIR=/tmp/pw-run` for the screenshot script
+
+Preview note:
+
+- Static preview is served from the built `build/jaspr` output
+- `jaspr build` still needs the internal app server on `8080` while generating routes
+- `tool/jaspr_theme_preview.sh` safely stops stale preview processes created in `/tmp/dartdoc-jaspr-preview*`
+- If some other app is listening on `8080`, the script fails fast and prints the blocking PID/command instead of pretending a different server port will work
 
 ## Presets
 

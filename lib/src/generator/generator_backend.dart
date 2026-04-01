@@ -13,6 +13,7 @@ import 'package:dartdoc_vitepress/src/generator/template_data.dart';
 import 'package:dartdoc_vitepress/src/generator/templates.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/runtime_stats.dart';
+import 'package:dartdoc_vitepress/src/validator.dart';
 import 'package:dartdoc_vitepress/src/version.dart';
 import 'package:dartdoc_vitepress/src/warnings.dart';
 import 'package:path/path.dart' as p show Context;
@@ -255,12 +256,24 @@ abstract class GeneratorBackend {
   /// Emits files not specific to a Dart language element (like a favicon, etc).
   Future<void> generateAdditionalFiles();
 
-  /// Whether this backend supports the post-generation HTML link validator.
-  ///
-  /// The built-in validator traverses generated `index.html` and `index.json`
-  /// files. Markdown-first backends such as VitePress and Jaspr should return
-  /// `false` until they have a dedicated validator for their output layout.
+  /// Whether this backend supports post-generation link validation.
   bool get supportsLinkValidation => true;
+
+  /// Runs format-aware post-generation link validation.
+  ///
+  /// HTML backends keep using the legacy HTML validator. Markdown-first
+  /// backends can override this to validate routes and anchors against the
+  /// generated markdown output.
+  FutureOr<void> validateGeneratedLinks(
+    PackageGraph packageGraph,
+    DartdocOptionContext config,
+    String origin,
+    Set<String> writtenFiles,
+    StreamController<String> onCheckProgress,
+  ) {
+    Validator(packageGraph, config, origin, writtenFiles, onCheckProgress)
+        .validateLinks();
+  }
 
   /// Called once before the documentation traversal begins.
   ///

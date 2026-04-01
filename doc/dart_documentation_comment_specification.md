@@ -140,7 +140,7 @@ Doc comments are associated with the declaration that immediately follows them. 
 * `typedef`
 * Top-level functions
 * Top-level variables
-* Top-level getters or setters (See [Section 6.2.2](#622-getters-and-setters) for details)
+* Top-level getters or setters (See [Section 6.2.2](#_6-2-2-getters-and-setters) for details)
 
 ### **3.3. Member Declarations**
 
@@ -148,7 +148,7 @@ Doc comments are associated with the declaration that immediately follows them. 
 * Methods (instance, static)
 * Operators
 * Fields (instance, static)
-* Getters or setters (See [Section 6.2.2](#622-getters-and-setters) for details)
+* Getters or setters (See [Section 6.2.2](#_6-2-2-getters-and-setters) for details)
 
 ### **3.4. Enum Constants**
 
@@ -182,13 +182,13 @@ A reference in a doc comment (e.g., `[name]`) can link to any Dart element that 
 * Type aliases (Typedefs) (e.g., `[MyTypedef]`)
 * Functions (e.g., `[myTopLevelFunction]`)
 * Variables and constants (e.g., `[myTopLevelVar]`)
-* Getters and Setters  (See [Section 6.2.2](#622-getters-and-setters) for full details)
+* Getters and Setters  (See [Section 6.2.2](#_6-2-2-getters-and-setters) for full details)
 
 ### **4.2. Members:**
 
 * Methods (instance and static) (e.g., `[myMethod]`, `[MyClass.myMethod]`)
 * Fields (instance and static) (e.g., `[myField]`, `[MyClass.myField]`)
-* Getters and Setters  (See [Section 6.2.2](#622-getters-and-setters) for full details)
+* Getters and Setters  (See [Section 6.2.2](#_6-2-2-getters-and-setters) for full details)
 * Constructors (e.g., `[MyClass.new]`, `[MyClass.named]`)
 * Enum constants (e.g., `[MyEnum.value]`)
 
@@ -205,7 +205,7 @@ When a name is enclosed in square brackets (e.g., `[MyClass.myMethod]`), documen
 
 ### **5.1. General Principles**
 
-* **Resolution Follows Scope Hierarchy:** Lookup begins relative to the documented element and proceeds outwards through the well-defined Dart scope precedence hierarchy (see [Section 5.2](#52-scope-precedence-hierarchy)). The first valid match found in this search is used.
+* **Resolution Follows Scope Hierarchy:** Lookup begins relative to the documented element and proceeds outwards through the well-defined Dart scope precedence hierarchy (see [Section 5.2](#_5-2-scope-precedence-hierarchy)). The first valid match found in this search is used.
 
 * **Disambiguation via Qualification:** To prevent ambiguity or to reference an element from a distant scope, a reference should be qualified. This is done by prefixing the name with a class name (e.g., `[ClassName.memberName]`) or an import prefix (e.g., `[prefix.elementName]`).
 
@@ -422,7 +422,7 @@ When a reference contains a qualified name (e.g., `[prefix.ClassName.member]`), 
 
 #### **1\. Resolve the First Identifier**
 
-The tool first resolves the first identifier in the qualified name (e.g., prefix) using the standard lookup process ([Section 5.3](#53-detailed-lookup-process)), starting from the doc comment's current scope.
+The tool first resolves the first identifier in the qualified name (e.g., prefix) using the standard lookup process ([Section 5.3](#_5-3-detailed-lookup-process)), starting from the doc comment's current scope.
 
 #### **2\. Resolve Subsequent Identifiers**
 
@@ -504,7 +504,7 @@ class A {
 }
 ```
 
-* **Getters and Setters:** A reference to a property name (e.g., `[value]`) resolves to the *conceptual property* rather than the individual getter or setter. See full discussion in [Section 6.2.2](#622-getters-and-setters).
+* **Getters and Setters:** A reference to a property name (e.g., `[value]`) resolves to the *conceptual property* rather than the individual getter or setter. See full discussion in [Section 6.2.2](#_6-2-2-getters-and-setters).
 
 * **Shadowing**: A name in an inner scope (like a `[parameterName]`) "shadows" a name in an outer scope (like a class field). The shadowed outer element must be qualified to be referenced, e.g., `[MyClass.fieldName]`.
 

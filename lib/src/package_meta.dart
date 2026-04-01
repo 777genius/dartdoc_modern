@@ -7,7 +7,6 @@ import 'dart:io' show Platform;
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
-
 // ignore: implementation_imports
 import 'package:analyzer/src/generated/sdk.dart' show DartSdk;
 import 'package:dartdoc_vitepress/src/failure.dart';
@@ -198,12 +197,25 @@ abstract class PubPackageMeta extends PackageMeta {
       return PubPackageMeta.fromDir(
           resourceProvider.getFolder(sdkDir), resourceProvider);
     }
-    return PubPackageMeta.fromDir(
-        resourceProvider
-            .getFile(resourceProvider.pathContext
-                .canonicalize(libraryElement.firstFragment.source.fullName))
-            .parent,
-        resourceProvider);
+    final pathContext = resourceProvider.pathContext;
+    final sourcePath =
+        pathContext.canonicalize(libraryElement.firstFragment.source.fullName);
+    final sourceFile = resourceProvider.getFile(sourcePath);
+
+    if (sourceFile.exists) {
+      return PubPackageMeta.fromDir(sourceFile.parent, resourceProvider);
+    }
+
+    var current = pathContext.dirname(sourcePath);
+    while (current.isNotEmpty && current != pathContext.dirname(current)) {
+      final folder = resourceProvider.getFolder(current);
+      if (folder.exists) {
+        return PubPackageMeta.fromDir(folder, resourceProvider);
+      }
+      current = pathContext.dirname(current);
+    }
+
+    return null;
   }
 
   static PackageMeta? fromFilename(
@@ -237,7 +249,19 @@ abstract class PubPackageMeta extends PackageMeta {
           var pubspec = resourceProvider
               .getFile(pathContext.join(dir.path, 'pubspec.yaml'));
           if (pubspec.exists) {
-            return _FilePackageMeta(dir, resourceProvider);
+            try {
+              return _FilePackageMeta(dir, resourceProvider);
+            } on YamlException {
+              // Skip scaffold/template pubspec files that are not valid YAML
+              // for the current package scan, and continue walking up to the
+              // nearest real package root.
+              continue;
+            } catch (error) {
+              if (error is TypeError) {
+                continue;
+              }
+              rethrow;
+            }
           }
         }
       }

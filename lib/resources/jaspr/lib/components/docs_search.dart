@@ -6,8 +6,11 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:universal_web/web.dart' as web;
 
+import '../docs_base.dart';
 import 'docs_navigation_runtime.dart';
 import 'docs_nav_link.dart';
+import 'docs_disclosure_runtime.dart';
+import 'docs_lightbox_runtime.dart';
 import 'docs_mermaid_runtime.dart';
 import 'docs_toc_runtime.dart';
 
@@ -21,7 +24,8 @@ class DocsSearchShell extends StatefulComponent {
 
 class _DocsSearchShellState extends State<DocsSearchShell> {
   static const _defaultStatus = 'Type at least 2 characters to search.';
-  static const _manifestCacheKey = 'docs.search.manifest.v4';
+  static const _manifestCacheKeyPrefix = 'docs.search.manifest.v5:';
+  static const _sectionsCachePrefix = 'docs.search.sections.v2:';
 
   Timer? _searchDebounceTimer;
   Timer? _warmSectionsTimer;
@@ -46,6 +50,9 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
   void dispose() {
     _searchDebounceTimer?.cancel();
     _warmSectionsTimer?.cancel();
+    if (kIsWeb) {
+      web.window.document.body?.classList.remove('search-open');
+    }
     super.dispose();
   }
 
@@ -67,6 +74,8 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
 
     return Component.fragment([
       const DocsNavigationRuntime(),
+      const DocsDisclosureRuntime(),
+      const DocsLightboxRuntime(),
       const DocsMermaidRuntime(),
       const DocsTocRuntime(),
       div(classes: 'header-search-shell', [
@@ -428,7 +437,6 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
     _lastFocusedBeforeOpen?.focus();
     _lastFocusedBeforeOpen = null;
   }
-
   void _scheduleSearch(String query, {bool immediate = false}) {
     if (!mounted) return;
     _searchDebounceTimer?.cancel();
@@ -624,7 +632,7 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
   void _navigateTo(String url) {
     if (!kIsWeb) return;
     _closeSearch();
-    web.window.location.assign(url);
+    web.window.location.assign(withDocsBasePath(url));
   }
 }
 
@@ -648,7 +656,9 @@ Future<Map<String, Object?>> _loadSearchManifest() async {
   if (_DocsSearchCache.manifest case final manifest?) return manifest;
   if (_DocsSearchCache.loadingManifest case final loading?) return loading;
 
-  final cached = _readSessionJson(_DocsSearchShellState._manifestCacheKey);
+  final manifestCacheKey =
+      '${_DocsSearchShellState._manifestCacheKeyPrefix}${docsBasePath}';
+  final cached = _readSessionJson(manifestCacheKey);
   if (cached != null) {
     _DocsSearchCache.manifest = cached;
     return cached;
@@ -656,7 +666,7 @@ Future<Map<String, Object?>> _loadSearchManifest() async {
 
   final future = _getJson('/generated/search_index.json').then((payload) {
     _DocsSearchCache.manifest = payload;
-    _writeSessionJson(_DocsSearchShellState._manifestCacheKey, payload);
+    _writeSessionJson(manifestCacheKey, payload);
     return payload;
   });
   _DocsSearchCache.loadingManifest = future;
@@ -706,7 +716,23 @@ Future<List<_SearchEntry>> _ensureSectionsReady() async {
     final pages = await _ensurePagesReady();
     final sectionsPath =
         (manifest['sections'] as String?) ?? '/generated/search_sections.json';
+    final cacheKey =
+        '${_DocsSearchShellState._sectionsCachePrefix}$sectionsPath';
+    final cached = _readSessionJson(cacheKey);
+    if (cached != null) {
+      _DocsSearchCache.sections = _mapSearchEntries(
+        cached,
+        pages: pages,
+        sectionRefs: true,
+      );
+      return _DocsSearchCache.sections;
+    }
+
     final payload = await _getJson(sectionsPath);
+    final entryCount = payload['entryCount'] as int? ?? 0;
+    if (entryCount <= 25000) {
+      _writeSessionJson(cacheKey, payload);
+    }
     _DocsSearchCache.sections = _mapSearchEntries(
       payload,
       pages: pages,
@@ -760,7 +786,7 @@ Future<List<_SearchEntry>> _ensureSectionContentReady() async {
 }
 
 Future<Map<String, Object?>> _getJson(String path) async {
-  final response = await http.get(Uri.parse(path));
+  final response = await http.get(Uri.parse(withDocsBasePath(path)));
   if (response.statusCode != 200) {
     throw StateError('Request failed for $path: ${response.statusCode}');
   }

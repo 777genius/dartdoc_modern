@@ -1,17 +1,26 @@
 # Jaspr Public Demo Checklist
 
-Status:
-- preview-ready
-- community-preview-ready
+This page gives one reproducible flow for showing the `jaspr` backend publicly
+without overselling it. The goal is simple: make the shortest serious evaluation
+path obvious and keep the framing honest.
 
-Purpose:
-- provide one reproducible demo flow for showing the `jaspr` backend publicly
-- make the smoke path explicit instead of relying on ad-hoc local steps
+## Shortest Serious Evaluation Path
+
+Primary public-demo quality gate:
+
+```bash
+dart run ./tool/task.dart validate jaspr-launch
+```
+
+If Playwright is not installed in `/tmp/pw-run`, export `PLAYWRIGHT_DIR` first.
+
+If that passes, you already have a strong practical signal that the current
+Jaspr preview is worth showing.
 
 ## Demo Package
 
 Primary demo package:
-- `/Users/belief/dev/projects/dartdoc-vitepress/testing/test_package_with_docs`
+- `testing/test_package_with_docs`
 
 This package exercises:
 - API pages
@@ -25,15 +34,15 @@ This package exercises:
 - Mermaid diagrams
 - build-time code import expansion
 
-## Demo Commands
+## Manual Flow If You Want To Inspect The Output
 
 Generate docs:
 
 ```bash
 tmpdir=$(mktemp -d /tmp/dartdoc-jaspr-demo.XXXXXX) && \
-dart run /Users/belief/dev/projects/dartdoc-vitepress/bin/dartdoc_vitepress.dart \
+dart run ./bin/dartdoc_vitepress.dart \
   --format jaspr \
-  --input /Users/belief/dev/projects/dartdoc-vitepress/testing/test_package_with_docs \
+  --input ./testing/test_package_with_docs \
   --output "$tmpdir"
 ```
 
@@ -49,77 +58,72 @@ dart run build_runner build --delete-conflicting-outputs
 Run the scaffold smoke checker:
 
 ```bash
-dart run /Users/belief/dev/projects/dartdoc-vitepress/tool/jaspr_scaffold_smoke.dart "$tmpdir"
+dart run ./tool/jaspr_scaffold_smoke.dart "$tmpdir"
+```
+
+Browser route and navigation smoke:
+
+```bash
+dart run ./tool/task.dart validate jaspr-route-smoke
 ```
 
 Optional search benchmark:
 
 ```bash
-dart run /Users/belief/dev/projects/dartdoc-vitepress/tool/jaspr_search_benchmark.dart \
+dart run ./tool/jaspr_search_benchmark.dart \
   "$tmpdir/web/generated/search_index.json" \
-  Greeter Getting Started Configuration Пример
+  Greeter Getting\ Started Configuration Пример
 ```
 
-Large real-project proof:
+## Large Real-Project Proof
+
+Verified large-project run:
+
+Verified on a large real Flutter workspace (`headless`) with the same pattern:
 
 ```bash
-cd /Users/belief/dev/projects/headless/packages/headless && \
-dart run /Users/belief/dev/projects/dartdoc-vitepress/bin/dartdoc_vitepress.dart \
+dart run ./bin/dartdoc_vitepress.dart \
   --format jaspr \
   --auto-include-dependencies \
   --output /tmp/headless-jaspr-docs-demo
 ```
 
-Optional large-project benchmark:
+Optional benchmark:
 
 ```bash
-dart run /Users/belief/dev/projects/dartdoc-vitepress/tool/jaspr_search_benchmark.dart \
+dart run ./tool/jaspr_search_benchmark.dart \
   /tmp/headless-jaspr-docs-demo/web/generated/search_index.json \
   State Theme Context Build BuildContext Widget
 ```
 
-## What To Verify Manually
+## Best Things To Verify Manually
 
 - Search opens with `Ctrl/Cmd+K`
-- Search returns API and guide results
+- Search returns both guide and API results
 - Search highlights matches and supports arrow-key navigation
-- `Greeter` API page renders signatures and links
+- `Greeter` API page renders signatures and links correctly
 - guide pages render callouts, Mermaid, and DartPad blocks
 - breadcrumbs and right-side outline are visible
 - internal navigation feels SPA-like instead of full page reloads
-- theme toggle persists light/dark preference
+- theme toggle persists light and dark preference
 - mobile viewport keeps search usable and sidebar navigable
 
-## What To Say In A Public Demo
+## Best Community Framing
 
-- `jaspr` is not a markdown export; it is a Dart-native docs application scaffold.
-- The same generator now supports `html`, `vitepress`, and `jaspr`.
-- VitePress remains the strongest ecosystem-first option.
-- Jaspr is the strongest Dart-first option when the team wants typed scaffold code, `jaspr_content` theming, and extension points in Dart instead of TypeScript/Vue.
-- The largest UX parity items from VitePress are already covered:
-  - search
-  - theme switching
-  - breadcrumbs
-  - outline
-  - auto-linked API references
-  - DartPad embeds
-  - Mermaid
-  - code import expansion
-- Large-project generation has been verified on `/Users/belief/dev/projects/headless/packages/headless`.
+Use language like:
+- `strong community preview`
+- `Dart-native docs backend`
+- `serious evaluation-ready scaffold`
+- `looking for feedback from package maintainers`
 
-## Current Quality Bar
+Avoid language like:
+- `1.0`
+- `replacement for every docs stack`
+- `finished forever`
 
-Ready for:
-- Flutter community preview/demo
-- serious evaluation by Dart/Flutter teams
-- early adopters trying `jaspr` output on real packages
+## Related Docs
 
-Not yet positioned as:
-- final polished 1.0 release
-- hosted public demo with browser-regression QA
-- fully benchmarked browser-only search feel on extremely large sites
-
-Related docs:
-- `/Users/belief/dev/projects/dartdoc-vitepress/doc/jaspr-vs-vitepress.md`
-- `/Users/belief/dev/projects/dartdoc-vitepress/doc/jaspr-launch-checklist.md`
-- `/Users/belief/dev/projects/dartdoc-vitepress/doc/jaspr-launch-readiness.md`
+- `doc/jaspr-deployment.md`
+- `doc/jaspr-vs-vitepress.md`
+- `doc/jaspr-launch-checklist.md`
+- `doc/jaspr-launch-readiness.md`

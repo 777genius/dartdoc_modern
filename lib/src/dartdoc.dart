@@ -15,7 +15,6 @@ import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/package_meta.dart';
 import 'package:dartdoc_vitepress/src/runtime_stats.dart';
 import 'package:dartdoc_vitepress/src/utils.dart';
-import 'package:dartdoc_vitepress/src/validator.dart';
 import 'package:dartdoc_vitepress/src/version.dart';
 import 'package:dartdoc_vitepress/src/warnings.dart';
 import 'package:meta/meta.dart';
@@ -214,9 +213,12 @@ class Dartdoc {
         writtenFiles.isNotEmpty &&
         generator.supportsLinkValidation) {
       runtimeStats.startPerfTask('validateLinks');
-      Validator(packageGraph, config, _outputDir.path, writtenFiles,
-              _onCheckProgress)
-          .validateLinks();
+      await generator.validateGeneratedLinks(
+        packageGraph,
+        config,
+        _outputDir.path,
+        _onCheckProgress,
+      );
       runtimeStats.endPerfTask();
     }
 
@@ -286,7 +288,7 @@ class Dartdoc {
         exitCode = e is DartdocFailure ? 1 : 255;
       },
       zoneSpecification: ZoneSpecification(
-        print: (_, __, ___, String line) => logInfo(line),
+        print: (_, _, _, String line) => logInfo(line),
       ),
     );
   }

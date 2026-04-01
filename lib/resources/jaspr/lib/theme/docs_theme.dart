@@ -65,9 +65,9 @@ class DocsThemeConfig {
         code:
             ThemeColor(ThemeColors.slate.$950, dark: Colors.white),
         preCode:
-            ThemeColor(ThemeColors.slate.$100, dark: ThemeColors.zinc.$200),
+            ThemeColor(ThemeColors.slate.$800, dark: ThemeColors.zinc.$200),
         preBg:
-            ThemeColor(const Color('#0f172f'), dark: ThemeColors.zinc.$950),
+            ThemeColor(const Color('#f8fbff'), dark: ThemeColors.zinc.$950),
         thBorders:
             ThemeColor(const Color('#c5d8fb'), dark: ThemeColors.zinc.$700),
         tdBorders:
@@ -127,8 +127,12 @@ class DocsThemeConfig {
           dark: Color('rgba(74, 222, 128, 0.65)'),
         ),
         shellCodeButtonBg: const ThemeColor(
-          Color('rgba(15, 23, 42, 0.96)'),
+          Color('rgba(255, 255, 255, 0.96)'),
           dark: Color('rgba(39, 39, 42, 0.96)'),
+        ),
+        shellCodeButtonFg: ThemeColor(
+          ThemeColors.slate.$800,
+          dark: Colors.white,
         ),
         shellDartPadStage: const ThemeColor(
           Color('rgba(252, 253, 255, 0.98)'),
@@ -167,9 +171,9 @@ class DocsThemeConfig {
         code:
             ThemeColor(ThemeColors.zinc.$950, dark: Colors.white),
         preCode:
-            ThemeColor(ThemeColors.zinc.$100, dark: ThemeColors.zinc.$200),
+            ThemeColor(ThemeColors.zinc.$800, dark: ThemeColors.zinc.$200),
         preBg:
-            ThemeColor(ThemeColors.zinc.$900, dark: Colors.black),
+            ThemeColor(ThemeColors.zinc.$50, dark: Colors.black),
         thBorders:
             ThemeColor(ThemeColors.zinc.$300, dark: ThemeColors.zinc.$700),
         tdBorders:
@@ -225,9 +229,9 @@ class DocsThemeConfig {
         code:
             ThemeColor(ThemeColors.stone.$950, dark: Colors.white),
         preCode:
-            ThemeColor(ThemeColors.stone.$100, dark: ThemeColors.stone.$200),
+            ThemeColor(ThemeColors.stone.$800, dark: ThemeColors.stone.$200),
         preBg: ThemeColor(
-          ThemeColors.emerald.$950,
+          const Color('#f8faf6'),
           dark: ThemeColors.stone.$950,
         ),
         thBorders:

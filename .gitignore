@@ -35,9 +35,11 @@ testing/**/docs-site/
 
 # Playwright MCP screenshots
 .playwright-mcp/
+.tmp-playwright-check.spec.js
+test-results/
 
 # VitePress cache (local dev)
-.vitepress/
+/.vitepress/
 
 # SQLite debug data
 data/

@@ -18,11 +18,25 @@ export 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart'
 class JasprPathResolver extends VitePressPathResolver {
   @override
   String? filePathFor(Documentable element) {
+    if (element is Library) {
+      if (isInternalSdkLibrary(element)) return null;
+      return 'content/api/${dirNameFor(element)}/library.md';
+    }
+
     final path = super.filePathFor(element);
     if (path == null || path.startsWith('content/')) {
       return path;
     }
     return 'content/$path';
+  }
+
+  @override
+  String? urlFor(Documentable element) {
+    if (element is Library) {
+      if (isInternalSdkLibrary(element)) return null;
+      return '/api/${dirNameFor(element)}/library';
+    }
+    return super.urlFor(element);
   }
 
   static String sanitizeFileName(String name) {

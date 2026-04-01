@@ -208,7 +208,8 @@ class PubPackageBuilder implements PackageBuilder {
 
   Set<PackageMeta> _packageMetasForFiles(Iterable<String> files) => {
         for (var filename in files)
-          _packageMetaProvider.fromFilename(filename)!,
+          if (_resourceProvider.getFile(filename).exists)
+            ?_packageMetaProvider.fromFilename(filename),
       };
 
   /// Names of packages discovered as workspace members during

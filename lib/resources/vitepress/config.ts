@@ -8,6 +8,9 @@ import { apiLinkerPlugin } from './theme/plugins/api-linker'
 export default defineConfig({
   title: '{{packageName}} API',
   description: 'API documentation for {{packageName}}',
+  head: [
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+  ],
   srcExclude: ['CLAUDE.md', 'AGENTS.md'],
   // Cross-references to SDK types (dart:core, dart:collection) produce
   // dead links since we only generate docs for this package.

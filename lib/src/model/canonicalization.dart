@@ -20,7 +20,7 @@ Library? canonicalLibraryCandidate(ModelElement modelElement) {
     // `libraryExports` map will not contain that library. However, we still want
     // to consider the defining library as a candidate if it happens to be
     // documented.
-    if (modelElement.library case var library?) library,
+    ?modelElement.library,
   };
   if (candidateList.isEmpty) {
     return null;

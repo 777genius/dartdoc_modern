@@ -2,7 +2,10 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:analyzer/file_system/file_system.dart';
+import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
 import 'package:dartdoc_vitepress/src/generator/generator.dart';
 import 'package:dartdoc_vitepress/src/generator/generator_backend.dart';
 import 'package:dartdoc_vitepress/src/generator/template_data.dart';
@@ -17,6 +20,7 @@ import 'package:dartdoc_vitepress/src/generator/vitepress/sidebar.dart'
     show VitePressSidebarGenerator;
 import 'package:dartdoc_vitepress/src/generator/vitepress_guide_generator.dart';
 import 'package:dartdoc_vitepress/src/logging.dart';
+import 'package:dartdoc_vitepress/src/markdown_validator.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 import 'package:dartdoc_vitepress/src/runtime_stats.dart';
 import 'package:path/path.dart' as p;
@@ -32,22 +36,23 @@ const _apiStylesCss = '''
 .member-signature {
   margin: 8px 0 16px;
 }
-.member-signature pre {
+.member-signature .member-signature-code {
   background: var(--vp-code-block-bg);
   border-radius: 8px;
-  padding: 12px 16px;
+  padding: 10px 14px;
   overflow-x: auto;
-  white-space: pre-wrap;
+  white-space: pre-line;
   overflow-wrap: break-word;
   margin: 0;
-}
-.member-signature code {
   font-family: var(--vp-font-family-mono);
   font-size: var(--vp-code-font-size);
   color: #24292E;
-  line-height: var(--vp-code-line-height);
+  line-height: 1.34;
 }
-.dark .member-signature code {
+.member-signature .member-signature-line {
+  display: block;
+}
+.dark .member-signature .member-signature-code {
   color: #E1E4E8;
 }
 /* Shiki-matched syntax highlighting for member signatures.
@@ -65,11 +70,12 @@ const _apiStylesCss = '''
 .member-signature .type-link {
   color: #005CC5;
   text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, #005CC5 40%, transparent);
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1.5px;
   text-underline-offset: 2px;
 }
 .member-signature .type-link:hover {
-  text-decoration-color: #005CC5;
+  text-decoration-thickness: 2px;
 }
 /* Function/method/constructor/field/property names */
 .member-signature .fn {
@@ -92,10 +98,10 @@ const _apiStylesCss = '''
 }
 .dark .member-signature .type-link {
   color: #79B8FF;
-  text-decoration-color: color-mix(in srgb, #79B8FF 40%, transparent);
+  text-decoration-color: currentColor;
 }
 .dark .member-signature .type-link:hover {
-  text-decoration-color: #79B8FF;
+  text-decoration-thickness: 2px;
 }
 .dark .member-signature .fn {
   color: #B392F0;
@@ -195,9 +201,6 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   // ---------------------------------------------------------------------------
 
   @override
-  bool get supportsLinkValidation => false;
-
-  @override
   void beforeGenerate(PackageGraph packageGraph) {
     _paths.initFromPackageGraph(packageGraph);
     _docs = VitePressDocProcessor(packageGraph, _paths,
@@ -224,6 +227,23 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   ) {
     _deleteStaleFiles();
     _logSummary();
+  }
+
+  @override
+  void validateGeneratedLinks(
+    PackageGraph packageGraph,
+    DartdocOptionContext config,
+    String origin,
+    Set<String> writtenFiles,
+    StreamController<String> onCheckProgress,
+  ) {
+    MarkdownValidator(
+      packageGraph,
+      config,
+      origin,
+      writtenFiles,
+      onCheckProgress,
+    ).validateLinks();
   }
 
   // ---------------------------------------------------------------------------

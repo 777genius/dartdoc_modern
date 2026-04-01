@@ -1,6 +1,5 @@
 import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_content/components/callout.dart';
-import 'package:jaspr_content/components/code_block.dart';
 import 'package:jaspr_content/components/image.dart';
 import 'package:jaspr_content/src/content_app.dart';
 import 'package:jaspr_content/src/page_extension/heading_anchors_extension.dart';
@@ -9,10 +8,12 @@ import 'package:jaspr_content/src/page_parser/markdown_parser.dart';
 import 'package:jaspr_content/src/template_engine/template_engine.dart';
 
 import 'components/docs_header.dart';
+import 'components/docs_code_block.dart';
 import 'components/docs_search.dart';
 import 'components/docs_sidebar.dart';
 import 'components/docs_theme_toggle.dart';
 import 'components/dart_pad.dart';
+import 'docs_base.dart';
 import 'components/mermaid_diagram.dart';
 import 'extensions/api_linker_extension.dart';
 import 'generated/api_sidebar.dart' as api;
@@ -40,7 +41,7 @@ Component buildDocsApp({
       Callout(),
       DartPadComponent(),
       MermaidDiagramComponent(),
-      CodeBlock(),
+      DocsCodeBlock(),
       Image(zoom: true),
     ],
     layouts: [
@@ -48,7 +49,7 @@ Component buildDocsApp({
         packageName: packageName,
         header: DocsHeader(
           title: '$packageName API',
-          logo: '/favicon.ico',
+          logo: withDocsBasePath('/favicon.svg'),
           homeHref: overviewHref,
           items: [
             const DocsSearchShell(),

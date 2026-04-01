@@ -96,7 +96,7 @@ class Parameter extends ModelElement with HasNoPage {
   @override
   Iterable<Referable> get referenceParents {
     final enclosingElement = this.enclosingElement;
-    return [if (enclosingElement != null) enclosingElement];
+    return [?enclosingElement];
   }
 
   @override

@@ -5,6 +5,8 @@
 /// A library containing an abstract documentation generator.
 library;
 
+import 'dart:async';
+
 import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
 import 'package:dartdoc_vitepress/src/generator/generator_backend.dart';
 import 'package:dartdoc_vitepress/src/generator/html_generator_backend.dart';
@@ -71,6 +73,21 @@ class Generator {
   Set<String> get writtenFiles => _generatorBackend.writer.writtenFiles;
 
   bool get supportsLinkValidation => _generatorBackend.supportsLinkValidation;
+
+  Future<void> validateGeneratedLinks(
+    PackageGraph packageGraph,
+    DartdocOptionContext config,
+    String origin,
+    StreamController<String> onCheckProgress,
+  ) async {
+    await _generatorBackend.validateGeneratedLinks(
+      packageGraph,
+      config,
+      origin,
+      writtenFiles,
+      onCheckProgress,
+    );
+  }
 
   /// Traverses the [packageGraph] and generates documentation for all contained
   /// elements.

@@ -84,6 +84,12 @@ class VitePressInitGenerator {
       outputFile: 'guide/index.md',
       placeholders: placeholders,
     );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: 'favicon.svg',
+      outputFile: '.vitepress/public/favicon.svg',
+      placeholders: placeholders,
+    );
 
     // LLM instructions (so AI tools know what's generated vs editable)
     _writeTemplateIfAbsent(

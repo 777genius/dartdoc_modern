@@ -128,6 +128,16 @@ String _escapeAngleBracketsInCell(String text) {
   return buf.toString();
 }
 
+String _normalizeSignatureHtml(String html) {
+  return html
+      .replaceAll('\r\n', '\n')
+      .split('\n')
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty)
+      .join('\n')
+      .trim();
+}
+
 /// Escapes characters that are special in YAML double-quoted string values.
 @visibleForTesting
 String yamlEscape(String text) => text
@@ -260,8 +270,16 @@ class _MarkdownPageBuilder {
 
   /// Writes a member signature as raw HTML with clickable type links.
   void writeSignature(String htmlSignature) {
+    final normalizedSignature = _normalizeSignatureHtml(htmlSignature);
+    final renderedSignature = normalizedSignature.contains('\n')
+        ? normalizedSignature
+            .split('\n')
+            .map((line) =>
+                '<span class="member-signature-line">$line</span>')
+            .join()
+        : normalizedSignature;
     _buffer.writeln(
-        '<div class="member-signature"><pre><code>$htmlSignature</code></pre></div>');
+        '<div class="member-signature"><div class="member-signature-code">$renderedSignature</div></div>');
     _buffer.writeln();
   }
 

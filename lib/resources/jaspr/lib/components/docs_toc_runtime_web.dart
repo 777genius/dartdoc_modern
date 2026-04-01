@@ -17,7 +17,7 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
   JSFunction? _scrollListener;
   JSFunction? _resizeListener;
   JSFunction? _navigationListener;
-  Timer? _updateTimer;
+  bool _updateQueued = false;
   String? _lastActiveId;
 
   @override
@@ -28,19 +28,18 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
     _scrollListener = ((web.Event _) => _scheduleUpdate()).toJS;
     _resizeListener = ((web.Event _) => _scheduleUpdate()).toJS;
     _navigationListener = ((web.Event _) {
-      Timer(const Duration(milliseconds: 50), _updateActiveSection);
+      Timer(const Duration(milliseconds: 50), _queueUpdate);
     }).toJS;
 
     web.window.addEventListener('scroll', _scrollListener);
     web.window.addEventListener('resize', _resizeListener);
     web.window.addEventListener('docs:navigation', _navigationListener);
 
-    Timer(const Duration(milliseconds: 50), _updateActiveSection);
+    Timer(const Duration(milliseconds: 50), _queueUpdate);
   }
 
   @override
   void dispose() {
-    _updateTimer?.cancel();
     if (_scrollListener != null) {
       web.window.removeEventListener('scroll', _scrollListener);
       _scrollListener = null;
@@ -67,9 +66,18 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
       );
 
   void _scheduleUpdate() {
-    _updateTimer?.cancel();
-    _updateTimer =
-        Timer(const Duration(milliseconds: 60), _updateActiveSection);
+    _queueUpdate();
+  }
+
+  void _queueUpdate() {
+    if (_updateQueued) return;
+    _updateQueued = true;
+    web.window.requestAnimationFrame(
+      ((JSNumber _) {
+        _updateQueued = false;
+        _updateActiveSection();
+      }).toJS,
+    );
   }
 
   void _updateActiveSection() {
@@ -109,15 +117,15 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
     }
 
     _openAncestorDetails(active.link);
+    _updateIndicator(active.link);
     _ensureLinkVisible(active.link, active.id);
   }
 
   double _offsetForViewport() {
     final width = web.window.innerWidth.toDouble();
     final header = web.document.querySelector('.header-container');
-    final headerHeight = header is web.HTMLElement
-        ? header.getBoundingClientRect().height
-        : 0.0;
+    final headerHeight =
+        header is web.HTMLElement ? header.getBoundingClientRect().height : 0.0;
 
     final breathingRoom = width < 960
         ? 20.0
@@ -146,9 +154,27 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
 
     final targetScroll =
         link.offsetTop - ((container.clientHeight - link.clientHeight) / 2);
-    final clampedScroll = targetScroll.clamp(0, container.scrollHeight.toDouble());
+    final clampedScroll =
+        targetScroll.clamp(0, container.scrollHeight.toDouble());
     if ((container.scrollTop - clampedScroll).abs() < 8) return;
     container.scrollTop = clampedScroll;
+  }
+
+  void _updateIndicator(web.HTMLElement link) {
+    final container = link.closest('.toc > div');
+    if (container is! web.HTMLElement) return;
+    final indicator = container.querySelector('.toc-indicator');
+    if (indicator is! web.HTMLElement) return;
+
+    final containerRect = container.getBoundingClientRect();
+    final linkRect = link.getBoundingClientRect();
+    final top = (linkRect.top - containerRect.top) + container.scrollTop;
+    final left = linkRect.left - containerRect.left;
+
+    indicator.style.opacity = '1';
+    indicator.style.width = '${linkRect.width}px';
+    indicator.style.height = '${linkRect.height}px';
+    indicator.style.transform = 'translate3d(${left}px, ${top}px, 0)';
   }
 
   _TocTarget _resolveActiveTarget(List<_TocTarget> targets, double offset) {

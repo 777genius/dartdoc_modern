@@ -1,5 +1,4 @@
 import 'package:jaspr/dom.dart';
-import 'package:jaspr/jaspr.dart';
 
 const docsCompactBreakpoint = 479;
 const docsMobileBreakpoint = 767;
@@ -41,14 +40,14 @@ List<StyleRule> docsResponsiveRootStyles() => [
           '--docs-shell-drawer-width': '20.5rem',
           '--docs-shell-main-pad-top': '2.15rem',
           '--docs-shell-main-pad-bottom': '3.5rem',
-          '--docs-shell-main-pad-inline': '0',
+          '--docs-shell-main-pad-inline': '0.9rem',
           '--docs-shell-content-pad-top': '1.55rem',
           '--docs-shell-content-pad-right': '0.25rem',
           '--docs-shell-content-pad-bottom': '3rem',
-          '--docs-shell-sticky-top': '5.65rem',
+          '--docs-shell-sticky-top': '5.15rem',
           '--docs-shell-anchor-offset': '7rem',
           '--docs-shell-search-panel-width': '46rem',
-          '--docs-shell-search-launcher-min': '12.75rem',
+          '--docs-shell-search-launcher-min': '8.5rem',
           '--docs-shell-content-header-pad-y': '1.75rem',
           '--docs-shell-content-header-pad-x': '1.8rem',
           '--docs-shell-content-header-radius': '1.5rem',
@@ -77,7 +76,7 @@ List<StyleRule> docsResponsiveRootStyles() => [
             '--docs-shell-content-pad-bottom': '2rem',
             '--docs-shell-header-inline-pad': '0.9rem',
             '--docs-shell-anchor-offset': '6rem',
-            '--docs-shell-search-launcher-min': '8.65rem',
+            '--docs-shell-search-launcher-min': '7rem',
             '--docs-shell-drawer-width': '20.5rem',
           },
         ),
@@ -96,7 +95,7 @@ List<StyleRule> docsResponsiveRootStyles() => [
           raw: {
             '--docs-shell-gutter': '0.72rem',
             '--docs-shell-header-inline-pad': '0.72rem',
-            '--docs-shell-search-launcher-min': '2.55rem',
+            '--docs-shell-search-launcher-min': '2.2rem',
           },
         ),
       ]),

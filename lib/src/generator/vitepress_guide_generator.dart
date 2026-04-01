@@ -62,7 +62,7 @@ class VitePressGuideGenerator {
     return _collector.collectGuideEntries(
       packageGraph: packageGraph,
       isMultiPackage: isMultiPackage,
-      transformContent: (content, _, __) {
+      transformContent: (content, _, _) {
         final tocAdjusted = content.replaceAll(
           RegExp(r'^\[TOC\]\s*$', multiLine: true),
           '[[toc]]',
