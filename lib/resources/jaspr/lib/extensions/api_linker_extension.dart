@@ -2,6 +2,7 @@ import 'package:jaspr_content/src/page.dart';
 import 'package:jaspr_content/src/page_extension/page_extension.dart';
 import 'package:jaspr_content/src/page_parser/page_parser.dart';
 
+import '../docs_base.dart';
 import '../generated/api_symbols.dart' as generated;
 
 class ApiLinkerExtension implements PageExtension {
@@ -167,12 +168,11 @@ class ApiLinkerExtension implements PageExtension {
       return null;
     }
 
-    return ElementNode('a', {
-      'href': entry.href,
-      'class': 'api-link',
-    }, [
-      codeNode,
-    ]);
+    return ElementNode(
+      'a',
+      {'href': withDocsBasePath(entry.href), 'class': 'api-link'},
+      [codeNode],
+    );
   }
 
   generated.ApiSymbolEntry _pickEntry(

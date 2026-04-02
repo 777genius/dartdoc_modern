@@ -25,6 +25,7 @@ class DocsSearchShell extends StatefulComponent {
 class _DocsSearchShellState extends State<DocsSearchShell> {
   static const _defaultStatus = 'Type at least 2 characters to search.';
   static const _manifestCacheKeyPrefix = 'docs.search.manifest.v5:';
+  static const _pagesCacheKeyPrefix = 'docs.search.pages.v2:';
   static const _sectionsCachePrefix = 'docs.search.sections.v2:';
 
   Timer? _searchDebounceTimer;
@@ -59,7 +60,8 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
   @override
   Component build(BuildContext context) {
     final results = _results;
-    final isBusy = _status == 'Loading search...' ||
+    final isBusy =
+        _status == 'Loading search...' ||
         _status == 'Searching...' ||
         _status == 'Searching sections...' ||
         _status == 'Searching pages and sections...' ||
@@ -92,14 +94,12 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
             'focus': (_) => _warmSearch(),
           },
           [
-            span(
-              classes: 'search-launcher-label',
-              [Component.text('Search docs')],
-            ),
-            span(
-              classes: 'search-launcher-shortcut',
-              [Component.text(_isApplePlatform ? '⌘ K' : 'Ctrl K')],
-            ),
+            span(classes: 'search-launcher-label', [
+              Component.text('Search docs'),
+            ]),
+            span(classes: 'search-launcher-shortcut', [
+              Component.text(_isApplePlatform ? '⌘ K' : 'Ctrl K'),
+            ]),
           ],
         ),
       ]),
@@ -133,6 +133,8 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
                 value: _query,
                 attributes: {
                   'data-search-input': '',
+                  'id': 'docs-search-input',
+                  'name': 'q',
                   'placeholder': 'Search API and guides',
                   'autocomplete': 'off',
                   'spellcheck': 'false',
@@ -178,39 +180,33 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
                 if (results.isEmpty)
                   div(classes: 'docs-search-empty-state', [
                     div(classes: 'docs-search-empty-icon', [
-                      Component.text(
-                        switch (searchState) {
-                          'loading' => '…',
-                          'error' => '!',
-                          'empty' => '0',
-                          _ => '⌕',
-                        },
-                      ),
+                      Component.text(switch (searchState) {
+                        'loading' => '…',
+                        'error' => '!',
+                        'empty' => '0',
+                        _ => '⌕',
+                      }),
                     ]),
                     div(classes: 'docs-search-empty-copy', [
                       div(classes: 'docs-search-empty-title', [
-                        Component.text(
-                          switch (searchState) {
-                            'loading' => 'Preparing results',
-                            'error' => 'Search unavailable',
-                            'empty' => 'No matching pages',
-                            _ => 'Search the docs',
-                          },
-                        ),
+                        Component.text(switch (searchState) {
+                          'loading' => 'Preparing results',
+                          'error' => 'Search unavailable',
+                          'empty' => 'No matching pages',
+                          _ => 'Search the docs',
+                        }),
                       ]),
                       div(classes: 'docs-search-empty-text', [
-                        Component.text(
-                          switch (searchState) {
-                            'loading' =>
-                              'Loading indexed pages and sections for this query.',
-                            'error' =>
-                              'The search index could not be loaded in this session.',
-                            'empty' =>
-                              'Try a shorter query, a type name, or a guide title.',
-                            _ =>
-                              'Search across API pages, section headings, and guides.',
-                          },
-                        ),
+                        Component.text(switch (searchState) {
+                          'loading' =>
+                            'Loading indexed pages and sections for this query.',
+                          'error' =>
+                            'The search index could not be loaded in this session.',
+                          'empty' =>
+                            'Try a shorter query, a type name, or a guide title.',
+                          _ =>
+                            'Search across API pages, section headings, and guides.',
+                        }),
                       ]),
                     ]),
                   ]),
@@ -222,20 +218,17 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
               div(classes: 'docs-search-hints', [
                 span(classes: 'docs-search-key', [Component.text('↑')]),
                 span(classes: 'docs-search-key', [Component.text('↓')]),
-                span(
-                  classes: 'docs-search-hint-label',
-                  [Component.text('Move')],
-                ),
+                span(classes: 'docs-search-hint-label', [
+                  Component.text('Move'),
+                ]),
                 span(classes: 'docs-search-key', [Component.text('Enter')]),
-                span(
-                  classes: 'docs-search-hint-label',
-                  [Component.text('Open')],
-                ),
+                span(classes: 'docs-search-hint-label', [
+                  Component.text('Open'),
+                ]),
                 span(classes: 'docs-search-key', [Component.text('Esc')]),
-                span(
-                  classes: 'docs-search-hint-label',
-                  [Component.text('Close')],
-                ),
+                span(classes: 'docs-search-hint-label', [
+                  Component.text('Close'),
+                ]),
               ]),
               span(classes: 'docs-search-footnote', [
                 Component.text('API pages, sections, and guides'),
@@ -271,10 +264,7 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
     return DocsNavLink(
       to: entry.url,
       classes: resultClass,
-      attributes: {
-        'role': 'option',
-        if (selected) 'aria-selected': 'true',
-      },
+      attributes: {'role': 'option', if (selected) 'aria-selected': 'true'},
       onNavigate: _closeSearch,
       onMouseEnter: (_) {
         if (_selectedIndex == index) return;
@@ -291,12 +281,9 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
           div(classes: 'docs-search-title', [
             ..._buildHighlightedText(entry.title, _tokens),
             if (entry.section.isNotEmpty)
-              span(
-                classes: 'docs-search-section',
-                [
-                  ..._buildHighlightedText(' ${entry.section}', _tokens),
-                ],
-              ),
+              span(classes: 'docs-search-section', [
+                ..._buildHighlightedText(' ${entry.section}', _tokens),
+              ]),
           ]),
           div(
             classes: 'docs-search-summary',
@@ -337,8 +324,8 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
       final nextIndex = event.shiftKey
           ? (currentIndex <= 0 ? focusables.length - 1 : currentIndex - 1)
           : (currentIndex == -1 || currentIndex >= focusables.length - 1
-              ? 0
-              : currentIndex + 1);
+                ? 0
+                : currentIndex + 1);
       event.preventDefault();
       focusables[nextIndex].focus();
       return;
@@ -348,8 +335,9 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
       if (_results.isEmpty) return;
       event.preventDefault();
       final delta = event.key == 'ArrowDown' ? 1 : -1;
-      final startIndex =
-          _selectedIndex == -1 ? (delta > 0 ? -1 : 0) : _selectedIndex;
+      final startIndex = _selectedIndex == -1
+          ? (delta > 0 ? -1 : 0)
+          : _selectedIndex;
       final nextIndex =
           (startIndex + delta + _results.length) % _results.length;
       _setActiveSearchResult(nextIndex);
@@ -360,8 +348,9 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
         _selectedIndex >= 0 &&
         _selectedIndex < _results.length) {
       event.preventDefault();
-      final results =
-          web.window.document.querySelectorAll('.docs-search-result');
+      final results = web.window.document.querySelectorAll(
+        '.docs-search-result',
+      );
       if (_selectedIndex < results.length) {
         final node = results.item(_selectedIndex);
         if (node is web.HTMLElement) {
@@ -437,6 +426,7 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
     _lastFocusedBeforeOpen?.focus();
     _lastFocusedBeforeOpen = null;
   }
+
   void _scheduleSearch(String query, {bool immediate = false}) {
     if (!mounted) return;
     _searchDebounceTimer?.cancel();
@@ -521,14 +511,17 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
       if (!mounted || queryToken != _latestQueryToken) return;
 
       final phrase = _normalizeSearchText(query);
-      final rankedPages = pageEntries
-          .map((entry) => _RankedSearchEntry(
-                entry: entry,
-                score: _scoreEntry(entry, tokens, phrase),
-              ))
-          .where((item) => item.score > 0)
-          .toList()
-        ..sort((a, b) => b.score.compareTo(a.score));
+      final rankedPages =
+          pageEntries
+              .map(
+                (entry) => _RankedSearchEntry(
+                  entry: entry,
+                  score: _scoreEntry(entry, tokens, phrase),
+                ),
+              )
+              .where((item) => item.score > 0)
+              .toList()
+            ..sort((a, b) => b.score.compareTo(a.score));
 
       var ranked = rankedPages.take(20).toList();
       final shouldLoadSections = phrase.length >= 3 || rankedPages.length < 8;
@@ -544,14 +537,17 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
         final sectionEntries = await _ensureSectionsReady();
         if (!mounted || queryToken != _latestQueryToken) return;
 
-        final rankedSections = sectionEntries
-            .map((entry) => _RankedSearchEntry(
-                  entry: entry,
-                  score: _scoreEntry(entry, tokens, phrase),
-                ))
-            .where((item) => item.score > 0)
-            .toList()
-          ..sort((a, b) => b.score.compareTo(a.score));
+        final rankedSections =
+            sectionEntries
+                .map(
+                  (entry) => _RankedSearchEntry(
+                    entry: entry,
+                    score: _scoreEntry(entry, tokens, phrase),
+                  ),
+                )
+                .where((item) => item.score > 0)
+                .toList()
+              ..sort((a, b) => b.score.compareTo(a.score));
 
         ranked = [...rankedPages.take(20), ...rankedSections.take(20)]
           ..sort((a, b) => b.score.compareTo(a.score));
@@ -559,7 +555,7 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
 
         final shouldLoadSectionContent =
             !_DocsSearchCache.sectionsContentReady &&
-                (phrase.length >= 4 || ranked.length < 8);
+            (phrase.length >= 4 || ranked.length < 8);
         if (shouldLoadSectionContent) {
           if (!mounted || queryToken != _latestQueryToken) return;
           setState(() {
@@ -571,14 +567,17 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
           final enrichedSections = await _ensureSectionContentReady();
           if (!mounted || queryToken != _latestQueryToken) return;
 
-          final enrichedRankedSections = enrichedSections
-              .map((entry) => _RankedSearchEntry(
-                    entry: entry,
-                    score: _scoreEntry(entry, tokens, phrase),
-                  ))
-              .where((item) => item.score > 0)
-              .toList()
-            ..sort((a, b) => b.score.compareTo(a.score));
+          final enrichedRankedSections =
+              enrichedSections
+                  .map(
+                    (entry) => _RankedSearchEntry(
+                      entry: entry,
+                      score: _scoreEntry(entry, tokens, phrase),
+                    ),
+                  )
+                  .where((item) => item.score > 0)
+                  .toList()
+                ..sort((a, b) => b.score.compareTo(a.score));
 
           ranked = [...rankedPages.take(20), ...enrichedRankedSections.take(20)]
             ..sort((a, b) => b.score.compareTo(a.score));
@@ -586,9 +585,10 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
         }
       }
 
-      final deduped = _dedupeRankedResults(ranked, phrase)
-          .map((item) => item.entry)
-          .toList(growable: false);
+      final deduped = _dedupeRankedResults(
+        ranked,
+        phrase,
+      ).map((item) => item.entry).toList(growable: false);
       if (!mounted || queryToken != _latestQueryToken) return;
 
       setState(() {
@@ -686,7 +686,8 @@ Future<List<_SearchEntry>> _ensurePagesReady() async {
 
     final pagesPath =
         (manifest['pages'] as String?) ?? '/generated/search_pages.json';
-    final cacheKey = 'docs.search.pages:$pagesPath';
+    final cacheKey =
+        '${_DocsSearchShellState._pagesCacheKeyPrefix}${docsBasePath}:$pagesPath';
     final cached = _readSessionJson(cacheKey);
     if (cached != null) {
       _DocsSearchCache.pages = _mapSearchEntries(cached);
@@ -717,7 +718,7 @@ Future<List<_SearchEntry>> _ensureSectionsReady() async {
     final sectionsPath =
         (manifest['sections'] as String?) ?? '/generated/search_sections.json';
     final cacheKey =
-        '${_DocsSearchShellState._sectionsCachePrefix}$sectionsPath';
+        '${_DocsSearchShellState._sectionsCachePrefix}${docsBasePath}:$sectionsPath';
     final cached = _readSessionJson(cacheKey);
     if (cached != null) {
       _DocsSearchCache.sections = _mapSearchEntries(
@@ -771,11 +772,13 @@ Future<List<_SearchEntry>> _ensureSectionContentReady() async {
       for (final entry in entries) entry.key: entry.content,
     };
 
-    _DocsSearchCache.sections = _DocsSearchCache.sections.map((entry) {
-      final content = contentByKey[entry.sectionKey];
-      if (content == null) return entry;
-      return entry.withContent(content);
-    }).toList(growable: false);
+    _DocsSearchCache.sections = _DocsSearchCache.sections
+        .map((entry) {
+          final content = contentByKey[entry.sectionKey];
+          if (content == null) return entry;
+          return entry.withContent(content);
+        })
+        .toList(growable: false);
 
     _DocsSearchCache.sectionsContentReady = true;
     return _DocsSearchCache.sections;
@@ -822,11 +825,13 @@ List<_SearchEntry> _mapSearchEntries(
   bool sectionRefs = false,
 }) {
   final rawEntries = (payload['entries'] as List<dynamic>?) ?? const [];
-  return rawEntries.map((rawEntry) {
-    return sectionRefs
-        ? _decodeSectionEntry(rawEntry, pages ?? const [])
-        : _decodeSearchEntry(rawEntry);
-  }).toList(growable: false);
+  return rawEntries
+      .map((rawEntry) {
+        return sectionRefs
+            ? _decodeSectionEntry(rawEntry, pages ?? const [])
+            : _decodeSearchEntry(rawEntry);
+      })
+      .toList(growable: false);
 }
 
 _SearchEntry _decodeSearchEntry(Object? entry) {
@@ -885,10 +890,9 @@ _SectionContentEntry? _decodeSectionContentEntry(Object? entry) {
 }
 
 List<String> _tokenize(String query) {
-  return _normalizeSearchText(query)
-      .split(' ')
-      .where((token) => token.length > 1)
-      .toList(growable: false);
+  return _normalizeSearchText(
+    query,
+  ).split(' ').where((token) => token.length > 1).toList(growable: false);
 }
 
 String _normalizeSearchText(String value) {
@@ -912,8 +916,8 @@ double _frameworkUrlBoost(String url, {required bool shortSingle}) {
     return shortSingle ? 158 : 32;
   }
   if (RegExp(
-          r'^/api/(rendering|services|animation|gestures|painting|semantics)/')
-      .hasMatch(url)) {
+    r'^/api/(rendering|services|animation|gestures|painting|semantics)/',
+  ).hasMatch(url)) {
     return shortSingle ? 108 : 22;
   }
   if (RegExp(r'^/api/dart-[^/]+/').hasMatch(url)) {
@@ -964,17 +968,20 @@ double _scoreEntry(_SearchEntry entry, List<String> tokens, String phrase) {
   final phraseIndex = compactTitle.toLowerCase().indexOf(phrase);
   final charAfterPhrase =
       phraseIndex >= 0 && phraseIndex + phrase.length < compactTitle.length
-          ? compactTitle[phraseIndex + phrase.length]
-          : '';
+      ? compactTitle[phraseIndex + phrase.length]
+      : '';
   final hasUppercaseBoundaryAfterPhrase =
       charAfterPhrase.isNotEmpty && RegExp(r'[A-Z]').hasMatch(charAfterPhrase);
   final hasLowercaseContinuationAfterPhrase =
       charAfterPhrase.isNotEmpty && RegExp(r'[a-z]').hasMatch(charAfterPhrase);
   final titleWordCount = _camelWordCount(compactTitle);
-  final extraTitleChars =
-      (entry.titleStem.length - phrase.length).clamp(0, 1000);
-  final looksLikeConstantTitle =
-      RegExp(r'[A-Z0-9]+_[A-Z0-9_]+').hasMatch(entry.title);
+  final extraTitleChars = (entry.titleStem.length - phrase.length).clamp(
+    0,
+    1000,
+  );
+  final looksLikeConstantTitle = RegExp(
+    r'[A-Z0-9]+_[A-Z0-9_]+',
+  ).hasMatch(entry.title);
 
   if (entry.section.isEmpty) score += 120;
   if (entry.normalizedTitle == phrase) score += 140;
@@ -1054,9 +1061,11 @@ List<_RankedSearchEntry> _dedupeRankedResults(
 ) {
   final exactPageBases = ranked
       .where((item) => item.entry.section.isEmpty)
-      .where((item) =>
-          item.entry.normalizedTitle == phrase ||
-          item.entry.titleStem == phrase)
+      .where(
+        (item) =>
+            item.entry.normalizedTitle == phrase ||
+            item.entry.titleStem == phrase,
+      )
       .map((item) => _baseUrlForEntry(item.entry))
       .toSet();
 
@@ -1086,10 +1095,7 @@ String _buildExcerpt(_SearchEntry entry, List<String> tokens) {
   if (tokens.isEmpty) return _trimExcerpt(source);
 
   final normalizedSource = _normalizeSearchText(source);
-  final hit = tokens.firstWhere(
-    normalizedSource.contains,
-    orElse: () => '',
-  );
+  final hit = tokens.firstWhere(normalizedSource.contains, orElse: () => '');
   if (hit.isEmpty) return _trimExcerpt(source);
 
   final exact = source.toLowerCase().indexOf(hit.toLowerCase());
@@ -1103,8 +1109,9 @@ String _buildExcerpt(_SearchEntry entry, List<String> tokens) {
 }
 
 String _trimExcerpt(String source) {
-  final excerpt =
-      source.length <= 220 ? source : '${source.substring(0, 220)}...';
+  final excerpt = source.length <= 220
+      ? source
+      : '${source.substring(0, 220)}...';
   return excerpt;
 }
 
@@ -1135,11 +1142,9 @@ List<Component> _buildHighlightedText(String value, List<String> tokens) {
 
 List<_TextRange> _findHighlightRanges(String value, List<String> tokens) {
   if (tokens.isEmpty) return const [];
-  final escapedTokens = tokens
-      .where((token) => token.length > 1)
-      .toSet()
-      .toList(growable: false)
-    ..sort((a, b) => b.length.compareTo(a.length));
+  final escapedTokens =
+      tokens.where((token) => token.length > 1).toSet().toList(growable: false)
+        ..sort((a, b) => b.length.compareTo(a.length));
   if (escapedTokens.isEmpty) return const [];
 
   final pattern = escapedTokens.map(RegExp.escape).join('|');
@@ -1172,16 +1177,19 @@ final class _SearchEntry {
     required this.summary,
     required this.searchText,
     this.sectionKey = '',
-  })  : normalizedTitle = _normalizeSearchText(title),
-        titleStem = _normalizeTitleStem(title),
-        normalizedSection = _normalizeSearchText(section),
-        normalizedSummary = _normalizeSearchText(summary),
-        normalizedText = _normalizeSearchText(searchText),
-        combined = _normalizeSearchText(
-          [title, section, summary, searchText]
-              .where((value) => value.isNotEmpty)
-              .join(' '),
-        );
+  }) : normalizedTitle = _normalizeSearchText(title),
+       titleStem = _normalizeTitleStem(title),
+       normalizedSection = _normalizeSearchText(section),
+       normalizedSummary = _normalizeSearchText(summary),
+       normalizedText = _normalizeSearchText(searchText),
+       combined = _normalizeSearchText(
+         [
+           title,
+           section,
+           summary,
+           searchText,
+         ].where((value) => value.isNotEmpty).join(' '),
+       );
 
   final String kind;
   final String title;
@@ -1212,10 +1220,7 @@ final class _SearchEntry {
 }
 
 final class _RankedSearchEntry {
-  const _RankedSearchEntry({
-    required this.entry,
-    required this.score,
-  });
+  const _RankedSearchEntry({required this.entry, required this.score});
 
   final _SearchEntry entry;
   final double score;

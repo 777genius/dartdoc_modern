@@ -941,11 +941,11 @@ class JasprGeneratorBackend extends GeneratorBackend {
 
     final routeByRelativePath = <String, String>{
       for (final entry in entries)
-        entry.relativePath: '/${entry.relativePath.replaceAll('.md', '')}',
+        entry.relativePath: _guideRouteForRelativePath(entry.relativePath),
     };
     final relativePathByRoute = <String, String>{
       for (final entry in entries)
-        '/${entry.relativePath.replaceAll('.md', '')}': entry.relativePath,
+        _guideRouteForRelativePath(entry.relativePath): entry.relativePath,
     };
     final anchorMapByRelativePath = <String, Map<String, String>>{
       for (final entry in entries)
@@ -1025,9 +1025,17 @@ class JasprGeneratorBackend extends GeneratorBackend {
 
     if (pathPart.startsWith('/')) {
       final normalizedRoute = p.posix.normalize(pathPart);
-      final targetRelativePath = relativePathByRoute[normalizedRoute];
+      final rootedMarkdownPath = normalizedRoute.startsWith('/')
+          ? normalizedRoute.substring(1)
+          : normalizedRoute;
+      final targetRelativePath =
+          relativePathByRoute[normalizedRoute] ??
+          (p.posix.extension(rootedMarkdownPath) == '.md'
+              ? rootedMarkdownPath
+              : null);
       if (targetRelativePath == null) return destination;
-      return '$normalizedRoute${rewriteFragment(targetRelativePath, fragment)}';
+      final route = routeByRelativePath[targetRelativePath] ?? normalizedRoute;
+      return '$route${rewriteFragment(targetRelativePath, fragment)}';
     }
 
     final currentDir = p.posix.dirname(currentRelativePath);
@@ -1037,6 +1045,15 @@ class JasprGeneratorBackend extends GeneratorBackend {
     final route = routeByRelativePath[relativeFile];
     if (route == null) return destination;
     return '$route${rewriteFragment(relativeFile, fragment)}';
+  }
+
+  static String _guideRouteForRelativePath(String relativePath) {
+    var route = '/${relativePath.replaceAll('.md', '')}';
+    if (route.endsWith('/index')) {
+      route = route.substring(0, route.length - '/index'.length);
+      return route.isEmpty ? '/' : route;
+    }
+    return route;
   }
 
   static Map<String, String> _buildJasprAnchorRewriteMap(String content) {

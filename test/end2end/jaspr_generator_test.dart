@@ -22,14 +22,18 @@ import '../src/utils.dart';
 final _resourceProvider = pubPackageMetaProvider.resourceProvider;
 final _pathContext = _resourceProvider.pathContext;
 
-Folder _getFolder(String path) => _resourceProvider
-    .getFolder(_pathContext.absolute(_pathContext.canonicalize(path)));
+Folder _getFolder(String path) => _resourceProvider.getFolder(
+  _pathContext.absolute(_pathContext.canonicalize(path)),
+);
 
 final _testPackageDir = _getFolder('testing/test_package');
 final _testPackageWithDocsDir = _getFolder('testing/test_package_with_docs');
 
 Dartdoc _buildJasprDartdoc(
-    List<String> extraArgv, Folder pkgRoot, Folder outDir) {
+  List<String> extraArgv,
+  Folder pkgRoot,
+  Folder outDir,
+) {
   final context = generatorContextFromArgv([
     '--format',
     'jaspr',
@@ -52,8 +56,9 @@ Dartdoc _buildJasprDartdoc(
 }
 
 String _readOutput(Folder outDir, String relativePath) {
-  final file =
-      _resourceProvider.getFile(p.normalize(p.join(outDir.path, relativePath)));
+  final file = _resourceProvider.getFile(
+    p.normalize(p.join(outDir.path, relativePath)),
+  );
   expect(file.exists, isTrue, reason: 'Expected file to exist: $relativePath');
   return file.readAsStringSync();
 }
@@ -70,8 +75,9 @@ bool _dirExists(Folder outDir, String relativePath) {
       .exists;
 }
 
-Folder _createSystemTemp(String prefix) => _resourceProvider
-    .getFolder(Directory.systemTemp.createTempSync(prefix).path);
+Folder _createSystemTemp(String prefix) => _resourceProvider.getFolder(
+  Directory.systemTemp.createTempSync(prefix).path,
+);
 
 Folder _copyPackageFixture(Folder source, String prefix) {
   final destination = io.Directory.systemTemp.createTempSync(prefix);
@@ -93,8 +99,9 @@ Folder _copyPackageFixture(Folder source, String prefix) {
 }
 
 bool _hasWarning(DartdocResults results, PackageWarning warning) {
-  return results.packageGraph.packageWarningCounter.countedWarnings.values
-      .any((warningsByKind) => warningsByKind.containsKey(warning));
+  return results.packageGraph.packageWarningCounter.countedWarnings.values.any(
+    (warningsByKind) => warningsByKind.containsKey(warning),
+  );
 }
 
 void _runDartTool(List<String> args, String workingDirectory) {
@@ -124,11 +131,11 @@ void _runPubGetForScaffold(String workingDirectory) {
     return content.contains('"packages"');
   }
 
-  final offlineResult = Process.runSync(
-    Platform.resolvedExecutable,
-    ['pub', 'get', '--offline'],
-    workingDirectory: workingDirectory,
-  );
+  final offlineResult = Process.runSync(Platform.resolvedExecutable, [
+    'pub',
+    'get',
+    '--offline',
+  ], workingDirectory: workingDirectory);
   if (offlineResult.exitCode == 0) {
     return;
   }
@@ -136,11 +143,10 @@ void _runPubGetForScaffold(String workingDirectory) {
     return;
   }
 
-  final onlineResult = Process.runSync(
-    Platform.resolvedExecutable,
-    ['pub', 'get'],
-    workingDirectory: workingDirectory,
-  );
+  final onlineResult = Process.runSync(Platform.resolvedExecutable, [
+    'pub',
+    'get',
+  ], workingDirectory: workingDirectory);
   if (onlineResult.exitCode == 0) {
     return;
   }
@@ -161,11 +167,10 @@ void _runPubGetForScaffold(String workingDirectory) {
 void main() {
   group('Jaspr generator e2e', () {
     setUpAll(() async {
-      final optionSet = DartdocOptionRoot.fromOptionGenerators(
-        'dartdoc',
-        [createDartdocProgramOptions, createLoggingOptions],
-        pubPackageMetaProvider,
-      );
+      final optionSet = DartdocOptionRoot.fromOptionGenerators('dartdoc', [
+        createDartdocProgramOptions,
+        createLoggingOptions,
+      ], pubPackageMetaProvider);
       optionSet.parseArguments([]);
       startLogging(isJson: false, isQuiet: true, showProgress: false);
 
@@ -196,45 +201,58 @@ void main() {
         expect(_outputExists(outDir, 'lib/main.client.options.dart'), isTrue);
         expect(_outputExists(outDir, 'web/index.html'), isTrue);
         expect(_outputExists(outDir, 'lib/theme/docs_theme.dart'), isTrue);
+        expect(_outputExists(outDir, 'lib/theme/docs_responsive.dart'), isTrue);
         expect(
-          _outputExists(outDir, 'lib/theme/docs_responsive.dart'),
+          _outputExists(outDir, 'lib/components/docs_search.dart'),
           isTrue,
         );
-        expect(
-            _outputExists(outDir, 'lib/components/docs_search.dart'), isTrue);
         expect(
           _outputExists(outDir, 'lib/components/docs_disclosure_runtime.dart'),
           isTrue,
         );
         expect(
           _outputExists(
-              outDir, 'lib/components/docs_disclosure_runtime_stub.dart'),
+            outDir,
+            'lib/components/docs_disclosure_runtime_stub.dart',
+          ),
           isTrue,
         );
         expect(
           _outputExists(
-              outDir, 'lib/components/docs_disclosure_runtime_web.dart'),
+            outDir,
+            'lib/components/docs_disclosure_runtime_web.dart',
+          ),
           isTrue,
         );
         expect(
-            _outputExists(outDir, 'lib/components/docs_header.dart'), isTrue);
+          _outputExists(outDir, 'lib/components/docs_header.dart'),
+          isTrue,
+        );
         expect(
           _outputExists(outDir, 'lib/components/docs_theme_toggle.dart'),
           isTrue,
         );
         expect(
-            _outputExists(outDir, 'lib/components/docs_nav_link.dart'), isTrue);
+          _outputExists(outDir, 'lib/components/docs_nav_link.dart'),
+          isTrue,
+        );
         expect(
-            _outputExists(outDir, 'lib/components/docs_sidebar.dart'), isTrue);
-        expect(_outputExists(outDir, 'lib/components/docs_sidebar_toggle.dart'),
-            isTrue);
+          _outputExists(outDir, 'lib/components/docs_sidebar.dart'),
+          isTrue,
+        );
+        expect(
+          _outputExists(outDir, 'lib/components/docs_sidebar_toggle.dart'),
+          isTrue,
+        );
         expect(
           _outputExists(outDir, 'lib/components/docs_dartpad_runtime.dart'),
           isTrue,
         );
         expect(
           _outputExists(
-              outDir, 'lib/components/docs_dartpad_runtime_stub.dart'),
+            outDir,
+            'lib/components/docs_dartpad_runtime_stub.dart',
+          ),
           isTrue,
         );
         expect(
@@ -247,7 +265,9 @@ void main() {
         );
         expect(
           _outputExists(
-              outDir, 'lib/components/docs_mermaid_runtime_stub.dart'),
+            outDir,
+            'lib/components/docs_mermaid_runtime_stub.dart',
+          ),
           isTrue,
         );
         expect(
@@ -264,12 +284,18 @@ void main() {
           isTrue,
         );
         expect(
+          _outputExists(outDir, 'lib/extensions/base_path_link_extension.dart'),
+          isTrue,
+        );
+        expect(
           _outputExists(outDir, 'lib/layouts/api_docs_layout.dart'),
           isTrue,
         );
         expect(
           _outputExists(
-              outDir, 'lib/template_engine/docs_template_engine.dart'),
+            outDir,
+            'lib/template_engine/docs_template_engine.dart',
+          ),
           isTrue,
         );
         expect(_outputExists(outDir, 'content/index.md'), isTrue);
@@ -279,10 +305,7 @@ void main() {
           _outputExists(outDir, 'lib/generated/guide_sidebar.dart'),
           isTrue,
         );
-        expect(
-          _outputExists(outDir, 'lib/generated/api_symbols.dart'),
-          isTrue,
-        );
+        expect(_outputExists(outDir, 'lib/generated/api_symbols.dart'), isTrue);
         expect(
           _outputExists(outDir, 'web/generated/search_index.json'),
           isTrue,
@@ -304,7 +327,7 @@ void main() {
 
       test('writes API markdown under content/api', () {
         expect(_outputExists(outDir, 'content/api/index.md'), isTrue);
-        expect(_outputExists(outDir, 'content/api/ex/index.md'), isTrue);
+        expect(_outputExists(outDir, 'content/api/ex/library.md'), isTrue);
         expect(_outputExists(outDir, 'content/api/ex/Apple.md'), isTrue);
       });
 
@@ -329,8 +352,10 @@ void main() {
         expect(content, contains("rel: 'stylesheet'"));
         expect(content, contains("href: withDocsBasePath('/favicon.svg')"));
         expect(content, contains("'type': 'image/svg+xml'"));
-        expect(content,
-            contains('Jaspr.initializeApp(options: defaultServerOptions);'));
+        expect(
+          content,
+          contains('Jaspr.initializeApp(options: defaultServerOptions);'),
+        );
         expect(content, contains("packageName: 'test_package'"));
         expect(content, contains('themePreset: themePreset'));
         expect(content, contains('templateEngine: DocsTemplateEngine()'));
@@ -340,12 +365,11 @@ void main() {
         );
         expect(
           _readOutput(outDir, 'lib/docs_base.dart'),
-          contains("String.fromEnvironment('DOCS_BASE_PATH', defaultValue: '')"),
+          contains(
+            "String.fromEnvironment('DOCS_BASE_PATH', defaultValue: '')",
+          ),
         );
-        expect(
-          content,
-          contains('DocsThemePresetX.parse(themeName)'),
-        );
+        expect(content, contains('DocsThemePresetX.parse(themeName)'));
       });
 
       test('shared app builder is reused by server and client entrypoints', () {
@@ -360,7 +384,8 @@ void main() {
         expect(
           app,
           isNot(
-              contains("import 'template_engine/docs_template_engine.dart';")),
+            contains("import 'template_engine/docs_template_engine.dart';"),
+          ),
         );
         expect(app, contains("import 'components/docs_header.dart';"));
         expect(app, contains("import 'components/docs_search.dart';"));
@@ -369,18 +394,25 @@ void main() {
         expect(app, contains("import 'docs_base.dart';"));
         expect(app, contains("import 'generated/api_sidebar.dart' as api;"));
         expect(
-            app, contains("import 'generated/guide_sidebar.dart' as guide;"));
+          app,
+          contains("import 'generated/guide_sidebar.dart' as guide;"),
+        );
         expect(app, contains('header: DocsHeader('));
+        expect(app, contains('title: packageName,'));
         expect(app, contains("logo: withDocsBasePath('/favicon.svg')"));
-        expect(app, contains('homeHref: overviewHref,'));
+        expect(app, contains("homeHref: hasGuideLinks ? '/' : overviewHref,"));
+        expect(app, contains("text: 'Guide',"));
+        expect(app, contains("text: 'API Reference',"));
         expect(app, contains('const DocsSearchShell()'));
         expect(app, contains('const DocsThemeToggle()'));
         expect(app, contains('sidebar: DocsSidebar('));
         expect(app, contains('DocsSidebarGroup('));
         expect(app, contains('DocsSidebarItem('));
         expect(client, contains("import 'main.client.options.dart';"));
-        expect(client,
-            contains('Jaspr.initializeApp(options: defaultClientOptions);'));
+        expect(
+          client,
+          contains('Jaspr.initializeApp(options: defaultClientOptions);'),
+        );
         expect(client, contains('runApp(const ClientApp());'));
         expect(client, isNot(contains("import 'app.dart';")));
         expect(client, isNot(contains('buildDocsApp(')));
@@ -391,6 +423,7 @@ void main() {
       });
 
       test('custom layout wires feature runtimes', () {
+        final app = _readOutput(outDir, 'lib/app.dart');
         final content = _readOutput(outDir, 'lib/layouts/api_docs_layout.dart');
         final header = _readOutput(outDir, 'lib/components/docs_header.dart');
         final search = _readOutput(outDir, 'lib/components/docs_search.dart');
@@ -422,8 +455,10 @@ void main() {
           outDir,
           'lib/components/docs_theme_toggle.dart',
         );
-        final navLink =
-            _readOutput(outDir, 'lib/components/docs_nav_link.dart');
+        final navLink = _readOutput(
+          outDir,
+          'lib/components/docs_nav_link.dart',
+        );
         final sidebar = _readOutput(outDir, 'lib/components/docs_sidebar.dart');
         final sidebarToggle = _readOutput(
           outDir,
@@ -477,23 +512,30 @@ void main() {
         expect(header, contains('const DocsSidebarToggle()'));
         expect(header, contains("classes: 'header-title'"));
         expect(header, contains('DocsNavLink('));
-        expect(themeToggle,
-            contains('class DocsThemeToggle extends StatefulComponent'));
+        expect(
+          themeToggle,
+          contains('class DocsThemeToggle extends StatefulComponent'),
+        );
         expect(themeToggle, contains("id: 'docs-theme-script'"));
-        expect(themeToggle,
-            contains("window.localStorage.getItem('jaspr:theme')"));
+        expect(
+          themeToggle,
+          contains("window.localStorage.getItem('jaspr:theme')"),
+        );
         expect(
           themeToggle,
           contains(
-              "document.documentElement.setAttribute('data-theme', resolvedTheme)"),
+            "document.documentElement.setAttribute('data-theme', resolvedTheme)",
+          ),
         );
         expect(themeToggle, contains("classes: 'theme-toggle'"));
         expect(themeToggle, contains("'data-docs-theme-toggle': ''"));
         expect(content, contains("import '../components/docs_nav_link.dart';"));
         expect(search, contains("import 'docs_navigation_runtime.dart';"));
         expect(search, contains("import 'docs_disclosure_runtime.dart';"));
-        expect(content,
-            isNot(contains("import '../components/docs_search.dart';")));
+        expect(
+          content,
+          isNot(contains("import '../components/docs_search.dart';")),
+        );
         expect(content, isNot(contains('const DocsSearchShell()')));
         expect(content, contains('const DocsDartPadRuntime()'));
         expect(content, isNot(contains('const DocsMermaidRuntime()')));
@@ -501,18 +543,17 @@ void main() {
         expect(content, isNot(contains('case final Header header')));
         expect(content, isNot(contains('case final Sidebar sidebar')));
         expect(search, contains('@client'));
-        expect(search,
-            contains('class DocsSearchShell extends StatefulComponent'));
+        expect(
+          search,
+          contains('class DocsSearchShell extends StatefulComponent'),
+        );
         expect(search, contains('const DocsNavigationRuntime()'));
         expect(search, contains('const DocsDisclosureRuntime()'));
         expect(search, contains("classes: 'search-launcher'"));
         expect(search, contains("'data-docs-search-launcher': ''"));
         expect(search, contains('docs-search-overlay'));
         expect(search, contains("'data-docs-search-overlay': ''"));
-        expect(
-          search,
-          contains('http.get(Uri.parse(withDocsBasePath(path)))'),
-        );
+        expect(search, contains('http.get(Uri.parse(withDocsBasePath(path)))'));
         expect(search, contains("import 'docs_nav_link.dart';"));
         expect(search, contains("import 'docs_mermaid_runtime.dart';"));
         expect(search, contains("import 'docs_toc_runtime.dart';"));
@@ -535,9 +576,14 @@ void main() {
         expect(search, contains('_focusableNodesWithin('));
         expect(search, contains('docs.search.manifest.v5:'));
         expect(search, contains('docs.search.sections.v2:'));
-        expect(search, contains('docs.search.pages:'));
+        expect(search, contains('docs.search.pages.v2:'));
         expect(search, contains("'role': 'dialog'"));
         expect(search, contains("event.key == 'ArrowDown'"));
+        expect(
+          app,
+          contains("import 'extensions/base_path_link_extension.dart';"),
+        );
+        expect(app, contains('const BasePathLinkExtension()'));
         expect(
           navigationRuntime,
           contains("export 'docs_navigation_runtime_stub.dart'"),
@@ -562,14 +608,8 @@ void main() {
           disclosureRuntimeWeb,
           contains("details.classList.add('docs-disclosure')"),
         );
-        expect(
-          disclosureRuntimeWeb,
-          contains('event.preventDefault()'),
-        );
-        expect(
-          disclosureRuntimeWeb,
-          contains("body.style.height = '0px'"),
-        );
+        expect(disclosureRuntimeWeb, contains('event.preventDefault()'));
+        expect(disclosureRuntimeWeb, contains("body.style.height = '0px'"));
         expect(
           disclosureRuntimeWeb,
           contains("body.style.height = '\${targetHeight}px'"),
@@ -585,7 +625,17 @@ void main() {
         expect(navigationRuntimeWeb, contains('a[data-docs-nav-link]'));
         expect(navigationRuntimeWeb, contains('web.window.history.pushState'));
         expect(
-            navigationRuntimeWeb, contains('web.DOMParser().parseFromString'));
+          navigationRuntimeWeb,
+          contains('web.DOMParser().parseFromString'),
+        );
+        expect(
+          navigationRuntimeWeb,
+          contains('_normalizeDocumentAnchors(root: nextMain)'),
+        );
+        expect(
+          navigationRuntimeWeb,
+          contains("node.setAttribute('href', withDocsBasePath(rawHref))"),
+        );
         expect(
           navigationRuntimeWeb,
           contains("querySelector('.main-container')"),
@@ -597,10 +647,13 @@ void main() {
         expect(
           navigationRuntimeWeb,
           contains(
-              "web.window.dispatchEvent(web.CustomEvent('docs:navigation'))"),
+            "web.window.dispatchEvent(web.CustomEvent('docs:navigation'))",
+          ),
         );
         expect(
-            navLink, contains('class DocsNavLink extends StatelessComponent'));
+          navLink,
+          contains('class DocsNavLink extends StatelessComponent'),
+        );
         expect(navLink, contains("'data-docs-nav-link': 'true'"));
         expect(navLink, contains('Router.maybeOf(context)'));
         expect(navLink, contains('router.preload(to)'));
@@ -609,23 +662,33 @@ void main() {
         expect(navLink, contains('_isModifiedClick('));
         expect(navLink, contains("value.startsWith('https://')"));
         expect(
-            sidebar, contains('class DocsSidebar extends StatelessComponent'));
-        expect(sidebar,
-            contains("import 'package:jaspr_content/jaspr_content.dart';"));
+          sidebar,
+          contains('class DocsSidebar extends StatelessComponent'),
+        );
+        expect(
+          sidebar,
+          contains("import 'package:jaspr_content/jaspr_content.dart';"),
+        );
         expect(sidebar, contains("'id': 'docs-sidebar'"));
         expect(sidebar, contains("classes: 'sidebar-close'"));
         expect(sidebar, contains("'data-docs-sidebar-close': 'true'"));
         expect(sidebar, contains('DocsNavLink('));
         expect(sidebar, contains("'sidebar-link active'"));
-        expect(sidebarToggle,
-            contains('class DocsSidebarToggle extends StatefulComponent'));
+        expect(
+          sidebarToggle,
+          contains('class DocsSidebarToggle extends StatefulComponent'),
+        );
         expect(sidebarToggle, contains("'data-docs-sidebar-toggle': ''"));
         expect(sidebarToggle, contains("aria-controls': 'docs-sidebar'"));
         expect(sidebarToggle, contains("sidebar.classList.add('open')"));
-        expect(sidebarToggle,
-            contains("web.document.body?.style.overflow = 'hidden'"));
-        expect(dartPadRuntime,
-            contains("export 'docs_dartpad_runtime_stub.dart'"));
+        expect(
+          sidebarToggle,
+          contains("web.document.body?.style.overflow = 'hidden'"),
+        );
+        expect(
+          dartPadRuntime,
+          contains("export 'docs_dartpad_runtime_stub.dart'"),
+        );
         expect(
           dartPadRuntimeWeb,
           contains('class DocsDartPadRuntime extends StatefulComponent'),
@@ -633,8 +696,10 @@ void main() {
         expect(dartPadRuntimeWeb, contains('candidate.contentWindow'));
         expect(dartPadRuntimeWeb, contains('navigator.clipboard'));
         expect(dartPadRuntimeWeb, contains('https://dartpad.dev'));
-        expect(mermaidRuntime,
-            contains("export 'docs_mermaid_runtime_stub.dart'"));
+        expect(
+          mermaidRuntime,
+          contains("export 'docs_mermaid_runtime_stub.dart'"),
+        );
         expect(
           mermaidRuntimeWeb,
           contains('class DocsMermaidRuntime extends StatelessComponent'),
@@ -647,15 +712,16 @@ void main() {
           ),
         );
         expect(mermaidRuntimeHelper, contains('suppressErrorRendering: true'));
+        expect(mermaidRuntimeHelper, contains('host.innerHTML = svg'));
+        expect(mermaidRuntimeHelper, contains('window.docsRenderMermaid'));
         expect(
           mermaidRuntimeHelper,
-          contains('host.innerHTML = svg'),
+          contains("querySelectorAll('.mermaid-diagram')"),
         );
-        expect(mermaidRuntimeHelper, contains('window.docsRenderMermaid'));
-        expect(mermaidRuntimeHelper,
-            contains("querySelectorAll('.mermaid-diagram')"));
-        expect(mermaidRuntimeHelper,
-            contains("addEventListener('docs:navigation'"));
+        expect(
+          mermaidRuntimeHelper,
+          contains("addEventListener('docs:navigation'"),
+        );
         expect(
           mermaidDiagram,
           contains("Component.text('Rendering Mermaid diagram')"),
@@ -713,7 +779,9 @@ void main() {
         expect(content, contains('DocsThemePreset.graphite'));
         expect(content, contains('DocsThemePreset.forest'));
         expect(
-            content, contains('extension DocsThemePresetX on DocsThemePreset'));
+          content,
+          contains('extension DocsThemePresetX on DocsThemePreset'),
+        );
         expect(content, contains('static DocsThemePreset parse(String value)'));
         expect(content, contains('class DocsThemeConfig'));
         expect(content, contains('class DocsThemeExtension'));
@@ -722,75 +790,63 @@ void main() {
       });
 
       test(
-          'responsive foundation centralizes canonical breakpoints and shell tokens',
-          () {
-        final responsive =
-            _readOutput(outDir, 'lib/theme/docs_responsive.dart');
-        final layout = _readOutput(outDir, 'lib/layouts/api_docs_layout.dart');
-        final header = _readOutput(outDir, 'lib/components/docs_header.dart');
-        final sidebar = _readOutput(outDir, 'lib/components/docs_sidebar.dart');
-        final sidebarToggle = _readOutput(
-          outDir,
-          'lib/components/docs_sidebar_toggle.dart',
-        );
+        'responsive foundation centralizes canonical breakpoints and shell tokens',
+        () {
+          final responsive = _readOutput(
+            outDir,
+            'lib/theme/docs_responsive.dart',
+          );
+          final layout = _readOutput(
+            outDir,
+            'lib/layouts/api_docs_layout.dart',
+          );
+          final header = _readOutput(outDir, 'lib/components/docs_header.dart');
+          final sidebar = _readOutput(
+            outDir,
+            'lib/components/docs_sidebar.dart',
+          );
+          final sidebarToggle = _readOutput(
+            outDir,
+            'lib/components/docs_sidebar_toggle.dart',
+          );
 
-        expect(
-          responsive,
-          contains('const docsCompactBreakpoint = 479;'),
-        );
-        expect(
-          responsive,
-          contains('const docsMobileBreakpoint = 767;'),
-        );
-        expect(
-          responsive,
-          contains('const docsContentBreakpoint = 959;'),
-        );
-        expect(
-          responsive,
-          contains('const docsWideBreakpoint = 1180;'),
-        );
-        expect(responsive, contains('StyleRule downCompact('));
-        expect(responsive, contains('StyleRule downMobile('));
-        expect(responsive, contains('StyleRule downContent('));
-        expect(responsive, contains('StyleRule downWide('));
-        expect(responsive, contains('docsResponsiveRootStyles() => ['));
-        expect(responsive, contains("'--docs-shell-grid-gap'"));
-        expect(responsive, contains("'--docs-shell-sidebar-width'"));
-        expect(responsive, contains("'--docs-shell-toc-width'"));
-        expect(responsive, contains("'--docs-shell-search-panel-width'"));
-        expect(responsive, contains("'--docs-shell-drawer-width'"));
+          expect(responsive, contains('const docsCompactBreakpoint = 479;'));
+          expect(responsive, contains('const docsMobileBreakpoint = 767;'));
+          expect(responsive, contains('const docsContentBreakpoint = 959;'));
+          expect(responsive, contains('const docsWideBreakpoint = 1180;'));
+          expect(responsive, contains('StyleRule downCompact('));
+          expect(responsive, contains('StyleRule downMobile('));
+          expect(responsive, contains('StyleRule downContent('));
+          expect(responsive, contains('StyleRule downWide('));
+          expect(responsive, contains('docsResponsiveRootStyles() => ['));
+          expect(responsive, contains("'--docs-shell-grid-gap'"));
+          expect(responsive, contains("'--docs-shell-sidebar-width'"));
+          expect(responsive, contains("'--docs-shell-toc-width'"));
+          expect(responsive, contains("'--docs-shell-search-panel-width'"));
+          expect(responsive, contains("'--docs-shell-drawer-width'"));
 
-        expect(layout, contains("import '../theme/docs_responsive.dart';"));
-        expect(layout, contains('...docsResponsiveRootStyles(),'));
-        expect(layout, contains('downMobile(['));
-        expect(layout, contains('downContent(['));
-        expect(layout, contains('downWide(['));
-        expect(
-          layout,
-          isNot(contains('MediaQuery.all(maxWidth: 767.px)')),
-        );
-        expect(
-          layout,
-          isNot(contains('MediaQuery.all(maxWidth: 959.px)')),
-        );
-        expect(
-          layout,
-          isNot(contains('MediaQuery.all(maxWidth: 1180.px)')),
-        );
-        expect(header, contains("import '../theme/docs_responsive.dart';"));
-        expect(header, contains('downMobile(['));
-        expect(header, contains('downCompact(['));
-        expect(sidebar, contains("import '../theme/docs_responsive.dart';"));
-        expect(sidebar, contains('downContent(['));
-        expect(
-          sidebarToggle,
-          contains("import '../theme/docs_responsive.dart';"),
-        );
-        expect(sidebarToggle, contains('downContent(['));
-        expect(sidebar, isNot(contains('1023')));
-        expect(sidebarToggle, isNot(contains('1024')));
-      });
+          expect(layout, contains("import '../theme/docs_responsive.dart';"));
+          expect(layout, contains('...docsResponsiveRootStyles(),'));
+          expect(layout, contains('downMobile(['));
+          expect(layout, contains('downContent(['));
+          expect(layout, contains('downWide(['));
+          expect(layout, isNot(contains('MediaQuery.all(maxWidth: 767.px)')));
+          expect(layout, isNot(contains('MediaQuery.all(maxWidth: 959.px)')));
+          expect(layout, isNot(contains('MediaQuery.all(maxWidth: 1180.px)')));
+          expect(header, contains("import '../theme/docs_responsive.dart';"));
+          expect(header, contains('downMobile(['));
+          expect(header, contains('downCompact(['));
+          expect(sidebar, contains("import '../theme/docs_responsive.dart';"));
+          expect(sidebar, contains('downContent(['));
+          expect(
+            sidebarToggle,
+            contains("import '../theme/docs_responsive.dart';"),
+          );
+          expect(sidebarToggle, contains('downContent(['));
+          expect(sidebar, isNot(contains('1023')));
+          expect(sidebarToggle, isNot(contains('1024')));
+        },
+      );
 
       test('search index is generated for API pages', () {
         final content = _readOutput(outDir, 'web/generated/search_index.json');
@@ -805,14 +861,18 @@ void main() {
         expect(pages, contains('"/api/ex/Apple"'));
         expect(pages, contains('"Apple"'));
 
-        final sections =
-            _readOutput(outDir, 'web/generated/search_sections.json');
+        final sections = _readOutput(
+          outDir,
+          'web/generated/search_sections.json',
+        );
         expect(sections, contains('"version":3'));
         expect(sections, contains('"m1"'));
         expect(sections, contains('"m1()"'));
 
-        final sectionContent =
-            _readOutput(outDir, 'web/generated/search_sections_content.json');
+        final sectionContent = _readOutput(
+          outDir,
+          'web/generated/search_sections_content.json',
+        );
         expect(sectionContent, contains('"version":4'));
         expect(sectionContent, contains('"m1"'));
       });
@@ -820,21 +880,46 @@ void main() {
       test('api sidebar is generated as Dart, not TypeScript', () {
         final content = _readOutput(outDir, 'lib/generated/api_sidebar.dart');
         expect(content, contains('const apiSidebarGroups = <SidebarGroup>['));
-        expect(content, contains("SidebarItem(text: 'ex'"));
+        expect(content, contains("text: 'ex'"));
+        expect(content, contains("text: 'Classes'"));
+        expect(content, contains("text: 'Overview'"));
         expect(
           content,
           isNot(contains("import type { DefaultTheme } from 'vitepress'")),
         );
       });
 
-      test('api symbols are generated as pure Dart data for runtime linking',
-          () {
-        final content = _readOutput(outDir, 'lib/generated/api_symbols.dart');
-        expect(content, contains('class ApiSymbolEntry'));
-        expect(content,
-            contains('const apiSymbolMap = <String, List<ApiSymbolEntry>>{'));
-        expect(content, contains("'Apple': ["));
-        expect(content, contains("href: '/api/ex/Apple'"));
+      test(
+        'api symbols are generated as pure Dart data for runtime linking',
+        () {
+          final content = _readOutput(outDir, 'lib/generated/api_symbols.dart');
+          expect(content, contains('class ApiSymbolEntry'));
+          expect(
+            content,
+            contains('const apiSymbolMap = <String, List<ApiSymbolEntry>>{'),
+          );
+          expect(content, contains("'Apple': ["));
+          expect(content, contains("href: '/api/ex/Apple'"));
+        },
+      );
+
+      test('api linker resolves runtime links against docs base path', () {
+        final content = _readOutput(
+          outDir,
+          'lib/extensions/api_linker_extension.dart',
+        );
+        expect(content, contains("import '../docs_base.dart';"));
+        expect(content, contains("'href': withDocsBasePath(entry.href)"));
+      });
+
+      test('base-path link extension normalizes content anchors', () {
+        final content = _readOutput(
+          outDir,
+          'lib/extensions/base_path_link_extension.dart',
+        );
+        expect(content, contains("import '../docs_base.dart';"));
+        expect(content, contains("return withDocsBasePath(href);"));
+        expect(content, contains("'data-docs-nav-link': 'true'"));
       });
 
       test('API page strips VitePress-only syntax but keeps API content', () {
@@ -849,10 +934,12 @@ void main() {
         expect(_dirExists(outDir, 'content/api/ex/Apple'), isFalse);
       });
 
-      test('markdown backend does not emit HTML validator broken-link warnings',
-          () {
-        expect(_hasWarning(results, PackageWarning.brokenLink), isFalse);
-      });
+      test(
+        'markdown backend does not emit HTML validator broken-link warnings',
+        () {
+          expect(_hasWarning(results, PackageWarning.brokenLink), isFalse);
+        },
+      );
     });
 
     group('guide generation and scaffold smoke', () {
@@ -870,7 +957,9 @@ void main() {
 
       test('guide files are written under content/guide', () {
         expect(
-            _outputExists(outDir, 'content/guide/getting-started.md'), isTrue);
+          _outputExists(outDir, 'content/guide/getting-started.md'),
+          isTrue,
+        );
         expect(
           _outputExists(outDir, 'content/guide/advanced/configuration.md'),
           isTrue,
@@ -887,10 +976,7 @@ void main() {
           _outputExists(outDir, 'content/guide/recipes/pipeline-patterns.md'),
           isTrue,
         );
-        expect(
-          _outputExists(outDir, 'content/guide/ui/showcase.md'),
-          isTrue,
-        );
+        expect(_outputExists(outDir, 'content/guide/ui/showcase.md'), isTrue);
       });
 
       test('guide sidebar is generated as Dart data', () {
@@ -904,20 +990,23 @@ void main() {
         expect(content, contains('UI Showcase'));
         expect(content, isNot(contains('export const guideSidebar')));
         expect(
-          content.indexOf("SidebarItem(text: 'Getting Started'"),
-          lessThan(content.indexOf("SidebarItem(text: 'Configuration'")),
+          content.indexOf("text: 'Getting Started'"),
+          lessThan(content.indexOf("text: 'Configuration'")),
         );
       });
 
-      test('root preview entry boots the app shell and rewrites to overview',
-          () {
+      test('root preview entry boots the app shell and rewrites to overview', () {
         final content = _readOutput(outDir, 'web/index.html');
         expect(
-            content,
-            contains(
-                '<meta http-equiv="refresh" content="0; url=guide/getting-started">'));
-        expect(content,
-            contains('window.location.replace("guide/getting-started");'));
+          content,
+          contains(
+            '<meta http-equiv="refresh" content="0; url=guide/getting-started">',
+          ),
+        );
+        expect(
+          content,
+          contains('window.location.replace("guide/getting-started");'),
+        );
         expect(content, contains('<link rel="icon" href="favicon.svg"'));
         expect(
           content,
@@ -943,25 +1032,39 @@ void main() {
         expect(content, contains('### Outline Depth'));
       });
 
-      test('advanced guide keeps container syntax for runtime preprocessing',
-          () {
-        final content =
-            _readOutput(outDir, 'content/guide/advanced/configuration.md');
-        expect(content, contains(':::details Configuration Notes'));
-        expect(content, contains(':::warning Caveat'));
-        expect(content, contains(':::tip Recommended Setup'));
-      });
+      test(
+        'advanced guide keeps container syntax for runtime preprocessing',
+        () {
+          final content = _readOutput(
+            outDir,
+            'content/guide/advanced/configuration.md',
+          );
+          expect(content, contains(':::details Configuration Notes'));
+          expect(content, contains(':::warning Caveat'));
+          expect(content, contains(':::tip Recommended Setup'));
+        },
+      );
 
       test('expanded package generates multiple public library pages', () {
         expect(
-            _outputExists(
-                outDir, 'content/api/test_package_with_docs/index.md'),
-            isTrue);
-        expect(_outputExists(outDir, 'content/api/pipeline/index.md'), isTrue);
+          _outputExists(
+            outDir,
+            'content/api/test_package_with_docs/library.md',
+          ),
+          isTrue,
+        );
         expect(
-            _outputExists(outDir, 'content/api/showcase_ui/index.md'), isTrue);
-        expect(_outputExists(outDir, 'content/api/testing_support/index.md'),
-            isTrue);
+          _outputExists(outDir, 'content/api/pipeline/library.md'),
+          isTrue,
+        );
+        expect(
+          _outputExists(outDir, 'content/api/showcase_ui/library.md'),
+          isTrue,
+        );
+        expect(
+          _outputExists(outDir, 'content/api/testing_support/library.md'),
+          isTrue,
+        );
       });
 
       test('search index includes guide pages and sections', () {
@@ -972,15 +1075,19 @@ void main() {
         expect(pages, contains('"/guide/ui/showcase"'));
         expect(pages, contains('ShowcasePageSpec'));
 
-        final sections =
-            _readOutput(outDir, 'web/generated/search_sections.json');
+        final sections = _readOutput(
+          outDir,
+          'web/generated/search_sections.json',
+        );
         expect(sections, contains('"version":3'));
         expect(sections, contains('"installation"'));
         expect(sections, contains('"outline-depth"'));
         expect(sections, contains('"why-multiple-libraries"'));
 
-        final sectionContent =
-            _readOutput(outDir, 'web/generated/search_sections_content.json');
+        final sectionContent = _readOutput(
+          outDir,
+          'web/generated/search_sections_content.json',
+        );
         expect(sectionContent, contains('Пример'));
         expect(sectionContent, contains('PrefixStage'));
         expect(sectionContent, contains('ShowcasePageSpec'));
@@ -988,19 +1095,18 @@ void main() {
 
       test('generated Jaspr scaffold passes pub get, analyze, and build', () {
         _runPubGetForScaffold(outDir.path);
-        _runDartTool(
-          ['run', 'build_runner', 'build', '--delete-conflicting-outputs'],
-          outDir.path,
-        );
+        _runDartTool([
+          'run',
+          'build_runner',
+          'build',
+          '--delete-conflicting-outputs',
+        ], outDir.path);
         _runDartTool(['analyze'], outDir.path);
-        _runDartTool(
-          [
-            'run',
-            '/Users/belief/dev/projects/dartdoc-vitepress/tool/jaspr_scaffold_smoke.dart',
-            outDir.path,
-          ],
-          '/Users/belief/dev/projects/dartdoc-vitepress',
-        );
+        _runDartTool([
+          'run',
+          '/Users/belief/dev/projects/dartdoc-vitepress/tool/jaspr_scaffold_smoke.dart',
+          outDir.path,
+        ], '/Users/belief/dev/projects/dartdoc-vitepress');
       });
     });
 
@@ -1018,11 +1124,15 @@ void main() {
       });
 
       test('relative markdown guide links resolve without warnings', () async {
-        pkgDir = _copyPackageFixture(_testPackageWithDocsDir, 'jaspr_links_ok.');
+        pkgDir = _copyPackageFixture(
+          _testPackageWithDocsDir,
+          'jaspr_links_ok.',
+        );
         outDir = _createSystemTemp('jaspr_links_out_ok.');
 
-        final guideFile = _resourceProvider
-            .getFile(p.join(pkgDir.path, 'doc', 'getting-started.md'));
+        final guideFile = _resourceProvider.getFile(
+          p.join(pkgDir.path, 'doc', 'getting-started.md'),
+        );
         guideFile.writeAsStringSync(
           '${guideFile.readAsStringSync()}\n\nSee the [Configuration](advanced/configuration.md) guide.\n',
         );
@@ -1035,11 +1145,15 @@ void main() {
       });
 
       test('broken guide links emit broken-link warnings', () async {
-        pkgDir = _copyPackageFixture(_testPackageWithDocsDir, 'jaspr_links_bad.');
+        pkgDir = _copyPackageFixture(
+          _testPackageWithDocsDir,
+          'jaspr_links_bad.',
+        );
         outDir = _createSystemTemp('jaspr_links_out_bad.');
 
-        final guideFile = _resourceProvider
-            .getFile(p.join(pkgDir.path, 'doc', 'getting-started.md'));
+        final guideFile = _resourceProvider.getFile(
+          p.join(pkgDir.path, 'doc', 'getting-started.md'),
+        );
         guideFile.writeAsStringSync(
           '${guideFile.readAsStringSync()}\n\nBroken: [Missing Guide](/guide/missing-page).\n',
         );

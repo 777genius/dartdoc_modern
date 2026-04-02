@@ -7,6 +7,8 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:web/web.dart' as web;
 
+import '../docs_base.dart';
+
 @client
 class DocsNavigationRuntime extends StatefulComponent {
   const DocsNavigationRuntime({super.key});
@@ -25,7 +27,10 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
     super.initState();
     if (!kIsWeb) return;
 
-    web.document.documentElement?.setAttribute('data-docs-nav-runtime-ready', '');
+    web.document.documentElement?.setAttribute(
+      'data-docs-nav-runtime-ready',
+      '',
+    );
 
     _clickListener = ((web.Event rawEvent) {
       if (rawEvent is! web.MouseEvent) return;
@@ -61,6 +66,7 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
       );
     }).toJS;
     web.document.addEventListener('click', _clickListener);
+    _normalizeDocumentAnchors();
 
     _popStateListener = ((web.Event _) {
       unawaited(
@@ -76,7 +82,9 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
 
   @override
   void dispose() {
-    web.document.documentElement?.removeAttribute('data-docs-nav-runtime-ready');
+    web.document.documentElement?.removeAttribute(
+      'data-docs-nav-runtime-ready',
+    );
     if (_clickListener != null) {
       web.document.removeEventListener('click', _clickListener);
       _clickListener = null;
@@ -90,12 +98,9 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
 
   @override
   Component build(BuildContext context) => span(
-        attributes: {
-          'hidden': 'hidden',
-          'data-docs-nav-runtime': '',
-        },
-        const [],
-      );
+    attributes: {'hidden': 'hidden', 'data-docs-nav-runtime': ''},
+    const [],
+  );
 
   bool _shouldHandleClientNavigation(web.HTMLAnchorElement anchor) {
     final rawHref = anchor.getAttribute('href');
@@ -103,16 +108,19 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
     if (rawHref.startsWith('#')) return false;
     if (anchor.target == '_blank') return false;
     if (anchor.hasAttribute('download')) return false;
-    if (rawHref.startsWith('mailto:') || rawHref.startsWith('tel:')) return false;
+    if (rawHref.startsWith('mailto:') || rawHref.startsWith('tel:'))
+      return false;
 
     final targetUri = Uri.parse(anchor.href);
     final currentUri = Uri.parse(web.window.location.href);
-    if (targetUri.scheme != currentUri.scheme || targetUri.host != currentUri.host) {
+    if (targetUri.scheme != currentUri.scheme ||
+        targetUri.host != currentUri.host) {
       return false;
     }
 
     final samePath =
-        targetUri.path == currentUri.path && targetUri.query == currentUri.query;
+        targetUri.path == currentUri.path &&
+        targetUri.query == currentUri.query;
     if (samePath && targetUri.fragment.isNotEmpty) return false;
 
     return true;
@@ -145,7 +153,11 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
       final response = await http.get(Uri.parse(targetUri.toString()));
       if (token != _navigationToken) return;
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        _hardNavigate(targetUri, replace: replace, updateHistory: updateHistory);
+        _hardNavigate(
+          targetUri,
+          replace: replace,
+          updateHistory: updateHistory,
+        );
         return;
       }
 
@@ -156,11 +168,16 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
       final nextMain = nextDocument.querySelector('.main-container');
       final currentMain = web.document.querySelector('.main-container');
       if (nextMain == null || currentMain == null) {
-        _hardNavigate(targetUri, replace: replace, updateHistory: updateHistory);
+        _hardNavigate(
+          targetUri,
+          replace: replace,
+          updateHistory: updateHistory,
+        );
         return;
       }
 
       currentMain.replaceWith(nextMain);
+      _normalizeDocumentAnchors(root: nextMain);
 
       final nextTitle = nextDocument.querySelector('title')?.textContent;
       if (nextTitle != null && nextTitle.isNotEmpty) {
@@ -229,6 +246,28 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
     web.window.dispatchEvent(web.CustomEvent('docs:navigation'));
   }
 
+  void _normalizeDocumentAnchors({web.Element? root}) {
+    final scope = root ?? web.document.documentElement;
+    if (scope == null) return;
+
+    final nodes = scope.querySelectorAll('a[href]');
+    for (var i = 0; i < nodes.length; i++) {
+      final node = nodes.item(i);
+      if (node is! web.HTMLAnchorElement) continue;
+
+      final rawHref = node.getAttribute('href');
+      if (rawHref == null || rawHref.isEmpty) continue;
+      if (_isExternalHref(rawHref) || rawHref.startsWith('#')) continue;
+
+      if (rawHref.startsWith('/')) {
+        node.setAttribute('href', withDocsBasePath(rawHref));
+      }
+
+      if (node.target == '_blank' || node.hasAttribute('download')) continue;
+      node.setAttribute('data-docs-nav-link', 'true');
+    }
+  }
+
   void _syncScroll(Uri targetUri, {required bool restoreScroll}) {
     if (targetUri.fragment.isNotEmpty) {
       final node = web.document.getElementById(targetUri.fragment);
@@ -241,5 +280,12 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
     if (!restoreScroll) {
       web.window.scrollTo(0.toJS, 0);
     }
+  }
+
+  bool _isExternalHref(String href) {
+    return href.startsWith('http://') ||
+        href.startsWith('https://') ||
+        href.startsWith('mailto:') ||
+        href.startsWith('tel:');
   }
 }
