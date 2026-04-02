@@ -100,9 +100,9 @@ final class _JasprPreviewWorkspace {
 String get _pathListSeparator => Platform.isWindows ? ';' : ':';
 
 String _prependPathEntry(String entry, String? existingPath) => [
-      entry,
-      if (existingPath != null && existingPath.isNotEmpty) existingPath,
-    ].join(_pathListSeparator);
+  entry,
+  if (existingPath != null && existingPath.isNotEmpty) existingPath,
+].join(_pathListSeparator);
 
 String _bashPath(List<String> segments) => path.posix.joinAll(segments);
 
@@ -116,10 +116,9 @@ Future<void> runAnalyze(ArgResults commandResults) async {
   }
 }
 
-Future<void> analyzePackage() async =>
-    await SubprocessLauncher('analyze').runStreamedDartCommand(
-      ['analyze', '--fatal-infos', '.'],
-    );
+Future<void> analyzePackage() async => await SubprocessLauncher(
+  'analyze',
+).runStreamedDartCommand(['analyze', '--fatal-infos', '.']);
 
 Future<void> analyzeTestPackages() async {
   var testPackagePaths = [
@@ -127,10 +126,9 @@ Future<void> analyzeTestPackages() async {
     if (Platform.version.contains('dev')) testPackageExperiments.path,
   ];
   for (var testPackagePath in testPackagePaths) {
-    await SubprocessLauncher('pub-get').runStreamedDartCommand(
-      ['pub', 'get'],
-      workingDirectory: testPackagePath,
-    );
+    await SubprocessLauncher(
+      'pub-get',
+    ).runStreamedDartCommand(['pub', 'get'], workingDirectory: testPackagePath);
     await SubprocessLauncher('analyze-test-package').runStreamedDartCommand(
       // TODO(srawlins): Analyze the whole directory by ignoring the pubspec
       // reports.
@@ -174,8 +172,9 @@ Future<void> buildAll() async {
   await buildDartdocOptions();
 }
 
-Future<void> buildRenderers() async => await SubprocessLauncher('build')
-    .runStreamedDartCommand([path.join('tool', 'mustachio', 'builder.dart')]);
+Future<void> buildRenderers() async => await SubprocessLauncher(
+  'build',
+).runStreamedDartCommand([path.join('tool', 'mustachio', 'builder.dart')]);
 
 Future<void> buildDartdocOptions() async {
   var dartdocOptions = File('dartdoc_options.yaml');
@@ -197,17 +196,22 @@ Future<void> buildWeb({bool debug = false}) async {
   ]);
   _delete(File('lib/resources/docs.dart.js.deps'));
 
-  final compileResult = sass.compileToResult('web/styles/styles.scss',
-      style: debug ? sass.OutputStyle.expanded : sass.OutputStyle.compressed);
+  final compileResult = sass.compileToResult(
+    'web/styles/styles.scss',
+    style: debug ? sass.OutputStyle.expanded : sass.OutputStyle.compressed,
+  );
   if (compileResult.css.isNotEmpty) {
-    File('lib/resources/styles.css')
-        .writeAsStringSync('${compileResult.css}\n');
+    File(
+      'lib/resources/styles.css',
+    ).writeAsStringSync('${compileResult.css}\n');
   } else {
     throw StateError('Compiled CSS was empty.');
   }
 
-  var compileSig =
-      await _calcFilesSig(Directory('web'), extensions: {'.dart', '.scss'});
+  var compileSig = await _calcFilesSig(
+    Directory('web'),
+    extensions: {'.dart', '.scss'},
+  );
   File(path.join('web', 'sig.txt')).writeAsStringSync('$compileSig\n');
 }
 
@@ -239,7 +243,9 @@ Future<void> runBuildbot() async {
   await _section('Analyze package', analyzePackage);
   await _section('Validate format', validateFormat);
   await _section('Validate build', validateBuild);
-  await _section('Validate Jaspr launch', validateJasprLaunch);
+  if (!Platform.isWindows) {
+    await _section('Validate Jaspr launch', validateJasprLaunch);
+  }
   await _section('Run try publish', runTryPublish);
   await _section('Run test', runTest);
   await _section('Validate dartdoc docs', validateDartdocDocs);
@@ -289,8 +295,9 @@ Future<void> runCompare(ArgResults commandResults) async {
 }
 
 Future<void> compareFlutterWarnings() async {
-  var originalDartdocFlutter =
-      Directory.systemTemp.createTempSync('dartdoc-comparison-flutter');
+  var originalDartdocFlutter = Directory.systemTemp.createTempSync(
+    'dartdoc-comparison-flutter',
+  );
   var originalDartdoc = await _createComparisonDartdoc();
   var envCurrent = createThrowawayPubCache();
   var envOriginal = createThrowawayPubCache();
@@ -319,8 +326,12 @@ Future<void> compareFlutterWarnings() async {
     pubDir: envOriginal['PUB_CACHE'],
   );
 
-  print(originalDartdocWarnings.warningDeltaText(
-      'Flutter repo', currentDartdocWarnings));
+  print(
+    originalDartdocWarnings.warningDeltaText(
+      'Flutter repo',
+      currentDartdocWarnings,
+    ),
+  );
 
   if (Platform.environment['SERVE_FLUTTER'] == '1') {
     var launcher = SubprocessLauncher('serve-flutter-docs');
@@ -385,45 +396,54 @@ Future<Iterable<Map<String, Object?>>> _docFlutter({
   bool withStats = false,
 }) async {
   var flutterRepo = await FlutterRepo.copyFromExistingFlutterRepo(
-      await cleanFlutterRepo, flutterPath, env, label);
+    await cleanFlutterRepo,
+    flutterPath,
+    env,
+    label,
+  );
   await _patchFlutterApiDocsRunner(flutterPath);
   var snippetsPath = path.join(flutterPath, 'dev', 'snippets');
-  var snippetsOutPath =
-      path.join(flutterPath, 'bin', 'cache', 'artifacts', 'snippets');
+  var snippetsOutPath = path.join(
+    flutterPath,
+    'bin',
+    'cache',
+    'artifacts',
+    'snippets',
+  );
   print('building snippets tool executable...');
   Directory(snippetsOutPath).createSync(recursive: true);
-  await flutterRepo.launcher.runStreamed(
-    flutterRepo.flutterCmd,
-    ['pub', 'get'],
-    workingDirectory: path.join(snippetsPath),
-  );
-  await flutterRepo.launcher.runStreamed(
-    flutterRepo.dartCmd,
-    ['compile', 'exe', '-o', '$snippetsOutPath/snippets', 'bin/snippets.dart'],
-    workingDirectory: path.join(snippetsPath),
-  );
+  await flutterRepo.launcher.runStreamed(flutterRepo.flutterCmd, [
+    'pub',
+    'get',
+  ], workingDirectory: path.join(snippetsPath));
+  await flutterRepo.launcher.runStreamed(flutterRepo.dartCmd, [
+    'compile',
+    'exe',
+    '-o',
+    '$snippetsOutPath/snippets',
+    'bin/snippets.dart',
+  ], workingDirectory: path.join(snippetsPath));
   // TODO(jcollins-g): flutter's dart SDK pub tries to precompile the universe
   // when using -spath.  Why?
-  await flutterRepo.launcher.runStreamed(
-    flutterRepo.flutterCmd,
-    ['pub', 'global', 'activate', '-spath', '.', '-x', 'dartdoc_vitepress'],
-    workingDirectory: cwd,
-  );
-  await flutterRepo.launcher.runStreamed(
-    flutterRepo.flutterCmd,
-    ['pub', 'get'],
-    workingDirectory: path.join(flutterPath, 'dev', 'tools'),
-  );
+  await flutterRepo.launcher.runStreamed(flutterRepo.flutterCmd, [
+    'pub',
+    'global',
+    'activate',
+    '-spath',
+    '.',
+    '-x',
+    'dartdoc_vitepress',
+  ], workingDirectory: cwd);
+  await flutterRepo.launcher.runStreamed(flutterRepo.flutterCmd, [
+    'pub',
+    'get',
+  ], workingDirectory: path.join(flutterPath, 'dev', 'tools'));
   return await flutterRepo.launcher.runStreamed(
     flutterRepo.dartCmd,
     [
       '--disable-dart-dev',
       '--enable-asserts',
-      path.join(
-        'dev',
-        'tools',
-        'create_api_docs.dart',
-      ),
+      path.join('dev', 'tools', 'create_api_docs.dart'),
       '--json',
     ],
     workingDirectory: flutterPath,
@@ -452,8 +472,9 @@ Future<void> _patchFlutterApiDocsRunner(String flutterPath) async {
   await createApiDocs.writeAsString(patched);
 }
 
-final Directory flutterDir =
-    Directory.systemTemp.createTempSync('flutter').absolute;
+final Directory flutterDir = Directory.systemTemp
+    .createTempSync('flutter')
+    .absolute;
 
 Future<void> _docHelp() async {
   print('''
@@ -489,8 +510,9 @@ Future<String> docPackage({
   ]);
   var cache = Directory(path.join(env['PUB_CACHE']!, 'hosted', 'pub.dev'));
   // The pub package should be predictably in a location like this.
-  var pubPackageDirOrig =
-      cache.listSync().firstWhere((e) => e.path.contains('/$name-'));
+  var pubPackageDirOrig = cache.listSync().firstWhere(
+    (e) => e.path.contains('/$name-'),
+  );
   var pubPackageDir = Directory.systemTemp.createTempSync(name);
   io_utils.copy(pubPackageDirOrig, pubPackageDir);
 
@@ -508,8 +530,9 @@ Future<String> docPackage({
   if (pubPackageMetaProvider
       .fromDir(PhysicalResourceProvider.INSTANCE.getFolder(pubPackageDir.path))!
       .requiresFlutter) {
-    var flutterRepo =
-        await FlutterRepo.fromExistingFlutterRepo(await cleanFlutterRepo);
+    var flutterRepo = await FlutterRepo.fromExistingFlutterRepo(
+      await cleanFlutterRepo,
+    );
     executable = flutterRepo.cacheDart;
     environment = flutterRepo.env;
   }
@@ -532,8 +555,10 @@ Future<String> docPackage({
     withStats: withStats,
   );
   if (withStats) {
-    (executable, arguments) =
-        SubprocessLauncher.wrapWithTime(executable, arguments);
+    (executable, arguments) = SubprocessLauncher.wrapWithTime(
+      executable,
+      arguments,
+    );
   }
   print('Quickly re-run doc generation with:');
   print(
@@ -545,10 +570,10 @@ Future<String> docPackage({
 }
 
 Future<void> docSdk({bool withStats = false}) async => _docSdk(
-      sdkDocsPath: _sdkDocsDir.path,
-      dartdocPath: Directory.current.path,
-      withStats: withStats,
-    );
+  sdkDocsPath: _sdkDocsDir.path,
+  dartdocPath: Directory.current.path,
+  withStats: withStats,
+);
 
 /// Creates a throwaway pub cache and returns the environment variables
 /// necessary to use it.
@@ -556,29 +581,31 @@ Map<String, String> createThrowawayPubCache() {
   var pubCache = Directory.systemTemp.createTempSync('pubcache');
   var pubCacheBin = Directory(path.join(pubCache.path, 'bin'));
   pubCacheBin.createSync();
-  return Map.fromIterables([
-    'PUB_CACHE',
-    'PATH',
-  ], [
-    pubCache.path,
-    _prependPathEntry(pubCacheBin.path, Platform.environment['PATH']),
-  ]);
+  return Map.fromIterables(
+    ['PUB_CACHE', 'PATH'],
+    [
+      pubCache.path,
+      _prependPathEntry(pubCacheBin.path, Platform.environment['PATH']),
+    ],
+  );
 }
 
-Future<String> docTestingPackage({
-  bool withStats = false,
-}) async {
+Future<String> docTestingPackage({bool withStats = false}) async {
   var testPackagePath = testPackage.absolute.path;
   var launcher = SubprocessLauncher('doc-test-package');
-  await launcher.runStreamedDartCommand(
-    ['pub', 'get'],
-    workingDirectory: testPackagePath,
-  );
+  await launcher.runStreamedDartCommand([
+    'pub',
+    'get',
+  ], workingDirectory: testPackagePath);
   var outputPath = _testingPackageDocsDir.absolute.path;
   await launcher.runStreamedDartCommand(
     [
       '--enable-asserts',
-      path.join(Directory.current.absolute.path, 'bin', 'dartdoc_vitepress.dart'),
+      path.join(
+        Directory.current.absolute.path,
+        'bin',
+        'dartdoc_vitepress.dart',
+      ),
       '--output',
       outputPath,
       '--include-source',
@@ -597,23 +624,29 @@ Future<String> docTestingPackage({
     var diskUsageResult = Process.runSync('du', ['-sh', outputPath]);
     // Output looks like
     // 146M    /var/folders/72/ltck4q353hsg3bn8kpkg7f84005w15/T/sdkdocsHcquiB
-    var diskUsageNumber =
-        (diskUsageResult.stdout as String).trim().split(RegExp('\\s+')).first;
+    var diskUsageNumber = (diskUsageResult.stdout as String)
+        .trim()
+        .split(RegExp('\\s+'))
+        .first;
     print('Generated $fileCount files amounting to $diskUsageNumber.');
   }
 
   return outputPath;
 }
 
-final Directory _testingPackageDocsDir =
-    Directory.systemTemp.createTempSync('testing_package');
+final Directory _testingPackageDocsDir = Directory.systemTemp.createTempSync(
+  'testing_package',
+);
 
 Future<void> compareSdkWarnings() async {
-  var originalDartdocSdkDocs =
-      Directory.systemTemp.createTempSync('dartdoc-comparison-sdkdocs');
+  var originalDartdocSdkDocs = Directory.systemTemp.createTempSync(
+    'dartdoc-comparison-sdkdocs',
+  );
   var originalDartdoc = await _createComparisonDartdoc();
-  var sdkDocsPath =
-      Directory.systemTemp.createTempSync('sdkdocs').absolute.path;
+  var sdkDocsPath = Directory.systemTemp
+      .createTempSync('sdkdocs')
+      .absolute
+      .path;
   var currentDartdocSdkBuild = _docSdk(
     sdkDocsPath: sdkDocsPath,
     dartdocPath: Directory.current.path,
@@ -633,8 +666,12 @@ Future<void> compareSdkWarnings() async {
     branch: _dartdocOriginalBranch,
   );
 
-  print(originalDartdocWarnings.warningDeltaText(
-      'SDK docs', currentDartdocWarnings));
+  print(
+    originalDartdocWarnings.warningDeltaText(
+      'SDK docs',
+      currentDartdocWarnings,
+    ),
+  );
 }
 
 Future<Iterable<Map<String, Object?>>> _docSdk({
@@ -643,8 +680,10 @@ Future<Iterable<Map<String, Object?>>> _docSdk({
   bool withStats = false,
 }) async {
   var launcher = SubprocessLauncher('build-sdk-docs');
-  await launcher
-      .runStreamedDartCommand(['pub', 'get'], workingDirectory: dartdocPath);
+  await launcher.runStreamedDartCommand([
+    'pub',
+    'get',
+  ], workingDirectory: dartdocPath);
   var output = await launcher.runStreamedDartCommand(
     [
       '--enable-asserts',
@@ -670,8 +709,10 @@ Future<Iterable<Map<String, Object?>>> _docSdk({
     var diskUsageResult = Process.runSync('du', ['-sh', sdkDocsPath]);
     // Output looks like
     // 146M    /var/folders/72/ltck4q353hsg3bn8kpkg7f84005w15/T/sdkdocsHcquiB
-    var diskUsageNumber =
-        (diskUsageResult.stdout as String).trim().split(RegExp('\\s+')).first;
+    var diskUsageNumber = (diskUsageResult.stdout as String)
+        .trim()
+        .split(RegExp('\\s+'))
+        .first;
 
     // Prints all files in `sdkDocsPath`, newline-separated.
     var findResult = Process.runSync('find', [sdkDocsPath, '-type', 'f']);
@@ -688,12 +729,19 @@ Future<Iterable<Map<String, Object?>>> _docSdk({
 Future<String> _createComparisonDartdoc() async {
   var launcher = SubprocessLauncher('create-comparison-dartdoc');
   var dartdocClean = Directory.systemTemp.createTempSync('dartdoc-comparison');
-  await launcher
-      .runStreamed('git', ['clone', Directory.current.path, dartdocClean.path]);
-  await launcher.runStreamed('git', ['checkout', _dartdocOriginalBranch],
-      workingDirectory: dartdocClean.path);
-  await launcher.runStreamed(Platform.resolvedExecutable, ['pub', 'get'],
-      workingDirectory: dartdocClean.path);
+  await launcher.runStreamed('git', [
+    'clone',
+    Directory.current.path,
+    dartdocClean.path,
+  ]);
+  await launcher.runStreamed('git', [
+    'checkout',
+    _dartdocOriginalBranch,
+  ], workingDirectory: dartdocClean.path);
+  await launcher.runStreamed(Platform.resolvedExecutable, [
+    'pub',
+    'get',
+  ], workingDirectory: dartdocClean.path);
   return dartdocClean.path;
 }
 
@@ -725,7 +773,8 @@ Help usage:
     'doc' => _docHelp(),
     'serve' => _serveHelp(),
     _ => throw UnimplementedError(
-        'Unknown command: "$command", or no specific help text'),
+      'Unknown command: "$command", or no specific help text',
+    ),
   };
 }
 
@@ -775,8 +824,10 @@ Future<void> _servePackageDocs(ArgResults commandResults) async {
   await servePackageDocs(name: name, version: version);
 }
 
-Future<void> servePackageDocs(
-    {required String name, required String? version}) async {
+Future<void> servePackageDocs({
+  required String name,
+  required String? version,
+}) async {
   var packageDocsPath = await docPackage(name: name, version: version);
   await _serveDocsFrom(packageDocsPath, 9000, 'serve-pub-package');
 }
@@ -803,8 +854,12 @@ Future<void> _serveDocsFrom(String servePath, int port, String context) async {
   var launcher = SubprocessLauncher(context);
   if (!_serveReady) {
     await launcher.runStreamedDartCommand(['pub', 'get']);
-    await launcher
-        .runStreamedDartCommand(['pub', 'global', 'activate', 'dhttpd']);
+    await launcher.runStreamedDartCommand([
+      'pub',
+      'global',
+      'activate',
+      'dhttpd',
+    ]);
     _serveReady = true;
   }
   await launcher.runStreamedDartCommand([
@@ -815,7 +870,7 @@ Future<void> _serveDocsFrom(String servePath, int port, String context) async {
     '--port',
     '$port',
     '--path',
-    servePath
+    servePath,
   ]);
 }
 
@@ -837,8 +892,9 @@ Future<void> serveTestingPackageDocs() async {
 
 Future<void> runTest() async {
   await analyzeTestPackages();
-  await SubprocessLauncher('dart test')
-      .runStreamedDartCommand(['--enable-asserts', 'run', 'test']);
+  await SubprocessLauncher(
+    'dart test',
+  ).runStreamedDartCommand(['--enable-asserts', 'run', 'test']);
 }
 
 Future<void> runTryPublish() async {
@@ -854,14 +910,10 @@ Future<void> runTryPublish() async {
   );
 
   if (result.stdout case final String stdoutText when stdoutText.isNotEmpty) {
-    stdout.write(
-      stdoutText.endsWith('\n') ? stdoutText : '$stdoutText\n',
-    );
+    stdout.write(stdoutText.endsWith('\n') ? stdoutText : '$stdoutText\n');
   }
   if (result.stderr case final String stderrText when stderrText.isNotEmpty) {
-    stderr.write(
-      stderrText.endsWith('\n') ? stderrText : '$stderrText\n',
-    );
+    stderr.write(stderrText.endsWith('\n') ? stderrText : '$stderrText\n');
   }
 
   if (result.exitCode == 0) {
@@ -1002,22 +1054,22 @@ Future<void> _validateJasprThemePrerequisites() async {
     path.join('test', 'end2end', 'jaspr_generator_test.dart'),
   ]);
 
-  await SubprocessLauncher('theme-preview-script').runStreamed(
-    'bash',
-    ['-n', _bashPath(['tool', 'jaspr_theme_preview.sh'])],
-  );
-  await SubprocessLauncher('theme-snapshot-script').runStreamed(
-    'bash',
-    ['-n', _bashPath(['tool', 'jaspr_theme_snapshot.sh'])],
-  );
-  await SubprocessLauncher('search-profile-script').runStreamed(
-    'bash',
-    ['-n', _bashPath(['tool', 'jaspr_search_profile.sh'])],
-  );
-  await SubprocessLauncher('route-smoke-script').runStreamed(
-    'bash',
-    ['-n', _bashPath(['tool', 'jaspr_route_smoke.sh'])],
-  );
+  await SubprocessLauncher('theme-preview-script').runStreamed('bash', [
+    '-n',
+    _bashPath(['tool', 'jaspr_theme_preview.sh']),
+  ]);
+  await SubprocessLauncher('theme-snapshot-script').runStreamed('bash', [
+    '-n',
+    _bashPath(['tool', 'jaspr_theme_snapshot.sh']),
+  ]);
+  await SubprocessLauncher('search-profile-script').runStreamed('bash', [
+    '-n',
+    _bashPath(['tool', 'jaspr_search_profile.sh']),
+  ]);
+  await SubprocessLauncher('route-smoke-script').runStreamed('bash', [
+    '-n',
+    _bashPath(['tool', 'jaspr_route_smoke.sh']),
+  ]);
 }
 
 Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
@@ -1025,10 +1077,12 @@ Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
   required String theme,
   String basePath = '',
 }) async {
-  final outputDir =
-      Directory.systemTemp.createTempSync('dartdoc-jaspr-$labelPrefix');
-  final pubCacheDir =
-      Directory.systemTemp.createTempSync('dartdoc-jaspr-$labelPrefix-pub');
+  final outputDir = Directory.systemTemp.createTempSync(
+    'dartdoc-jaspr-$labelPrefix',
+  );
+  final pubCacheDir = Directory.systemTemp.createTempSync(
+    'dartdoc-jaspr-$labelPrefix-pub',
+  );
 
   try {
     _prepareOfflinePubCache(pubCacheDir);
@@ -1048,17 +1102,17 @@ Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
       pubCachePath: pubCacheDir.path,
     );
 
-    await SubprocessLauncher('$labelPrefix-analyze').runStreamedDartCommand([
-      'analyze',
-    ], workingDirectory: outputDir.path, environment: {
-      'PUB_CACHE': pubCacheDir.path,
-    });
+    await SubprocessLauncher('$labelPrefix-analyze').runStreamedDartCommand(
+      ['analyze'],
+      workingDirectory: outputDir.path,
+      environment: {'PUB_CACHE': pubCacheDir.path},
+    );
 
-    final homeDirPath = _resolveHomeDirPath();
-    final jasprBinDir = path.join(homeDirPath, '.pub-cache', 'bin');
     await SubprocessLauncher('$labelPrefix-build').runStreamed(
-      'jaspr',
+      Platform.executable,
       [
+        'run',
+        'jaspr_cli:jaspr',
         'build',
         '--dart-define',
         'DOCS_THEME=$theme',
@@ -1066,10 +1120,7 @@ Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
         'DOCS_BASE_PATH=$basePath',
       ],
       workingDirectory: outputDir.path,
-      environment: {
-        'PUB_CACHE': pubCacheDir.path,
-        'PATH': _prependPathEntry(jasprBinDir, Platform.environment['PATH']),
-      },
+      environment: {'PUB_CACHE': pubCacheDir.path},
     );
 
     return _JasprPreviewWorkspace(
@@ -1113,14 +1164,16 @@ Future<void> _runPubGetWithOfflineFallback({
 }
 
 void _assertJasprBuiltGuideExists(String outputDirPath) {
-  final builtGuide = File(path.joinAll([
-    outputDirPath,
-    'build',
-    'jaspr',
-    'guide',
-    'getting-started',
-    'index.html',
-  ]));
+  final builtGuide = File(
+    path.joinAll([
+      outputDirPath,
+      'build',
+      'jaspr',
+      'guide',
+      'getting-started',
+      'index.html',
+    ]),
+  );
   if (!builtGuide.existsSync()) {
     throw StateError(
       'Expected static Jaspr preview route at ${builtGuide.path}, but it was not generated.',
@@ -1130,13 +1183,16 @@ void _assertJasprBuiltGuideExists(String outputDirPath) {
 
 Future<void> validateJasprThemeVisual() async {
   final playwrightDir = _resolvePlaywrightDirPath();
-  final outputDir =
-      Directory.systemTemp.createTempSync('dartdoc-jaspr-theme-shots');
+  final outputDir = Directory.systemTemp.createTempSync(
+    'dartdoc-jaspr-theme-shots',
+  );
 
   try {
     await SubprocessLauncher('theme-snapshot-run').runStreamed(
       'bash',
-      [_bashPath(['tool', 'jaspr_theme_snapshot.sh'])],
+      [
+        _bashPath(['tool', 'jaspr_theme_snapshot.sh']),
+      ],
       environment: {
         'PLAYWRIGHT_DIR': playwrightDir,
         'OUTPUT_DIR': outputDir.path,
@@ -1146,13 +1202,12 @@ Future<void> validateJasprThemeVisual() async {
     for (final fileName in [
       'index.html',
       'manifest.json',
-      for (final theme in ['ocean', 'graphite', 'forest'])
-        ...[
-          '$theme-desktop-light.png',
-          '$theme-desktop-dark.png',
-          '$theme-mobile-light.png',
-          '$theme-mobile-dark.png',
-        ],
+      for (final theme in ['ocean', 'graphite', 'forest']) ...[
+        '$theme-desktop-light.png',
+        '$theme-desktop-dark.png',
+        '$theme-mobile-light.png',
+        '$theme-mobile-dark.png',
+      ],
     ]) {
       final file = File(path.join(outputDir.path, fileName));
       if (!file.existsSync()) {
@@ -1211,10 +1266,11 @@ Future<void> validateJasprThemeGolden() async {
   final playwrightDir = _resolvePlaywrightDirPath();
   await SubprocessLauncher('theme-golden-script').runStreamed(
     'bash',
-    [_bashPath(['tool', 'jaspr_theme_golden.sh']), 'verify'],
-    environment: {
-      'PLAYWRIGHT_DIR': playwrightDir,
-    },
+    [
+      _bashPath(['tool', 'jaspr_theme_golden.sh']),
+      'verify',
+    ],
+    environment: {'PLAYWRIGHT_DIR': playwrightDir},
   );
 }
 
@@ -1224,14 +1280,17 @@ Future<void> validateJasprRouteSmoke({
   bool reuseBuild = false,
 }) async {
   final playwrightDir = _resolvePlaywrightDirPath();
-  final outputDir =
-      Directory.systemTemp.createTempSync('dartdoc-jaspr-route-smoke');
+  final outputDir = Directory.systemTemp.createTempSync(
+    'dartdoc-jaspr-route-smoke',
+  );
 
   try {
     final reportFile = path.join(outputDir.path, 'report.json');
     await SubprocessLauncher('route-smoke-run').runStreamed(
       'bash',
-      [_bashPath(['tool', 'jaspr_route_smoke.sh'])],
+      [
+        _bashPath(['tool', 'jaspr_route_smoke.sh']),
+      ],
       environment: {
         'PLAYWRIGHT_DIR': playwrightDir,
         'OUTPUT_DIR': outputDir.path,
@@ -1268,12 +1327,10 @@ Future<void> validateJasprRouteSmoke({
     final consoleErrors =
         (diagnostics['consoleErrors'] as List<Object?>? ?? const [])
             .cast<Object?>();
-    final pageErrors =
-        (diagnostics['pageErrors'] as List<Object?>? ?? const [])
-            .cast<Object?>();
-    final httpErrors =
-        (diagnostics['httpErrors'] as List<Object?>? ?? const [])
-            .cast<Object?>();
+    final pageErrors = (diagnostics['pageErrors'] as List<Object?>? ?? const [])
+        .cast<Object?>();
+    final httpErrors = (diagnostics['httpErrors'] as List<Object?>? ?? const [])
+        .cast<Object?>();
     final requestFailures =
         (diagnostics['requestFailures'] as List<Object?>? ?? const [])
             .cast<Object?>();
@@ -1293,8 +1350,8 @@ Future<void> validateJasprRouteSmoke({
 
     final desktopGuideHeading =
         (desktop['visitedGuideHeading'] as String? ?? '').toLowerCase();
-    final desktopApiHeading =
-        (desktop['visitedApiHeading'] as String? ?? '').toLowerCase();
+    final desktopApiHeading = (desktop['visitedApiHeading'] as String? ?? '')
+        .toLowerCase();
     final mobileHeading = (mobile['heading'] as String? ?? '').toLowerCase();
     final breadcrumbCount = (desktop['breadcrumbCount'] as num?)?.toInt() ?? 0;
 
@@ -1331,15 +1388,18 @@ Future<void> validateJasprRouteSmokeBasePath({
   bool reuseBuild = false,
 }) async {
   final playwrightDir = _resolvePlaywrightDirPath();
-  final outputDir =
-      Directory.systemTemp.createTempSync('dartdoc-jaspr-route-smoke-base');
+  final outputDir = Directory.systemTemp.createTempSync(
+    'dartdoc-jaspr-route-smoke-base',
+  );
 
   try {
     final reportFile = path.join(outputDir.path, 'report.json');
     const basePath = '/dartdoc-preview';
     await SubprocessLauncher('route-smoke-base-path-run').runStreamed(
       'bash',
-      [path.join('tool', 'jaspr_route_smoke.sh')],
+      [
+        _bashPath(['tool', 'jaspr_route_smoke.sh']),
+      ],
       environment: {
         'PLAYWRIGHT_DIR': playwrightDir,
         'OUTPUT_DIR': outputDir.path,
@@ -1393,14 +1453,17 @@ Future<void> validateJasprSearchPerf({
   bool reuseBuild = false,
 }) async {
   final playwrightDir = _resolvePlaywrightDirPath();
-  final outputDir =
-      Directory.systemTemp.createTempSync('dartdoc-jaspr-search-profile');
+  final outputDir = Directory.systemTemp.createTempSync(
+    'dartdoc-jaspr-search-profile',
+  );
 
   try {
     final reportFile = path.join(outputDir.path, 'report.json');
     await SubprocessLauncher('search-profile-run').runStreamed(
       'bash',
-      [path.join('tool', 'jaspr_search_profile.sh')],
+      [
+        _bashPath(['tool', 'jaspr_search_profile.sh']),
+      ],
       environment: {
         'PLAYWRIGHT_DIR': playwrightDir,
         'OUTPUT_DIR': outputDir.path,
@@ -1435,7 +1498,8 @@ Future<void> validateJasprSearchPerf({
       final warmOpenRequests =
           (scenario['warmOpenRequests'] as List<Object?>? ?? const [])
               .cast<String>();
-      final deepQuery = scenario['deepQuery'] as Map<String, Object?>? ?? const {};
+      final deepQuery =
+          scenario['deepQuery'] as Map<String, Object?>? ?? const {};
       final unicodeQuery =
           scenario['unicodeQuery'] as Map<String, Object?>? ?? const {};
 
@@ -1453,30 +1517,39 @@ Future<void> validateJasprSearchPerf({
           'Expected cold search open to load page entries for $scenarioId.',
         );
       }
-      if (warmOpenRequests.any((entry) => entry.endsWith('/search_pages.json'))) {
+      if (warmOpenRequests.any(
+        (entry) => entry.endsWith('/search_pages.json'),
+      )) {
         throw StateError(
           'Warm search open unexpectedly refetched page entries for $scenarioId.',
         );
       }
-      if (warmOpenRequests.any((entry) => entry.endsWith('/search_sections.json'))) {
+      if (warmOpenRequests.any(
+        (entry) => entry.endsWith('/search_sections.json'),
+      )) {
         throw StateError(
           'Warm search open unexpectedly refetched section metadata for $scenarioId.',
         );
       }
-      if (warmOpenRequests.any((entry) => entry.endsWith('/search_index.json'))) {
+      if (warmOpenRequests.any(
+        (entry) => entry.endsWith('/search_index.json'),
+      )) {
         throw StateError(
           'Warm search open unexpectedly refetched the manifest for $scenarioId.',
         );
       }
 
-      final deepResultCount =
-          (deepQuery['resultCount'] as num?)?.toInt() ?? 0;
+      final deepResultCount = (deepQuery['resultCount'] as num?)?.toInt() ?? 0;
       final deepRequests = (deepQuery['requests'] as List<Object?>? ?? const [])
           .cast<String>();
       if (deepResultCount < 0) {
-        throw StateError('Deep query result count was invalid for $scenarioId.');
+        throw StateError(
+          'Deep query result count was invalid for $scenarioId.',
+        );
       }
-      if (!deepRequests.any((entry) => entry.endsWith('/search_sections.json'))) {
+      if (!deepRequests.any(
+        (entry) => entry.endsWith('/search_sections.json'),
+      )) {
         throw StateError(
           'Expected deep query to load section metadata for $scenarioId.',
         );
@@ -1534,8 +1607,8 @@ void _prepareOfflinePubCache(Directory pubCacheDir) {
 }
 
 String _resolveHomeDirPath() {
-  final homeDirPath = Platform.environment['HOME'] ??
-      Platform.environment['USERPROFILE'];
+  final homeDirPath =
+      Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
   if (homeDirPath == null || homeDirPath.isEmpty) {
     throw StateError('Unable to determine the user home directory.');
   }
@@ -1601,16 +1674,20 @@ Rebuild them with "dart tool/task.dart build" and check the results in.
   }
 
   // Verify that the web frontend has been compiled.
-  final currentSig =
-      await _calcFilesSig(Directory('web'), extensions: {'.dart', '.scss'});
-  final lastCompileSig =
-      File(path.join('web', 'sig.txt')).readAsStringSync().trim();
+  final currentSig = await _calcFilesSig(
+    Directory('web'),
+    extensions: {'.dart', '.scss'},
+  );
+  final lastCompileSig = File(
+    path.join('web', 'sig.txt'),
+  ).readAsStringSync().trim();
   if (currentSig != lastCompileSig) {
     print('current files: $currentSig');
     print('cached sig   : $lastCompileSig');
     throw StateError(
-        'The web frontend (web/docs.dart) needs to be recompiled; rebuild it '
-        'with "dart tool/task.dart build web".');
+      'The web frontend (web/docs.dart) needs to be recompiled; rebuild it '
+      'with "dart tool/task.dart build web".',
+    );
   }
 
   // Reset some files for `try-publish` step. This check looks for changes in
@@ -1641,8 +1718,10 @@ Future<void> validateDartdocDocs() async {
     _dartdocDocsPath,
     '--no-link-to-remote',
   ]);
-  _expectFileContains(path.join(_dartdocDocsPath, 'index.html'),
-      '<title>dartdoc_vitepress - Dart API docs</title>');
+  _expectFileContains(
+    path.join(_dartdocDocsPath, 'index.html'),
+    '<title>dartdoc_vitepress - Dart API docs</title>',
+  );
   var objectText = RegExp('<li>Object</li>', multiLine: true);
   _expectFileContains(
     path.join(_dartdocDocsPath, 'dartdoc', 'PubPackageMeta-class.html'),
@@ -1661,8 +1740,9 @@ void _expectFileContains(String filePath, Pattern text) {
   }
 }
 
-final String _dartdocDocsPath =
-    Directory.systemTemp.createTempSync('dartdoc').path;
+final String _dartdocDocsPath = Directory.systemTemp
+    .createTempSync('dartdoc')
+    .path;
 
 Future<void> validateFormat() async {
   var processResult = Process.runSync(Platform.resolvedExecutable, [
@@ -1698,35 +1778,44 @@ Future<void> validateSdkDocs() async {
   var foundLibCount = _findCount(indexContents, '  <li><a href="dart-');
   if (expectedLibCount != foundLibCount) {
     throw StateError(
-        "Expected $expectedLibCount 'dart:' entries in 'index.html', but "
-        'found $foundLibCount');
+      "Expected $expectedLibCount 'dart:' entries in 'index.html', but "
+      'found $foundLibCount',
+    );
   }
   print("Found $foundLibCount 'dart:' entries in 'index.html'");
 
-  var libLinkPattern =
-      RegExp('<li class="section-subitem"><a [^>]*href="dart-');
+  var libLinkPattern = RegExp(
+    '<li class="section-subitem"><a [^>]*href="dart-',
+  );
   var foundSubLibCount = _findCount(indexContents, libLinkPattern);
   if (expectedSubLibCount != foundSubLibCount) {
-    throw StateError("Expected $expectedSubLibCount 'dart:' entries in "
-        "'index.html' to be in categories, but found $foundSubLibCount");
+    throw StateError(
+      "Expected $expectedSubLibCount 'dart:' entries in "
+      "'index.html' to be in categories, but found $foundSubLibCount",
+    );
   }
   print('$foundSubLibCount index.html dart: entries in categories found');
 
   // Check for the existence of certain files and directories.
-  var libraries =
-      _sdkDocsDir.listSync().where((fs) => fs.path.contains('dart-'));
+  var libraries = _sdkDocsDir.listSync().where(
+    (fs) => fs.path.contains('dart-'),
+  );
   var libraryCount = libraries.length;
   if (expectedTotalCount != libraryCount) {
-    var libraryNames =
-        libraries.map((l) => "'${path.basename(l.path)}'").join(', ');
-    throw StateError('Unexpected docs generated for SDK libraries; expected '
-        '$expectedTotalCount directories, but $libraryCount directories were '
-        'generated: $libraryNames');
+    var libraryNames = libraries
+        .map((l) => "'${path.basename(l.path)}'")
+        .join(', ');
+    throw StateError(
+      'Unexpected docs generated for SDK libraries; expected '
+      '$expectedTotalCount directories, but $libraryCount directories were '
+      'generated: $libraryNames',
+    );
   }
   print("Found $libraryCount 'dart:' libraries");
 
-  var futureConstructorFile =
-      File(path.join(_sdkDocsDir.path, 'dart-async', 'Future', 'Future.html'));
+  var futureConstructorFile = File(
+    path.join(_sdkDocsDir.path, 'dart-async', 'Future', 'Future.html'),
+  );
   if (!futureConstructorFile.existsSync()) {
     throw StateError('No Future.html found for dart:async Future constructor');
   }
@@ -1734,8 +1823,9 @@ Future<void> validateSdkDocs() async {
 }
 
 /// A temporary directory into which the SDK can be documented.
-final Directory _sdkDocsDir =
-    Directory.systemTemp.createTempSync('sdkdocs').absolute;
+final Directory _sdkDocsDir = Directory.systemTemp
+    .createTempSync('sdkdocs')
+    .absolute;
 
 /// Returns the number of (perhaps overlapping) occurrences of [str] in [match].
 int _findCount(String str, Pattern match) {
@@ -1748,12 +1838,14 @@ int _findCount(String str, Pattern match) {
   return count;
 }
 
-Future<String> _calcFilesSig(Directory dir,
-    {required Set<String> extensions}) async {
-  final digest = await _fileLines(dir, extensions: extensions)
-      .transform(utf8.encoder)
-      .transform(crypto.md5)
-      .single;
+Future<String> _calcFilesSig(
+  Directory dir, {
+  required Set<String> extensions,
+}) async {
+  final digest = await _fileLines(
+    dir,
+    extensions: extensions,
+  ).transform(utf8.encoder).transform(crypto.md5).single;
 
   return digest.bytes
       .map((byte) => byte.toRadixString(16).padLeft(2, '0').toUpperCase())

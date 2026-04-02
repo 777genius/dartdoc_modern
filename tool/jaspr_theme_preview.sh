@@ -19,7 +19,6 @@ REUSE_BUILD="${REUSE_BUILD:-0}"
 
 DART_BIN="/Users/belief/dev/flutter/bin/cache/dart-sdk/bin/dart"
 DART_DIR="/Users/belief/dev/flutter/bin/cache/dart-sdk/bin"
-JASPR_BIN="/Users/belief/.pub-cache/bin/jaspr"
 
 normalize_base_path() {
   local value="$1"
@@ -228,7 +227,7 @@ else
   (
     cd "$OUTPUT_DIR"
     export PATH="$DART_DIR:$PATH"
-    PUB_CACHE="$PUB_CACHE_DIR" "$JASPR_BIN" build \
+    PUB_CACHE="$PUB_CACHE_DIR" "$DART_BIN" run jaspr_cli:jaspr build \
       --dart-define "DOCS_THEME=$THEME" \
       --dart-define "DOCS_BASE_PATH=$BASE_PATH"
   )
