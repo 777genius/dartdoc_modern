@@ -1854,7 +1854,6 @@ class ApiDocsLayout extends DocsLayout {
     ),
     css('.content table', [
       css('&').styles(
-        width: 100.percent,
         margin: Margin.only(top: 1.35.rem, bottom: 1.75.rem),
         border: Border.all(
           width: 1.px,
@@ -1865,9 +1864,12 @@ class ApiDocsLayout extends DocsLayout {
         raw: {
           'border-collapse': 'separate',
           'border-spacing': '0',
-          'overflow': 'hidden',
-          'display': 'table',
+          'overflow-x': 'auto',
+          'overflow-y': 'hidden',
+          'display': 'block',
+          'width': 'max-content',
           'min-width': '100%',
+          'max-width': '100%',
         },
       ),
       css('thead th').styles(
@@ -1892,11 +1894,11 @@ class ApiDocsLayout extends DocsLayout {
           ),
         ),
         fontSize: 0.96.rem,
-        raw: {'vertical-align': 'top', 'overflow-wrap': 'break-word'},
+        raw: {'vertical-align': 'top'},
       ),
-      css(
-        'thead th:first-child, tbody td:first-child',
-      ).styles(raw: {'width': '44%', 'min-width': '16rem'}),
+      css('thead th:first-child, tbody td:first-child').styles(
+        raw: {'width': '1%', 'min-width': '20rem', 'white-space': 'nowrap'},
+      ),
       css('tbody tr:last-child td').styles(border: Border.unset),
       css(
         'tbody tr:hover td',
@@ -1904,21 +1906,16 @@ class ApiDocsLayout extends DocsLayout {
       css('th:first-child, td:first-child').styles(fontWeight: FontWeight.w600),
       css(
         'tbody td:first-child, tbody td:first-child a',
-      ).styles(raw: {'word-break': 'normal'}),
-      css(
-        'tbody td:last-child',
-      ).styles(color: Color('var(--docs-shell-muted)')),
+      ).styles(raw: {'white-space': 'nowrap', 'overflow-wrap': 'normal'}),
+      css('tbody td:last-child').styles(
+        color: Color('var(--docs-shell-muted)'),
+        raw: {'overflow-wrap': 'break-word'},
+      ),
       css('tbody td a').styles(fontWeight: FontWeight.w600),
       downMobile([
         css('&').styles(
           margin: Margin.only(top: 1.1.rem, bottom: 1.45.rem),
-          raw: {
-            'display': 'block',
-            'width': 'max-content',
-            'min-width': '34rem',
-            'overflow-x': 'auto',
-            'max-width': '100%',
-          },
+          raw: {'min-width': '34rem'},
         ),
         css('thead th').styles(
           padding: Padding.symmetric(vertical: 0.75.rem, horizontal: 0.82.rem),
@@ -1928,7 +1925,7 @@ class ApiDocsLayout extends DocsLayout {
         ),
         css(
           'thead th:first-child, tbody td:first-child',
-        ).styles(raw: {'width': '18rem', 'min-width': '18rem'}),
+        ).styles(raw: {'width': '1%', 'min-width': '18rem'}),
       ]),
     ]),
     css('.content pre').styles(
