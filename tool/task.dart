@@ -97,6 +97,15 @@ final class _JasprPreviewWorkspace {
   }
 }
 
+String get _pathListSeparator => Platform.isWindows ? ';' : ':';
+
+String _prependPathEntry(String entry, String? existingPath) => [
+      entry,
+      if (existingPath != null && existingPath.isNotEmpty) existingPath,
+    ].join(_pathListSeparator);
+
+String _bashPath(List<String> segments) => path.posix.joinAll(segments);
+
 Future<void> runAnalyze(ArgResults commandResults) async {
   for (var target in commandResults.rest) {
     await switch (target) {
@@ -552,7 +561,7 @@ Map<String, String> createThrowawayPubCache() {
     'PATH',
   ], [
     pubCache.path,
-    [pubCacheBin.path, Platform.environment['PATH']].join(':'),
+    _prependPathEntry(pubCacheBin.path, Platform.environment['PATH']),
   ]);
 }
 
@@ -995,19 +1004,19 @@ Future<void> _validateJasprThemePrerequisites() async {
 
   await SubprocessLauncher('theme-preview-script').runStreamed(
     'bash',
-    ['-n', path.join('tool', 'jaspr_theme_preview.sh')],
+    ['-n', _bashPath(['tool', 'jaspr_theme_preview.sh'])],
   );
   await SubprocessLauncher('theme-snapshot-script').runStreamed(
     'bash',
-    ['-n', path.join('tool', 'jaspr_theme_snapshot.sh')],
+    ['-n', _bashPath(['tool', 'jaspr_theme_snapshot.sh'])],
   );
   await SubprocessLauncher('search-profile-script').runStreamed(
     'bash',
-    ['-n', path.join('tool', 'jaspr_search_profile.sh')],
+    ['-n', _bashPath(['tool', 'jaspr_search_profile.sh'])],
   );
   await SubprocessLauncher('route-smoke-script').runStreamed(
     'bash',
-    ['-n', path.join('tool', 'jaspr_route_smoke.sh')],
+    ['-n', _bashPath(['tool', 'jaspr_route_smoke.sh'])],
   );
 }
 
@@ -1033,13 +1042,11 @@ Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
       outputDir.path,
     ], workingDirectory: path.join('testing', 'test_package_with_docs'));
 
-    await SubprocessLauncher('$labelPrefix-pub-get').runStreamedDartCommand([
-      'pub',
-      'get',
-      '--offline',
-    ], workingDirectory: outputDir.path, environment: {
-      'PUB_CACHE': pubCacheDir.path,
-    });
+    await _runPubGetWithOfflineFallback(
+      labelPrefix: labelPrefix,
+      workingDirectory: outputDir.path,
+      pubCachePath: pubCacheDir.path,
+    );
 
     await SubprocessLauncher('$labelPrefix-analyze').runStreamedDartCommand([
       'analyze',
@@ -1061,7 +1068,7 @@ Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
       workingDirectory: outputDir.path,
       environment: {
         'PUB_CACHE': pubCacheDir.path,
-        'PATH': '$jasprBinDir:${Platform.environment['PATH'] ?? ''}',
+        'PATH': _prependPathEntry(jasprBinDir, Platform.environment['PATH']),
       },
     );
 
@@ -1079,6 +1086,29 @@ Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
       pubCacheDir.deleteSync(recursive: true);
     }
     rethrow;
+  }
+}
+
+Future<void> _runPubGetWithOfflineFallback({
+  required String labelPrefix,
+  required String workingDirectory,
+  required String pubCachePath,
+}) async {
+  final launcher = SubprocessLauncher('$labelPrefix-pub-get');
+  final environment = {'PUB_CACHE': pubCachePath};
+
+  try {
+    await launcher.runStreamedDartCommand(
+      ['pub', 'get', '--offline'],
+      workingDirectory: workingDirectory,
+      environment: environment,
+    );
+  } on SubprocessException {
+    await launcher.runStreamedDartCommand(
+      ['pub', 'get'],
+      workingDirectory: workingDirectory,
+      environment: environment,
+    );
   }
 }
 
@@ -1106,7 +1136,7 @@ Future<void> validateJasprThemeVisual() async {
   try {
     await SubprocessLauncher('theme-snapshot-run').runStreamed(
       'bash',
-      [path.join('tool', 'jaspr_theme_snapshot.sh')],
+      [_bashPath(['tool', 'jaspr_theme_snapshot.sh'])],
       environment: {
         'PLAYWRIGHT_DIR': playwrightDir,
         'OUTPUT_DIR': outputDir.path,
@@ -1181,7 +1211,7 @@ Future<void> validateJasprThemeGolden() async {
   final playwrightDir = _resolvePlaywrightDirPath();
   await SubprocessLauncher('theme-golden-script').runStreamed(
     'bash',
-    [path.join('tool', 'jaspr_theme_golden.sh'), 'verify'],
+    [_bashPath(['tool', 'jaspr_theme_golden.sh']), 'verify'],
     environment: {
       'PLAYWRIGHT_DIR': playwrightDir,
     },
@@ -1201,7 +1231,7 @@ Future<void> validateJasprRouteSmoke({
     final reportFile = path.join(outputDir.path, 'report.json');
     await SubprocessLauncher('route-smoke-run').runStreamed(
       'bash',
-      [path.join('tool', 'jaspr_route_smoke.sh')],
+      [_bashPath(['tool', 'jaspr_route_smoke.sh'])],
       environment: {
         'PLAYWRIGHT_DIR': playwrightDir,
         'OUTPUT_DIR': outputDir.path,
