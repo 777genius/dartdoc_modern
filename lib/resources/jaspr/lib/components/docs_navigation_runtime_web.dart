@@ -68,6 +68,7 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
     }).toJS;
     web.document.addEventListener('click', _clickListener);
     _normalizeDocumentAnchors();
+    _syncHeaderNavActive();
 
     _popStateListener = ((web.Event _) {
       unawaited(
@@ -201,6 +202,7 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
       }
 
       _closeSidebar();
+      _syncHeaderNavActive();
       _notifyNavigation();
       _syncScroll(targetUri, restoreScroll: restoreScroll);
     } catch (_) {
@@ -249,6 +251,63 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
 
   void _notifyNavigation() {
     web.window.dispatchEvent(web.CustomEvent('docs:navigation'));
+  }
+
+  void _syncHeaderNavActive() {
+    final currentRoute = _normalizeRoute(web.window.location.pathname);
+    final navLinks = web.document.querySelectorAll(
+      '.header-nav a[data-docs-header-nav-link]',
+    );
+
+    for (var index = 0; index < navLinks.length; index++) {
+      final node = navLinks.item(index);
+      if (node is! web.HTMLAnchorElement) continue;
+
+      final href = node.getAttribute('href') ?? node.href;
+      final hrefRoute = _normalizeRoute(href);
+      final primaryPrefix = node.getAttribute('data-docs-match-prefix');
+      final extraPrefixes =
+          node
+              .getAttribute('data-docs-match-prefixes')
+              ?.split('|')
+              .where((value) => value.trim().isNotEmpty)
+              .toList() ??
+          const <String>[];
+
+      final isActive =
+          hrefRoute == currentRoute ||
+          (primaryPrefix != null &&
+              _matchesSectionPath(
+                currentRoute,
+                _normalizeRoute(primaryPrefix),
+              )) ||
+          extraPrefixes.any(
+            (prefix) =>
+                _matchesSectionPath(currentRoute, _normalizeRoute(prefix)),
+          );
+
+      node.classList.toggle('active', isActive);
+      if (isActive) {
+        node.setAttribute('aria-current', 'page');
+      } else {
+        node.removeAttribute('aria-current');
+      }
+    }
+  }
+
+  String _normalizeRoute(String route) {
+    final withoutFragment = route.split('#').first.split('?').first;
+    final normalizedPath = stripDocsBasePath(withoutFragment);
+    if (normalizedPath.length > 1 && normalizedPath.endsWith('/')) {
+      return normalizedPath.substring(0, normalizedPath.length - 1);
+    }
+    return normalizedPath.isEmpty ? '/' : normalizedPath;
+  }
+
+  bool _matchesSectionPath(String route, String prefix) {
+    if (route == prefix) return true;
+    if (prefix == '/') return route == '/';
+    return route.startsWith('$prefix/');
   }
 
   void _syncSidebarToggle() {

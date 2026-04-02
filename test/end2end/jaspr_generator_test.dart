@@ -590,6 +590,11 @@ void main() {
           header,
           contains('final List<String>? additionalMatchPrefixes;'),
         );
+        expect(header, contains("'data-docs-header-nav-link': 'true'"));
+        expect(
+          header,
+          contains("'data-docs-match-prefixes': prefixes.join('|')"),
+        );
         expect(
           themeToggle,
           contains('class DocsThemeToggle extends StatefulComponent'),
@@ -707,6 +712,19 @@ void main() {
         expect(
           navigationRuntime,
           contains("export 'docs_navigation_runtime_stub.dart'"),
+        );
+        expect(navigationRuntimeWeb, contains('_syncHeaderNavActive();'));
+        expect(
+          navigationRuntimeWeb,
+          contains(".header-nav a[data-docs-header-nav-link]"),
+        );
+        expect(
+          navigationRuntimeWeb,
+          contains("node.classList.toggle('active', isActive)"),
+        );
+        expect(
+          navigationRuntimeWeb,
+          contains("node.setAttribute('aria-current', 'page')"),
         );
         expect(
           disclosureRuntime,

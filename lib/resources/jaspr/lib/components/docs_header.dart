@@ -50,6 +50,14 @@ class DocsHeader extends StatelessComponent {
                   classes: _isNavActive(item, activeRoute)
                       ? 'header-nav-link active'
                       : 'header-nav-link',
+                  attributes: {
+                    'data-docs-header-nav-link': 'true',
+                    if (item.matchPrefix case final prefix?)
+                      'data-docs-match-prefix': prefix,
+                    if (item.additionalMatchPrefixes case final prefixes?
+                        when prefixes.isNotEmpty)
+                      'data-docs-match-prefixes': prefixes.join('|'),
+                  },
                   children: [Component.text(item.text)],
                 ),
             ]),
