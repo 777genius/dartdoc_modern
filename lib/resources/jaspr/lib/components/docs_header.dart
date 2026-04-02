@@ -170,22 +170,31 @@ class DocsHeader extends StatelessComponent {
         display: Display.inlineFlex,
         alignItems: AlignItems.center,
         justifyContent: JustifyContent.center,
-        padding: Padding.symmetric(vertical: 0.42.rem, horizontal: 0.72.rem),
-        radius: BorderRadius.circular(0.8.rem),
+        width: 2.6.rem,
+        height: 2.6.rem,
+        padding: Padding.zero,
+        radius: BorderRadius.circular(999.px),
         border: Border.all(
           width: 1.px,
           color: Color('var(--docs-shell-border)'),
         ),
         color: ContentColors.text,
-        fontWeight: FontWeight.w600,
         backgroundColor: Color('var(--docs-shell-surface-soft)'),
         transition: Transition(
           'color, background-color, border-color',
           duration: 150.ms,
           curve: Curve.easeInOut,
         ),
-        raw: {'white-space': 'nowrap'},
       ),
+      css('.header-repo-link-icon').styles(
+        display: Display.inlineFlex,
+        alignItems: AlignItems.center,
+        justifyContent: JustifyContent.center,
+        raw: {'line-height': '1'},
+      ),
+      css(
+        '.header-repo-link-icon svg',
+      ).styles(width: 1.25.rem, height: 1.25.rem),
       css('.header-repo-link:hover').styles(
         color: Color('var(--docs-shell-accent)'),
         backgroundColor: Color('var(--docs-shell-accent-soft)'),
@@ -218,6 +227,7 @@ class DocsHeader extends StatelessComponent {
           '.header-title span',
         ).styles(fontSize: 0.95.rem, raw: {'max-width': '100%'}),
         css('.header-items').styles(gap: Gap.column(0.45.rem)),
+        css('.header-repo-link').styles(width: 2.45.rem, height: 2.45.rem),
         css('.header-nav').styles(display: Display.none),
       ]),
       downCompact([
@@ -240,6 +250,10 @@ class DocsHeader extends StatelessComponent {
         css(
           '.header-items',
         ).styles(gap: Gap.column(0.35.rem), raw: {'flex': '0 0 auto'}),
+        css('.header-repo-link').styles(width: 2.3.rem, height: 2.3.rem),
+        css(
+          '.header-repo-link-icon svg',
+        ).styles(width: 1.1.rem, height: 1.1.rem),
         css('.header-nav').styles(display: Display.none),
       ]),
     ]),

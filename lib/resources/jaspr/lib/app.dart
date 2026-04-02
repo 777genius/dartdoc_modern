@@ -83,7 +83,11 @@ Component buildDocsApp({
                   'aria-label': 'GitHub repository',
                 },
                 classes: 'header-repo-link',
-                children: [Component.text('GitHub')],
+                children: [
+                  span(classes: 'header-repo-link-icon', [
+                    RawText(_githubIcon),
+                  ]),
+                ],
               ),
           ],
         ),
@@ -102,6 +106,10 @@ Component buildDocsApp({
     theme: buildDocsTheme(config: DocsThemeConfig.preset(themePreset)),
   );
 }
+
+const _githubIcon = '''
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.09 3.29 9.41 7.86 10.94.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.69-3.88-1.54-3.88-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.71.08-.69.08-.69 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.97.1-.75.4-1.26.72-1.55-2.55-.29-5.24-1.27-5.24-5.68 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.14 1.17a10.9 10.9 0 0 1 5.72 0c2.18-1.48 3.14-1.17 3.14-1.17.62 1.57.23 2.73.11 3.02.74.8 1.18 1.82 1.18 3.07 0 4.42-2.69 5.39-5.26 5.67.41.35.78 1.04.78 2.1 0 1.52-.01 2.75-.01 3.12 0 .31.21.68.8.56A11.52 11.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"></path></svg>
+''';
 
 DocsSidebarGroup _mapGuideGroup(guide.SidebarGroup group) {
   return DocsSidebarGroup(
