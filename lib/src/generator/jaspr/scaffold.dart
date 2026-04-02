@@ -97,6 +97,36 @@ class JasprInitGenerator {
     );
     _writeTemplateIfAbsent(
       templateDir: templateDir,
+      templateFile: p.join(
+        'lib',
+        'components',
+        'docs_page_actions_runtime.dart',
+      ),
+      outputFile: 'lib/components/docs_page_actions_runtime.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join(
+        'lib',
+        'components',
+        'docs_page_actions_runtime_stub.dart',
+      ),
+      outputFile: 'lib/components/docs_page_actions_runtime_stub.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join(
+        'lib',
+        'components',
+        'docs_page_actions_runtime_web.dart',
+      ),
+      outputFile: 'lib/components/docs_page_actions_runtime_web.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
       templateFile: p.join('lib', 'components', 'docs_search.dart'),
       outputFile: 'lib/components/docs_search.dart',
       placeholders: placeholders,

@@ -6,6 +6,7 @@ import 'package:jaspr_content/theme.dart';
 import '../components/docs_dartpad_runtime.dart';
 import '../components/docs_header.dart';
 import '../components/docs_nav_link.dart';
+import '../components/docs_page_actions_runtime.dart';
 import '../theme/docs_responsive.dart';
 
 class ApiDocsLayout extends DocsLayout {
@@ -64,6 +65,7 @@ class ApiDocsLayout extends DocsLayout {
 
     return div(classes: 'docs', [
       const DocsDartPadRuntime(),
+      const DocsPageActionsRuntime(),
       if (headerComponent case final Component header)
         div(
           classes: 'header-container',
@@ -173,14 +175,27 @@ class ApiDocsLayout extends DocsLayout {
       div(classes: 'breadcrumb-trail', trail),
       if (sourceUrl != null)
         div(classes: 'breadcrumb-actions', [
+          button(
+            type: ButtonType.button,
+            classes: 'action-btn icon-action-btn action-btn-copy',
+            attributes: {
+              'data-docs-copy-link': 'true',
+              'aria-label': 'Copy page link',
+              'title': 'Copy page link',
+            },
+            [span(classes: 'action-btn-icon action-btn-icon-copy', const [])],
+          ),
           DocsNavLink(
             to: sourceUrl,
             target: Target.blank,
-            attributes: {'rel': 'noopener'},
-            classes: 'action-btn',
+            attributes: {
+              'rel': 'noopener',
+              'aria-label': 'Open source',
+              'title': 'Open source',
+            },
+            classes: 'action-btn icon-action-btn action-btn-source',
             children: [
-              span(classes: 'action-btn-icon', [Component.text('</>')]),
-              span(classes: 'action-btn-label', [Component.text('Source')]),
+              span(classes: 'action-btn-icon action-btn-icon-source', const []),
             ],
           ),
         ]),
@@ -336,9 +351,11 @@ class ApiDocsLayout extends DocsLayout {
       ).styles(opacity: 0.6, margin: Margin.symmetric(horizontal: 0.5.rem)),
       css('.breadcrumb-category').styles(opacity: 0.85),
       css('.breadcrumb-current').styles(fontWeight: FontWeight.w600),
-      css(
-        '.breadcrumb-actions',
-      ).styles(display: Display.flex, alignItems: AlignItems.center),
+      css('.breadcrumb-actions').styles(
+        display: Display.flex,
+        alignItems: AlignItems.center,
+        gap: Gap.column(0.55.rem),
+      ),
       css('.action-btn').styles(
         display: Display.inlineFlex,
         alignItems: AlignItems.center,
@@ -365,6 +382,12 @@ class ApiDocsLayout extends DocsLayout {
         ),
         raw: {'line-height': '1'},
       ),
+      css('.icon-action-btn').styles(
+        justifyContent: JustifyContent.center,
+        width: 3.1.rem,
+        height: 3.1.rem,
+        padding: Padding.zero,
+      ),
       css('.action-btn:hover').styles(
         backgroundColor: Color('var(--docs-shell-accent-soft)'),
         border: Border.all(
@@ -372,6 +395,13 @@ class ApiDocsLayout extends DocsLayout {
           color: Color('var(--docs-shell-border-strong)'),
         ),
         raw: {'transform': 'translateY(-1px)'},
+      ),
+      css('.action-btn-copy[data-copy-state="copied"]').styles(
+        backgroundColor: Color('var(--docs-shell-accent-soft)'),
+        border: Border.all(
+          width: 1.px,
+          color: Color('var(--docs-shell-border-strong)'),
+        ),
       ),
       css('.action-btn-icon').styles(
         display: Display.inlineFlex,
@@ -390,7 +420,44 @@ class ApiDocsLayout extends DocsLayout {
         ),
         raw: {'letter-spacing': '-0.04em'},
       ),
+      css('.action-btn-icon-copy').styles(
+        position: Position.relative(),
+        backgroundColor: Color('transparent'),
+        border: Border.unset,
+      ),
+      css('.action-btn-icon-copy::before, .action-btn-icon-copy::after').styles(
+        position: Position.absolute(),
+        width: 0.82.rem,
+        height: 0.82.rem,
+        radius: BorderRadius.circular(0.18.rem),
+        border: Border.all(width: 2.px, color: Color('currentColor')),
+        backgroundColor: Color('transparent'),
+        raw: {'content': '""', 'box-sizing': 'border-box'},
+      ),
+      css(
+        '.action-btn-icon-copy::before',
+      ).styles(raw: {'transform': 'translate(-0.16rem, -0.16rem)'}),
+      css(
+        '.action-btn-icon-copy::after',
+      ).styles(raw: {'transform': 'translate(0.12rem, 0.12rem)'}),
+      css('.action-btn-icon-source').styles(
+        backgroundColor: Color('transparent'),
+        border: Border.unset,
+        raw: {'font-family': 'var(--content-code-font)'},
+      ),
+      css('.action-btn-icon-source::before').styles(
+        color: Color('currentColor'),
+        fontWeight: FontWeight.w800,
+        raw: {
+          'content': '"<>"',
+          'font-size': '1rem',
+          'letter-spacing': '-0.08em',
+        },
+      ),
       css('.action-btn-label').styles(fontWeight: FontWeight.w700),
+      downCompact([
+        css('.icon-action-btn').styles(width: 2.85.rem, height: 2.85.rem),
+      ]),
     ]),
     css('.header-search-shell', [
       css('&').styles(

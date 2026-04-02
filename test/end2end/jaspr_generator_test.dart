@@ -442,6 +442,18 @@ void main() {
         final content = _readOutput(outDir, 'lib/layouts/api_docs_layout.dart');
         final header = _readOutput(outDir, 'lib/components/docs_header.dart');
         final search = _readOutput(outDir, 'lib/components/docs_search.dart');
+        final pageActionsRuntime = _readOutput(
+          outDir,
+          'lib/components/docs_page_actions_runtime.dart',
+        );
+        final pageActionsRuntimeStub = _readOutput(
+          outDir,
+          'lib/components/docs_page_actions_runtime_stub.dart',
+        );
+        final pageActionsRuntimeWeb = _readOutput(
+          outDir,
+          'lib/components/docs_page_actions_runtime_web.dart',
+        );
         final navigationRuntime = _readOutput(
           outDir,
           'lib/components/docs_navigation_runtime.dart',
@@ -607,6 +619,45 @@ void main() {
           contains("import 'extensions/base_path_link_extension.dart';"),
         );
         expect(app, contains('const BasePathLinkExtension()'));
+        expect(
+          content,
+          contains("import '../components/docs_page_actions_runtime.dart';"),
+        );
+        expect(content, contains('const DocsPageActionsRuntime()'));
+        expect(content, contains("'data-docs-copy-link': 'true'"));
+        expect(
+          content,
+          contains("classes: 'action-btn icon-action-btn action-btn-copy'"),
+        );
+        expect(
+          content,
+          contains("classes: 'action-btn icon-action-btn action-btn-source'"),
+        );
+        expect(
+          pageActionsRuntime,
+          contains("export 'docs_page_actions_runtime_stub.dart'"),
+        );
+        expect(
+          pageActionsRuntimeStub,
+          contains('class DocsPageActionsRuntime extends StatelessComponent'),
+        );
+        expect(
+          pageActionsRuntimeStub,
+          contains("'data-docs-page-actions-runtime': ''"),
+        );
+        expect(
+          pageActionsRuntimeWeb,
+          contains('class DocsPageActionsRuntime extends StatefulComponent'),
+        );
+        expect(pageActionsRuntimeWeb, contains('navigator.clipboard'));
+        expect(
+          pageActionsRuntimeWeb,
+          contains("target.closest('[data-docs-copy-link]')"),
+        );
+        expect(
+          pageActionsRuntimeWeb,
+          contains("button.dataset['copyState'] = 'copied'"),
+        );
         expect(
           navigationRuntime,
           contains("export 'docs_navigation_runtime_stub.dart'"),
