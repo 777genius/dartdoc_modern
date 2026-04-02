@@ -670,7 +670,7 @@ void main() {
         expect(
           navigationRuntimeWeb,
           contains(
-            "if (!updateHistory) {\n      web.window.location.replace(targetUri.toString());",
+            'if (!updateHistory) {\n      web.window.location.replace(targetUri.toString());',
           ),
         );
         expect(
@@ -682,7 +682,7 @@ void main() {
         expect(
           navigationRuntimeWeb,
           contains(
-            "web.window.dispatchEvent(web.CustomEvent(_sidebarSyncEvent))",
+            'web.window.dispatchEvent(web.CustomEvent(_sidebarSyncEvent))',
           ),
         );
         expect(
@@ -725,13 +725,13 @@ void main() {
         );
         expect(
           sidebarToggleWeb,
-          contains("addEventListener(_sidebarSyncEvent"),
+          contains('addEventListener(_sidebarSyncEvent'),
         );
         expect(sidebarToggleWeb, contains('void _syncFromDom() {'));
         expect(
           sidebarToggleWeb,
           contains(
-            "web.window.dispatchEvent(web.CustomEvent(_sidebarSyncEvent))",
+            'web.window.dispatchEvent(web.CustomEvent(_sidebarSyncEvent))',
           ),
         );
         expect(sidebarToggleWeb, contains("sidebar.classList.add('open')"));
@@ -807,6 +807,12 @@ void main() {
             "if (page.data['toc'] case final TableOfContents toc\n                when _hasVisibleTocEntries(toc.entries))",
           ),
         );
+        expect(
+          content,
+          contains("final isApiPage = pagePath.startsWith('api/');"),
+        );
+        expect(content, contains('final hasContentHeader ='));
+        expect(content, contains('!isApiPage &&'));
         expect(
           content,
           contains('bool _hasVisibleTocEntries(Iterable<TocEntry> entries)'),
@@ -983,7 +989,7 @@ void main() {
           'lib/extensions/base_path_link_extension.dart',
         );
         expect(content, contains("import '../docs_base.dart';"));
-        expect(content, contains("return withDocsBasePath(href);"));
+        expect(content, contains('return withDocsBasePath(href);'));
         expect(content, contains("'data-docs-nav-link': 'true'"));
       });
 

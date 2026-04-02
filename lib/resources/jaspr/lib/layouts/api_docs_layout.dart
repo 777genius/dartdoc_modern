@@ -29,6 +29,8 @@ class ApiDocsLayout extends DocsLayout {
   @override
   Component buildBody(Page page, Component child) {
     final pageData = page.data.page;
+    final pagePath = page.path.replaceAll('\\', '/');
+    final isApiPage = pagePath.startsWith('api/');
     final headerComponent = switch (this.header) {
       DocsHeader(
         :final logo,
@@ -55,9 +57,10 @@ class ApiDocsLayout extends DocsLayout {
     final pageImage = pageData['image'] as String?;
     final pageImageAlt = pageData['imageAlt'] as String?;
     final hasContentHeader =
-        (pageTitle?.isNotEmpty ?? false) ||
-        (pageDescription?.isNotEmpty ?? false) ||
-        (pageImage?.isNotEmpty ?? false);
+        !isApiPage &&
+        ((pageTitle?.isNotEmpty ?? false) ||
+            (pageDescription?.isNotEmpty ?? false) ||
+            (pageImage?.isNotEmpty ?? false));
 
     return div(classes: 'docs', [
       const DocsDartPadRuntime(),
