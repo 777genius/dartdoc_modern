@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="/Users/belief/dev/projects/dartdoc-vitepress"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 MODE="${1:-verify}"
 PLAYWRIGHT_DIR="${PLAYWRIGHT_DIR:-/tmp/pw-run}"
 BASELINE_DIR="${BASELINE_DIR:-$ROOT/test/goldens/jaspr_theme}"

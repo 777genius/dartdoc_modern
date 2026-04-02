@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="/Users/belief/dev/projects/dartdoc-vitepress"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DOCS_RECIPE="${DOCS_RECIPE:-}"
 if [ "$DOCS_RECIPE" = "self-docs" ]; then
   TEST_PACKAGE_DIR="${TEST_PACKAGE_DIR:-$ROOT}"
@@ -17,8 +17,9 @@ THEME="${THEME:-ocean}"
 BASE_PATH="${BASE_PATH:-}"
 REUSE_BUILD="${REUSE_BUILD:-0}"
 
-DART_BIN="/Users/belief/dev/flutter/bin/cache/dart-sdk/bin/dart"
-DART_DIR="/Users/belief/dev/flutter/bin/cache/dart-sdk/bin"
+DART_BIN="${DART_BIN:-$(command -v dart)}"
+DART_DIR="${DART_DIR:-$(dirname "$DART_BIN")}"
+SOURCE_PUB_CACHE_DIR="${SOURCE_PUB_CACHE_DIR:-${HOME:-}/.pub-cache}"
 
 normalize_base_path() {
   local value="$1"
@@ -154,16 +155,16 @@ resolve_preview_path() {
 prepare_pub_cache() {
   mkdir -p "$PUB_CACHE_DIR"
 
-  if [ ! -e "$PUB_CACHE_DIR/hosted" ]; then
-    ln -s /Users/belief/.pub-cache/hosted "$PUB_CACHE_DIR/hosted"
+  if [ -d "$SOURCE_PUB_CACHE_DIR/hosted" ] && [ ! -e "$PUB_CACHE_DIR/hosted" ]; then
+    ln -s "$SOURCE_PUB_CACHE_DIR/hosted" "$PUB_CACHE_DIR/hosted"
   fi
 
-  if [ -d /Users/belief/.pub-cache/git ] && [ ! -e "$PUB_CACHE_DIR/git" ]; then
-    ln -s /Users/belief/.pub-cache/git "$PUB_CACHE_DIR/git"
+  if [ -d "$SOURCE_PUB_CACHE_DIR/git" ] && [ ! -e "$PUB_CACHE_DIR/git" ]; then
+    ln -s "$SOURCE_PUB_CACHE_DIR/git" "$PUB_CACHE_DIR/git"
   fi
 
-  if [ -d /Users/belief/.pub-cache/hosted-hashes ] && [ ! -e "$PUB_CACHE_DIR/hosted-hashes" ]; then
-    ln -s /Users/belief/.pub-cache/hosted-hashes "$PUB_CACHE_DIR/hosted-hashes"
+  if [ -d "$SOURCE_PUB_CACHE_DIR/hosted-hashes" ] && [ ! -e "$PUB_CACHE_DIR/hosted-hashes" ]; then
+    ln -s "$SOURCE_PUB_CACHE_DIR/hosted-hashes" "$PUB_CACHE_DIR/hosted-hashes"
   fi
 }
 

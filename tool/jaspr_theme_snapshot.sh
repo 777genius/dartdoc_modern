@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="/Users/belief/dev/projects/dartdoc-vitepress"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PLAYWRIGHT_DIR="${PLAYWRIGHT_DIR:-/tmp/pw-run}"
 OUTPUT_DIR="${OUTPUT_DIR:-/tmp/jaspr-theme-shots}"
 WAIT_MS="${WAIT_MS:-1500}"

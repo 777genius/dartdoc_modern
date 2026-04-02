@@ -1315,6 +1315,7 @@ void main() {
       );
 
       test('generated Jaspr scaffold passes pub get, analyze, and build', () {
+        final repoRoot = Directory.current.path;
         _runPubGetForScaffold(outDir.path);
         _runDartTool([
           'run',
@@ -1325,9 +1326,9 @@ void main() {
         _runDartTool(['analyze'], outDir.path);
         _runDartTool([
           'run',
-          '/Users/belief/dev/projects/dartdoc-vitepress/tool/jaspr_scaffold_smoke.dart',
+          p.join(repoRoot, 'tool', 'jaspr_scaffold_smoke.dart'),
           outDir.path,
-        ], '/Users/belief/dev/projects/dartdoc-vitepress');
+        ], repoRoot);
       });
     });
 
