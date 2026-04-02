@@ -33,9 +33,9 @@ List<StyleRule> docsResponsiveRootStyles() => [
           '--docs-shell-header-inline-pad': '1.5rem',
           '--docs-shell-gutter': '1.5rem',
           '--docs-shell-main-max-width':
-              'min(97rem, calc(100vw - calc(var(--docs-shell-gutter) * 2)))',
-          '--docs-shell-grid-gap': '2.25rem',
-          '--docs-shell-toc-width': '19rem',
+              'min(101rem, calc(100vw - calc(var(--docs-shell-gutter) * 2)))',
+          '--docs-shell-grid-gap': '2rem',
+          '--docs-shell-toc-width': '13.5rem',
           '--docs-shell-sidebar-width': '19rem',
           '--docs-shell-drawer-width': '20.5rem',
           '--docs-shell-main-pad-top': '2.15rem',
@@ -58,8 +58,8 @@ List<StyleRule> docsResponsiveRootStyles() => [
           raw: {
             '--docs-shell-gutter': '1rem',
             '--docs-shell-main-max-width': 'calc(100vw - 2rem)',
-            '--docs-shell-grid-gap': '1.5rem',
-            '--docs-shell-toc-width': '17rem',
+            '--docs-shell-grid-gap': '1.25rem',
+            '--docs-shell-toc-width': '12.5rem',
             '--docs-shell-sidebar-width': '17rem',
           },
         ),

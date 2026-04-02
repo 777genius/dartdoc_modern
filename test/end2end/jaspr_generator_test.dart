@@ -959,6 +959,16 @@ void main() {
         expect(content, contains("'data-toc-link': entry.id"));
         expect(content, contains("classes: 'toc-indicator'"));
         expect(content, contains("classes: 'toc-link'"));
+        expect(
+          content,
+          contains("'border-left': '1px solid var(--docs-shell-border)'"),
+        );
+        expect(
+          content,
+          contains(
+            "'box-shadow': '0 0 0 1px color-mix(in srgb, var(--docs-shell-accent) 18%, transparent)'",
+          ),
+        );
         expect(content, isNot(contains("'table-layout': 'fixed'")));
         expect(
           content,
@@ -1035,6 +1045,8 @@ void main() {
           expect(responsive, contains("'--docs-shell-grid-gap'"));
           expect(responsive, contains("'--docs-shell-sidebar-width'"));
           expect(responsive, contains("'--docs-shell-toc-width'"));
+          expect(responsive, contains("'13.5rem'"));
+          expect(responsive, contains("'12.5rem'"));
           expect(responsive, contains("'--docs-shell-search-panel-width'"));
           expect(responsive, contains("'--docs-shell-drawer-width'"));
 

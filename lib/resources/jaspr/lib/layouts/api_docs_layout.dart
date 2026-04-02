@@ -1590,7 +1590,7 @@ class ApiDocsLayout extends DocsLayout {
     ]),
     css('.content-container', [
       css('&').styles(
-        padding: Padding.only(top: 1.55.rem, right: 0.25.rem, bottom: 3.rem),
+        padding: Padding.only(top: 1.55.rem, right: Unit.zero, bottom: 3.rem),
         minWidth: Unit.zero,
       ),
       css(
@@ -1744,7 +1744,7 @@ class ApiDocsLayout extends DocsLayout {
         '.docs .main-container main > div &',
       ).styles(raw: {'width': 'var(--docs-shell-toc-width)'}),
       css('&').styles(
-        padding: Padding.only(top: Unit.zero, bottom: 2.rem),
+        padding: Padding.only(top: 0.15.rem, right: Unit.zero, bottom: 2.rem),
       ),
       css('ul').styles(
         listStyle: ListStyle.none,
@@ -1756,43 +1756,27 @@ class ApiDocsLayout extends DocsLayout {
         position: Position.sticky(top: Unit.zero),
         maxHeight: 80.vh,
         overflow: Overflow.auto,
-        padding: Padding.only(
-          top: 0.95.rem,
-          right: 0.95.rem,
-          bottom: 0.95.rem,
-          left: 0.95.rem,
-        ),
-        radius: BorderRadius.circular(1.1.rem),
-        backgroundColor: Color('var(--docs-shell-surface-elevated)'),
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-border)'),
-        ),
-        shadow: BoxShadow(
-          offsetX: Unit.zero,
-          offsetY: 16.px,
-          blur: 24.px,
-          color: Color('var(--docs-shell-shadow)'),
-        ),
+        padding: Padding.only(left: 1.1.rem),
         raw: {
           'top': 'var(--docs-shell-sticky-top)',
           'overscroll-behavior': 'contain',
+          'border-left': '1px solid var(--docs-shell-border)',
+          'box-sizing': 'border-box',
         },
       ),
       css('.toc-indicator').styles(
         position: Position.absolute(),
-        radius: BorderRadius.circular(0.82.rem),
+        radius: BorderRadius.circular(999.px),
         opacity: 0,
         raw: {
-          'top': '0',
-          'left': '0',
-          'width': '0',
+          'top': '0.18rem',
+          'left': '-1px',
+          'width': '3px',
           'height': '0',
           'pointer-events': 'none',
           'z-index': '0',
-          'background': 'var(--docs-shell-accent-soft)',
-          'box-shadow':
-              'inset 3px 0 0 var(--docs-shell-accent), 0 12px 22px var(--docs-shell-shadow)',
+          'background': 'var(--docs-shell-accent)',
+          'box-shadow': '0 0 0 1px color-mix(in srgb, var(--docs-shell-accent) 18%, transparent)',
           'transform': 'translate3d(0, 0, 0)',
           'transition':
               'transform 180ms cubic-bezier(.22, 1, .36, 1), width 180ms cubic-bezier(.22, 1, .36, 1), height 180ms cubic-bezier(.22, 1, .36, 1), opacity 120ms ease',
@@ -1800,7 +1784,7 @@ class ApiDocsLayout extends DocsLayout {
         },
       ),
       css('h3').styles(
-        margin: Margin.only(bottom: 0.8.rem),
+        margin: Margin.only(bottom: 0.85.rem),
         fontSize: 0.8.rem,
         fontWeight: FontWeight.w800,
         textTransform: TextTransform.upperCase,
@@ -1809,39 +1793,39 @@ class ApiDocsLayout extends DocsLayout {
       ),
       css('.toc-link').styles(
         display: Display.block,
-        padding: Padding.symmetric(vertical: 0.42.rem, horizontal: 0.68.rem),
-        radius: BorderRadius.circular(0.75.rem),
+        padding: Padding.symmetric(vertical: 0.34.rem, horizontal: Unit.zero),
+        radius: BorderRadius.circular(Unit.zero),
         color: ContentColors.text,
         textDecoration: TextDecoration.none,
-        fontSize: 0.93.rem,
+        fontSize: 0.89.rem,
         transition: Transition(
-          'color, transform, box-shadow',
+          'color, opacity',
           duration: Duration(milliseconds: 150),
         ),
-        raw: {'line-height': '1.35', 'position': 'relative', 'z-index': '1'},
+        raw: {
+          'line-height': '1.45',
+          'position': 'relative',
+          'z-index': '1',
+          'text-wrap': 'pretty',
+        },
       ),
       css('.toc-link:hover').styles(
         color: Color('var(--docs-shell-accent-strong)'),
-        raw: {'transform': 'translateX(1px)'},
+        raw: {'opacity': '1'},
       ),
       css('.toc-link.active').styles(
         color: Color('var(--docs-shell-accent)'),
         fontWeight: FontWeight.w700,
-        raw: {'transform': 'translateX(0)'},
+        raw: {'opacity': '1'},
       ),
       css('.toc ul ul').styles(
-        margin: Margin.only(top: 0.25.rem, left: 0.55.rem),
-        padding: Padding.only(left: 0.55.rem),
-        border: Border.only(
-          left: BorderSide(
-            width: 1.px,
-            color: Color('var(--docs-shell-border)'),
-          ),
-        ),
+        margin: Margin.only(top: 0.2.rem, left: 0.7.rem),
+        padding: Padding.only(left: 0.7.rem),
+        border: Border.unset,
       ),
       css(
         '.toc ul ul .toc-link',
-      ).styles(fontSize: 0.87.rem, color: Color('var(--docs-shell-muted)')),
+      ).styles(fontSize: 0.84.rem, color: Color('var(--docs-shell-muted)')),
       css(
         '.toc ul ul .toc-link.active',
       ).styles(color: Color('var(--docs-shell-accent)')),
@@ -1850,15 +1834,9 @@ class ApiDocsLayout extends DocsLayout {
     downContent([css('.code-block button').styles(opacity: 1)]),
     css('.toc .toc-section', [
       css('&').styles(
-        padding: Padding.only(top: 0.35.rem, bottom: 0.35.rem),
-        border: Border.only(
-          bottom: BorderSide(
-            width: 1.px,
-            color: Color('var(--docs-shell-border)'),
-          ),
-        ),
+        padding: Padding.only(top: 0.22.rem, bottom: 0.22.rem),
+        border: Border.unset,
       ),
-      css('&:last-child').styles(border: Border.unset),
       css('summary').styles(
         padding: Padding.zero,
         fontWeight: FontWeight.w600,
@@ -1869,27 +1847,27 @@ class ApiDocsLayout extends DocsLayout {
       css('.toc-summary').styles(
         display: Display.flex,
         alignItems: AlignItems.center,
-        gap: Gap.column(0.45.rem),
-        padding: Padding.only(bottom: 0.15.rem),
+        gap: Gap.column(0.32.rem),
+        padding: Padding.only(bottom: 0.08.rem),
       ),
       css('.toc-summary-chevron').styles(
         display: Display.inlineFlex,
         alignItems: AlignItems.center,
         justifyContent: JustifyContent.center,
-        width: 1.rem,
+        width: 0.8.rem,
         color: Color('var(--docs-shell-muted)'),
         transition: Transition(
           'transform, color',
           duration: Duration(milliseconds: 150),
         ),
-        raw: {'flex': '0 0 auto', 'font-size': '1rem', 'line-height': '1'},
+        raw: {'flex': '0 0 auto', 'font-size': '0.9rem', 'line-height': '1'},
       ),
       css('&[open] .toc-summary-chevron').styles(
         color: Color('var(--docs-shell-accent)'),
         raw: {'transform': 'rotate(90deg)'},
       ),
       css('.toc-summary .toc-link').styles(
-        padding: Padding.symmetric(vertical: 0.42.rem, horizontal: 0.68.rem),
+        padding: Padding.symmetric(vertical: 0.34.rem, horizontal: Unit.zero),
         raw: {'flex': '1 1 auto'},
       ),
       css('a').styles(color: ContentColors.text),
