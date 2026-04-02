@@ -1793,7 +1793,7 @@ class ApiDocsLayout extends DocsLayout {
       ),
       css('.toc-link').styles(
         display: Display.block,
-        padding: Padding.symmetric(vertical: 0.34.rem, horizontal: Unit.zero),
+        padding: Padding.only(top: 0.34.rem, right: Unit.zero, bottom: 0.34.rem, left: 0.7.rem),
         radius: BorderRadius.circular(Unit.zero),
         color: ContentColors.text,
         textDecoration: TextDecoration.none,
@@ -1867,7 +1867,7 @@ class ApiDocsLayout extends DocsLayout {
         raw: {'transform': 'rotate(90deg)'},
       ),
       css('.toc-summary .toc-link').styles(
-        padding: Padding.symmetric(vertical: 0.34.rem, horizontal: Unit.zero),
+        padding: Padding.only(top: 0.34.rem, right: Unit.zero, bottom: 0.34.rem, left: 0.7.rem),
         raw: {'flex': '1 1 auto'},
       ),
       css('a').styles(color: ContentColors.text),
