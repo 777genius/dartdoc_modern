@@ -7,6 +7,34 @@ import 'package:dartdoc_vitepress/src/generator/vitepress_renderer.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('renderer table normalization', () {
+    test('drops trailing description column when every cell is empty', () {
+      expect(
+        effectiveTableColumnCount(
+          ['Constant', 'Description'],
+          [
+            ['compileArgsTagName', ''],
+            ['dartdocVersion', '  '],
+          ],
+        ),
+        equals(1),
+      );
+    });
+
+    test('keeps trailing description column when any cell has content', () {
+      expect(
+        effectiveTableColumnCount(
+          ['Class', 'Description'],
+          [
+            ['Greeter', 'Greets users.'],
+            ['MessageFormatter', ''],
+          ],
+        ),
+        equals(2),
+      );
+    });
+  });
+
   group('VitePressDocProcessor.sanitizeHtml', () {
     // -- Null byte removal --------------------------------------------------
 

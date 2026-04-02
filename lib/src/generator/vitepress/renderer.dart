@@ -377,9 +377,21 @@ class _MarkdownPageBuilder {
     required List<List<String>> rows,
   }) {
     if (rows.isEmpty) return;
-    _buffer.writeln('| ${headers.map(escapeTableCell).join(' | ')} |');
-    _buffer.writeln('|${headers.map((_) => '---').join('|')}|');
-    for (final row in rows) {
+    final columnCount = effectiveTableColumnCount(headers, rows);
+    final effectiveHeaders = headers.take(columnCount).toList(growable: false);
+    final effectiveRows = rows
+        .map(
+          (row) => List.generate(
+            columnCount,
+            (index) => index < row.length ? row[index] : '',
+            growable: false,
+          ),
+        )
+        .toList(growable: false);
+
+    _buffer.writeln('| ${effectiveHeaders.map(escapeTableCell).join(' | ')} |');
+    _buffer.writeln('|${effectiveHeaders.map((_) => '---').join('|')}|');
+    for (final row in effectiveRows) {
       _buffer.writeln('| ${row.map(escapeTableCell).join(' | ')} |');
     }
     _buffer.writeln();
@@ -416,6 +428,27 @@ String _htmlUnescape(String text) => text
     .replaceAll('&quot;', '"')
     .replaceAll('&#34;', '"')
     .replaceAll('&#39;', "'");
+
+/// Drops trailing table columns that are empty across every row.
+///
+/// This keeps summary tables compact for sections like Constants or Typedefs
+/// where dartdoc often has no one-line docs at all, avoiding an always-empty
+/// Description column in both VitePress and Jaspr output.
+@visibleForTesting
+int effectiveTableColumnCount(List<String> headers, List<List<String>> rows) {
+  var count = headers.length;
+  while (count > 1) {
+    final columnIndex = count - 1;
+    final columnIsEmpty = rows.every(
+      (row) => columnIndex >= row.length || row[columnIndex].trim().isEmpty,
+    );
+    if (!columnIsEmpty) {
+      break;
+    }
+    count--;
+  }
+  return count;
+}
 
 // ---------------------------------------------------------------------------
 // Pre-compiled regular expressions (avoid re-creating on every call).
