@@ -681,6 +681,16 @@ void main() {
         expect(tocRuntimeWeb, contains('requestAnimationFrame('));
         expect(tocRuntimeWeb, contains("querySelector('.toc-indicator')"));
         expect(tocRuntimeWeb, contains('indicator.style.transform ='));
+        expect(
+          content,
+          contains(
+            "if (page.data['toc'] case final TableOfContents toc\n                when _hasVisibleTocEntries(toc.entries))",
+          ),
+        );
+        expect(
+          content,
+          contains('bool _hasVisibleTocEntries(Iterable<TocEntry> entries)'),
+        );
         expect(content, contains("'data-toc-link': entry.id"));
         expect(content, contains("classes: 'toc-indicator'"));
         expect(content, contains("classes: 'toc-link'"));

@@ -73,8 +73,9 @@ class ApiDocsLayout extends DocsLayout {
               if (this.footer != null)
                 div(classes: 'content-footer', [this.footer!]),
             ]),
-            aside(classes: 'toc', [
-              if (page.data['toc'] case final TableOfContents toc)
+            if (page.data['toc'] case final TableOfContents toc
+                when _hasVisibleTocEntries(toc.entries))
+              aside(classes: 'toc', [
                 div([
                   div(
                     classes: 'toc-indicator',
@@ -84,7 +85,7 @@ class ApiDocsLayout extends DocsLayout {
                   h3([Component.text('On this page')]),
                   _buildToc(toc, page.url, collapsibleOutline),
                 ]),
-            ]),
+              ]),
           ]),
         ]),
       ]),
@@ -160,6 +161,16 @@ class ApiDocsLayout extends DocsLayout {
           ),
         ]),
     ]);
+  }
+
+  bool _hasVisibleTocEntries(Iterable<TocEntry> entries) {
+    for (final entry in entries) {
+      if (entry.text.trim().isNotEmpty ||
+          _hasVisibleTocEntries(entry.children)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Component _buildToc(
