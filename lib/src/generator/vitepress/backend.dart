@@ -719,7 +719,10 @@ class VitePressGeneratorBackend extends GeneratorBackend {
     bool skipRootFiles = false,
   ]) {
     visited ??= {};
-    final dirPath = p.join(_outputPath, dirRelative);
+    final pathContext = resourceProvider.pathContext;
+    final dirPath = pathContext.normalize(
+      pathContext.join(_outputPath, dirRelative),
+    );
     if (!visited.add(dirPath)) return; // Symlink loop protection.
     final folder = resourceProvider.getFolder(dirPath);
     if (!folder.exists) return;
@@ -728,7 +731,10 @@ class VitePressGeneratorBackend extends GeneratorBackend {
     for (final child in folder.getChildren()) {
       if (child is Folder) {
         // Recurse into subdirectories (skipRootFiles only applies to root).
-        final relativePath = p.relative(child.path, from: _outputPath);
+        final relativePath = pathContext.relative(
+          child.path,
+          from: _outputPath,
+        );
         _deleteStaleInDir(relativePath, extension, visited);
       } else {
         // Skip files directly in the root directory when requested.
@@ -737,7 +743,9 @@ class VitePressGeneratorBackend extends GeneratorBackend {
         // Normalize to POSIX separators so the path matches _expectedFiles
         // (which always uses forward slashes).
         final relativePath = p.posix.joinAll(
-          p.split(p.relative(child.path, from: _outputPath)),
+          pathContext.split(
+            pathContext.relative(child.path, from: _outputPath),
+          ),
         );
         if (relativePath.endsWith(extension) &&
             !_expectedFiles.contains(relativePath)) {

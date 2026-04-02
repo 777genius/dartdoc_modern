@@ -16,10 +16,7 @@ import 'package:dartdoc_vitepress/src/warnings.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:path/path.dart' as path;
 
-enum MarkdownAnchorStrategy {
-  vitepress,
-  jaspr,
-}
+enum MarkdownAnchorStrategy { vitepress, jaspr }
 
 /// Validates generated markdown-first sites such as VitePress and Jaspr.
 ///
@@ -35,10 +32,10 @@ class MarkdownValidator {
     this._writtenFiles,
     StreamController<String> onCheckProgress, {
     MarkdownAnchorStrategy anchorStrategy = MarkdownAnchorStrategy.vitepress,
-  })   : _origin = path.normalize(origin),
-        _onCheckProgress = onCheckProgress,
-        _anchorStrategy = anchorStrategy,
-        _hrefs = _packageGraph.allHrefs;
+  }) : _origin = path.normalize(origin),
+       _onCheckProgress = onCheckProgress,
+       _anchorStrategy = anchorStrategy,
+       _hrefs = _packageGraph.allHrefs;
 
   final PackageGraph _packageGraph;
   final DartdocOptionContext _config;
@@ -55,20 +52,22 @@ class MarkdownValidator {
   static final _frontMatterFence = RegExp(r'^---\s*$');
   static final _fencedCodeStart = RegExp(r'^\s*(```|~~~)');
   static final _headingPattern = RegExp(r'^\s{0,3}#{1,6}\s+(.*?)\s*$');
-  static final _explicitHeadingAnchor = RegExp(r'\s+\{#([A-Za-z0-9:_\-.]+)\}\s*$');
-  static final _htmlIdPattern =
-      RegExp(r"""<[A-Za-z][^>]*\sid=['"]([^'"]+)['"][^>]*>""");
+  static final _explicitHeadingAnchor = RegExp(
+    r'\s+\{#([A-Za-z0-9:_\-.]+)\}\s*$',
+  );
+  static final _htmlIdPattern = RegExp(
+    r"""<[A-Za-z][^>]*\sid=['"]([^'"]+)['"][^>]*>""",
+  );
   static final _markdownLinkPattern = RegExp(r'!?\[[^\]]*\]\(([^)\n]+)\)');
-  static final _htmlHrefOrSrcPattern =
-      RegExp(r'''(?:href|src)=["']([^"'#][^"']*|#[^"']+)["']''');
+  static final _htmlHrefOrSrcPattern = RegExp(
+    r'''(?:href|src)=["']([^"'#][^"']*|#[^"']+)["']''',
+  );
   static final _sidebarLinkPattern = RegExp(r'''link:\s*["']([^"']+)["']''');
   static final _schemePattern = RegExp(r'^[a-zA-Z][a-zA-Z0-9+.-]*:');
 
   void validateLinks() {
     logInfo('Validating markdown links...');
-    runtimeStats.resetAccumulators({
-      'readCountForMarkdownValidation',
-    });
+    runtimeStats.resetAccumulators({'readCountForMarkdownValidation'});
 
     _indexMarkdownFiles();
     _validateMarkdownPages();
@@ -76,11 +75,14 @@ class MarkdownValidator {
   }
 
   void _indexMarkdownFiles() {
-    final markdownFiles = _writtenFiles
-        .where((file) => file.endsWith('.md'))
-        .where(_isGeneratedMarkdownPage)
-        .toList()
-      ..sort();
+    final markdownFiles =
+        _writtenFiles
+            .map(_normalizeRelativeOutputPath)
+            .where((file) => file.endsWith('.md'))
+            .where(_isGeneratedMarkdownPage)
+            .toSet()
+            .toList()
+          ..sort();
 
     for (final relativePath in markdownFiles) {
       _markdownFiles.add(relativePath);
@@ -115,24 +117,26 @@ class MarkdownValidator {
   }
 
   void _validateNavigationFiles() {
-    final navigationFiles = _writtenFiles
-        .where((file) =>
-            file.endsWith('sidebar.ts') ||
-            file.endsWith('sidebar.dart') ||
-            file.endsWith('guide-sidebar.ts') ||
-            file.endsWith('api-sidebar.ts'))
-        .toList()
-      ..sort();
+    final navigationFiles =
+        _writtenFiles
+            .map(_normalizeRelativeOutputPath)
+            .where(
+              (file) =>
+                  file.endsWith('sidebar.ts') ||
+                  file.endsWith('sidebar.dart') ||
+                  file.endsWith('guide-sidebar.ts') ||
+                  file.endsWith('api-sidebar.ts'),
+            )
+            .toSet()
+            .toList()
+          ..sort();
 
     for (final relativePath in navigationFiles) {
       final content = _readOutput(relativePath);
       for (final match in _sidebarLinkPattern.allMatches(content)) {
         final destination = match.group(1);
         if (destination == null || destination.isEmpty) continue;
-        _validateDestination(
-          destination,
-          referredFrom: relativePath,
-        );
+        _validateDestination(destination, referredFrom: relativePath);
       }
       _onCheckProgress.add(relativePath);
     }
@@ -150,29 +154,24 @@ class MarkdownValidator {
     }
 
     final fragmentIndex = destination.indexOf('#');
-    final pathPart =
-        fragmentIndex == -1 ? destination : destination.substring(0, fragmentIndex);
-    final fragment =
-        fragmentIndex == -1 ? null : destination.substring(fragmentIndex + 1);
+    final pathPart = fragmentIndex == -1
+        ? destination
+        : destination.substring(0, fragmentIndex);
+    final fragment = fragmentIndex == -1
+        ? null
+        : destination.substring(fragmentIndex + 1);
 
     if (pathPart.isEmpty) {
       if (currentRoute == null || fragment == null || fragment.isEmpty) return;
-      _validateAnchor(
-        currentRoute,
-        fragment,
-        referredFrom: referredFrom,
-      );
+      _validateAnchor(currentRoute, fragment, referredFrom: referredFrom);
       return;
     }
 
     if (pathPart.startsWith('/')) {
-      if (_assetExists(pathPart) || _validateRoute(pathPart, referredFrom: referredFrom)) {
+      if (_assetExists(pathPart) ||
+          _validateRoute(pathPart, referredFrom: referredFrom)) {
         if (fragment != null && fragment.isNotEmpty) {
-          _validateAnchor(
-            pathPart,
-            fragment,
-            referredFrom: referredFrom,
-          );
+          _validateAnchor(pathPart, fragment, referredFrom: referredFrom);
         }
       }
       return;
@@ -199,11 +198,7 @@ class MarkdownValidator {
     if (_validateRoute(resolved.route!, referredFrom: referredFrom) &&
         fragment != null &&
         fragment.isNotEmpty) {
-      _validateAnchor(
-        resolved.route!,
-        fragment,
-        referredFrom: referredFrom,
-      );
+      _validateAnchor(resolved.route!, fragment, referredFrom: referredFrom);
     }
   }
 
@@ -212,7 +207,11 @@ class MarkdownValidator {
     if (_routeToMarkdownPath.containsKey(normalizedRoute)) {
       return true;
     }
-    _warn(PackageWarning.brokenLink, normalizedRoute, referredFrom: referredFrom);
+    _warn(
+      PackageWarning.brokenLink,
+      normalizedRoute,
+      referredFrom: referredFrom,
+    );
     return false;
   }
 
@@ -401,7 +400,8 @@ class MarkdownValidator {
     if (queryIndex != -1) {
       final hashIndex = normalized.indexOf('#');
       if (hashIndex == -1 || queryIndex < hashIndex) {
-        normalized = normalized.substring(0, queryIndex) +
+        normalized =
+            normalized.substring(0, queryIndex) +
             (hashIndex == -1 ? '' : normalized.substring(hashIndex));
       }
     }
@@ -421,6 +421,7 @@ class MarkdownValidator {
   }
 
   String _routeFromMarkdownPath(String relativePath) {
+    relativePath = _normalizeRelativeOutputPath(relativePath);
     final withoutPrefix = relativePath.replaceFirst(RegExp(r'^content/'), '');
     final noExt = withoutPrefix.replaceFirst(RegExp(r'\.md$'), '');
     if (noExt == 'index') return '/';
@@ -431,6 +432,7 @@ class MarkdownValidator {
   }
 
   String _routeFromMarkdownDir(String relativeDir) {
+    relativeDir = _normalizeRelativeOutputPath(relativeDir);
     final withoutPrefix = relativeDir.replaceFirst(RegExp(r'^content/?'), '');
     if (withoutPrefix.isEmpty || withoutPrefix == '.') {
       return '/';
@@ -464,21 +466,18 @@ class MarkdownValidator {
   }
 
   String _readOutput(String relativePath) {
-    final file = _config.resourceProvider.getFile(
-      path.normalize(path.join(_origin, relativePath)),
-    );
+    final file = _config.resourceProvider.getFile(_outputPathFor(relativePath));
     runtimeStats.incrementAccumulator('readCountForMarkdownValidation');
     return file.readAsStringSync();
   }
 
   bool _assetExists(String rootRelativePath) {
-    final fullPath =
-        path.normalize(path.join(_origin, rootRelativePath.substring(1)));
+    final fullPath = _outputPathFor(rootRelativePath.substring(1));
     return _config.resourceProvider.getFile(fullPath).exists;
   }
 
   bool _outputFileExists(String relativePath) {
-    final fullPath = path.normalize(path.join(_origin, relativePath));
+    final fullPath = _outputPathFor(relativePath);
     return _config.resourceProvider.getFile(fullPath).exists;
   }
 
@@ -497,7 +496,9 @@ class MarkdownValidator {
     if (referredFromElements.any((e) => e.isCanonical)) {
       referredFromElements.removeWhere((e) => !e.isCanonical);
     }
-    final warnOnElement = warnOnElements?.firstWhereOrNull((e) => e.isCanonical);
+    final warnOnElement = warnOnElements?.firstWhereOrNull(
+      (e) => e.isCanonical,
+    );
 
     _packageGraph.warnOnElement(
       warnOnElement,
@@ -508,6 +509,7 @@ class MarkdownValidator {
   }
 
   bool _isGeneratedMarkdownPage(String relativePath) {
+    relativePath = _normalizeRelativeOutputPath(relativePath);
     final normalized = relativePath.replaceFirst(RegExp(r'^content/'), '');
     return normalized.startsWith('api/') ||
         normalized == 'api/index.md' ||
@@ -517,16 +519,34 @@ class MarkdownValidator {
   }
 
   bool _isUserAuthoredMarkdownPage(String relativePath) {
+    relativePath = _normalizeRelativeOutputPath(relativePath);
     final normalized = relativePath.replaceFirst(RegExp(r'^content/'), '');
     return normalized.startsWith('guide/') || normalized.startsWith('topics/');
+  }
+
+  String _normalizeRelativeOutputPath(String relativePath) {
+    var normalized = relativePath.replaceAll(r'\', '/');
+    if (normalized.startsWith('./')) {
+      normalized = normalized.substring(2);
+    }
+    return path.posix.normalize(normalized);
+  }
+
+  String _outputPathFor(String relativePath) {
+    final pathContext = _config.resourceProvider.pathContext;
+    final normalizedRelative = _normalizeRelativeOutputPath(relativePath);
+    return pathContext.normalize(
+      pathContext.join(
+        _origin,
+        pathContext.joinAll(path.posix.split(normalizedRelative)),
+      ),
+    );
   }
 }
 
 class _ResolvedMarkdownDestination {
   const _ResolvedMarkdownDestination.route(this.route) : isAssetPath = false;
-  const _ResolvedMarkdownDestination.asset()
-      : route = null,
-        isAssetPath = true;
+  const _ResolvedMarkdownDestination.asset() : route = null, isAssetPath = true;
 
   final String? route;
   final bool isAssetPath;

@@ -67,6 +67,21 @@ jobs:
       - uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2123f0ab2c02c
         with:
           sdk: ${{ matrix.sdk }}
+      - name: Install Playwright
+        if: matrix.job == 'main' && runner.os != 'Windows'
+        shell: bash
+        run: |
+          mkdir -p /tmp/pw-run
+          cd /tmp/pw-run
+          if [ ! -f package.json ]; then
+            npm init -y
+          fi
+          npm install playwright@1.59.1
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            npx playwright install --with-deps chromium
+          else
+            npx playwright install chromium
+          fi
       - name: Install dependencies
         run: dart pub get
       - name: ${{ matrix.job }}

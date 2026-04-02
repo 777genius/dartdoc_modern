@@ -19,16 +19,19 @@ import 'package:dartdoc_vitepress/src/warnings.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p show Context;
 
-final _templatePattern =
-    RegExp(r'[ ]*\{@template\s+([^\s}].*?)\}([^]+?)\{@endtemplate\}[ ]*(\n?)');
-final _htmlPattern =
-    RegExp(r'[ ]*\{@inject-html\s*\}([^]+?)\{@end-inject-html\}[ ]*\n?');
+final _templatePattern = RegExp(
+  r'[ ]*\{@template\s+([^\s}].*?)\}([^]+?)\{@endtemplate\}[ ]*(\n?)',
+);
+final _htmlPattern = RegExp(
+  r'[ ]*\{@inject-html\s*\}([^]+?)\{@end-inject-html\}[ ]*\n?',
+);
 
 /// Matches all tool directives (even some invalid ones). This is so
 /// we can give good error messages if the directive is malformed, instead of
 /// just silently emitting it as-is.
-final _basicToolPattern =
-    RegExp(r'[ ]*{@tool\s+([^\s}][^}]*)}\n?([^]+?)\n?{@end-tool}[ ]*\n?');
+final _basicToolPattern = RegExp(
+  r'[ ]*{@tool\s+([^\s}][^}]*)}\n?([^]+?)\n?{@end-tool}[ ]*\n?',
+);
 
 final _macroRegExp = RegExp(r'{@macro\s+([^\s}][^}]*)}');
 
@@ -50,13 +53,15 @@ mixin DocumentationComment implements Warnable, SourceCode {
   Element get element;
 
   @override
-  late final String documentationAsHtml =
-      _injectHtmlFragments(_elementDocumentation.asHtml);
+  late final String documentationAsHtml = _injectHtmlFragments(
+    _elementDocumentation.asHtml,
+  );
 
   String get oneLineDoc => _elementDocumentation.asOneLiner;
 
-  late final Documentation _elementDocumentation =
-      Documentation.forElement(this);
+  late final Documentation _elementDocumentation = Documentation.forElement(
+    this,
+  );
 
   /// The rawest form of [element]'s documentation comment, if there is one,
   /// including comment delimiters like `///`, `//`, `/*`, `*/`, or `null` if
@@ -137,7 +142,8 @@ mixin DocumentationComment implements Warnable, SourceCode {
 
   @visibleForTesting
   ({List<String> categories, List<String> subCategories}) parseCategorization(
-      String docs) {
+    String docs,
+  ) {
     Set<String>? categorySet;
     Set<String>? subCategorySet;
 
@@ -169,7 +175,8 @@ mixin DocumentationComment implements Warnable, SourceCode {
     _initialCategorizationDone = true;
     if (documentationComment case var comment?) {
       final parsed = parseCategorization(
-          stripCommentDelimiters(_stripDocImports(comment)));
+        stripCommentDelimiters(_stripDocImports(comment)),
+      );
       _categoryNamesSet.addAll(parsed.categories);
       _subCategoryNamesSet.addAll(parsed.subCategories);
     }
@@ -288,22 +295,29 @@ mixin DocumentationComment implements Warnable, SourceCode {
       return rawDocs;
     }
     var invocationIndex = 0;
-    return await _replaceAllMappedAsync(rawDocs, _basicToolPattern,
-        (basicMatch) async {
+    return await _replaceAllMappedAsync(rawDocs, _basicToolPattern, (
+      basicMatch,
+    ) async {
       final args = _splitUpQuotedArgs(basicMatch[1]!);
       // Tool name must come first.
       if (args.isEmpty) {
-        warn(PackageWarning.toolError,
-            message: 'Must specify a tool to execute for the @tool directive.');
+        warn(
+          PackageWarning.toolError,
+          message: 'Must specify a tool to execute for the @tool directive.',
+        );
         return Future.value('');
       }
       // Count the number of invocations of tools in this dartdoc block,
       // so that tools can differentiate different blocks from each other.
       invocationIndex++;
-      return await config.tools.runner.run(args.toList(),
-          content: basicMatch[2]!, toolErrorCallback: (String message) async {
-        warn(PackageWarning.toolError, message: message);
-      }, environment: _toolsEnvironment(invocationIndex: invocationIndex));
+      return await config.tools.runner.run(
+        args.toList(),
+        content: basicMatch[2]!,
+        toolErrorCallback: (String message) async {
+          warn(PackageWarning.toolError, message: message);
+        },
+        environment: _toolsEnvironment(invocationIndex: invocationIndex),
+      );
     });
   }
 
@@ -317,8 +331,10 @@ mixin DocumentationComment implements Warnable, SourceCode {
       'SOURCE_LINE': characterLocation?.lineNumber.toString(),
       'SOURCE_COLUMN': characterLocation?.columnNumber.toString(),
       if (sourceFileName case var sourceFileName?)
-        'SOURCE_PATH':
-            pathContext.relative(sourceFileName, from: package.packagePath),
+        'SOURCE_PATH': pathContext.relative(
+          sourceFileName,
+          from: package.packagePath,
+        ),
       'PACKAGE_PATH': package.packagePath,
       'PACKAGE_NAME': package.name,
       'LIBRARY_NAME': library?.fullyQualifiedName,
@@ -365,8 +381,10 @@ mixin DocumentationComment implements Warnable, SourceCode {
     return rawDocs.replaceAllMapped(_exampleRegExp, (match) {
       var argsAsString = match[1];
       if (argsAsString == null) {
-        warn(PackageWarning.invalidParameter,
-            message: 'Must specify a file path for the @example directive.');
+        warn(
+          PackageWarning.invalidParameter,
+          message: 'Must specify a file path for the @example directive.',
+        );
         return '';
       }
       var args = _parseArgs(argsAsString, _exampleArgParser, 'example');
@@ -375,16 +393,20 @@ mixin DocumentationComment implements Warnable, SourceCode {
         return '';
       }
       if (args.rest.isEmpty) {
-        warn(PackageWarning.invalidParameter,
-            message: 'Must specify a file path for the @example directive.');
+        warn(
+          PackageWarning.invalidParameter,
+          message: 'Must specify a file path for the @example directive.',
+        );
         return '';
       }
 
       if (args.rest.length > 1) {
-        warn(PackageWarning.invalidParameter,
-            message:
-                'The {@example} directive only takes one positional argument (the file path). '
-                'Ignoring extra arguments: ${args.rest.skip(1).join(" ")}');
+        warn(
+          PackageWarning.invalidParameter,
+          message:
+              'The {@example} directive only takes one positional argument (the file path). '
+              'Ignoring extra arguments: ${args.rest.skip(1).join(" ")}',
+        );
       }
 
       var filepath = args.rest.first;
@@ -460,8 +482,10 @@ mixin DocumentationComment implements Warnable, SourceCode {
     required p.Context pathContext,
     required void Function(PackageWarning, {String? message}) warn,
   }) {
-    assert(sourceFilePath == null ||
-        pathContext.isWithin(packagePath, sourceFilePath));
+    assert(
+      sourceFilePath == null ||
+          pathContext.isWithin(packagePath, sourceFilePath),
+    );
 
     // Resolve the path as a URI reference.
     // 1. Get the relative path of the current file from the package root.
@@ -474,8 +498,9 @@ mixin DocumentationComment implements Warnable, SourceCode {
     // absolute-like path (e.g., "\lib\src\foo.dart" on Windows), which [toUri]
     // converts to a file URI (potentially including a drive letter,
     // e.g., "file:///C:/lib/...").
-    var baseUri = pathContext
-        .toUri(pathContext.join(pathContext.separator, relativePath));
+    var baseUri = pathContext.toUri(
+      pathContext.join(pathContext.separator, relativePath),
+    );
 
     // 3. Resolve using [Uri.resolveUri].
     // [exampleFilePath] is interpreted as a URI reference.
@@ -483,10 +508,12 @@ mixin DocumentationComment implements Warnable, SourceCode {
     try {
       var exampleFileUri = Uri.parse(exampleFilePath);
       if (exampleFileUri.hasScheme || exampleFileUri.hasAuthority) {
-        warn(PackageWarning.invalidParameter,
-            message:
-                '@example path "$exampleFilePath" must be a local file path. '
-                'Schemes and authorities are not allowed.');
+        warn(
+          PackageWarning.invalidParameter,
+          message:
+              '@example path "$exampleFilePath" must be a local file path. '
+              'Schemes and authorities are not allowed.',
+        );
         return null;
       }
       var resolvedUri = baseUri.resolveUri(exampleFileUri);
@@ -503,9 +530,11 @@ mixin DocumentationComment implements Warnable, SourceCode {
 
       resolvedPath = pathContext.join(packagePath, relativeToRoot);
     } on FormatException catch (e) {
-      warn(PackageWarning.invalidParameter,
-          message:
-              'Invalid path for @example directive ($exampleFilePath): ${e.message}');
+      warn(
+        PackageWarning.invalidParameter,
+        message:
+            'Invalid path for @example directive ($exampleFilePath): ${e.message}',
+      );
       return null;
     }
 
@@ -515,9 +544,11 @@ mixin DocumentationComment implements Warnable, SourceCode {
     // but kept as a safeguard against future refactoring bugs.
     if (!pathContext.isWithin(packagePath, resolvedPath) &&
         !pathContext.equals(packagePath, resolvedPath)) {
-      warn(PackageWarning.invalidParameter,
-          message:
-              'Example file $exampleFilePath must be within the package root ($packagePath).');
+      warn(
+        PackageWarning.invalidParameter,
+        message:
+            'Example file $exampleFilePath must be within the package root ($packagePath).',
+      );
       return null;
     }
 
@@ -532,7 +563,9 @@ mixin DocumentationComment implements Warnable, SourceCode {
   /// If any line has non-space characters in its indentation, a warning is issued
   /// and the original [content] is returned.
   static String _stripIndentation(
-      String content, void Function(PackageWarning, {String? message}) warn) {
+    String content,
+    void Function(PackageWarning, {String? message}) warn,
+  ) {
     var lines = LineSplitter.split(content).toList();
     if (lines.isEmpty) return content;
 
@@ -555,10 +588,12 @@ mixin DocumentationComment implements Warnable, SourceCode {
 
       for (var j = 0; j < indentLength; j++) {
         if (indentation.codeUnitAt(j) != 0x20) {
-          warn(PackageWarning.invalidParameter,
-              message:
-                  'Example contains non-space whitespace in indentation. Indentation stripping '
-                  'disabled to avoid incorrect formatting.');
+          warn(
+            PackageWarning.invalidParameter,
+            message:
+                'Example contains non-space whitespace in indentation. Indentation stripping '
+                'disabled to avoid incorrect formatting.',
+          );
           return content;
         }
       }
@@ -589,8 +624,9 @@ mixin DocumentationComment implements Warnable, SourceCode {
   static final _basicYouTubePattern = RegExp(r'{@youtube\s+([^\s}][^}]*)}');
 
   /// Matches YouTube IDs from supported YouTube URLs.
-  static final _validYouTubeUrlPattern =
-      RegExp(r'https://www\.youtube\.com/watch\?v=([^&]+)$');
+  static final _validYouTubeUrlPattern = RegExp(
+    r'https://www\.youtube\.com/watch\?v=([^&]+)$',
+  );
 
   /// An argument parser used in [_injectYouTube] to parse a `{@youtube}`
   /// directive.
@@ -628,38 +664,50 @@ mixin DocumentationComment implements Warnable, SourceCode {
       }
       var positionalArgs = args.rest.sublist(0);
       if (positionalArgs.length != 3) {
-        warn(PackageWarning.invalidParameter,
-            message: 'Invalid @youtube directive, "${basicMatch[0]}"\n'
-                'YouTube directives must be of the form "{@youtube WIDTH '
-                'HEIGHT URL}"');
+        warn(
+          PackageWarning.invalidParameter,
+          message:
+              'Invalid @youtube directive, "${basicMatch[0]}"\n'
+              'YouTube directives must be of the form "{@youtube WIDTH '
+              'HEIGHT URL}"',
+        );
         return '';
       }
 
       var width = int.tryParse(positionalArgs[0]);
       if (width == null || width <= 0) {
-        warn(PackageWarning.invalidParameter,
-            message: 'A @youtube directive has an invalid width, '
-                '"${positionalArgs[0]}". The width must be a positive '
-                'integer.');
+        warn(
+          PackageWarning.invalidParameter,
+          message:
+              'A @youtube directive has an invalid width, '
+              '"${positionalArgs[0]}". The width must be a positive '
+              'integer.',
+        );
         return '';
       }
 
       var height = int.tryParse(positionalArgs[1]);
       if (height == null || height <= 0) {
-        warn(PackageWarning.invalidParameter,
-            message: 'A @youtube directive has an invalid height, '
-                '"${positionalArgs[1]}". The height must be a positive '
-                'integer.');
+        warn(
+          PackageWarning.invalidParameter,
+          message:
+              'A @youtube directive has an invalid height, '
+              '"${positionalArgs[1]}". The height must be a positive '
+              'integer.',
+        );
         return '';
       }
 
       var url = _validYouTubeUrlPattern.firstMatch(positionalArgs[2]);
       if (url == null) {
-        warn(PackageWarning.invalidParameter,
-            message: 'A @youtube directive has an invalid URL: '
-                '"${positionalArgs[2]}". Supported YouTube URLs have the '
-                'following format: '
-                'https://www.youtube.com/watch?v=oHg5SJYRHA0.');
+        warn(
+          PackageWarning.invalidParameter,
+          message:
+              'A @youtube directive has an invalid URL: '
+              '"${positionalArgs[2]}". Supported YouTube URLs have the '
+              'following format: '
+              'https://www.youtube.com/watch?v=oHg5SJYRHA0.',
+        );
         return '';
       }
       var youTubeId = url.group(url.groupCount)!;
@@ -750,24 +798,33 @@ mixin DocumentationComment implements Warnable, SourceCode {
       if (positionalArgs.length == 3) {
         uniqueId = args['id'] ?? getUniqueId('animation_');
       } else {
-        warn(PackageWarning.invalidParameter,
-            message: 'Invalid @animation directive, "${basicMatch[0]}"\n'
-                'Animation directives must be of the form "{@animation WIDTH '
-                'HEIGHT URL [id=ID]}"');
+        warn(
+          PackageWarning.invalidParameter,
+          message:
+              'Invalid @animation directive, "${basicMatch[0]}"\n'
+              'Animation directives must be of the form "{@animation WIDTH '
+              'HEIGHT URL [id=ID]}"',
+        );
         return '';
       }
 
       if (!_validIdPattern.hasMatch(uniqueId)) {
-        warn(PackageWarning.invalidParameter,
-            message: 'An animation has an invalid identifier, "$uniqueId". The '
-                'identifier can only contain letters, numbers and underscores, '
-                'and must not begin with a number.');
+        warn(
+          PackageWarning.invalidParameter,
+          message:
+              'An animation has an invalid identifier, "$uniqueId". The '
+              'identifier can only contain letters, numbers and underscores, '
+              'and must not begin with a number.',
+        );
         return '';
       }
       if (package.usedAnimationIdsByHref[href]!.contains(uniqueId)) {
-        warn(PackageWarning.invalidParameter,
-            message: 'An animation has a non-unique identifier, "$uniqueId". '
-                'Animation identifiers must be unique.');
+        warn(
+          PackageWarning.invalidParameter,
+          message:
+              'An animation has a non-unique identifier, "$uniqueId". '
+              'Animation identifiers must be unique.',
+        );
         return '';
       }
       package.usedAnimationIdsByHref[href]!.add(uniqueId);
@@ -776,9 +833,12 @@ mixin DocumentationComment implements Warnable, SourceCode {
       try {
         width = int.parse(positionalArgs[0]);
       } on FormatException {
-        warn(PackageWarning.invalidParameter,
-            message: 'An animation has an invalid width ($uniqueId), '
-                '"${positionalArgs[0]}". The width must be an integer.');
+        warn(
+          PackageWarning.invalidParameter,
+          message:
+              'An animation has an invalid width ($uniqueId), '
+              '"${positionalArgs[0]}". The width must be an integer.',
+        );
         return '';
       }
 
@@ -786,9 +846,12 @@ mixin DocumentationComment implements Warnable, SourceCode {
       try {
         height = int.parse(positionalArgs[1]);
       } on FormatException {
-        warn(PackageWarning.invalidParameter,
-            message: 'An animation has an invalid height ($uniqueId), '
-                '"${positionalArgs[1]}". The height must be an integer.');
+        warn(
+          PackageWarning.invalidParameter,
+          message:
+              'An animation has an invalid height ($uniqueId), '
+              '"${positionalArgs[1]}". The height must be an integer.',
+        );
         return '';
       }
 
@@ -796,9 +859,12 @@ mixin DocumentationComment implements Warnable, SourceCode {
       try {
         movieUrl = Uri.parse(positionalArgs[2]);
       } on FormatException catch (e) {
-        warn(PackageWarning.invalidParameter,
-            message: 'An animation URL could not be parsed ($uniqueId): '
-                '${positionalArgs[2]}\n$e');
+        warn(
+          PackageWarning.invalidParameter,
+          message:
+              'An animation URL could not be parsed ($uniqueId): '
+              '${positionalArgs[2]}\n$e',
+        );
         return '';
       }
       var overlayId = '${uniqueId}_play_button_';
@@ -869,8 +935,9 @@ mixin DocumentationComment implements Warnable, SourceCode {
       buffer.write(content.substring(0, firstDocImport.offset - commentOffset));
       var offset = firstDocImport.end - commentOffset;
       for (var docImport in commentData.docImports.skip(1)) {
-        buffer
-            .write(content.substring(offset, docImport.offset - commentOffset));
+        buffer.write(
+          content.substring(offset, docImport.offset - commentOffset),
+        );
         offset = docImport.end - commentOffset;
       }
       if (offset < content.length) {
@@ -909,23 +976,59 @@ mixin DocumentationComment implements Warnable, SourceCode {
   /// Helper to process arguments given as a (possibly quoted) string.
   ///
   /// First, this will split the given [argsAsString] into separate arguments
-  /// with [_splitUpQuotedArgs] it then parses the resulting argument list
-  /// normally with [argParser] and returns the result.
+  /// with [_splitUpQuotedArgs]. Named arguments are then moved ahead of a `--`
+  /// separator before parsing so negative numeric positional values (for
+  /// example `-100`) are not misinterpreted as short options.
   ArgResults? _parseArgs(
-      String argsAsString, ArgParser argParser, String directiveName) {
-    var args = _splitUpQuotedArgs(argsAsString, convertToArgs: true);
+    String argsAsString,
+    ArgParser argParser,
+    String directiveName,
+  ) {
+    final rawArgs = _splitUpQuotedArgs(argsAsString).toList(growable: false);
+    final namedArgs = <String>[];
+    final positionalArgs = <String>[];
+
+    for (final rawArg in rawArgs) {
+      if (rawArg.startsWith('--')) {
+        namedArgs.add(rawArg);
+        continue;
+      }
+
+      final assignmentMatch = RegExp(
+        r'^([a-zA-Z\-_0-9]+)=(.*)$',
+      ).firstMatch(rawArg);
+      if (assignmentMatch != null) {
+        namedArgs.add('--$rawArg');
+        continue;
+      }
+
+      positionalArgs.add(rawArg);
+    }
+
+    final args = <String>[
+      ...namedArgs,
+      if (positionalArgs.isNotEmpty) '--',
+      ...positionalArgs,
+    ];
+
     try {
       return argParser.parse(args);
     } on ArgParserException catch (e) {
-      warn(PackageWarning.invalidParameter,
-          message: 'The {@$directiveName ...} directive was called with '
-              'invalid parameters. $e');
+      warn(
+        PackageWarning.invalidParameter,
+        message:
+            'The {@$directiveName ...} directive was called with '
+            'invalid parameters. $e',
+      );
       return null;
     }
   }
 
-  static Future<String> _replaceAllMappedAsync(String string, Pattern exp,
-      Future<String> Function(Match match) replace) async {
+  static Future<String> _replaceAllMappedAsync(
+    String string,
+    Pattern exp,
+    Future<String> Function(Match match) replace,
+  ) async {
     var replaced = StringBuffer();
     var currentIndex = 0;
     for (var match in exp.allMatches(string)) {
@@ -946,10 +1049,12 @@ mixin DocumentationComment implements Warnable, SourceCode {
   /// Match group 2 contains the quote character used (which is discarded).
   /// Match group 3 is a quoted arg, if any, without the quotes.
   /// Match group 4 is the unquoted arg, if any.
-  static final RegExp _argPattern = RegExp(r'([a-zA-Z\-_0-9]+=)?' // option name
-      r'(?:' // Start a new non-capture group for the two possibilities.
-      r'''(["'])((?:[^\\\r\n]|\\.)*?)\2|''' // with quotes.
-      r'(\S+))'); // without quotes.
+  static final RegExp _argPattern = RegExp(
+    r'([a-zA-Z\-_0-9]+=)?' // option name
+    r'(?:' // Start a new non-capture group for the two possibilities.
+    r'''(["'])((?:[^\\\r\n]|\\.)*?)\2|''' // with quotes.
+    r'(\S+))',
+  ); // without quotes.
 
   /// Helper to process arguments given as a (possibly quoted) string.
   ///
@@ -962,8 +1067,10 @@ mixin DocumentationComment implements Warnable, SourceCode {
   /// "foo=bar" argument as "--foo=bar". It does handle quoted args like
   /// "foo='bar baz'" too, returning just bar (without quotes) for the foo
   /// value.
-  static Iterable<String> _splitUpQuotedArgs(String argsAsString,
-      {bool convertToArgs = false}) {
+  static Iterable<String> _splitUpQuotedArgs(
+    String argsAsString, {
+    bool convertToArgs = false,
+  }) {
     final Iterable<Match> matches = _argPattern.allMatches(argsAsString);
     // Remove quotes around args, and if [convertToArgs] is true, then for any
     // args that look like assignments (start with valid option names followed
@@ -994,8 +1101,10 @@ mixin DocumentationComment implements Warnable, SourceCode {
   ///
   /// Use only in factory for [PackageGraph].
   Future<void> precacheLocalDocs() async {
-    assert(_documentationLocal == null,
-        'reentrant calls to _buildDocumentation* not allowed');
+    assert(
+      _documentationLocal == null,
+      'reentrant calls to _buildDocumentation* not allowed',
+    );
     _documentationLocal = await processComment();
   }
 
@@ -1099,8 +1208,10 @@ mixin DocumentationComment implements Warnable, SourceCode {
     });
   }
 
-  static final RegExp _categoryRegExp =
-      RegExp(r'[ ]*{@(category|subCategory) (.+?)}[ ]*\n?', multiLine: true);
+  static final RegExp _categoryRegExp = RegExp(
+    r'[ ]*{@(category|subCategory) (.+?)}[ ]*\n?',
+    multiLine: true,
+  );
 
   /// A set of strings containing all declared subcategories for this element.
   List<String> get subCategoryNames {
@@ -1138,6 +1249,7 @@ mixin DocumentationComment implements Warnable, SourceCode {
         match.group(1)!,
   };
 
-  static final _canonicalForRegExp =
-      RegExp(r'[ ]*{@canonicalFor\s([^}]+)}[ ]*\n?');
+  static final _canonicalForRegExp = RegExp(
+    r'[ ]*{@canonicalFor\s([^}]+)}[ ]*\n?',
+  );
 }

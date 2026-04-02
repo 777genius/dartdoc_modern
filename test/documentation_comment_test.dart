@@ -23,9 +23,12 @@ class DocumentationCommentTest extends DocumentationCommentTestBase {
 ''');
     var doc = libraryModel.documentation;
 
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 Text.
-More text.'''));
+More text.'''),
+    );
   }
 
   void test_removesSpaceAfterTripleSlashes() async {
@@ -38,9 +41,12 @@ More text.'''));
     // TODO(srawlins): Actually, the three spaces before 'More' is perhaps not
     // the best fit. Should it only be two, to match the indent from the first
     // line's "Text"?
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 Text.
-   More text.'''));
+   More text.'''),
+    );
   }
 
   void test_leavesBlankLines() async {
@@ -51,10 +57,13 @@ Text.
 ''');
     var doc = libraryModel.documentation;
 
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 Text.
 
-More text.'''));
+More text.'''),
+    );
   }
 
   void test_processesAnimationDirective() async {
@@ -68,7 +77,9 @@ More text.'''));
     var doc = libraryModel.documentation;
 
     expectNoWarnings();
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 Text.
 
 
@@ -106,7 +117,8 @@ Text.
 
 
 
-End text.'''));
+End text.'''),
+    );
   }
 
   void test_rendersUnnamedAnimation() async {
@@ -211,12 +223,15 @@ End text.'''));
 ''');
     var doc = libraryModel.documentation;
 
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 Text.
 
 
 
-End text.'''));
+End text.'''),
+    );
   }
 
   void test_docImport_onlyLine() async {
@@ -258,12 +273,15 @@ End text.'''));
 ''');
     var doc = libraryModel.documentation;
 
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 One.
 
 Two.
 
-Three.'''));
+Three.'''),
+    );
   }
 
   void test_docImport_precedingText() async {
@@ -289,10 +307,11 @@ Three.'''));
     expect(
       libraryModel,
       hasInvalidParameterWarning(
-          'Invalid @animation directive, "{@animation 100 '
-          'http://host/path/to/video.mp4 id=barHerderAnimation}"\n'
-          'Animation directives must be of the form "{@animation WIDTH '
-          'HEIGHT URL [id=ID]}"'),
+        'Invalid @animation directive, "{@animation 100 '
+        'http://host/path/to/video.mp4 id=barHerderAnimation}"\n'
+        'Animation directives must be of the form "{@animation WIDTH '
+        'HEIGHT URL [id=ID]}"',
+      ),
     );
   }
 
@@ -308,10 +327,11 @@ Three.'''));
     expect(
       libraryModel,
       hasInvalidParameterWarning(
-          'Invalid @animation directive, "{@animation 100 200 300 400 '
-          'http://host/path/to/video.mp4 id=barHerderAnimation}"\n'
-          'Animation directives must be of the form "{@animation WIDTH '
-          'HEIGHT URL [id=ID]}"'),
+        'Invalid @animation directive, "{@animation 100 200 300 400 '
+        'http://host/path/to/video.mp4 id=barHerderAnimation}"\n'
+        'Animation directives must be of the form "{@animation WIDTH '
+        'HEIGHT URL [id=ID]}"',
+      ),
     );
   }
 
@@ -327,8 +347,10 @@ Three.'''));
 
     expect(
       libraryModel,
-      hasInvalidParameterWarning('An animation has a non-unique identifier, '
-          '"barHerderAnimation". Animation identifiers must be unique.'),
+      hasInvalidParameterWarning(
+        'An animation has a non-unique identifier, '
+        '"barHerderAnimation". Animation identifiers must be unique.',
+      ),
     );
   }
 
@@ -344,9 +366,10 @@ Three.'''));
     expect(
       libraryModel,
       hasInvalidParameterWarning(
-          'An animation has an invalid identifier, "not-valid". The '
-          'identifier can only contain letters, numbers and underscores, and '
-          'must not begin with a number.'),
+        'An animation has an invalid identifier, "not-valid". The '
+        'identifier can only contain letters, numbers and underscores, and '
+        'must not begin with a number.',
+      ),
     );
   }
 
@@ -362,8 +385,9 @@ Three.'''));
     expect(
       libraryModel,
       hasInvalidParameterWarning(
-          'An animation has an invalid width (barHerderAnimation), '
-          '"100px". The width must be an integer.'),
+        'An animation has an invalid width (barHerderAnimation), '
+        '"100px". The width must be an integer.',
+      ),
     );
   }
 
@@ -379,8 +403,9 @@ Three.'''));
     expect(
       libraryModel,
       hasInvalidParameterWarning(
-          'An animation has an invalid height (barHerderAnimation), '
-          '"200px". The height must be an integer.'),
+        'An animation has an invalid height (barHerderAnimation), '
+        '"200px". The height must be an integer.',
+      ),
     );
   }
 
@@ -396,8 +421,9 @@ Three.'''));
     expect(
       libraryModel,
       hasInvalidParameterWarning(
-          'The {@animation ...} directive was called with invalid '
-          'parameters. FormatException: Could not find an option named'),
+        'The {@animation ...} directive was called with invalid '
+        'parameters. FormatException: Could not find an option named',
+      ),
     );
   }
 
@@ -414,12 +440,15 @@ Three.'''));
     var doc = await libraryModel.processComment();
 
     expectNoWarnings();
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 Text.
 
 {@macro abc}
 
-End text.'''));
+End text.'''),
+    );
   }
 
   void test_processesLeadingTemplateDirective() async {
@@ -433,10 +462,13 @@ End text.'''));
     var doc = await libraryModel.processComment();
 
     expectNoWarnings();
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 {@macro abc}
 
-End text.'''));
+End text.'''),
+    );
   }
 
   void test_processesTrailingTemplateDirective() async {
@@ -450,10 +482,13 @@ End text.'''));
     var doc = await libraryModel.processComment();
 
     expectNoWarnings();
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 Text.
 
-{@macro abc}'''));
+{@macro abc}'''),
+    );
   }
 
   void test_processesTemplateDirectiveWithoutBlankLineFollowing() async {
@@ -468,11 +503,14 @@ Text.
     var doc = await libraryModel.processComment();
 
     expectNoWarnings();
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 Text.
 
 {@macro abc}
-End text.'''));
+End text.'''),
+    );
   }
 
   void test_allowsWhitespaceAroundTemplateDirectiveName() async {
@@ -496,10 +534,13 @@ End text.'''));
     var doc = libraryModel.documentation;
 
     expectNoWarnings();
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 Text.
 
-{@inject-html}<script></script>{@end-inject-html}'''));
+{@inject-html}<script></script>{@end-inject-html}'''),
+    );
   }
 
   void test_leavesToolUnprocessedWhenDisabled() async {
@@ -511,10 +552,13 @@ Text.
     var doc = libraryModel.documentation;
 
     expectNoWarnings();
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 Text.
 
-{@tool date}{@end-tool}'''));
+{@tool date}{@end-tool}'''),
+    );
   }
 
   void test_processesInjectHtmlDirectiveWhenEnabled() async {
@@ -530,12 +574,15 @@ Text.
     var doc = libraryModel.documentation;
 
     expectNoWarnings();
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 Text.
 
 
 <dartdoc-html>6829def5ec06d211fa90fe69a58213ae901f3ee4</dartdoc-html>
-'''));
+'''),
+    );
   }
 
   void test_processesYoutubeDirective() async {
@@ -609,108 +656,126 @@ Text.
 
   void test_youtubeDirectiveHasLessThanThreeArguments() async {
     await writePackageWithCommentedLibrary(
-        '/// {@youtube 100 https://www.youtube.com/watch?v=oHg5SJYRHA0}');
+      '/// {@youtube 100 https://www.youtube.com/watch?v=oHg5SJYRHA0}',
+    );
 
     expect(
       libraryModel,
-      hasInvalidParameterWarning('Invalid @youtube directive, '
-          '"{@youtube 100 https://www.youtube.com/watch?v=oHg5SJYRHA0}"\n'
-          'YouTube directives must be of the form '
-          '"{@youtube WIDTH HEIGHT URL}"'),
+      hasInvalidParameterWarning(
+        'Invalid @youtube directive, '
+        '"{@youtube 100 https://www.youtube.com/watch?v=oHg5SJYRHA0}"\n'
+        'YouTube directives must be of the form '
+        '"{@youtube WIDTH HEIGHT URL}"',
+      ),
     );
   }
 
   void test_youtubeDirectiveHasMoreThanThreeArguments() async {
     await writePackageWithCommentedLibrary(
-        '/// {@youtube 100 200 300 https://www.youtube.com/watch?v=oHg5SJYRHA0}');
+      '/// {@youtube 100 200 300 https://www.youtube.com/watch?v=oHg5SJYRHA0}',
+    );
 
     expect(
       libraryModel,
-      hasInvalidParameterWarning('Invalid @youtube directive, '
-          '"{@youtube 100 200 300 https://www.youtube.com/watch?v=oHg5SJYRHA0}"\n'
-          'YouTube directives must be of the form '
-          '"{@youtube WIDTH HEIGHT URL}"'),
+      hasInvalidParameterWarning(
+        'Invalid @youtube directive, '
+        '"{@youtube 100 200 300 https://www.youtube.com/watch?v=oHg5SJYRHA0}"\n'
+        'YouTube directives must be of the form '
+        '"{@youtube WIDTH HEIGHT URL}"',
+      ),
     );
   }
 
   void test_youtubeDirectiveHasMalformedWidth() async {
     await writePackageWithCommentedLibrary(
-        '/// {@youtube 100px 200 https://www.youtube.com/watch?v=oHg5SJYRHA0}');
+      '/// {@youtube 100px 200 https://www.youtube.com/watch?v=oHg5SJYRHA0}',
+    );
 
     expect(
       libraryModel,
       hasInvalidParameterWarning(
-          'A @youtube directive has an invalid width, "100px". '
-          'The width must be a positive integer.'),
+        'A @youtube directive has an invalid width, "100px". '
+        'The width must be a positive integer.',
+      ),
     );
   }
 
   void test_youtubeDirectiveHasNegativeWidth() async {
     await writePackageWithCommentedLibrary(
-        '/// {@youtube -100 200 https://www.youtube.com/watch?v=oHg5SJYRHA0}');
+      '/// {@youtube -100 200 https://www.youtube.com/watch?v=oHg5SJYRHA0}',
+    );
 
     expect(
       libraryModel,
       hasInvalidParameterWarning(
-          'The {@youtube ...} directive was called with invalid '
-          'parameters. FormatException: Could not find an option with '
-          'short name "-1".'),
+        'A @youtube directive has an invalid width, "-100". '
+        'The width must be a positive integer.',
+      ),
     );
   }
 
   void test_youtubeDirectiveHasMalformedHeight() async {
     await writePackageWithCommentedLibrary(
-        '/// {@youtube 100 200px https://www.youtube.com/watch?v=oHg5SJYRHA0}');
+      '/// {@youtube 100 200px https://www.youtube.com/watch?v=oHg5SJYRHA0}',
+    );
 
     expect(
       libraryModel,
       hasInvalidParameterWarning(
-          'A @youtube directive has an invalid height, "200px". The height '
-          'must be a positive integer.'),
+        'A @youtube directive has an invalid height, "200px". The height '
+        'must be a positive integer.',
+      ),
     );
   }
 
   void test_youtubeDirectiveHasNegativeHeight() async {
     await writePackageWithCommentedLibrary(
-        '/// {@youtube 100 -200 https://www.youtube.com/watch?v=oHg5SJYRHA0}');
+      '/// {@youtube 100 -200 https://www.youtube.com/watch?v=oHg5SJYRHA0}',
+    );
 
     expect(
       libraryModel,
       hasInvalidParameterWarning(
-          'The {@youtube ...} directive was called with invalid '
-          'parameters. FormatException: Could not find an option with '
-          'short name "-2".'),
+        'A @youtube directive has an invalid height, "-200". The height '
+        'must be a positive integer.',
+      ),
     );
   }
 
   void test_youtubeDirectiveHasInvalidUrl() async {
     await writePackageWithCommentedLibrary(
-        '/// {@youtube 100 200 https://www.not-youtube.com/watch?v=oHg5SJYRHA0}');
+      '/// {@youtube 100 200 https://www.not-youtube.com/watch?v=oHg5SJYRHA0}',
+    );
 
     expect(
       libraryModel,
-      hasInvalidParameterWarning('A @youtube directive has an invalid URL: '
-          '"https://www.not-youtube.com/watch?v=oHg5SJYRHA0". Supported '
-          'YouTube URLs have the following format: '
-          'https://www.youtube.com/watch?v=oHg5SJYRHA0.'),
+      hasInvalidParameterWarning(
+        'A @youtube directive has an invalid URL: '
+        '"https://www.not-youtube.com/watch?v=oHg5SJYRHA0". Supported '
+        'YouTube URLs have the following format: '
+        'https://www.youtube.com/watch?v=oHg5SJYRHA0.',
+      ),
     );
   }
 
   void test_youtubeDirectiveHasUrlWithExtraQueryParameters() async {
     await writePackageWithCommentedLibrary(
-        '/// {@youtube 100 200 https://www.not-youtube.com/watch?v=oHg5SJYRHA0&a=1}');
+      '/// {@youtube 100 200 https://www.not-youtube.com/watch?v=oHg5SJYRHA0&a=1}',
+    );
 
     expect(
       libraryModel,
-      hasInvalidParameterWarning('A @youtube directive has an invalid URL: '
-          '"https://www.not-youtube.com/watch?v=oHg5SJYRHA0&a=1". '
-          'Supported YouTube URLs have the following format: '
-          'https://www.youtube.com/watch?v=oHg5SJYRHA0.'),
+      hasInvalidParameterWarning(
+        'A @youtube directive has an invalid URL: '
+        '"https://www.not-youtube.com/watch?v=oHg5SJYRHA0&a=1". '
+        'Supported YouTube URLs have the following format: '
+        'https://www.youtube.com/watch?v=oHg5SJYRHA0.',
+      ),
     );
   }
 
   Matcher hasInvalidParameterWarning(String message) =>
       hasWarning(PackageWarning.invalidParameter, message);
 
-// TODO(srawlins): More unit tests: @tool.
+  // TODO(srawlins): More unit tests: @tool.
 }
