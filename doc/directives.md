@@ -1,3 +1,7 @@
+---
+internal: true
+---
+
 Dartdoc supports several **directives** within Dart doc comments. Each directive
 is then processed during documentation generation, and new text is inserted in
 place of the directive. Not all directives are supported for package

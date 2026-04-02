@@ -1,3 +1,7 @@
+---
+internal: true
+---
+
 # Jaspr Public Demo Checklist
 
 This page gives one reproducible flow for showing the `jaspr` backend publicly

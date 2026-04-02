@@ -267,23 +267,6 @@ The Jaspr backend has been verified on a real Flutter workspace:
 
 That does not mean “done forever”, but it does mean this is well beyond a toy-package-only prototype.
 
-## Community Evaluation Links
-
-Start here if you want the public-facing story and the practical proof points:
-- [Package Maintainer Recipes](doc/package-maintainer-recipes.md)
-- [Release Playbook](doc/release-playbook.md)
-- [Jaspr Community Showcase](doc/jaspr-community-showcase.md)
-- [Jaspr Public Demo Checklist](doc/jaspr-public-demo.md)
-- [Jaspr Deployment](doc/jaspr-deployment.md)
-- [Jaspr Search Verification](doc/jaspr-search-verification.md)
-- [Jaspr Theming](doc/jaspr-theming.md)
-- [Jaspr vs VitePress](doc/jaspr-vs-vitepress.md)
-- [Jaspr Launch Checklist](doc/jaspr-launch-checklist.md)
-- [Jaspr Launch Readiness](doc/jaspr-launch-readiness.md)
-- [Jaspr Reddit Draft](doc/jaspr-reddit-post.md)
-- [Jaspr Demo Script](doc/jaspr-demo-script.md)
-- [Jaspr Post Assets](doc/jaspr-post-assets.md)
-
 ## CI/CD Example For VitePress
 
 A simple GitHub Pages flow can generate docs from the local source checkout instead of relying on a global install:
@@ -447,7 +430,8 @@ If the site is hosted under a subpath, add:
 --dart-define DOCS_BASE_PATH=/your-site-path
 ```
 
-See [Jaspr Deployment](doc/jaspr-deployment.md) for the full hosting guide.
+Use `DOCS_BASE_PATH` whenever the generated site is hosted under a subpath
+rather than the domain root.
 
 ## Key CLI Options
 

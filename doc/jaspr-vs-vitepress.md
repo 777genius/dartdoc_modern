@@ -1,3 +1,7 @@
+---
+internal: true
+---
+
 # Jaspr vs VitePress
 
 Status:

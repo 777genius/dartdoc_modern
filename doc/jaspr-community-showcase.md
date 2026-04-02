@@ -1,3 +1,7 @@
+---
+internal: true
+---
+
 # Jaspr Community Showcase
 
 This is the clean public-facing page to link when showing the `jaspr` backend

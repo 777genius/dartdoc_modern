@@ -1,3 +1,7 @@
+---
+internal: true
+---
+
 # Phase 0: Feasibility Spike Results
 
 ## Test Setup

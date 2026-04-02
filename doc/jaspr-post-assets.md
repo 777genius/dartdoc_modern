@@ -1,3 +1,7 @@
+---
+internal: true
+---
+
 # Jaspr Post Assets
 
 Status:

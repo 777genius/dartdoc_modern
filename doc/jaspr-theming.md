@@ -1,3 +1,7 @@
+---
+internal: true
+---
+
 # Jaspr Theming
 
 The generated Jaspr scaffold now uses a two-layer theming model:

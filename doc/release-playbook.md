@@ -1,3 +1,7 @@
+---
+internal: true
+---
+
 # Release Playbook
 
 Status:

@@ -1,3 +1,7 @@
+---
+internal: true
+---
+
 # Jaspr Launch Readiness
 
 This document captures the real public-facing quality bar for the `jaspr`

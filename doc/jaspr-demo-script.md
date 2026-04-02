@@ -1,3 +1,7 @@
+---
+internal: true
+---
+
 # Jaspr Demo Script
 
 Status:

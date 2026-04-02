@@ -1,3 +1,7 @@
+---
+internal: true
+---
+
 # Package Maintainer Recipes
 
 Status:

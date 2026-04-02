@@ -1,3 +1,7 @@
+---
+internal: true
+---
+
 # **Dart Documentation Comments Specification**
 Version: 1.0.0
 

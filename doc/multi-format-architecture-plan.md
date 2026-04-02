@@ -1,3 +1,7 @@
+---
+internal: true
+---
+
 # Multi-Format Architecture Plan
 
 Status: implemented through Phase 5
