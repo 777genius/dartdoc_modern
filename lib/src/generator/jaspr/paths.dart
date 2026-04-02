@@ -6,12 +6,10 @@ import 'package:dartdoc_vitepress/src/generator/core/path_utils.dart'
     as path_utils;
 import 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
+import 'package:path/path.dart' as p;
 
 export 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart'
-    show
-        VitePressPathResolver,
-        isDuplicateSdkLibrary,
-        isInternalSdkLibrary;
+    show VitePressPathResolver, isDuplicateSdkLibrary, isInternalSdkLibrary;
 
 /// Jaspr uses the same public URL structure as VitePress, but stores markdown
 /// source files under `content/`.
@@ -37,6 +35,16 @@ class JasprPathResolver extends VitePressPathResolver {
       return '/api/${dirNameFor(element)}/library';
     }
     return super.urlFor(element);
+  }
+
+  @override
+  String? relativeUrlFor(Documentable element) {
+    final url = urlFor(element);
+    if (url == null) return null;
+    if (currentPageUrl == null) return url;
+
+    final rel = p.posix.relative(url, from: currentPageUrl!);
+    return rel.startsWith('.') ? rel : './$rel';
   }
 
   static String sanitizeFileName(String name) {
