@@ -6,7 +6,7 @@ import 'src/utils.dart';
 
 void main() {
   group('JasprPathResolver.relativeUrlFor', () {
-    test('uses route-relative links for sibling API pages', () async {
+    test('uses base-relative links for API pages', () async {
       final packageGraph = await bootBasicPackage(
         'testing/test_package_with_docs',
         pubPackageMetaProvider,
@@ -27,11 +27,20 @@ void main() {
       final paths = JasprPathResolver()..initFromPackageGraph(packageGraph);
 
       paths.currentPageUrl = paths.urlFor(greeter);
-      expect(paths.relativeUrlFor(formatter), '../MessageFormatter');
-      expect(paths.relativeUrlFor(result), '../GreetingResult');
+      expect(
+        paths.relativeUrlFor(formatter),
+        'api/test_package_with_docs/MessageFormatter',
+      );
+      expect(
+        paths.relativeUrlFor(result),
+        'api/test_package_with_docs/GreetingResult',
+      );
 
       paths.currentPageUrl = paths.urlFor(library);
-      expect(paths.relativeUrlFor(greeter), '../Greeter');
+      expect(
+        paths.relativeUrlFor(greeter),
+        'api/test_package_with_docs/Greeter',
+      );
     });
   });
 }

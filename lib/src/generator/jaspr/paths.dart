@@ -41,10 +41,7 @@ class JasprPathResolver extends VitePressPathResolver {
   String? relativeUrlFor(Documentable element) {
     final url = urlFor(element);
     if (url == null) return null;
-    if (currentPageUrl == null) return url;
-
-    final rel = p.posix.relative(url, from: currentPageUrl!);
-    return rel.startsWith('.') ? rel : './$rel';
+    return p.posix.relative(url, from: '/');
   }
 
   static String sanitizeFileName(String name) {
