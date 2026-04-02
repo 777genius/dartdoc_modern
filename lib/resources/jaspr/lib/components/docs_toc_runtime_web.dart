@@ -17,6 +17,7 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
   JSFunction? _scrollListener;
   JSFunction? _resizeListener;
   JSFunction? _navigationListener;
+  JSFunction? _hashChangeListener;
   bool _updateQueued = false;
   String? _lastActiveId;
 
@@ -30,10 +31,14 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
     _navigationListener = ((web.Event _) {
       Timer(const Duration(milliseconds: 50), _queueUpdate);
     }).toJS;
+    _hashChangeListener = ((web.Event _) {
+      Timer(const Duration(milliseconds: 16), _queueUpdate);
+    }).toJS;
 
     web.window.addEventListener('scroll', _scrollListener);
     web.window.addEventListener('resize', _resizeListener);
     web.window.addEventListener('docs:navigation', _navigationListener);
+    web.window.addEventListener('hashchange', _hashChangeListener);
 
     Timer(const Duration(milliseconds: 50), _queueUpdate);
   }
@@ -51,6 +56,10 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
     if (_navigationListener != null) {
       web.window.removeEventListener('docs:navigation', _navigationListener);
       _navigationListener = null;
+    }
+    if (_hashChangeListener != null) {
+      web.window.removeEventListener('hashchange', _hashChangeListener);
+      _hashChangeListener = null;
     }
     super.dispose();
   }
@@ -172,12 +181,27 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
     final left = linkRect.left - containerRect.left;
 
     indicator.style.opacity = '1';
-    indicator.style.width = '${linkRect.width}px';
     indicator.style.height = '${linkRect.height}px';
     indicator.style.transform = 'translate3d(${left}px, ${top}px, 0)';
   }
 
   _TocTarget _resolveActiveTarget(List<_TocTarget> targets, double offset) {
+    final hash = web.window.location.hash;
+    if (hash.isNotEmpty) {
+      final hashId = Uri.decodeComponent(hash.substring(1));
+      for (final target in targets) {
+        if (target.id != hashId) continue;
+        final hashTop = target.heading.getBoundingClientRect().top;
+        final isHashTargetInFocus =
+            hashTop <= offset + 120 &&
+            hashTop >= -(target.link.clientHeight + 24);
+        if (isHashTargetInFocus) {
+          return target;
+        }
+        break;
+      }
+    }
+
     for (var index = 0; index < targets.length; index++) {
       final current = targets[index];
       final currentTop = current.heading.getBoundingClientRect().top;

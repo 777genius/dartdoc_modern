@@ -937,9 +937,12 @@ void main() {
           contains("target.link.classList.remove('active')"),
         );
         expect(tocRuntimeWeb, contains("window.addEventListener('scroll'"));
+        expect(tocRuntimeWeb, contains("window.addEventListener('hashchange'"));
         expect(tocRuntimeWeb, contains('requestAnimationFrame('));
         expect(tocRuntimeWeb, contains("querySelector('.toc-indicator')"));
         expect(tocRuntimeWeb, contains('indicator.style.transform ='));
+        expect(tocRuntimeWeb, isNot(contains('indicator.style.width =')));
+        expect(tocRuntimeWeb, contains('final hash = web.window.location.hash;'));
         expect(
           content,
           contains(
