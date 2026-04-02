@@ -22,6 +22,10 @@ class JasprScaffoldSmokeChecker {
     _requireFile('web/generated/api_styles.css');
     _requireFile('lib/generated/api_sidebar.dart');
     _requireFile('lib/layouts/api_docs_layout.dart');
+    _requireFile('lib/components/docs_sidebar_toggle.dart');
+    _requireFile('lib/components/docs_sidebar_toggle_shared.dart');
+    _requireFile('lib/components/docs_sidebar_toggle_stub.dart');
+    _requireFile('lib/components/docs_sidebar_toggle_web.dart');
 
     final packageName = _readPubspecPackageName();
     final generatedRoot = p.join(
@@ -88,7 +92,9 @@ class JasprScaffoldSmokeChecker {
     final pagesPath = searchIndex['pages'] as String?;
     final sectionsPath = searchIndex['sections'] as String?;
     final sectionsContentPath = searchIndex['sectionsContent'] as String?;
-    if (pagesPath == null || sectionsPath == null || sectionsContentPath == null) {
+    if (pagesPath == null ||
+        sectionsPath == null ||
+        sectionsContentPath == null) {
       throw StateError('search index manifest is missing chunk paths');
     }
 
@@ -104,17 +110,20 @@ class JasprScaffoldSmokeChecker {
       throw StateError('search index does not contain API entries');
     }
 
-    final hasGuideContent =
-        Directory(p.join(outputDir.path, 'content', 'guide')).existsSync();
+    final hasGuideContent = Directory(
+      p.join(outputDir.path, 'content', 'guide'),
+    ).existsSync();
     if (hasGuideContent && !urls.any((url) => url.startsWith('/guide/'))) {
       throw StateError('search index does not contain guide entries');
     }
+
+    _compileServerEntrypoint();
   }
 
   Map<String, Object?> _readSearchIndex() {
-    final raw =
-        File(p.join(outputDir.path, 'web', 'generated', 'search_index.json'))
-            .readAsStringSync();
+    final raw = File(
+      p.join(outputDir.path, 'web', 'generated', 'search_index.json'),
+    ).readAsStringSync();
     return jsonDecode(raw) as Map<String, Object?>;
   }
 
@@ -122,10 +131,12 @@ class JasprScaffoldSmokeChecker {
     String relativePath, {
     List<Object?> pages = const [],
   }) {
-    final normalizedPath =
-        relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
-    final raw =
-        File(p.join(outputDir.path, 'web', normalizedPath)).readAsStringSync();
+    final normalizedPath = relativePath.startsWith('/')
+        ? relativePath.substring(1)
+        : relativePath;
+    final raw = File(
+      p.join(outputDir.path, 'web', normalizedPath),
+    ).readAsStringSync();
     final payload = jsonDecode(raw) as Map<String, Object?>;
     return ((payload['entries'] as List<Object?>?) ?? const [])
         .map((entry) => _normalizeEntry(entry, pages))
@@ -133,7 +144,9 @@ class JasprScaffoldSmokeChecker {
   }
 
   String _readPubspecPackageName() {
-    final pubspec = File(p.join(outputDir.path, 'pubspec.yaml')).readAsLinesSync();
+    final pubspec = File(
+      p.join(outputDir.path, 'pubspec.yaml'),
+    ).readAsLinesSync();
     for (final line in pubspec) {
       final trimmed = line.trim();
       if (trimmed.startsWith('name:')) {
@@ -155,6 +168,35 @@ class JasprScaffoldSmokeChecker {
       throw StateError('Required file not found: $relativePath');
     }
   }
+
+  void _compileServerEntrypoint() {
+    final smokeDir = Directory(
+      p.join(outputDir.path, '.dart_tool', 'jaspr_scaffold_smoke'),
+    )..createSync(recursive: true);
+    final outputPath = p.join(smokeDir.path, 'main_server_smoke');
+
+    final result = Process.runSync(Platform.resolvedExecutable, [
+      'compile',
+      'exe',
+      'lib/main.server.dart',
+      '-o',
+      outputPath,
+    ], workingDirectory: outputDir.path);
+
+    if (result.exitCode != 0) {
+      throw StateError(
+        'Server entrypoint failed to compile:\n'
+        '${result.stdout}\n'
+        '${result.stderr}',
+      );
+    }
+
+    if (!File(outputPath).existsSync()) {
+      throw StateError(
+        'Server entrypoint compilation completed without producing $outputPath',
+      );
+    }
+  }
 }
 
 String? _entryUrl(Object? entry) {
@@ -170,13 +212,12 @@ String? _entryUrl(Object? entry) {
 Object? _normalizeEntry(Object? entry, List<Object?> pages) {
   if (entry is List<Object?> && entry.isNotEmpty && entry.first is int) {
     final pageIndex = entry.first as int;
-    final page =
-        pageIndex >= 0 && pageIndex < pages.length ? pages[pageIndex] : null;
+    final page = pageIndex >= 0 && pageIndex < pages.length
+        ? pages[pageIndex]
+        : null;
     final pageUrl = _entryUrl(page) ?? '';
     final anchor = entry.length > 1 ? entry[1] as String? ?? '' : '';
-    return {
-      'url': anchor.isEmpty ? pageUrl : '$pageUrl#$anchor',
-    };
+    return {'url': anchor.isEmpty ? pageUrl : '$pageUrl#$anchor'};
   }
   return entry;
 }

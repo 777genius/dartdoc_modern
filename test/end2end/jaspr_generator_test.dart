@@ -245,6 +245,21 @@ void main() {
           isTrue,
         );
         expect(
+          _outputExists(
+            outDir,
+            'lib/components/docs_sidebar_toggle_shared.dart',
+          ),
+          isTrue,
+        );
+        expect(
+          _outputExists(outDir, 'lib/components/docs_sidebar_toggle_stub.dart'),
+          isTrue,
+        );
+        expect(
+          _outputExists(outDir, 'lib/components/docs_sidebar_toggle_web.dart'),
+          isTrue,
+        );
+        expect(
           _outputExists(outDir, 'lib/components/docs_dartpad_runtime.dart'),
           isTrue,
         );
@@ -463,6 +478,14 @@ void main() {
         final sidebarToggle = _readOutput(
           outDir,
           'lib/components/docs_sidebar_toggle.dart',
+        );
+        final sidebarToggleStub = _readOutput(
+          outDir,
+          'lib/components/docs_sidebar_toggle_stub.dart',
+        );
+        final sidebarToggleWeb = _readOutput(
+          outDir,
+          'lib/components/docs_sidebar_toggle_web.dart',
         );
         final dartPadRuntime = _readOutput(
           outDir,
@@ -688,21 +711,32 @@ void main() {
         expect(sidebar, contains("'sidebar-link active'"));
         expect(
           sidebarToggle,
+          contains("export 'docs_sidebar_toggle_stub.dart'"),
+        );
+        expect(
+          sidebarToggleStub,
+          contains('class DocsSidebarToggle extends StatelessComponent'),
+        );
+        expect(sidebarToggleStub, contains("'data-docs-sidebar-toggle': ''"));
+        expect(sidebarToggleStub, contains("aria-controls': 'docs-sidebar'"));
+        expect(
+          sidebarToggleWeb,
           contains('class DocsSidebarToggle extends StatefulComponent'),
         );
-        expect(sidebarToggle, contains("'data-docs-sidebar-toggle': ''"));
-        expect(sidebarToggle, contains("aria-controls': 'docs-sidebar'"));
-        expect(sidebarToggle, contains("addEventListener(_sidebarSyncEvent"));
-        expect(sidebarToggle, contains('void _syncFromDom() {'));
         expect(
-          sidebarToggle,
+          sidebarToggleWeb,
+          contains("addEventListener(_sidebarSyncEvent"),
+        );
+        expect(sidebarToggleWeb, contains('void _syncFromDom() {'));
+        expect(
+          sidebarToggleWeb,
           contains(
             "web.window.dispatchEvent(web.CustomEvent(_sidebarSyncEvent))",
           ),
         );
-        expect(sidebarToggle, contains("sidebar.classList.add('open')"));
+        expect(sidebarToggleWeb, contains("sidebar.classList.add('open')"));
         expect(
-          sidebarToggle,
+          sidebarToggleWeb,
           contains("web.document.body?.style.overflow = 'hidden'"),
         );
         expect(
