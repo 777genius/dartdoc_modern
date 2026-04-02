@@ -917,7 +917,14 @@ void main() {
         );
         expect(
           mermaidDiagram,
-          contains("Component.text('Rendering Mermaid diagram')"),
+          contains("Component.text('Loading diagram preview')"),
+        );
+        expect(mermaidDiagram, contains("Component.text('Mermaid')"));
+        expect(
+          mermaidDiagram,
+          contains(
+            "Component.text(\n                      'Rendering the Mermaid source into a visual diagram. This usually takes a moment.',",
+          ),
         );
         expect(mermaidDiagram, contains("'data-mermaid-host': ''"));
         expect(mermaidDiagram, contains("'data-mermaid-fallback': ''"));

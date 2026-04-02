@@ -41,8 +41,19 @@ class MermaidDiagramComponent extends CustomComponent {
                 'aria-live': 'polite',
               },
               [
-                span(classes: 'mermaid-placeholder-label', [
-                  Component.text('Rendering Mermaid diagram'),
+                div(classes: 'mermaid-placeholder-inner', [
+                  span(
+                    classes: 'mermaid-placeholder-badge',
+                    [Component.text('Mermaid')],
+                  ),
+                  span(classes: 'mermaid-placeholder-label', [
+                    Component.text('Loading diagram preview'),
+                  ]),
+                  p(classes: 'mermaid-placeholder-hint', [
+                    Component.text(
+                      'Rendering the Mermaid source into a visual diagram. This usually takes a moment.',
+                    ),
+                  ]),
                 ]),
               ],
             ),

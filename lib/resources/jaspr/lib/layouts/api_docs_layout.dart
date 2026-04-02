@@ -1284,13 +1284,35 @@ class ApiDocsLayout extends DocsLayout {
         ),
         backgroundColor: Color('var(--docs-shell-surface-soft)'),
       ),
+      css('.mermaid-placeholder-inner').styles(
+        display: Display.grid,
+        justifyItems: JustifyItems.center,
+        gap: Gap.row(0.55.rem),
+        raw: {'text-align': 'center', 'max-width': '32rem'},
+      ),
+      css('.mermaid-placeholder-badge').styles(
+        padding: Padding.symmetric(vertical: 0.22.rem, horizontal: 0.55.rem),
+        radius: BorderRadius.circular(999.px),
+        backgroundColor: Color('var(--docs-shell-accent-soft)'),
+        color: Color('var(--docs-shell-accent-strong)'),
+        fontWeight: FontWeight.w700,
+        fontSize: 0.76.rem,
+        textTransform: TextTransform.upperCase,
+        raw: {'letter-spacing': '0.08em'},
+      ),
       css(
         '.mermaid-placeholder[hidden], .mermaid-host[hidden], .mermaid-fallback[hidden]',
       ).styles(display: Display.none, raw: {'display': 'none !important'}),
       css('.mermaid-placeholder-label').styles(
         color: Color('var(--docs-shell-muted-text)'),
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.02.rem,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 0.01.rem,
+      ),
+      css('.mermaid-placeholder-hint').styles(
+        margin: Margin.zero,
+        color: Color('var(--docs-shell-muted)'),
+        fontSize: 0.92.rem,
+        raw: {'line-height': '1.55'},
       ),
       css('.mermaid-host').styles(
         display: Display.block,
@@ -2128,7 +2150,8 @@ class ApiDocsLayout extends DocsLayout {
       radius: BorderRadius.circular(0.8.rem),
       backgroundColor: Color('var(--docs-shell-surface-soft)'),
     ),
-    css('.mermaid-placeholder-label').styles(raw: {'font-size': '0.98rem'}),
+    css('.mermaid-placeholder-label').styles(raw: {'font-size': '1rem'}),
+    css('.mermaid-placeholder-hint').styles(raw: {'max-width': '28rem'}),
     css('.mermaid-fallback-message').styles(raw: {'position': 'relative'}),
     css('.mermaid-fallback-message::before').styles(
       raw: {
