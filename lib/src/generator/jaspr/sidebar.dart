@@ -19,28 +19,28 @@ class JasprSidebarGenerator {
     _writeHeader(buf);
     buf.writeln('const apiSidebarGroups = <SidebarGroup>[');
 
+    final isMultiPackage = packageGraph.localPackages.length > 1;
     for (final package in packageGraph.localPackages) {
-      final libraries = package.publicLibrariesSorted
-          .where((lib) =>
-              !isDuplicateSdkLibrary(lib, package.libraries) &&
-              !isInternalSdkLibrary(lib) &&
-              _hasApiElements(lib))
-          .toList()
-        ..sort((a, b) => a.name.compareTo(b.name));
+      final libraries =
+          package.publicLibrariesSorted
+              .where(
+                (lib) =>
+                    !isDuplicateSdkLibrary(lib, package.libraries) &&
+                    !isInternalSdkLibrary(lib) &&
+                    _hasApiElements(lib),
+              )
+              .toList()
+            ..sort((a, b) => a.name.compareTo(b.name));
 
       if (libraries.isEmpty) continue;
 
-      final isMultiPackage = packageGraph.localPackages.length > 1;
+      final displayNames = _disambiguatedNames(libraries);
       _writeGroup(
         buf,
         title: isMultiPackage ? package.name : null,
         items: [
           for (final lib in libraries)
-            if (_paths.urlFor(lib) case final url?)
-              (
-                text: lib.name,
-                link: url,
-              ),
+            _libraryItem(lib, displayName: displayNames[lib] ?? lib.name),
         ],
       );
     }
@@ -71,7 +71,7 @@ class JasprSidebarGenerator {
           title: packageName,
           items: [
             for (final entry in sorted)
-              (
+              _SidebarNode(
                 text: entry.title,
                 link: _guideLink(entry.relativePath),
               ),
@@ -85,7 +85,7 @@ class JasprSidebarGenerator {
           buf,
           items: [
             for (final entry in sorted)
-              (
+              _SidebarNode(
                 text: entry.title,
                 link: _guideLink(entry.relativePath),
               ),
@@ -113,9 +113,12 @@ class JasprSidebarGenerator {
     buf.writeln();
     buf.writeln('class SidebarItem {');
     buf.writeln('  final String text;');
-    buf.writeln('  final String link;');
+    buf.writeln('  final String? link;');
+    buf.writeln('  final bool collapsed;');
+    buf.writeln('  final List<SidebarItem> items;');
     buf.writeln(
-        '  const SidebarItem({required this.text, required this.link});');
+      '  const SidebarItem({required this.text, this.link, this.collapsed = false, this.items = const <SidebarItem>[]});',
+    );
     buf.writeln('}');
     buf.writeln();
     buf.writeln('class SidebarGroup {');
@@ -128,7 +131,7 @@ class JasprSidebarGenerator {
 
   void _writeGroup(
     StringBuffer buf, {
-    required List<({String text, String link})> items,
+    required List<_SidebarNode> items,
     String? title,
   }) {
     if (items.isEmpty) return;
@@ -138,12 +141,174 @@ class JasprSidebarGenerator {
     }
     buf.writeln('    items: [');
     for (final item in items) {
-      buf.writeln(
-        "      SidebarItem(text: '${_esc(item.text)}', link: '${_esc(item.link)}'),",
-      );
+      _writeItem(buf, item, indent: 6);
     }
     buf.writeln('    ],');
     buf.writeln('  ),');
+  }
+
+  void _writeItem(StringBuffer buf, _SidebarNode item, {required int indent}) {
+    final pad = ' ' * indent;
+    buf.writeln('${pad}SidebarItem(');
+    buf.writeln("$pad  text: '${_esc(item.text)}',");
+    if (item.link case final link?) {
+      buf.writeln("$pad  link: '${_esc(link)}',");
+    }
+    if (item.collapsed) {
+      buf.writeln('$pad  collapsed: true,');
+    }
+    if (item.items.isNotEmpty) {
+      buf.writeln('$pad  items: [');
+      for (final child in item.items) {
+        _writeItem(buf, child, indent: indent + 4);
+      }
+      buf.writeln('$pad  ],');
+    }
+    buf.writeln('$pad),');
+  }
+
+  _SidebarNode _libraryItem(Library library, {required String displayName}) {
+    final totalElements = _countLibraryElements(library);
+    final overviewLink = _paths.urlFor(library);
+    final items = <_SidebarNode>[
+      if (overviewLink != null)
+        _SidebarNode(text: 'Overview', link: overviewLink),
+      ..._kindGroups(library),
+    ];
+    return _SidebarNode(
+      text: displayName,
+      collapsed: totalElements > 30,
+      items: items,
+    );
+  }
+
+  List<_SidebarNode> _kindGroups(Library library) {
+    return [
+      _kindGroup(
+        'Classes',
+        library.publicClassesSorted,
+        library,
+        collapseThreshold: 8,
+      ),
+      _kindGroup(
+        'Exceptions',
+        library.publicExceptionsSorted,
+        library,
+        collapseThreshold: 8,
+      ),
+      _kindGroup(
+        'Enums',
+        library.publicEnumsSorted,
+        library,
+        collapseThreshold: 8,
+      ),
+      _kindGroup(
+        'Mixins',
+        library.publicMixinsSorted,
+        library,
+        collapseThreshold: 8,
+      ),
+      _kindGroup(
+        'Extensions',
+        library.publicExtensionsSorted,
+        library,
+        collapseThreshold: 8,
+      ),
+      _kindGroup(
+        'Extension Types',
+        library.publicExtensionTypesSorted,
+        library,
+        collapseThreshold: 8,
+      ),
+      _kindGroup(
+        'Functions',
+        library.publicFunctionsSorted,
+        library,
+        collapseThreshold: 10,
+      ),
+      _kindGroup(
+        'Properties',
+        library.publicPropertiesSorted,
+        library,
+        collapseThreshold: 10,
+      ),
+      _kindGroup(
+        'Constants',
+        library.publicConstantsSorted,
+        library,
+        collapseThreshold: 10,
+      ),
+      _kindGroup(
+        'Typedefs',
+        library.publicTypedefsSorted,
+        library,
+        collapseThreshold: 8,
+      ),
+    ].nonNulls.toList();
+  }
+
+  _SidebarNode? _kindGroup(
+    String text,
+    List<ModelElement> elements,
+    Library library, {
+    required int collapseThreshold,
+  }) {
+    final filtered =
+        elements.where((e) => _belongsToLibrary(e, library)).toList()
+          ..sort((a, b) => a.name.compareTo(b.name));
+    if (filtered.isEmpty) return null;
+
+    final items = <_SidebarNode>[
+      for (final element in filtered)
+        if (_paths.urlFor(element) case final url?)
+          _SidebarNode(text: element.name, link: url),
+    ];
+    if (items.isEmpty) return null;
+
+    return _SidebarNode(
+      text: text,
+      collapsed: items.length > collapseThreshold,
+      items: items,
+    );
+  }
+
+  static bool _belongsToLibrary(ModelElement e, Library library) {
+    final canonical = e.canonicalLibrary;
+    if (canonical == null) return e.library == library;
+    return canonical == library;
+  }
+
+  int _countLibraryElements(Library library) {
+    int count(List<ModelElement> elements) =>
+        elements.where((e) => _belongsToLibrary(e, library)).length;
+    return count(library.publicClassesSorted) +
+        count(library.publicExceptionsSorted) +
+        count(library.publicEnumsSorted) +
+        count(library.publicMixinsSorted) +
+        count(library.publicExtensionsSorted) +
+        count(library.publicExtensionTypesSorted) +
+        count(library.publicFunctionsSorted) +
+        count(library.publicPropertiesSorted) +
+        count(library.publicConstantsSorted) +
+        count(library.publicTypedefsSorted);
+  }
+
+  Map<Library, String> _disambiguatedNames(List<Library> libraries) {
+    final nameCounts = <String, int>{};
+    for (final lib in libraries) {
+      nameCounts[lib.name] = (nameCounts[lib.name] ?? 0) + 1;
+    }
+
+    final result = <Library, String>{};
+    for (final lib in libraries) {
+      if (nameCounts[lib.name]! > 1) {
+        final dirName = _paths.dirNameFor(lib);
+        result[lib] = '${lib.name} ($dirName)';
+      } else {
+        result[lib] = lib.name;
+      }
+    }
+    return result;
   }
 
   static String _esc(String s) =>
@@ -161,4 +326,18 @@ class JasprSidebarGenerator {
         library.publicConstantsSorted.isNotEmpty ||
         library.publicTypedefsSorted.isNotEmpty;
   }
+}
+
+final class _SidebarNode {
+  const _SidebarNode({
+    required this.text,
+    this.link,
+    this.collapsed = false,
+    this.items = const [],
+  });
+
+  final String text;
+  final String? link;
+  final bool collapsed;
+  final List<_SidebarNode> items;
 }

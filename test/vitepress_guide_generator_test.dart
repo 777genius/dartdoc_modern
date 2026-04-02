@@ -79,6 +79,38 @@ void main() {
     });
   });
 
+  group('Guide collection visibility', () {
+    test('guide is visible by default', () {
+      expect(
+        guide_core.isGuideVisible('# Public Guide\n\nVisible content.'),
+        isTrue,
+      );
+    });
+
+    test('internal frontmatter hides guide', () {
+      expect(
+        guide_core.isGuideVisible('---\ninternal: true\n---\n\n# Secret'),
+        isFalse,
+      );
+    });
+
+    test('published false frontmatter hides guide', () {
+      expect(
+        guide_core.isGuideVisible('---\npublished: false\n---\n\n# Draft'),
+        isFalse,
+      );
+    });
+
+    test('sidebar position still parses when guide is internal', () {
+      expect(
+        guide_core.extractSidebarPosition(
+          '---\nsidebar_position: 3\ninternal: true\n---\n\n# Secret',
+        ),
+        equals(3),
+      );
+    });
+  });
+
   group('VitePressGuideGenerator.matchesFilters', () {
     VitePressGuideGenerator makeGenerator({
       List<String> include = const [],

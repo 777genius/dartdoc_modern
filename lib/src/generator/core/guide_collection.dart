@@ -27,8 +27,24 @@ final _kebabSnakeDelimiter = RegExp(r'[-_]');
 final frontmatterPattern = RegExp(r'^---\n([\s\S]*?)\n---', multiLine: true);
 
 /// Matches `sidebar_position: <number>` in frontmatter.
-final _sidebarPositionPattern =
-    RegExp(r'^sidebar_position:\s*(\d+)\s*$', multiLine: true);
+final _sidebarPositionPattern = RegExp(
+  r'^sidebar_position:\s*(\d+)\s*$',
+  multiLine: true,
+);
+
+/// Matches `internal: true` in frontmatter.
+final _internalGuidePattern = RegExp(
+  r'^internal:\s*true\s*$',
+  multiLine: true,
+  caseSensitive: false,
+);
+
+/// Matches `published: false` in frontmatter.
+final _unpublishedGuidePattern = RegExp(
+  r'^published:\s*false\s*$',
+  multiLine: true,
+  caseSensitive: false,
+);
 
 /// An entry representing a single guide markdown file.
 class GuideEntry {
@@ -63,11 +79,8 @@ class GuideEntry {
 }
 
 /// Applies format-specific content transformations to collected guide files.
-typedef GuideContentTransformer = String Function(
-  String content,
-  String relativePath,
-  String sourcePath,
-);
+typedef GuideContentTransformer =
+    String Function(String content, String relativePath, String sourcePath);
 
 /// Scans and collects markdown guide files in a format-agnostic way.
 ///
@@ -90,8 +103,8 @@ class GuideCollector {
     required this.scanDirs,
     List<String> include = const [],
     List<String> exclude = const [],
-  })  : _includeRegexps = compilePatterns(include, 'include'),
-        _excludeRegexps = compilePatterns(exclude, 'exclude');
+  }) : _includeRegexps = compilePatterns(include, 'include'),
+       _excludeRegexps = compilePatterns(exclude, 'exclude');
 
   /// Compiles regex patterns with validation.
   static List<RegExp> compilePatterns(List<String> patterns, String label) {
@@ -131,8 +144,12 @@ class GuideCollector {
           if (!matchesFilters(relativeToDocs)) continue;
 
           final originalContent = mdFile.readAsStringSync();
-          final transformedContent =
-              transformContent(originalContent, relativeToDocs, mdFile.path);
+          if (!isGuideVisible(originalContent)) continue;
+          final transformedContent = transformContent(
+            originalContent,
+            relativeToDocs,
+            mdFile.path,
+          );
           final title = extractTitle(originalContent, relativeToDocs);
 
           final outputRelative = isMultiPackage
@@ -238,6 +255,18 @@ int? extractSidebarPosition(String content) {
   final posMatch = _sidebarPositionPattern.firstMatch(fmMatch.group(1)!);
   if (posMatch == null) return null;
   return int.tryParse(posMatch.group(1)!);
+}
+
+/// Whether the guide should be exposed in generated user-facing docs.
+///
+/// Internal guides remain in the repository but are skipped during guide
+/// collection so they do not appear in generated navigation or routes.
+bool isGuideVisible(String content) {
+  final fmMatch = frontmatterPattern.firstMatch(content);
+  if (fmMatch == null) return true;
+  final frontmatter = fmMatch.group(1)!;
+  return !_internalGuidePattern.hasMatch(frontmatter) &&
+      !_unpublishedGuidePattern.hasMatch(frontmatter);
 }
 
 /// Sorts guide entries: by `sidebarPosition` first (ascending),

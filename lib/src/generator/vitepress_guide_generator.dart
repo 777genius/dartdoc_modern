@@ -104,8 +104,9 @@ class VitePressGuideGenerator {
       }
 
       for (final packageName in byPackage.keys.toList()..sort()) {
-        final packageEntries =
-            guide_core.sortGuideEntries(byPackage[packageName]!);
+        final packageEntries = guide_core.sortGuideEntries(
+          byPackage[packageName]!,
+        );
         buffer.writeln('    {');
         buffer.writeln("      text: '${escapeForTs(packageName)}',");
         buffer.writeln('      collapsed: false,');
