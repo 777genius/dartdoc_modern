@@ -8,6 +8,4 @@ build/
 .packages
 
 # Generated files
-lib/main.server.options.dart
-lib/main.client.options.dart
 lib/generated/
