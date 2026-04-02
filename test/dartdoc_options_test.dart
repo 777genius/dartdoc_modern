@@ -119,18 +119,22 @@ String _testAbsolutePath(
   String pathValue,
 ) {
   final pathContext = resourceProvider.pathContext;
-  if (pathContext.isAbsolute(pathValue)) {
-    return pathContext.normalize(pathValue);
-  }
   final normalizedRelative = pathValue.replaceFirst(RegExp(r'^[/\\]+'), '');
   final rootPrefix = pathContext.rootPrefix(pathContext.current);
   if (pathContext.separator == r'\') {
+    final hasDriveLetter = RegExp(r'^[a-zA-Z]:[/\\]').hasMatch(pathValue);
+    if (hasDriveLetter) {
+      return pathContext.normalize(pathValue);
+    }
     return pathContext.normalize(
       pathContext.join(
         '$rootPrefix${pathContext.separator}',
         normalizedRelative,
       ),
     );
+  }
+  if (pathContext.isAbsolute(pathValue)) {
+    return pathContext.normalize(pathValue);
   }
   return pathContext.normalize(
     pathContext.join(rootPrefix, normalizedRelative),
