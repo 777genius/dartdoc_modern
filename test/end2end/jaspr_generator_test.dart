@@ -814,6 +814,12 @@ void main() {
         expect(content, contains("'data-toc-link': entry.id"));
         expect(content, contains("classes: 'toc-indicator'"));
         expect(content, contains("classes: 'toc-link'"));
+        expect(content, isNot(contains("'table-layout': 'fixed'")));
+        expect(
+          content,
+          contains("'thead th:first-child, tbody td:first-child'"),
+        );
+        expect(content, contains("'min-width': '34rem'"));
         expect(content, isNot(contains('route-progress')));
         expect(content, isNot(contains('window.history.pushState(')));
         expect(content, isNot(contains('const _runtimeScript')));

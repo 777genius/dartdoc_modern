@@ -1867,7 +1867,6 @@ class ApiDocsLayout extends DocsLayout {
           'border-spacing': '0',
           'overflow': 'hidden',
           'display': 'table',
-          'table-layout': 'fixed',
           'min-width': '100%',
         },
       ),
@@ -1893,16 +1892,19 @@ class ApiDocsLayout extends DocsLayout {
           ),
         ),
         fontSize: 0.96.rem,
-        raw: {'vertical-align': 'top', 'overflow-wrap': 'anywhere'},
+        raw: {'vertical-align': 'top', 'overflow-wrap': 'break-word'},
       ),
       css(
         'thead th:first-child, tbody td:first-child',
-      ).styles(raw: {'width': '34%'}),
+      ).styles(raw: {'width': '44%', 'min-width': '16rem'}),
       css('tbody tr:last-child td').styles(border: Border.unset),
       css(
         'tbody tr:hover td',
       ).styles(backgroundColor: Color('var(--docs-shell-accent-soft)')),
       css('th:first-child, td:first-child').styles(fontWeight: FontWeight.w600),
+      css(
+        'tbody td:first-child, tbody td:first-child a',
+      ).styles(raw: {'word-break': 'normal'}),
       css(
         'tbody td:last-child',
       ).styles(color: Color('var(--docs-shell-muted)')),
@@ -1913,8 +1915,9 @@ class ApiDocsLayout extends DocsLayout {
           raw: {
             'display': 'block',
             'width': 'max-content',
-            'min-width': '100%',
+            'min-width': '34rem',
             'overflow-x': 'auto',
+            'max-width': '100%',
           },
         ),
         css('thead th').styles(
@@ -1923,6 +1926,9 @@ class ApiDocsLayout extends DocsLayout {
         css('tbody td').styles(
           padding: Padding.symmetric(vertical: 0.75.rem, horizontal: 0.82.rem),
         ),
+        css(
+          'thead th:first-child, tbody td:first-child',
+        ).styles(raw: {'width': '18rem', 'min-width': '18rem'}),
       ]),
     ]),
     css('.content pre').styles(
