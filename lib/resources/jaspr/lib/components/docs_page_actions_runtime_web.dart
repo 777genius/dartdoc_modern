@@ -58,7 +58,7 @@ class _DocsPageActionsRuntimeState extends State<DocsPageActionsRuntime> {
       button.setAttribute('aria-label', 'Copied page link');
       button.setAttribute('title', 'Copied page link');
       Timer(const Duration(milliseconds: 1400), () {
-        button.dataset.remove('copyState');
+        button.removeAttribute('data-copy-state');
         button.setAttribute('aria-label', 'Copy page link');
         button.setAttribute('title', 'Copy page link');
       });

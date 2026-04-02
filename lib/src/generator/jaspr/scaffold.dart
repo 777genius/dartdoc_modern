@@ -244,6 +244,36 @@ class JasprInitGenerator {
       templateFile: p.join(
         'lib',
         'components',
+        'docs_sidebar_toggle_runtime.dart',
+      ),
+      outputFile: 'lib/components/docs_sidebar_toggle_runtime.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join(
+        'lib',
+        'components',
+        'docs_sidebar_toggle_runtime_stub.dart',
+      ),
+      outputFile: 'lib/components/docs_sidebar_toggle_runtime_stub.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join(
+        'lib',
+        'components',
+        'docs_sidebar_toggle_runtime_web.dart',
+      ),
+      outputFile: 'lib/components/docs_sidebar_toggle_runtime_web.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join(
+        'lib',
+        'components',
         'docs_sidebar_toggle_shared.dart',
       ),
       outputFile: 'lib/components/docs_sidebar_toggle_shared.dart',

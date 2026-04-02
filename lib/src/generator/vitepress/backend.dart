@@ -316,8 +316,8 @@ class VitePressGeneratorBackend extends GeneratorBackend {
       guideSidebarContent,
     );
 
-    if (_homePageMarkdown != null) {
-      _writeMarkdown('index.md', _homePageMarkdown!);
+    if (_homePageMarkdown case final homePageMarkdown?) {
+      _writeMarkdown('index.md', homePageMarkdown);
     }
 
     runtimeStats.incrementAccumulator('writtenPackageFileCount');

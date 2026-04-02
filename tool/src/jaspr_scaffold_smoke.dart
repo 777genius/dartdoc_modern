@@ -23,6 +23,9 @@ class JasprScaffoldSmokeChecker {
     _requireFile('lib/generated/api_sidebar.dart');
     _requireFile('lib/layouts/api_docs_layout.dart');
     _requireFile('lib/components/docs_sidebar_toggle.dart');
+    _requireFile('lib/components/docs_sidebar_toggle_runtime.dart');
+    _requireFile('lib/components/docs_sidebar_toggle_runtime_stub.dart');
+    _requireFile('lib/components/docs_sidebar_toggle_runtime_web.dart');
     _requireFile('lib/components/docs_sidebar_toggle_shared.dart');
     _requireFile('lib/components/docs_sidebar_toggle_stub.dart');
     _requireFile('lib/components/docs_sidebar_toggle_web.dart');

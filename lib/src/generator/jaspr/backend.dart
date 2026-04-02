@@ -343,8 +343,8 @@ class JasprGeneratorBackend extends GeneratorBackend {
     );
     _writeMarkdown('lib/generated/guide_sidebar.dart', guideSidebarContent);
 
-    if (_homePageMarkdown != null) {
-      _writeMarkdown('content/index.md', _homePageMarkdown!);
+    if (_homePageMarkdown case final homePageMarkdown?) {
+      _writeMarkdown('content/index.md', homePageMarkdown);
     }
 
     runtimeStats.incrementAccumulator('writtenPackageFileCount');

@@ -247,6 +247,27 @@ void main() {
         expect(
           _outputExists(
             outDir,
+            'lib/components/docs_sidebar_toggle_runtime.dart',
+          ),
+          isTrue,
+        );
+        expect(
+          _outputExists(
+            outDir,
+            'lib/components/docs_sidebar_toggle_runtime_stub.dart',
+          ),
+          isTrue,
+        );
+        expect(
+          _outputExists(
+            outDir,
+            'lib/components/docs_sidebar_toggle_runtime_web.dart',
+          ),
+          isTrue,
+        );
+        expect(
+          _outputExists(
+            outDir,
             'lib/components/docs_sidebar_toggle_shared.dart',
           ),
           isTrue,
@@ -491,6 +512,18 @@ void main() {
           outDir,
           'lib/components/docs_sidebar_toggle.dart',
         );
+        final sidebarToggleRuntime = _readOutput(
+          outDir,
+          'lib/components/docs_sidebar_toggle_runtime.dart',
+        );
+        final sidebarToggleRuntimeStub = _readOutput(
+          outDir,
+          'lib/components/docs_sidebar_toggle_runtime_stub.dart',
+        );
+        final sidebarToggleRuntimeWeb = _readOutput(
+          outDir,
+          'lib/components/docs_sidebar_toggle_runtime_web.dart',
+        );
         final sidebarToggleStub = _readOutput(
           outDir,
           'lib/components/docs_sidebar_toggle_stub.dart',
@@ -566,6 +599,7 @@ void main() {
         expect(themeToggle, contains("'data-docs-theme-toggle': ''"));
         expect(content, contains("import '../components/docs_nav_link.dart';"));
         expect(search, contains("import 'docs_navigation_runtime.dart';"));
+        expect(search, contains("import 'docs_sidebar_toggle_runtime.dart';"));
         expect(search, contains("import 'docs_disclosure_runtime.dart';"));
         expect(
           content,
@@ -583,6 +617,7 @@ void main() {
           contains('class DocsSearchShell extends StatefulComponent'),
         );
         expect(search, contains('const DocsNavigationRuntime()'));
+        expect(search, contains('const DocsSidebarToggleRuntime()'));
         expect(search, contains('const DocsDisclosureRuntime()'));
         expect(search, contains("classes: 'search-launcher'"));
         expect(search, contains("'data-docs-search-launcher': ''"));
@@ -765,6 +800,32 @@ void main() {
           contains("export 'docs_sidebar_toggle_stub.dart'"),
         );
         expect(
+          sidebarToggleRuntime,
+          contains("export 'docs_sidebar_toggle_runtime_stub.dart'"),
+        );
+        expect(
+          sidebarToggleRuntimeStub,
+          contains('class DocsSidebarToggleRuntime extends StatelessComponent'),
+        );
+        expect(
+          sidebarToggleRuntimeStub,
+          contains("'data-docs-sidebar-toggle-runtime': ''"),
+        );
+        expect(
+          sidebarToggleRuntimeWeb,
+          contains(
+            'class DocsSidebarToggleRuntime extends StatefulComponent',
+          ),
+        );
+        expect(
+          sidebarToggleRuntimeWeb,
+          contains("target.closest('[data-docs-sidebar-toggle]')"),
+        );
+        expect(
+          sidebarToggleRuntimeWeb,
+          contains("button.setAttribute('aria-expanded'"),
+        );
+        expect(
           sidebarToggleStub,
           contains('class DocsSidebarToggle extends StatelessComponent'),
         );
@@ -926,6 +987,14 @@ void main() {
             outDir,
             'lib/components/docs_sidebar_toggle.dart',
           );
+          final sidebarToggleWeb = _readOutput(
+            outDir,
+            'lib/components/docs_sidebar_toggle_web.dart',
+          );
+          final sidebarToggleShared = _readOutput(
+            outDir,
+            'lib/components/docs_sidebar_toggle_shared.dart',
+          );
 
           expect(responsive, contains('const docsCompactBreakpoint = 479;'));
           expect(responsive, contains('const docsMobileBreakpoint = 767;'));
@@ -956,12 +1025,17 @@ void main() {
           expect(sidebar, contains("import '../theme/docs_responsive.dart';"));
           expect(sidebar, contains('downContent(['));
           expect(
-            sidebarToggle,
+            sidebarToggleShared,
             contains("import '../theme/docs_responsive.dart';"),
           );
-          expect(sidebarToggle, contains('downContent(['));
+          expect(sidebarToggleShared, contains('downContent(['));
+          expect(sidebarToggleWeb, contains('docsSidebarToggleStyles()'));
+          expect(
+            sidebarToggle,
+            contains("export 'docs_sidebar_toggle_stub.dart'"),
+          );
           expect(sidebar, isNot(contains('1023')));
-          expect(sidebarToggle, isNot(contains('1024')));
+          expect(sidebarToggleWeb, isNot(contains('1024')));
         },
       );
 

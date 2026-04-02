@@ -12,6 +12,7 @@ import 'docs_nav_link.dart';
 import 'docs_disclosure_runtime.dart';
 import 'docs_lightbox_runtime.dart';
 import 'docs_mermaid_runtime.dart';
+import 'docs_sidebar_toggle_runtime.dart';
 import 'docs_toc_runtime.dart';
 
 @client
@@ -79,6 +80,7 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
       const DocsDisclosureRuntime(),
       const DocsLightboxRuntime(),
       const DocsMermaidRuntime(),
+      const DocsSidebarToggleRuntime(),
       const DocsTocRuntime(),
       div(classes: 'header-search-shell', [
         button(
