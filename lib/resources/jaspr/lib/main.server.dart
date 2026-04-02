@@ -31,6 +31,7 @@ void main() {
           buildDocsApp(
             packageName: '{{packageName}}',
             themePreset: themePreset,
+            repositoryUrl: '{{repositoryUrl}}',
             templateEngine: DocsTemplateEngine(),
           ),
         ],

@@ -1,5 +1,6 @@
 import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
+import 'package:jaspr_content/theme.dart';
 
 import 'docs_nav_link.dart';
 import 'docs_sidebar_toggle.dart';
@@ -10,6 +11,8 @@ class DocsHeader extends StatelessComponent {
     required this.logo,
     required this.title,
     required this.homeHref,
+    this.currentRoute,
+    this.navItems = const [],
     this.items = const [],
     super.key,
   });
@@ -17,10 +20,14 @@ class DocsHeader extends StatelessComponent {
   final String logo;
   final String title;
   final String homeHref;
+  final String? currentRoute;
+  final List<DocsHeaderNavItem> navItems;
   final List<Component> items;
 
   @override
   Component build(BuildContext context) {
+    final activeRoute = _normalizeRoute(currentRoute ?? homeHref);
+
     return Component.fragment([
       Document.head(children: [Style(styles: _styles)]),
       header(classes: 'header', [
@@ -34,10 +41,38 @@ class DocsHeader extends StatelessComponent {
           ],
         ),
         div(classes: 'header-content', [
+          if (navItems.isNotEmpty)
+            nav(classes: 'header-nav', [
+              for (final item in navItems)
+                DocsNavLink(
+                  to: item.href,
+                  classes: _isNavActive(item, activeRoute)
+                      ? 'header-nav-link active'
+                      : 'header-nav-link',
+                  children: [Component.text(item.text)],
+                ),
+            ]),
           div(classes: 'header-items', items),
         ]),
       ]),
     ]);
+  }
+
+  bool _isNavActive(DocsHeaderNavItem item, String activeRoute) {
+    final href = _normalizeRoute(item.href);
+    if (href == activeRoute) return true;
+    if (item.matchPrefix != null && activeRoute.startsWith(item.matchPrefix!)) {
+      return true;
+    }
+    return false;
+  }
+
+  String _normalizeRoute(String route) {
+    final withoutFragment = route.split('#').first.split('?').first;
+    if (withoutFragment.length > 1 && withoutFragment.endsWith('/')) {
+      return withoutFragment.substring(0, withoutFragment.length - 1);
+    }
+    return withoutFragment.isEmpty ? '/' : withoutFragment;
   }
 
   static List<StyleRule> get _styles => [
@@ -97,11 +132,79 @@ class DocsHeader extends StatelessComponent {
             css('&').styles(
               display: Display.flex,
               flex: Flex(grow: 1, shrink: 1),
+              gap: Gap.column(1.rem),
               justifyContent: JustifyContent.end,
               alignItems: AlignItems.center,
               minWidth: Unit.zero,
             ),
           ]),
+          css('.header-nav', [
+            css('&').styles(
+              display: Display.flex,
+              alignItems: AlignItems.center,
+              gap: Gap.column(0.35.rem),
+              minWidth: Unit.zero,
+              raw: {
+                'overflow-x': 'auto',
+              },
+            ),
+            css('&::-webkit-scrollbar').styles(display: Display.none),
+          ]),
+          css('.header-nav-link').styles(
+            display: Display.inlineFlex,
+            alignItems: AlignItems.center,
+            justifyContent: JustifyContent.center,
+            padding: Padding.symmetric(vertical: 0.4.rem, horizontal: 0.7.rem),
+            radius: BorderRadius.circular(0.8.rem),
+            color: ContentColors.text,
+            fontWeight: FontWeight.w600,
+            transition: Transition(
+              'color, background-color',
+              duration: 150.ms,
+              curve: Curve.easeInOut,
+            ),
+            raw: {
+              'white-space': 'nowrap',
+            },
+          ),
+          css('.header-nav-link:hover').styles(
+            color: Color('var(--docs-shell-accent)'),
+            backgroundColor: Color('var(--docs-shell-accent-soft)'),
+          ),
+          css('.header-nav-link.active').styles(
+            color: Color('var(--docs-shell-accent)'),
+            backgroundColor: Color('var(--docs-shell-accent-soft)'),
+          ),
+          css('.header-repo-link').styles(
+            display: Display.inlineFlex,
+            alignItems: AlignItems.center,
+            justifyContent: JustifyContent.center,
+            padding: Padding.symmetric(vertical: 0.42.rem, horizontal: 0.72.rem),
+            radius: BorderRadius.circular(0.8.rem),
+            border: Border.all(
+              width: 1.px,
+              color: Color('var(--docs-shell-border)'),
+            ),
+            color: ContentColors.text,
+            fontWeight: FontWeight.w600,
+            backgroundColor: Color('var(--docs-shell-surface-soft)'),
+            transition: Transition(
+              'color, background-color, border-color',
+              duration: 150.ms,
+              curve: Curve.easeInOut,
+            ),
+            raw: {
+              'white-space': 'nowrap',
+            },
+          ),
+          css('.header-repo-link:hover').styles(
+            color: Color('var(--docs-shell-accent)'),
+            backgroundColor: Color('var(--docs-shell-accent-soft)'),
+            border: Border.all(
+              width: 1.px,
+              color: Color('var(--docs-shell-border-strong)'),
+            ),
+          ),
           css('.header-items', [
             css('&').styles(
               display: Display.flex,
@@ -133,6 +236,9 @@ class DocsHeader extends StatelessComponent {
             ),
             css('.header-items').styles(
               gap: Gap.column(0.45.rem),
+            ),
+            css('.header-nav').styles(
+              display: Display.none,
             ),
           ]),
           downCompact([
@@ -167,7 +273,20 @@ class DocsHeader extends StatelessComponent {
                 'flex': '0 0 auto',
               },
             ),
+            css('.header-nav').styles(display: Display.none),
           ]),
         ]),
       ];
+}
+
+final class DocsHeaderNavItem {
+  const DocsHeaderNavItem({
+    required this.text,
+    required this.href,
+    this.matchPrefix,
+  });
+
+  final String text;
+  final String href;
+  final String? matchPrefix;
 }
