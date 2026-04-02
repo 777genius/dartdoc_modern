@@ -2,6 +2,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_content/theme.dart';
 
+import '../docs_base.dart';
 import 'docs_nav_link.dart';
 import 'docs_sidebar_toggle.dart';
 import '../theme/docs_responsive.dart';
@@ -61,18 +62,40 @@ class DocsHeader extends StatelessComponent {
   bool _isNavActive(DocsHeaderNavItem item, String activeRoute) {
     final href = _normalizeRoute(item.href);
     if (href == activeRoute) return true;
-    if (item.matchPrefix != null && activeRoute.startsWith(item.matchPrefix!)) {
-      return true;
+    if (item.matchPrefix case final prefix?) {
+      final normalizedPrefix = _normalizeRoute(prefix);
+      if (_matchesSectionPath(activeRoute, normalizedPrefix)) {
+        return true;
+      }
+    }
+    if (item.additionalMatchPrefixes case final prefixes?) {
+      for (final prefix in prefixes) {
+        final normalizedPrefix = _normalizeRoute(prefix);
+        if (_matchesSectionPath(activeRoute, normalizedPrefix)) {
+          return true;
+        }
+      }
     }
     return false;
   }
 
+  bool _matchesSectionPath(String route, String prefix) {
+    if (route == prefix) {
+      return true;
+    }
+    if (prefix == '/') {
+      return route == '/';
+    }
+    return route.startsWith('$prefix/');
+  }
+
   String _normalizeRoute(String route) {
     final withoutFragment = route.split('#').first.split('?').first;
-    if (withoutFragment.length > 1 && withoutFragment.endsWith('/')) {
-      return withoutFragment.substring(0, withoutFragment.length - 1);
+    final normalizedPath = stripDocsBasePath(withoutFragment);
+    if (normalizedPath.length > 1 && normalizedPath.endsWith('/')) {
+      return normalizedPath.substring(0, normalizedPath.length - 1);
     }
-    return withoutFragment.isEmpty ? '/' : withoutFragment;
+    return normalizedPath.isEmpty ? '/' : normalizedPath;
   }
 
   static List<StyleRule> get _styles => [
@@ -265,9 +288,11 @@ final class DocsHeaderNavItem {
     required this.text,
     required this.href,
     this.matchPrefix,
+    this.additionalMatchPrefixes,
   });
 
   final String text;
   final String href;
   final String? matchPrefix;
+  final List<String>? additionalMatchPrefixes;
 }

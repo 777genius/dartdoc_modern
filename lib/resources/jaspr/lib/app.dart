@@ -64,6 +64,7 @@ Component buildDocsApp({
                 text: 'Guide',
                 href: '/',
                 matchPrefix: '/guide',
+                additionalMatchPrefixes: ['/'],
               ),
             const DocsHeaderNavItem(
               text: 'API Reference',

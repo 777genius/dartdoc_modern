@@ -577,9 +577,19 @@ void main() {
           isNot(contains("import '../components/docs_mermaid_runtime.dart';")),
         );
         expect(header, contains('class DocsHeader extends StatelessComponent'));
+        expect(header, contains("import '../docs_base.dart';"));
         expect(header, contains('const DocsSidebarToggle()'));
         expect(header, contains("classes: 'header-title'"));
         expect(header, contains('DocsNavLink('));
+        expect(header, contains('stripDocsBasePath(withoutFragment)'));
+        expect(
+          header,
+          contains('_matchesSectionPath(activeRoute, normalizedPrefix)'),
+        );
+        expect(
+          header,
+          contains('final List<String>? additionalMatchPrefixes;'),
+        );
         expect(
           themeToggle,
           contains('class DocsThemeToggle extends StatefulComponent'),
@@ -654,6 +664,7 @@ void main() {
           contains("import 'extensions/base_path_link_extension.dart';"),
         );
         expect(app, contains('const BasePathLinkExtension()'));
+        expect(app, contains("additionalMatchPrefixes: ['/'],"));
         expect(
           content,
           contains("import '../components/docs_page_actions_runtime.dart';"),
@@ -813,9 +824,7 @@ void main() {
         );
         expect(
           sidebarToggleRuntimeWeb,
-          contains(
-            'class DocsSidebarToggleRuntime extends StatefulComponent',
-          ),
+          contains('class DocsSidebarToggleRuntime extends StatefulComponent'),
         );
         expect(
           sidebarToggleRuntimeWeb,
