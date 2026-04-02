@@ -2,7 +2,12 @@
 set -euo pipefail
 
 ROOT="/Users/belief/dev/projects/dartdoc-vitepress"
-TEST_PACKAGE_DIR="${TEST_PACKAGE_DIR:-$ROOT/testing/test_package_with_docs}"
+DOCS_RECIPE="${DOCS_RECIPE:-}"
+if [ "$DOCS_RECIPE" = "self-docs" ]; then
+  TEST_PACKAGE_DIR="${TEST_PACKAGE_DIR:-$ROOT}"
+else
+  TEST_PACKAGE_DIR="${TEST_PACKAGE_DIR:-$ROOT/testing/test_package_with_docs}"
+fi
 OUTPUT_DIR="${OUTPUT_DIR:-/tmp/dartdoc-jaspr-preview}"
 PUB_CACHE_DIR="${PUB_CACHE_DIR:-/tmp/dartdoc-pub-cache}"
 PROXY_PORT="${PORT:-4312}"
@@ -122,6 +127,31 @@ find_free_port() {
   printf '%s\n' "$port"
 }
 
+resolve_preview_path() {
+  local static_dir="$1"
+  if [ "$DOCS_RECIPE" = "self-docs" ]; then
+    printf '/\n'
+    return 0
+  fi
+
+  local candidate
+
+  if [ -f "$static_dir/guide/getting-started/index.html" ]; then
+    printf '/guide/getting-started/\n'
+    return 0
+  fi
+
+  candidate="$(find "$static_dir/guide" -mindepth 2 -maxdepth 2 -name index.html 2>/dev/null | sort | head -n 1 || true)"
+  if [ -n "$candidate" ]; then
+    candidate="${candidate#"$static_dir"}"
+    candidate="${candidate%/index.html}/"
+    printf '%s\n' "$candidate"
+    return 0
+  fi
+
+  printf '/\n'
+}
+
 prepare_pub_cache() {
   mkdir -p "$PUB_CACHE_DIR"
 
@@ -171,11 +201,20 @@ if [ "$REUSE_BUILD" = "1" ]; then
   echo "Reusing existing Jaspr preview in $OUTPUT_DIR with theme '$THEME'..."
 else
   echo "Generating Jaspr docs into $OUTPUT_DIR using theme '$THEME'..."
+  rm -rf "$OUTPUT_DIR"
   mkdir -p "$OUTPUT_DIR"
 
   (
     cd "$TEST_PACKAGE_DIR"
-    "$DART_BIN" run "$ROOT/bin/dartdoc_vitepress.dart" --format jaspr --output "$OUTPUT_DIR"
+    generator_args=(
+      run "$ROOT/bin/dartdoc_vitepress.dart"
+      --format jaspr
+      --output "$OUTPUT_DIR"
+    )
+    if [ -n "$DOCS_RECIPE" ]; then
+      generator_args+=(--recipe "$DOCS_RECIPE")
+    fi
+    "$DART_BIN" "${generator_args[@]}"
   )
 
   echo "Resolving dependencies offline..."
@@ -203,7 +242,7 @@ if [ ! -d "$STATIC_DIR" ]; then
 fi
 
 SERVE_DIR="$STATIC_DIR"
-PREVIEW_PATH="/guide/getting-started/"
+PREVIEW_PATH="$(resolve_preview_path "$STATIC_DIR")"
 
 if [ -n "$BASE_PATH" ]; then
   SERVE_DIR="$OUTPUT_DIR/.serve-root"
@@ -213,11 +252,14 @@ if [ -n "$BASE_PATH" ]; then
   mkdir -p "$TARGET_DIR"
   cp -R "$STATIC_DIR"/. "$TARGET_DIR"/
 
-  PREVIEW_PATH="$BASE_PATH/guide/getting-started/"
+  PREVIEW_PATH="$BASE_PATH$PREVIEW_PATH"
 fi
 
 echo "Starting Jaspr preview on http://localhost:$PROXY_PORT ..."
 echo "Theme preset: $THEME"
+if [ -n "$DOCS_RECIPE" ]; then
+  echo "Docs recipe: $DOCS_RECIPE"
+fi
 if [ -n "$BASE_PATH" ]; then
   echo "Base path: $BASE_PATH"
 fi

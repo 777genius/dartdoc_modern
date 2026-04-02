@@ -17,9 +17,12 @@ import 'dart:io' show exitCode, stderr, stdout;
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:args/args.dart';
-import 'package:dartdoc_vitepress/src/dartdoc.dart' show dartdocVersion, programName;
+import 'package:dartdoc_vitepress/src/dartdoc.dart'
+    show dartdocVersion, programName;
 import 'package:dartdoc_vitepress/src/experiment_options.dart';
 import 'package:dartdoc_vitepress/src/failure.dart';
+import 'package:dartdoc_vitepress/src/generator/core/docs_recipe.dart'
+    as docs_recipe;
 import 'package:dartdoc_vitepress/src/generator/generator.dart';
 import 'package:dartdoc_vitepress/src/io_utils.dart';
 import 'package:dartdoc_vitepress/src/logging.dart';
@@ -114,8 +117,11 @@ class CategoryConfiguration {
     return CategoryConfiguration._(const {});
   }
 
-  static CategoryConfiguration fromYamlMap(YamlMap yamlMap,
-      String canonicalYamlPath, ResourceProvider resourceProvider) {
+  static CategoryConfiguration fromYamlMap(
+    YamlMap yamlMap,
+    String canonicalYamlPath,
+    ResourceProvider resourceProvider,
+  ) {
     var newCategoryDefinitions = <String, CategoryDefinition>{};
     for (var MapEntry(:key, value: categoryMap) in yamlMap.entries) {
       var name = key.toString();
@@ -124,12 +130,16 @@ class CategoryConfiguration {
         var documentationMarkdown = categoryMap['markdown']?.toString();
         if (documentationMarkdown != null) {
           documentationMarkdown = resourceProvider.pathContext.canonicalize(
-              resourceProvider.pathContext
-                  .join(canonicalYamlPath, documentationMarkdown));
+            resourceProvider.pathContext.join(
+              canonicalYamlPath,
+              documentationMarkdown,
+            ),
+          );
           if (!resourceProvider.getFile(documentationMarkdown).exists) {
             throw DartdocFileMissing(
-                'In categories definition for $name, "markdown" resolves to '
-                'the missing file $documentationMarkdown');
+              'In categories definition for $name, "markdown" resolves to '
+              'the missing file $documentationMarkdown',
+            );
           }
         }
         final externalItems = <ExternalItem>[];
@@ -142,20 +152,24 @@ class CategoryConfiguration {
               final itemName = item['name'] as String?;
               if (itemName == null) {
                 throw DartdocOptionError(
-                    "'external' item missing required field 'name'");
+                  "'external' item missing required field 'name'",
+                );
               }
 
               final itemUrl = item['url'] as String?;
               if (itemUrl == null) {
                 throw DartdocOptionError(
-                    "'external' item missing required field 'url'");
+                  "'external' item missing required field 'url'",
+                );
               }
 
-              externalItems.add(ExternalItem(
-                name: itemName,
-                url: itemUrl,
-                docs: item['docs'] as String?,
-              ));
+              externalItems.add(
+                ExternalItem(
+                  name: itemName,
+                  url: itemUrl,
+                  docs: item['docs'] as String?,
+                ),
+              );
             }
           }
         }
@@ -222,8 +236,8 @@ class _OptionValueWithContext<T> {
   /// [path] is the path where this value came from (not required to be
   /// canonical).
   _OptionValueWithContext(this.value, String path, {this.definingFile})
-      : canonicalDirectoryPath = p.canonicalize(path),
-        pathContext = p.Context(current: p.canonicalize(path));
+    : canonicalDirectoryPath = p.canonicalize(path),
+      pathContext = p.Context(current: p.canonicalize(path));
 
   /// Assume value is a path, and attempt to resolve it.
   ///
@@ -231,16 +245,19 @@ class _OptionValueWithContext<T> {
   T get resolvedValue {
     final value = this.value;
     return switch (value) {
-      List<String>() => value
-          .map((v) => pathContext.canonicalizeWithTilde(v))
-          .cast<String>()
-          .toList(growable: false) as T,
+      List<String>() =>
+        value
+                .map((v) => pathContext.canonicalizeWithTilde(v))
+                .cast<String>()
+                .toList(growable: false)
+            as T,
       String() => pathContext.canonicalizeWithTilde(value) as T,
       Map<String, String>() =>
         value.map<String, String>((String key, String value) {
-          return MapEntry(key, pathContext.canonicalizeWithTilde(value));
-        }) as T,
-      _ => throw UnsupportedError('Type $T is not supported for resolvedValue')
+              return MapEntry(key, pathContext.canonicalizeWithTilde(value));
+            })
+            as T,
+      _ => throw UnsupportedError('Type $T is not supported for resolvedValue'),
     };
   }
 }
@@ -287,8 +304,15 @@ abstract class DartdocOption<T extends Object?> {
 
   final ResourceProvider resourceProvider;
 
-  DartdocOption(this.name, this.defaultsTo, this.help, this.optionIs,
-      this.mustExist, this._convertYamlToType, this.resourceProvider) {
+  DartdocOption(
+    this.name,
+    this.defaultsTo,
+    this.help,
+    this.optionIs,
+    this.mustExist,
+    this._convertYamlToType,
+    this.resourceProvider,
+  ) {
     if (isDir || isFile || isGlob) {
       assert(_isString || _isListString || _isMapString);
     }
@@ -339,7 +363,9 @@ abstract class DartdocOption<T extends Object?> {
   /// Throw [DartdocFileMissing] with a detailed error message indicating where
   /// the error came from when a file or directory option is missing.
   void _onMissing(
-      _OptionValueWithContext<T> valueWithContext, String missingFilename);
+    _OptionValueWithContext<T> valueWithContext,
+    String missingFilename,
+  );
 
   /// Call [_onMissing] for every path that does not exist.
   void _validatePaths(_OptionValueWithContext<T> valueWithContext) {
@@ -358,9 +384,10 @@ abstract class DartdocOption<T extends Object?> {
             .toList(growable: false);
       default:
         assert(
-            false,
-            'Trying to ensure existence of unsupported type '
-            '${valueWithContext.value.runtimeType}');
+          false,
+          'Trying to ensure existence of unsupported type '
+          '${valueWithContext.value.runtimeType}',
+        );
         return;
     }
     for (var path in resolvedPaths) {
@@ -435,8 +462,9 @@ abstract class DartdocOption<T extends Object?> {
   /// Calls [valueAt] with the working directory at the start of the program.
   Object? valueAtCurrent() => valueAt(_directoryCurrent);
 
-  late final Folder _directoryCurrent =
-      resourceProvider.getFolder(_directoryCurrentPath);
+  late final Folder _directoryCurrent = resourceProvider.getFolder(
+    _directoryCurrentPath,
+  );
   late final String _directoryCurrentPath =
       resourceProvider.pathContext.current;
 
@@ -444,7 +472,8 @@ abstract class DartdocOption<T extends Object?> {
   void add(DartdocOption option) {
     if (_children.containsKey(option.name)) {
       throw DartdocOptionError(
-          'Tried to add two children with the same name: ${option.name}');
+        'Tried to add two children with the same name: ${option.name}',
+      );
     }
     _children[option.name] = option;
     // TODO(jcollins-g): Consider a stronger refactor that doesn't rely on
@@ -484,10 +513,11 @@ class DartdocOptionFileSynth<T> extends DartdocOption<T>
   final T Function(DartdocSyntheticOption<T>, Folder) _compute;
 
   DartdocOptionFileSynth(
-      String name, this._compute, ResourceProvider resourceProvider,
-      {String help = ''})
-      : super(
-            name, null, help, OptionKind.other, false, null, resourceProvider);
+    String name,
+    this._compute,
+    ResourceProvider resourceProvider, {
+    String help = '',
+  }) : super(name, null, help, OptionKind.other, false, null, resourceProvider);
 
   @override
   bool get parentDirOverridesChild => false;
@@ -503,7 +533,9 @@ class DartdocOptionFileSynth<T> extends DartdocOption<T>
 
   @override
   Never _onMissing(
-      _OptionValueWithContext<T> valueWithContext, String missingPath) {
+    _OptionValueWithContext<T> valueWithContext,
+    String missingPath,
+  ) {
     if (valueWithContext.definingFile != null) {
       _onMissingFromFiles(valueWithContext, missingPath);
     } else {
@@ -525,13 +557,15 @@ class DartdocOptionArgSynth<T> extends DartdocOption<T>
   final T Function(DartdocSyntheticOption<T>, Folder) _compute;
 
   DartdocOptionArgSynth(
-      String name, this._compute, ResourceProvider resourceProvider,
-      {this.abbr,
-      bool mustExist = false,
-      String help = '',
-      OptionKind optionIs = OptionKind.other,
-      this.negatable = false})
-      : super(name, null, help, optionIs, mustExist, null, resourceProvider);
+    String name,
+    this._compute,
+    ResourceProvider resourceProvider, {
+    this.abbr,
+    bool mustExist = false,
+    String help = '',
+    OptionKind optionIs = OptionKind.other,
+    this.negatable = false,
+  }) : super(name, null, help, optionIs, mustExist, null, resourceProvider);
 
   @override
   bool get hide => false;
@@ -541,7 +575,9 @@ class DartdocOptionArgSynth<T> extends DartdocOption<T>
 
   @override
   Never _onMissing(
-      _OptionValueWithContext<T> valueWithContext, String missingPath) {
+    _OptionValueWithContext<T> valueWithContext,
+    String missingPath,
+  ) {
     _onMissingFromArgs(valueWithContext, missingPath);
   }
 
@@ -565,11 +601,13 @@ class DartdocOptionSyntheticOnly<T> extends DartdocOption<T>
   final T Function(DartdocSyntheticOption<T>, Folder) _compute;
 
   DartdocOptionSyntheticOnly(
-      String name, this._compute, ResourceProvider resourceProvider,
-      {bool mustExist = false,
-      String help = '',
-      OptionKind optionIs = OptionKind.other})
-      : super(name, null, help, optionIs, mustExist, null, resourceProvider);
+    String name,
+    this._compute,
+    ResourceProvider resourceProvider, {
+    bool mustExist = false,
+    String help = '',
+    OptionKind optionIs = OptionKind.other,
+  }) : super(name, null, help, optionIs, mustExist, null, resourceProvider);
 }
 
 mixin DartdocSyntheticOption<T> implements DartdocOption<T> {
@@ -585,15 +623,19 @@ mixin DartdocSyntheticOption<T> implements DartdocOption<T> {
 
   @override
   Never _onMissing(
-          _OptionValueWithContext<T> valueWithContext, String missingPath) =>
-      _onMissingFromSynthetic(valueWithContext, missingPath);
+    _OptionValueWithContext<T> valueWithContext,
+    String missingPath,
+  ) => _onMissingFromSynthetic(valueWithContext, missingPath);
 
   Never _onMissingFromSynthetic(
-      _OptionValueWithContext<T> valueWithContext, String missingPath) {
+    _OptionValueWithContext<T> valueWithContext,
+    String missingPath,
+  ) {
     var description = 'Synthetic configuration option $name from <internal>';
     throw DartdocFileMissing(
-        '$description, computed as ${valueWithContext.value}, resolves to '
-        'missing path: "$missingPath"');
+      '$description, computed as ${valueWithContext.value}, resolves to '
+      'missing path: "$missingPath"',
+    );
   }
 }
 
@@ -603,8 +645,9 @@ typedef OptionGenerator = List<DartdocOption> Function(PackageMetaProvider);
 class DartdocOptionRoot extends DartdocOptionSet {
   DartdocOptionRoot(super.name, super.resourceProvider);
 
-  late final ArgParser _argParser =
-      ArgParser(usageLineLength: _usageLineLength);
+  late final ArgParser _argParser = ArgParser(
+    usageLineLength: _usageLineLength,
+  );
 
   /// Asynchronous factory that is the main entry point to initialize Dartdoc
   /// options for use.
@@ -613,11 +656,14 @@ class DartdocOptionRoot extends DartdocOptionSet {
   /// [optionGenerators] is a sequence of asynchronous functions that return
   /// [DartdocOption]s that will be added to the new option set.
   static DartdocOptionRoot fromOptionGenerators(
-      String name,
-      Iterable<OptionGenerator> optionGenerators,
-      PackageMetaProvider packageMetaProvider) {
-    var optionSet =
-        DartdocOptionRoot(name, packageMetaProvider.resourceProvider);
+    String name,
+    Iterable<OptionGenerator> optionGenerators,
+    PackageMetaProvider packageMetaProvider,
+  ) {
+    var optionSet = DartdocOptionRoot(
+      name,
+      packageMetaProvider.resourceProvider,
+    );
     for (var generator in optionGenerators) {
       optionSet.addAll(generator(packageMetaProvider));
     }
@@ -662,7 +708,7 @@ class DartdocOptionRoot extends DartdocOptionSet {
 /// option itself.
 class DartdocOptionSet extends DartdocOption<void> {
   DartdocOptionSet(String name, ResourceProvider resourceProvider)
-      : super(name, null, '', OptionKind.other, false, null, resourceProvider);
+    : super(name, null, '', OptionKind.other, false, null, resourceProvider);
 
   /// [DartdocOptionSet] always has the null value.
   @override
@@ -671,7 +717,9 @@ class DartdocOptionSet extends DartdocOption<void> {
   /// Since we have no value, [_onMissing] does nothing.
   @override
   void _onMissing(
-      _OptionValueWithContext<void> valueWithContext, String missingFilename) {}
+    _OptionValueWithContext<void> valueWithContext,
+    String missingFilename,
+  ) {}
 }
 
 /// A [DartdocOption] that only exists as a command line argument. `--help` is a
@@ -688,16 +736,25 @@ class DartdocOptionArgOnly<T> extends DartdocOption<T>
   final bool splitCommas;
 
   DartdocOptionArgOnly(
-      String name, T defaultsTo, ResourceProvider resourceProvider,
-      {this.abbr,
-      bool mustExist = false,
-      String help = '',
-      this.hide = false,
-      OptionKind optionIs = OptionKind.other,
-      this.negatable = false,
-      this.splitCommas = false})
-      : super(name, defaultsTo, help, optionIs, mustExist, null,
-            resourceProvider);
+    String name,
+    T defaultsTo,
+    ResourceProvider resourceProvider, {
+    this.abbr,
+    bool mustExist = false,
+    String help = '',
+    this.hide = false,
+    OptionKind optionIs = OptionKind.other,
+    this.negatable = false,
+    this.splitCommas = false,
+  }) : super(
+         name,
+         defaultsTo,
+         help,
+         optionIs,
+         mustExist,
+         null,
+         resourceProvider,
+       );
 }
 
 /// A [DartdocOption] that works with command line arguments and
@@ -710,14 +767,23 @@ class DartdocOptionArgFile<T> extends DartdocOption<T>
   final bool splitCommas;
 
   DartdocOptionArgFile(
-      String name, T defaultsTo, ResourceProvider resourceProvider,
-      {bool mustExist = false,
-      String help = '',
-      OptionKind optionIs = OptionKind.other,
-      this.negatable = false,
-      this.splitCommas = false})
-      : super(name, defaultsTo, help, optionIs, mustExist, null,
-            resourceProvider);
+    String name,
+    T defaultsTo,
+    ResourceProvider resourceProvider, {
+    bool mustExist = false,
+    String help = '',
+    OptionKind optionIs = OptionKind.other,
+    this.negatable = false,
+    this.splitCommas = false,
+  }) : super(
+         name,
+         defaultsTo,
+         help,
+         optionIs,
+         mustExist,
+         null,
+         resourceProvider,
+       );
 
   @override
   String? get abbr => null;
@@ -730,7 +796,9 @@ class DartdocOptionArgFile<T> extends DartdocOption<T>
 
   @override
   Never _onMissing(
-      _OptionValueWithContext<T> valueWithContext, String missingPath) {
+    _OptionValueWithContext<T> valueWithContext,
+    String missingPath,
+  ) {
     if (valueWithContext.definingFile != null) {
       _onMissingFromFiles(valueWithContext, missingPath);
     } else {
@@ -751,14 +819,23 @@ class DartdocOptionFileOnly<T> extends DartdocOption<T>
   final bool parentDirOverridesChild;
 
   DartdocOptionFileOnly(
-      String name, T defaultsTo, ResourceProvider resourceProvider,
-      {bool mustExist = false,
-      String help = '',
-      OptionKind optionIs = OptionKind.other,
-      this.parentDirOverridesChild = false,
-      ConvertYamlToType<T>? convertYamlToType})
-      : super(name, defaultsTo, help, optionIs, mustExist, convertYamlToType,
-            resourceProvider);
+    String name,
+    T defaultsTo,
+    ResourceProvider resourceProvider, {
+    bool mustExist = false,
+    String help = '',
+    OptionKind optionIs = OptionKind.other,
+    this.parentDirOverridesChild = false,
+    ConvertYamlToType<T>? convertYamlToType,
+  }) : super(
+         name,
+         defaultsTo,
+         help,
+         optionIs,
+         mustExist,
+         convertYamlToType,
+         resourceProvider,
+       );
 }
 
 /// Implements checking for options contained in dartdoc.yaml.
@@ -780,15 +857,22 @@ mixin _DartdocFileOption<T> implements DartdocOption<T> {
 
   @override
   Never _onMissing(
-          _OptionValueWithContext<T> valueWithContext, String missingPath) =>
-      _onMissingFromFiles(valueWithContext, missingPath);
+    _OptionValueWithContext<T> valueWithContext,
+    String missingPath,
+  ) => _onMissingFromFiles(valueWithContext, missingPath);
 
   Never _onMissingFromFiles(
-      _OptionValueWithContext<T> valueWithContext, String missingPath) {
+    _OptionValueWithContext<T> valueWithContext,
+    String missingPath,
+  ) {
     var dartdocYaml = resourceProvider.pathContext.join(
-        valueWithContext.canonicalDirectoryPath, valueWithContext.definingFile);
-    throw DartdocFileMissing('Field $fieldName from $dartdocYaml, set to '
-        '${valueWithContext.value}, resolves to missing path: "$missingPath"');
+      valueWithContext.canonicalDirectoryPath,
+      valueWithContext.definingFile,
+    );
+    throw DartdocFileMissing(
+      'Field $fieldName from $dartdocYaml, set to '
+      '${valueWithContext.value}, resolves to missing path: "$missingPath"',
+    );
   }
 
   /// Searches for a value in configuration files relative to [dir], and if not
@@ -852,9 +936,7 @@ mixin _DartdocFileOption<T> implements DartdocOption<T> {
     Object? returnData;
     if (_isListString) {
       if (yamlData is YamlList) {
-        returnData = [
-          for (var item in yamlData) item.toString(),
-        ];
+        returnData = [for (var item in yamlData) item.toString()];
       }
     } else if (yamlData is YamlMap) {
       var convertYamlToType = _convertYamlToType;
@@ -866,23 +948,32 @@ mixin _DartdocFileOption<T> implements DartdocOption<T> {
       // _OptionValueWithContext into the return data here, and would not have
       // that be separate.
       if (_isMapString && convertYamlToType == null) {
-        convertYamlToType = (YamlMap yamlMap, String canonicalYamlPath,
-            ResourceProvider resourceProvider) {
-          var returnData = <String, String>{};
-          for (var MapEntry(:key, :value) in yamlMap.entries) {
-            returnData[key.toString()] = value.toString();
-          }
-          return returnData as T;
-        };
+        convertYamlToType =
+            (
+              YamlMap yamlMap,
+              String canonicalYamlPath,
+              ResourceProvider resourceProvider,
+            ) {
+              var returnData = <String, String>{};
+              for (var MapEntry(:key, :value) in yamlMap.entries) {
+                returnData[key.toString()] = value.toString();
+              }
+              return returnData as T;
+            };
       }
       if (convertYamlToType == null) {
         throw UnsupportedError(
-            '$fieldName: convertYamlToType method not defined');
+          '$fieldName: convertYamlToType method not defined',
+        );
       }
-      var canonicalDirectoryPath =
-          resourceProvider.pathContext.canonicalize(contextPath);
-      returnData =
-          convertYamlToType(yamlData, canonicalDirectoryPath, resourceProvider);
+      var canonicalDirectoryPath = resourceProvider.pathContext.canonicalize(
+        contextPath,
+      );
+      returnData = convertYamlToType(
+        yamlData,
+        canonicalDirectoryPath,
+        resourceProvider,
+      );
     } else if (_isDouble) {
       if (yamlData is num) {
         returnData = yamlData.toDouble();
@@ -895,11 +986,16 @@ mixin _DartdocFileOption<T> implements DartdocOption<T> {
       throw UnsupportedError('Type $T is not supported');
     }
     if (returnData == null) {
-      throw DartdocOptionError('Error in dartdoc_options.yaml, $fieldName: '
-          'expecting a $_expectedTypeForDisplay, got `$yamlData`');
+      throw DartdocOptionError(
+        'Error in dartdoc_options.yaml, $fieldName: '
+        'expecting a $_expectedTypeForDisplay, got `$yamlData`',
+      );
     }
-    return _OptionValueWithContext(returnData as T, contextPath,
-        definingFile: 'dartdoc_options.yaml');
+    return _OptionValueWithContext(
+      returnData as T,
+      contextPath,
+      definingFile: 'dartdoc_options.yaml',
+    );
   }
 
   _YamlFileData _yamlAtDirectory(Folder folder) {
@@ -907,24 +1003,27 @@ mixin _DartdocFileOption<T> implements DartdocOption<T> {
     var yamlData = _YamlFileData({}, _directoryCurrentPath);
 
     for (var dir in folder.withAncestors) {
-      var canonicalPath =
-          resourceProvider.pathContext.canonicalize(folder.path);
+      var canonicalPath = resourceProvider.pathContext.canonicalize(
+        folder.path,
+      );
       if (_yamlAtCanonicalPathCache.containsKey(canonicalPath)) {
         yamlData = _yamlAtCanonicalPathCache[canonicalPath]!;
         break;
       }
       canonicalPaths.add(canonicalPath);
       if (dir.exists) {
-        var dartdocOptionsFile = resourceProvider.getFile(resourceProvider
-            .pathContext
-            .join(dir.path, 'dartdoc_options.yaml'));
+        var dartdocOptionsFile = resourceProvider.getFile(
+          resourceProvider.pathContext.join(dir.path, 'dartdoc_options.yaml'),
+        );
         if (dartdocOptionsFile.exists) {
           final yaml = loadYaml(dartdocOptionsFile.readAsStringSync());
           // [loadYaml] will return `null` for empty (or all comment) YAML
           // files, so we must check for that case.
           if (yaml != null) {
             yamlData = _YamlFileData(
-                yaml, resourceProvider.pathContext.canonicalize(dir.path));
+              yaml,
+              resourceProvider.pathContext.canonicalize(dir.path),
+            );
           }
           break;
         }
@@ -970,11 +1069,13 @@ mixin _DartdocArgOption<T> implements DartdocOption<T> {
       example = '0.76';
     } else {
       throw UnimplementedError(
-          'Type for $name is not implemented in $_throwErrorForTypes');
+        'Type for $name is not implemented in $_throwErrorForTypes',
+      );
     }
     throw DartdocOptionError(
-        'Invalid argument value: --$argName, set to "$value", must be a '
-        '$T.  Example:  --$argName $example');
+      'Invalid argument value: --$argName, set to "$value", must be a '
+      '$T.  Example:  --$argName $example',
+    );
   }
 
   /// Returns null if no argument was given on the command line.
@@ -985,14 +1086,18 @@ mixin _DartdocArgOption<T> implements DartdocOption<T> {
 
   @override
   Never _onMissing(
-          _OptionValueWithContext<T> valueWithContext, String missingPath) =>
-      _onMissingFromArgs(valueWithContext, missingPath);
+    _OptionValueWithContext<T> valueWithContext,
+    String missingPath,
+  ) => _onMissingFromArgs(valueWithContext, missingPath);
 
   Never _onMissingFromArgs(
-      _OptionValueWithContext<T> valueWithContext, String missingPath) {
+    _OptionValueWithContext<T> valueWithContext,
+    String missingPath,
+  ) {
     throw DartdocFileMissing(
-        'Argument --$argName, set to ${valueWithContext.value}, resolves to '
-        'missing path: "$missingPath"');
+      'Argument --$argName, set to ${valueWithContext.value}, resolves to '
+      'missing path: "$missingPath"',
+    );
   }
 
   /// Generates an [_OptionValueWithContext] using the value of the argument
@@ -1009,7 +1114,9 @@ mixin _DartdocArgOption<T> implements DartdocOption<T> {
     // user's control.
     if (_isBool || _isListString || _isString) {
       return _OptionValueWithContext(
-          _argResults[argName], _directoryCurrentPath);
+        _argResults[argName],
+        _directoryCurrentPath,
+      );
     } else if (_isInt) {
       var value = int.tryParse(_argResults[argName]);
       if (value == null) _throwErrorForTypes(_argResults[argName]);
@@ -1060,42 +1167,49 @@ mixin _DartdocArgOption<T> implements DartdocOption<T> {
   @override
   void _addToArgParser(ArgParser argParser) {
     if (_isBool) {
-      argParser.addFlag(argName,
-          abbr: abbr,
-          defaultsTo: defaultsTo as bool?,
-          help: help,
-          hide: hide,
-          negatable: negatable);
+      argParser.addFlag(
+        argName,
+        abbr: abbr,
+        defaultsTo: defaultsTo as bool?,
+        help: help,
+        hide: hide,
+        negatable: negatable,
+      );
     } else if (_isInt || _isDouble || _isString) {
-      argParser.addOption(argName,
-          abbr: abbr,
-          defaultsTo: defaultsTo?.toString(),
-          help: help,
-          hide: hide);
+      argParser.addOption(
+        argName,
+        abbr: abbr,
+        defaultsTo: defaultsTo?.toString(),
+        help: help,
+        hide: hide,
+      );
     } else if (_isListString || _isMapString) {
       if (defaultsTo == null) {
-        argParser.addMultiOption(argName,
-            abbr: abbr,
-            defaultsTo: null,
-            help: help,
-            hide: hide,
-            splitCommas: splitCommas);
+        argParser.addMultiOption(
+          argName,
+          abbr: abbr,
+          defaultsTo: null,
+          help: help,
+          hide: hide,
+          splitCommas: splitCommas,
+        );
       } else {
         List<String> defaultsToList;
         if (_isListString) {
           defaultsToList = defaultsTo as List<String>;
         } else {
-          defaultsToList = (defaultsTo as Map<String, String>)
-              .entries
+          defaultsToList = (defaultsTo as Map<String, String>).entries
               .map((m) => '${m.key}::${m.value}')
               .toList(growable: false);
         }
-        argParser.addMultiOption(argName,
-            abbr: abbr,
-            defaultsTo: defaultsToList,
-            help: help,
-            hide: hide,
-            splitCommas: splitCommas);
+        argParser.addMultiOption(
+          argName,
+          abbr: abbr,
+          defaultsTo: defaultsToList,
+          help: help,
+          hide: hide,
+          splitCommas: splitCommas,
+        );
       }
     } else {
       throw UnsupportedError('Type $T is not supported');
@@ -1130,46 +1244,68 @@ class DartdocOptionContext extends DartdocOptionContextBase
   // TODO(jcollins-g): Allow passing in structured data to initialize a
   // [DartdocOptionContext]'s arguments instead of having to parse strings
   // via optionSet.
-  DartdocOptionContext(this.optionSet, Resource contextLocation,
-      ResourceProvider resourceProvider)
-      : context = resourceProvider.getFolder(resourceProvider.pathContext
-            .canonicalize(contextLocation is File
-                ? contextLocation.parent.path
-                : contextLocation.path));
+  DartdocOptionContext(
+    this.optionSet,
+    Resource contextLocation,
+    ResourceProvider resourceProvider,
+  ) : context = resourceProvider.getFolder(
+        resourceProvider.pathContext.canonicalize(
+          contextLocation is File
+              ? contextLocation.parent.path
+              : contextLocation.path,
+        ),
+      );
 
   /// Build a DartdocOptionContext via the 'inputDir' command line option.
   DartdocOptionContext.fromDefaultContextLocation(
-      this.optionSet, ResourceProvider resourceProvider)
-      : context = resourceProvider.getFolder(optionSet['inputDir'].valueAt(
-                resourceProvider
-                    .getFolder(resourceProvider.pathContext.current)) ??
-            resourceProvider.pathContext.current);
+    this.optionSet,
+    ResourceProvider resourceProvider,
+  ) : context = resourceProvider.getFolder(
+        optionSet['inputDir'].valueAt(
+              resourceProvider.getFolder(resourceProvider.pathContext.current),
+            ) ??
+            resourceProvider.pathContext.current,
+      );
 
   /// Build a DartdocOptionContext from an analyzer element (using its source
   /// location).
-  factory DartdocOptionContext.fromElement(DartdocOptionSet optionSet,
-      LibraryElement libraryElement, ResourceProvider resourceProvider) {
+  factory DartdocOptionContext.fromElement(
+    DartdocOptionSet optionSet,
+    LibraryElement libraryElement,
+    ResourceProvider resourceProvider,
+  ) {
     return DartdocOptionContext(
-        optionSet,
-        resourceProvider.getFile(libraryElement.firstFragment.source.fullName),
-        resourceProvider);
+      optionSet,
+      resourceProvider.getFile(libraryElement.firstFragment.source.fullName),
+      resourceProvider,
+    );
   }
 
   /// Build a DartdocOptionContext from an existing [DartdocOptionContext] and a
   /// new analyzer [Element].
   factory DartdocOptionContext.fromContextElement(
-      DartdocOptionContext optionContext,
-      LibraryElement libraryElement,
-      ResourceProvider resourceProvider) {
+    DartdocOptionContext optionContext,
+    LibraryElement libraryElement,
+    ResourceProvider resourceProvider,
+  ) {
     return DartdocOptionContext.fromElement(
-        optionContext.optionSet, libraryElement, resourceProvider);
+      optionContext.optionSet,
+      libraryElement,
+      resourceProvider,
+    );
   }
 
   /// Build a DartdocOptionContext from an existing [DartdocOptionContext].
-  factory DartdocOptionContext.fromContext(DartdocOptionContext optionContext,
-      Resource resource, ResourceProvider resourceProvider) {
+  factory DartdocOptionContext.fromContext(
+    DartdocOptionContext optionContext,
+    Resource resource,
+    ResourceProvider resourceProvider,
+  ) {
     return DartdocOptionContext(
-        optionContext.optionSet, resource, resourceProvider);
+      optionContext.optionSet,
+      resource,
+      resourceProvider,
+    );
   }
 
   // All values defined in createDartdocOptions should be exposed here.
@@ -1188,31 +1324,46 @@ class DartdocOptionContext extends DartdocOptionContextBase
   CategoryConfiguration get categories =>
       optionSet['categories'].valueAt(context);
 
+  String? get recipe => optionSet['recipe'].valueAt(context);
+
   // TODO(srawlins): This memoization saved a lot of time in unit testing, but
   // is the first value in this class to be memoized. Memoize others?
-  late final Set<String> exclude =
-      Set.of(optionSet['exclude'].valueAt(context));
+  late final Set<String> exclude = docs_recipe
+      .resolveExcludedLibrariesForRecipe(
+        recipe,
+        fallback: Set.of(optionSet['exclude'].valueAt(context)),
+        resourceProvider: resourceProvider,
+        inputDir: inputDir,
+        packageName: topLevelPackageMeta.name,
+      );
 
-  Set<String> get _excludePackages =>
-      {...optionSet['excludePackages'].valueAt(context)};
+  Set<String> get _excludePackages => {
+    ...optionSet['excludePackages'].valueAt(context),
+  };
 
   bool get workspaceDocs => optionSet['workspaceDocs'].valueAt(context);
 
   List<String> get includePackages =>
       optionSet['includePackages'].valueAt(context);
 
-  List<String> get guideDirs => optionSet['guide']['dirs'].valueAt(context);
+  List<String> get guideDirs => docs_recipe.resolveGuideDirsForRecipe(
+    recipe,
+    fallback: optionSet['guide']['dirs'].valueAt(context),
+  );
 
   List<String> get guideInclude =>
       optionSet['guide']['include'].valueAt(context);
 
-  List<String> get guideExclude =>
-      optionSet['guide']['exclude'].valueAt(context);
+  List<String> get guideExclude => docs_recipe.resolveGuideExcludeForRecipe(
+    recipe,
+    fallback: optionSet['guide']['exclude'].valueAt(context),
+  );
 
   String? get flutterRoot => optionSet['flutterRoot'].valueAt(context);
 
-  late final Set<String> include =
-      Set.of(optionSet['include'].valueAt(context));
+  late final Set<String> include = Set.of(
+    optionSet['include'].valueAt(context),
+  );
 
   bool get includeSource => optionSet['includeSource'].valueAt(context);
 
@@ -1281,10 +1432,14 @@ class DartdocOptionContext extends DartdocOptionContextBase
 /// Helper class that consolidates option contexts for instantiating generators.
 class DartdocGeneratorOptionContext extends DartdocOptionContext {
   DartdocGeneratorOptionContext(
-      super.optionSet, super.dir, super.resourceProvider);
+    super.optionSet,
+    super.dir,
+    super.resourceProvider,
+  );
   DartdocGeneratorOptionContext.fromDefaultContextLocation(
-      super.optionSet, super.resourceProvider)
-      : super.fromDefaultContextLocation();
+    super.optionSet,
+    super.resourceProvider,
+  ) : super.fromDefaultContextLocation();
 
   /// The joined contents of any 'header' files specified in options.
   String get header =>
@@ -1322,26 +1477,46 @@ class DartdocGeneratorOptionContext extends DartdocOptionContext {
 class DartdocProgramOptionContext extends DartdocGeneratorOptionContext
     with LoggingContext {
   DartdocProgramOptionContext(
-      super.optionSet, super.dir, super.resourceProvider);
+    super.optionSet,
+    super.dir,
+    super.resourceProvider,
+  );
 
   DartdocProgramOptionContext.fromDefaultContextLocation(
-      super.optionSet, super.resourceProvider)
-      : super.fromDefaultContextLocation();
+    super.optionSet,
+    super.resourceProvider,
+  ) : super.fromDefaultContextLocation();
 }
 
 List<DartdocOption<bool>> createDartdocProgramOptions(
-    PackageMetaProvider packageMetaProvider) {
+  PackageMetaProvider packageMetaProvider,
+) {
   var resourceProvider = packageMetaProvider.resourceProvider;
   return [
-    DartdocOptionArgOnly<bool>('generateDocs', true, resourceProvider,
-        help:
-            'Generate docs into the output directory (or only display warnings '
-            'if false).',
-        negatable: true),
-    DartdocOptionArgOnly<bool>('help', false, resourceProvider,
-        abbr: 'h', help: 'Show command help.', negatable: false),
-    DartdocOptionArgOnly<bool>('version', false, resourceProvider,
-        help: 'Display the version for $programName.', negatable: false),
+    DartdocOptionArgOnly<bool>(
+      'generateDocs',
+      true,
+      resourceProvider,
+      help:
+          'Generate docs into the output directory (or only display warnings '
+          'if false).',
+      negatable: true,
+    ),
+    DartdocOptionArgOnly<bool>(
+      'help',
+      false,
+      resourceProvider,
+      abbr: 'h',
+      help: 'Show command help.',
+      negatable: false,
+    ),
+    DartdocOptionArgOnly<bool>(
+      'version',
+      false,
+      resourceProvider,
+      help: 'Display the version for $programName.',
+      negatable: false,
+    ),
   ];
 }
 
@@ -1351,16 +1526,13 @@ DartdocProgramOptionContext? parseOptions(
   // Additional options are given in google3.
   OptionGenerator? additionalOptions,
 }) {
-  var optionRoot = DartdocOptionRoot.fromOptionGenerators(
-      'dartdoc',
-      [
-        createDartdocOptions,
-        createDartdocProgramOptions,
-        createLoggingOptions,
-        createGeneratorOptions,
-        ?additionalOptions,
-      ],
-      packageMetaProvider);
+  var optionRoot = DartdocOptionRoot.fromOptionGenerators('dartdoc', [
+    createDartdocOptions,
+    createDartdocProgramOptions,
+    createLoggingOptions,
+    createGeneratorOptions,
+    ?additionalOptions,
+  ], packageMetaProvider);
 
   try {
     optionRoot.parseArguments(arguments);
@@ -1388,9 +1560,19 @@ DartdocProgramOptionContext? parseOptions(
   DartdocProgramOptionContext config;
   try {
     config = DartdocProgramOptionContext.fromDefaultContextLocation(
-        optionRoot, packageMetaProvider.resourceProvider);
+      optionRoot,
+      packageMetaProvider.resourceProvider,
+    );
   } on DartdocOptionError catch (e) {
     stderr.writeln(' fatal error: ${e.message}');
+    stderr.writeln('');
+    _printUsage(optionRoot.argParser);
+    exitCode = 64;
+    return null;
+  }
+  final recipeError = docs_recipe.validateDocsRecipe(config.recipe);
+  if (recipeError != null) {
+    stderr.writeln(' fatal error: $recipeError');
     stderr.writeln('');
     _printUsage(optionRoot.argParser);
     exitCode = 64;
@@ -1417,128 +1599,220 @@ List<DartdocOption> createDartdocOptions(
 ) {
   var resourceProvider = packageMetaProvider.resourceProvider;
   return [
-    DartdocOptionArgFile<String>('format', 'html', resourceProvider,
-        help: 'Output format: html, vitepress, or jaspr.'),
-    DartdocOptionArgOnly<bool>('allowTools', false, resourceProvider,
-        help: 'Execute user-defined tools to fill in @tool directives.',
-        negatable: true),
-    DartdocOptionArgFile<double>(
-        'ambiguousReexportScorerMinConfidence', 0.1, resourceProvider,
-        help: 'Minimum scorer confidence to suppress warning on ambiguous '
-            'reexport.'),
+    DartdocOptionArgFile<String>(
+      'format',
+      'html',
+      resourceProvider,
+      help: 'Output format: html, vitepress, or jaspr.',
+    ),
+    DartdocOptionArgFile<String?>(
+      'recipe',
+      null,
+      resourceProvider,
+      help: 'Documentation recipe. Supported: self-docs.',
+    ),
     DartdocOptionArgOnly<bool>(
-        'autoIncludeDependencies', false, resourceProvider,
-        help: 'Include all the used libraries into the docs, even the ones not '
-            'in the current package',
-        negatable: true),
+      'allowTools',
+      false,
+      resourceProvider,
+      help: 'Execute user-defined tools to fill in @tool directives.',
+      negatable: true,
+    ),
+    DartdocOptionArgFile<double>(
+      'ambiguousReexportScorerMinConfidence',
+      0.1,
+      resourceProvider,
+      help:
+          'Minimum scorer confidence to suppress warning on ambiguous '
+          'reexport.',
+    ),
+    DartdocOptionArgOnly<bool>(
+      'autoIncludeDependencies',
+      false,
+      resourceProvider,
+      help:
+          'Include all the used libraries into the docs, even the ones not '
+          'in the current package',
+      negatable: true,
+    ),
     DartdocOptionArgFile<List<String>>(
-        'categoryOrder', const [], resourceProvider,
-        splitCommas: true,
-        help: 'A list of categories (not package names) to place first when '
-            "grouping symbols on dartdoc's sidebar. Unmentioned categories are "
-            'sorted after these.'),
+      'categoryOrder',
+      const [],
+      resourceProvider,
+      splitCommas: true,
+      help:
+          'A list of categories (not package names) to place first when '
+          "grouping symbols on dartdoc's sidebar. Unmentioned categories are "
+          'sorted after these.',
+    ),
     DartdocOptionFileOnly<CategoryConfiguration>(
-        'categories', CategoryConfiguration.empty, resourceProvider,
-        convertYamlToType: CategoryConfiguration.fromYamlMap,
-        help: 'A list of all categories, their display names, and markdown '
-            'documentation in the order they are to be displayed.'),
-    DartdocOptionArgFile<List<String>>('exclude', [], resourceProvider,
-        help: 'Names of libraries to exclude from documentation.',
-        splitCommas: true),
-    DartdocOptionArgOnly<List<String>>('excludePackages', [], resourceProvider,
-        help: 'Names of packages to exclude from documentation.',
-        splitCommas: true),
-    DartdocOptionArgOnly<bool>('workspaceDocs', false, resourceProvider,
-        help: 'Auto-detect workspace packages from the root pubspec.yaml '
-            "'workspace:' key and document them as local packages.",
-        negatable: true),
-    DartdocOptionArgOnly<List<String>>('includePackages', [], resourceProvider,
-        help: 'Names of packages to force-include as local (manual override '
-            'for multi-package documentation).',
-        splitCommas: true),
-    DartdocOptionSet('guide', resourceProvider)
-      ..addAll([
-        DartdocOptionArgFile<List<String>>(
-            'dirs', ['doc', 'docs'], resourceProvider,
-            help: 'Directory names to scan for guide markdown files.',
-            splitCommas: true),
-        DartdocOptionArgFile<List<String>>('include', [], resourceProvider,
-            help: 'Regexp patterns for guide file paths to include.',
-            splitCommas: true),
-        DartdocOptionArgFile<List<String>>('exclude', [], resourceProvider,
-            help: 'Regexp patterns for guide file paths to exclude.',
-            splitCommas: true),
-      ]),
-    DartdocOptionSyntheticOnly<String?>('flutterRoot',
-        (DartdocSyntheticOption<String?> option, Folder dir) {
-      var flutterRootEnv =
-          packageMetaProvider.environmentProvider['FLUTTER_ROOT'];
-      if (flutterRootEnv != null) {
-        return resourceProvider.pathContext.resolveTildePath(flutterRootEnv);
-      }
-      return _inferFlutterRoot(packageMetaProvider);
-    }, resourceProvider,
-        optionIs: OptionKind.dir,
-        help: 'Root of the Flutter SDK, specified from the environment.',
-        mustExist: true),
-    DartdocOptionArgFile<List<String>>('include', [], resourceProvider,
-        help: 'Names of libraries to document.', splitCommas: true),
-    DartdocOptionArgOnly<bool>('includeSource', true, resourceProvider,
-        help: 'Show source code blocks.', negatable: true),
+      'categories',
+      CategoryConfiguration.empty,
+      resourceProvider,
+      convertYamlToType: CategoryConfiguration.fromYamlMap,
+      help:
+          'A list of all categories, their display names, and markdown '
+          'documentation in the order they are to be displayed.',
+    ),
     DartdocOptionArgFile<List<String>>(
-        'allowedIframeHosts', [], resourceProvider,
-        help: 'Additional hostnames whose <iframe> elements are preserved '
-            'during HTML sanitization. YouTube and DartPad hosts are always '
-            'allowed. Example: codepen.io,stackblitz.com',
-        splitCommas: true),
-    DartdocOptionArgOnly<bool>('injectHtml', false, resourceProvider,
-        help: 'Allow the use of the `{@inject-html}` directive to inject raw '
-            'HTML into dartdoc output.'),
-    DartdocOptionArgOnly<bool>('sanitizeHtml', false, resourceProvider,
-        hide: true,
-        help: 'Sanitize HTML generated from markdown text, `{@tool}` and '
-            '`{@inject-html}` directives.'),
-    DartdocOptionArgOnly<String>(
-        'input', resourceProvider.pathContext.current, resourceProvider,
-        optionIs: OptionKind.dir,
-        help: 'Path to source directory.',
-        mustExist: true),
-    DartdocOptionSyntheticOnly<String>(
-        'inputDir',
-        (DartdocSyntheticOption<String> option, Folder dir) =>
-            option.parent['sdkDocs'].valueAt(dir) == true
-                ? option.parent['sdkDir'].valueAt(dir)
-                : option.parent['input'].valueAt(dir),
+      'exclude',
+      [],
+      resourceProvider,
+      help: 'Names of libraries to exclude from documentation.',
+      splitCommas: true,
+    ),
+    DartdocOptionArgOnly<List<String>>(
+      'excludePackages',
+      [],
+      resourceProvider,
+      help: 'Names of packages to exclude from documentation.',
+      splitCommas: true,
+    ),
+    DartdocOptionArgOnly<bool>(
+      'workspaceDocs',
+      false,
+      resourceProvider,
+      help:
+          'Auto-detect workspace packages from the root pubspec.yaml '
+          "'workspace:' key and document them as local packages.",
+      negatable: true,
+    ),
+    DartdocOptionArgOnly<List<String>>(
+      'includePackages',
+      [],
+      resourceProvider,
+      help:
+          'Names of packages to force-include as local (manual override '
+          'for multi-package documentation).',
+      splitCommas: true,
+    ),
+    DartdocOptionSet('guide', resourceProvider)..addAll([
+      DartdocOptionArgFile<List<String>>(
+        'dirs',
+        ['doc', 'docs'],
         resourceProvider,
-        help: 'Path to source directory (with override if --sdk-docs).',
-        optionIs: OptionKind.dir,
-        mustExist: true),
-    DartdocOptionSet('linkTo', resourceProvider)
-      ..addAll([
-        DartdocOptionArgOnly<Map<String, String>>(
-            'hosted',
-            {
-              'pub.dartlang.org': 'https://pub.dev/documentation/%n%/%v%',
-              'pub.dev': 'https://pub.dev/documentation/%n%/%v%',
-            },
-            resourceProvider,
-            help: 'Specify URLs for hosted pub packages'),
-        DartdocOptionArgOnly<Map<String, String>>(
-          'sdks',
-          {
-            'Dart': 'https://api.dart.dev/%b%/%v%',
-            'Flutter': 'https://api.flutter.dev/flutter',
-          },
-          resourceProvider,
-          help: 'Specify URLs for SDKs.',
-        ),
-        DartdocOptionFileSynth<String>('url',
-            (DartdocSyntheticOption<String> option, Folder dir) {
-          PackageMeta packageMeta =
-              option.parent.parent['packageMeta'].valueAt(dir);
+        help: 'Directory names to scan for guide markdown files.',
+        splitCommas: true,
+      ),
+      DartdocOptionArgFile<List<String>>(
+        'include',
+        [],
+        resourceProvider,
+        help: 'Regexp patterns for guide file paths to include.',
+        splitCommas: true,
+      ),
+      DartdocOptionArgFile<List<String>>(
+        'exclude',
+        [],
+        resourceProvider,
+        help: 'Regexp patterns for guide file paths to exclude.',
+        splitCommas: true,
+      ),
+    ]),
+    DartdocOptionSyntheticOnly<String?>(
+      'flutterRoot',
+      (DartdocSyntheticOption<String?> option, Folder dir) {
+        var flutterRootEnv =
+            packageMetaProvider.environmentProvider['FLUTTER_ROOT'];
+        if (flutterRootEnv != null) {
+          return resourceProvider.pathContext.resolveTildePath(flutterRootEnv);
+        }
+        return _inferFlutterRoot(packageMetaProvider);
+      },
+      resourceProvider,
+      optionIs: OptionKind.dir,
+      help: 'Root of the Flutter SDK, specified from the environment.',
+      mustExist: true,
+    ),
+    DartdocOptionArgFile<List<String>>(
+      'include',
+      [],
+      resourceProvider,
+      help: 'Names of libraries to document.',
+      splitCommas: true,
+    ),
+    DartdocOptionArgOnly<bool>(
+      'includeSource',
+      true,
+      resourceProvider,
+      help: 'Show source code blocks.',
+      negatable: true,
+    ),
+    DartdocOptionArgFile<List<String>>(
+      'allowedIframeHosts',
+      [],
+      resourceProvider,
+      help:
+          'Additional hostnames whose <iframe> elements are preserved '
+          'during HTML sanitization. YouTube and DartPad hosts are always '
+          'allowed. Example: codepen.io,stackblitz.com',
+      splitCommas: true,
+    ),
+    DartdocOptionArgOnly<bool>(
+      'injectHtml',
+      false,
+      resourceProvider,
+      help:
+          'Allow the use of the `{@inject-html}` directive to inject raw '
+          'HTML into dartdoc output.',
+    ),
+    DartdocOptionArgOnly<bool>(
+      'sanitizeHtml',
+      false,
+      resourceProvider,
+      hide: true,
+      help:
+          'Sanitize HTML generated from markdown text, `{@tool}` and '
+          '`{@inject-html}` directives.',
+    ),
+    DartdocOptionArgOnly<String>(
+      'input',
+      resourceProvider.pathContext.current,
+      resourceProvider,
+      optionIs: OptionKind.dir,
+      help: 'Path to source directory.',
+      mustExist: true,
+    ),
+    DartdocOptionSyntheticOnly<String>(
+      'inputDir',
+      (DartdocSyntheticOption<String> option, Folder dir) =>
+          option.parent['sdkDocs'].valueAt(dir) == true
+          ? option.parent['sdkDir'].valueAt(dir)
+          : option.parent['input'].valueAt(dir),
+      resourceProvider,
+      help: 'Path to source directory (with override if --sdk-docs).',
+      optionIs: OptionKind.dir,
+      mustExist: true,
+    ),
+    DartdocOptionSet('linkTo', resourceProvider)..addAll([
+      DartdocOptionArgOnly<Map<String, String>>(
+        'hosted',
+        {
+          'pub.dartlang.org': 'https://pub.dev/documentation/%n%/%v%',
+          'pub.dev': 'https://pub.dev/documentation/%n%/%v%',
+        },
+        resourceProvider,
+        help: 'Specify URLs for hosted pub packages',
+      ),
+      DartdocOptionArgOnly<Map<String, String>>(
+        'sdks',
+        {
+          'Dart': 'https://api.dart.dev/%b%/%v%',
+          'Flutter': 'https://api.flutter.dev/flutter',
+        },
+        resourceProvider,
+        help: 'Specify URLs for SDKs.',
+      ),
+      DartdocOptionFileSynth<String>(
+        'url',
+        (DartdocSyntheticOption<String> option, Folder dir) {
+          PackageMeta packageMeta = option.parent.parent['packageMeta'].valueAt(
+            dir,
+          );
           // Prefer SDK check first, then pub cache check.
-          var inSdk = packageMeta
-              .sdkType(option.parent.parent['flutterRoot'].valueAt(dir));
+          var inSdk = packageMeta.sdkType(
+            option.parent.parent['flutterRoot'].valueAt(dir),
+          );
           if (inSdk != null) {
             Map<String, String> sdks = option.parent['sdks'].valueAt(dir);
             var inSdkVal = sdks[inSdk];
@@ -1551,109 +1825,188 @@ List<DartdocOption> createDartdocOptions(
             if (hostedAtVal != null) return hostedAtVal;
           }
           return '';
-        }, resourceProvider, help: 'Url to use for this particular package.'),
-        DartdocOptionArgOnly<bool>('remote', true, resourceProvider,
-            help: 'Allow links to be generated for packages outside this one.',
-            negatable: true),
-      ]),
-    DartdocOptionArgOnly<String>('output',
-        resourceProvider.pathContext.join('doc', 'api'), resourceProvider,
-        optionIs: OptionKind.dir, help: 'Path to the output directory.'),
+        },
+        resourceProvider,
+        help: 'Url to use for this particular package.',
+      ),
+      DartdocOptionArgOnly<bool>(
+        'remote',
+        true,
+        resourceProvider,
+        help: 'Allow links to be generated for packages outside this one.',
+        negatable: true,
+      ),
+    ]),
+    DartdocOptionArgOnly<String>(
+      'output',
+      resourceProvider.pathContext.join('doc', 'api'),
+      resourceProvider,
+      optionIs: OptionKind.dir,
+      help: 'Path to the output directory.',
+    ),
+    DartdocOptionSyntheticOnly<PackageMeta>('packageMeta', (
+      DartdocSyntheticOption<PackageMeta> option,
+      Folder dir,
+    ) {
+      var packageMeta = packageMetaProvider.fromDir(dir);
+      if (packageMeta == null) {
+        throw DartdocOptionError(
+          'Unable to determine package for directory: ${dir.path}',
+        );
+      }
+      return packageMeta;
+    }, resourceProvider),
+    DartdocOptionArgOnly<List<String>>(
+      'packageOrder',
+      [],
+      resourceProvider,
+      splitCommas: true,
+      help:
+          'A list of package names to place first when grouping libraries in '
+          'packages. Unmentioned packages are placed after these.',
+    ),
+    DartdocOptionArgOnly<String?>(
+      'resourcesDir',
+      null,
+      resourceProvider,
+      help: "An absolute path to dartdoc's resources directory.",
+      hide: true,
+    ),
+    DartdocOptionArgOnly<bool>(
+      'sdkDocs',
+      false,
+      resourceProvider,
+      help: 'Generate ONLY the docs for the Dart SDK.',
+    ),
+    DartdocOptionArgSynth<String?>(
+      'sdkDir',
+      (DartdocSyntheticOption<String?> option, Folder dir) {
+        if (!(option.parent['sdkDocs'].valueAt(dir) as bool) &&
+            (option.root['topLevelPackageMeta'].valueAt(dir) as PackageMeta)
+                .requiresFlutter) {
+          String? flutterRoot = option.root['flutterRoot'].valueAt(dir);
+          if (flutterRoot == null) {
+            throw DartdocOptionError(
+              'Flutter package detected, but no Flutter SDK root could be '
+              'resolved. Set FLUTTER_ROOT or pass --sdk-dir explicitly.',
+            );
+          }
+          return resourceProvider.pathContext.join(
+            flutterRoot,
+            'bin',
+            'cache',
+            'dart-sdk',
+          );
+        }
+        return packageMetaProvider.defaultSdkDir.path;
+      },
+      packageMetaProvider.resourceProvider,
+      help: 'Path to the SDK directory.',
+      optionIs: OptionKind.dir,
+      mustExist: true,
+    ),
+    DartdocOptionArgFile<bool>(
+      'showUndocumentedCategories',
+      false,
+      resourceProvider,
+      help: "Label categories that aren't documented",
+      negatable: true,
+    ),
     DartdocOptionSyntheticOnly<PackageMeta>(
-      'packageMeta',
+      'topLevelPackageMeta',
       (DartdocSyntheticOption<PackageMeta> option, Folder dir) {
-        var packageMeta = packageMetaProvider.fromDir(dir);
+        var packageMeta = packageMetaProvider.fromDir(
+          resourceProvider.getFolder(option.parent['inputDir'].valueAt(dir)),
+        );
         if (packageMeta == null) {
           throw DartdocOptionError(
-              'Unable to determine package for directory: ${dir.path}');
+            'Unable to generate documentation: no package found',
+          );
+        }
+        if (!packageMeta.isValid) {
+          final firstError = packageMeta.getInvalidReasons().first;
+          throw DartdocOptionError('Package is invalid: $firstError');
         }
         return packageMeta;
       },
       resourceProvider,
+      help: 'PackageMeta object for the default package.',
     ),
-    DartdocOptionArgOnly<List<String>>('packageOrder', [], resourceProvider,
-        splitCommas: true,
-        help:
-            'A list of package names to place first when grouping libraries in '
-            'packages. Unmentioned packages are placed after these.'),
-    DartdocOptionArgOnly<String?>('resourcesDir', null, resourceProvider,
-        help: "An absolute path to dartdoc's resources directory.", hide: true),
-    DartdocOptionArgOnly<bool>('sdkDocs', false, resourceProvider,
-        help: 'Generate ONLY the docs for the Dart SDK.'),
-    DartdocOptionArgSynth<String?>('sdkDir',
-        (DartdocSyntheticOption<String?> option, Folder dir) {
-      if (!(option.parent['sdkDocs'].valueAt(dir) as bool) &&
-          (option.root['topLevelPackageMeta'].valueAt(dir) as PackageMeta)
-              .requiresFlutter) {
-        String? flutterRoot = option.root['flutterRoot'].valueAt(dir);
-        if (flutterRoot == null) {
-          throw DartdocOptionError(
-            'Flutter package detected, but no Flutter SDK root could be '
-            'resolved. Set FLUTTER_ROOT or pass --sdk-dir explicitly.',
-          );
-        }
-        return resourceProvider.pathContext
-            .join(flutterRoot, 'bin', 'cache', 'dart-sdk');
-      }
-      return packageMetaProvider.defaultSdkDir.path;
-    }, packageMetaProvider.resourceProvider,
-        help: 'Path to the SDK directory.',
-        optionIs: OptionKind.dir,
-        mustExist: true),
-    DartdocOptionArgFile<bool>(
-        'showUndocumentedCategories', false, resourceProvider,
-        help: "Label categories that aren't documented", negatable: true),
-    DartdocOptionSyntheticOnly<PackageMeta>('topLevelPackageMeta',
-        (DartdocSyntheticOption<PackageMeta> option, Folder dir) {
-      var packageMeta = packageMetaProvider.fromDir(
-          resourceProvider.getFolder(option.parent['inputDir'].valueAt(dir)));
-      if (packageMeta == null) {
-        throw DartdocOptionError(
-            'Unable to generate documentation: no package found');
-      }
-      if (!packageMeta.isValid) {
-        final firstError = packageMeta.getInvalidReasons().first;
-        throw DartdocOptionError('Package is invalid: $firstError');
-      }
-      return packageMeta;
-    }, resourceProvider, help: 'PackageMeta object for the default package.'),
-    DartdocOptionArgOnly<bool>('useCategories', true, resourceProvider,
-        help: 'Deprecated, has no effect.',
-        hide: true),
-    DartdocOptionArgOnly<bool>('validateLinks', true, resourceProvider,
-        help: 'Runs the built-in link checker to display Dart context aware '
-            'warnings for broken links (slow)',
-        negatable: true),
-    DartdocOptionArgOnly<bool>('verboseWarnings', true, resourceProvider,
-        help: 'Display extra debugging information and help with warnings.',
-        negatable: true),
-    DartdocOptionFileOnly<bool>('excludeFooterVersion', false, resourceProvider,
-        help: 'Excludes the package version number in the footer text'),
+    DartdocOptionArgOnly<bool>(
+      'useCategories',
+      true,
+      resourceProvider,
+      help: 'Deprecated, has no effect.',
+      hide: true,
+    ),
+    DartdocOptionArgOnly<bool>(
+      'validateLinks',
+      true,
+      resourceProvider,
+      help:
+          'Runs the built-in link checker to display Dart context aware '
+          'warnings for broken links (slow)',
+      negatable: true,
+    ),
+    DartdocOptionArgOnly<bool>(
+      'verboseWarnings',
+      true,
+      resourceProvider,
+      help: 'Display extra debugging information and help with warnings.',
+      negatable: true,
+    ),
+    DartdocOptionFileOnly<bool>(
+      'excludeFooterVersion',
+      false,
+      resourceProvider,
+      help: 'Excludes the package version number in the footer text',
+    ),
     DartdocOptionFileOnly<ToolConfiguration>(
-        'tools', ToolConfiguration.empty(resourceProvider), resourceProvider,
-        convertYamlToType: ToolConfiguration.fromYamlMap,
-        help: 'A map of tool names to executable paths. Each executable must '
-            'exist. Executables for different platforms are specified by '
-            'giving the platform name as a key, and a list of strings as the '
-            'command.'),
-    DartdocOptionArgOnly<bool>('useBaseHref', false, resourceProvider,
-        help:
-            'Use <base href> in generated files (legacy behavior). This option '
-            'is temporary and support will be removed in the future. Use only '
-            'if the default behavior breaks links between your documentation '
-            'pages, and please file an issue on GitHub.',
-        negatable: false,
-        hide: true),
-    DartdocOptionArgOnly<bool>('showStats', false, resourceProvider,
-        help: 'Show statistics useful for debugging.', hide: true),
-    DartdocOptionArgOnly<String>('maxFileCount', '0', resourceProvider,
-        help:
-            'The maximum number of files dartdoc is allowed to create (0 for no limit).',
-        hide: true),
-    DartdocOptionArgOnly<String>('maxTotalSize', '0', resourceProvider,
-        help:
-            'The maximum total size (in bytes) dartdoc is allowed to write (0 for no limit).',
-        hide: true),
+      'tools',
+      ToolConfiguration.empty(resourceProvider),
+      resourceProvider,
+      convertYamlToType: ToolConfiguration.fromYamlMap,
+      help:
+          'A map of tool names to executable paths. Each executable must '
+          'exist. Executables for different platforms are specified by '
+          'giving the platform name as a key, and a list of strings as the '
+          'command.',
+    ),
+    DartdocOptionArgOnly<bool>(
+      'useBaseHref',
+      false,
+      resourceProvider,
+      help:
+          'Use <base href> in generated files (legacy behavior). This option '
+          'is temporary and support will be removed in the future. Use only '
+          'if the default behavior breaks links between your documentation '
+          'pages, and please file an issue on GitHub.',
+      negatable: false,
+      hide: true,
+    ),
+    DartdocOptionArgOnly<bool>(
+      'showStats',
+      false,
+      resourceProvider,
+      help: 'Show statistics useful for debugging.',
+      hide: true,
+    ),
+    DartdocOptionArgOnly<String>(
+      'maxFileCount',
+      '0',
+      resourceProvider,
+      help:
+          'The maximum number of files dartdoc is allowed to create (0 for no limit).',
+      hide: true,
+    ),
+    DartdocOptionArgOnly<String>(
+      'maxTotalSize',
+      '0',
+      resourceProvider,
+      help:
+          'The maximum total size (in bytes) dartdoc is allowed to write (0 for no limit).',
+      hide: true,
+    ),
     // TODO(jcollins-g): refactor so there is a single static "create" for
     // each DartdocOptionContext that traverses the inheritance tree itself.
     ...createExperimentOptions(resourceProvider),

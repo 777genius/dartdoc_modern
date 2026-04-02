@@ -161,6 +161,7 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   final List<String> _guideInclude;
   final List<String> _guideExclude;
   final Set<String> _allowedIframeHosts;
+  final String? _homePageMarkdown;
 
   /// Tracks all file paths written during this generation run.
   ///
@@ -186,15 +187,17 @@ class VitePressGeneratorBackend extends GeneratorBackend {
     List<String> guideInclude = const [],
     List<String> guideExclude = const [],
     List<String> allowedIframeHosts = const [],
-  })  : _paths = VitePressPathResolver(),
-        _outputPath = outputPath,
-        _packageName = packageName,
-        _repositoryUrl = repositoryUrl,
-        _guideDirs = guideDirs,
-        _guideInclude = guideInclude,
-        _guideExclude = guideExclude,
-        _allowedIframeHosts = Set.of(allowedIframeHosts),
-        super(options, _NoOpTemplates(), writer, resourceProvider);
+    String? homePageMarkdown,
+  }) : _paths = VitePressPathResolver(),
+       _outputPath = outputPath,
+       _packageName = packageName,
+       _repositoryUrl = repositoryUrl,
+       _guideDirs = guideDirs,
+       _guideInclude = guideInclude,
+       _guideExclude = guideExclude,
+       _allowedIframeHosts = Set.of(allowedIframeHosts),
+       _homePageMarkdown = homePageMarkdown,
+       super(options, _NoOpTemplates(), writer, resourceProvider);
 
   // ---------------------------------------------------------------------------
   // Lifecycle hooks
@@ -203,8 +206,11 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   @override
   void beforeGenerate(PackageGraph packageGraph) {
     _paths.initFromPackageGraph(packageGraph);
-    _docs = VitePressDocProcessor(packageGraph, _paths,
-        allowedIframeHosts: _allowedIframeHosts);
+    _docs = VitePressDocProcessor(
+      packageGraph,
+      _paths,
+      allowedIframeHosts: _allowedIframeHosts,
+    );
     _sidebar = VitePressSidebarGenerator(_paths);
   }
 
@@ -256,8 +262,10 @@ class VitePressGeneratorBackend extends GeneratorBackend {
     final isMultiPackage = packageGraph.localPackages.length > 1;
 
     if (isMultiPackage) {
-      logInfo('Generating VitePress docs for workspace '
-          '(${packageGraph.localPackages.length} packages)...');
+      logInfo(
+        'Generating VitePress docs for workspace '
+        '(${packageGraph.localPackages.length} packages)...',
+      );
     } else {
       logInfo('Generating VitePress docs for package ${package.name}...');
     }
@@ -279,10 +287,7 @@ class VitePressGeneratorBackend extends GeneratorBackend {
 
     // Generate sidebar from the full PackageGraph.
     var sidebarContent = _sidebar.generate(packageGraph);
-    _writeMarkdown(
-      '.vitepress/generated/api-sidebar.ts',
-      sidebarContent,
-    );
+    _writeMarkdown('.vitepress/generated/api-sidebar.ts', sidebarContent);
 
     // Generate guide files from doc/docs directories.
     var guideGen = VitePressGuideGenerator(
@@ -310,6 +315,10 @@ class VitePressGeneratorBackend extends GeneratorBackend {
       '.vitepress/generated/guide-sidebar.ts',
       guideSidebarContent,
     );
+
+    if (_homePageMarkdown != null) {
+      _writeMarkdown('index.md', _homePageMarkdown!);
+    }
 
     runtimeStats.incrementAccumulator('writtenPackageFileCount');
   }
@@ -429,10 +438,17 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   /// Output: `api/<dirName>/<ExtensionName>.md`
   @override
   void generateExtension(
-      PackageGraph packageGraph, Library library, Extension extension) {
+    PackageGraph packageGraph,
+    Library library,
+    Extension extension,
+  ) {
     try {
-      var content =
-          renderer.renderExtensionPage(extension, library, _paths, _docs);
+      var content = renderer.renderExtensionPage(
+        extension,
+        library,
+        _paths,
+        _docs,
+      );
       var filePath = _paths.filePathFor(extension);
       if (filePath != null) {
         _writeMarkdown(filePath, content);
@@ -450,17 +466,25 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   /// Output: `api/<dirName>/<ExtensionTypeName>.md`
   @override
   void generateExtensionType(
-      PackageGraph packageGraph, Library library, ExtensionType extensionType) {
+    PackageGraph packageGraph,
+    Library library,
+    ExtensionType extensionType,
+  ) {
     try {
       var content = renderer.renderExtensionTypePage(
-          extensionType, library, _paths, _docs);
+        extensionType,
+        library,
+        _paths,
+        _docs,
+      );
       var filePath = _paths.filePathFor(extensionType);
       if (filePath != null) {
         _writeMarkdown(filePath, content);
       }
     } on Object catch (e) {
       logWarning(
-          'Failed to generate page for extension type ${extensionType.name}: $e');
+        'Failed to generate page for extension type ${extensionType.name}: $e',
+      );
     }
 
     runtimeStats.incrementAccumulator('writtenExtensionTypeFileCount');
@@ -477,10 +501,17 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   /// Output: `api/<dirName>/<FunctionName>.md`
   @override
   void generateFunction(
-      PackageGraph packageGraph, Library library, ModelFunction function) {
+    PackageGraph packageGraph,
+    Library library,
+    ModelFunction function,
+  ) {
     try {
-      var content =
-          renderer.renderFunctionPage(function, library, _paths, _docs);
+      var content = renderer.renderFunctionPage(
+        function,
+        library,
+        _paths,
+        _docs,
+      );
       var filePath = _paths.filePathFor(function);
       if (filePath != null) {
         _writeMarkdown(filePath, content);
@@ -497,10 +528,17 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   /// Output: `api/<dirName>/<PropertyName>.md`
   @override
   void generateTopLevelProperty(
-      PackageGraph packageGraph, Library library, TopLevelVariable property) {
+    PackageGraph packageGraph,
+    Library library,
+    TopLevelVariable property,
+  ) {
     try {
-      var content =
-          renderer.renderPropertyPage(property, library, _paths, _docs);
+      var content = renderer.renderPropertyPage(
+        property,
+        library,
+        _paths,
+        _docs,
+      );
       var filePath = _paths.filePathFor(property);
       if (filePath != null) {
         _writeMarkdown(filePath, content);
@@ -517,7 +555,10 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   /// Output: `api/<dirName>/<TypedefName>.md`
   @override
   void generateTypeDef(
-      PackageGraph packageGraph, Library library, Typedef typedef) {
+    PackageGraph packageGraph,
+    Library library,
+    Typedef typedef,
+  ) {
     try {
       var content = renderer.renderTypedefPage(typedef, library, _paths, _docs);
       var filePath = _paths.filePathFor(typedef);
@@ -542,22 +583,34 @@ class VitePressGeneratorBackend extends GeneratorBackend {
 
   /// No-op: constructors are rendered inline on the class/enum page.
   @override
-  void generateConstructor(PackageGraph packageGraph, Library library,
-      Constructable constructable, Constructor constructor) {
+  void generateConstructor(
+    PackageGraph packageGraph,
+    Library library,
+    Constructable constructable,
+    Constructor constructor,
+  ) {
     // Intentionally empty -- constructors are embedded on the container page.
   }
 
   /// No-op: methods are rendered inline on the container page.
   @override
-  void generateMethod(PackageGraph packageGraph, Library library,
-      Container container, Method method) {
+  void generateMethod(
+    PackageGraph packageGraph,
+    Library library,
+    Container container,
+    Method method,
+  ) {
     // Intentionally empty -- methods are embedded on the container page.
   }
 
   /// No-op: properties/fields are rendered inline on the container page.
   @override
-  void generateProperty(PackageGraph packageGraph, Library library,
-      Container container, Field field) {
+  void generateProperty(
+    PackageGraph packageGraph,
+    Library library,
+    Container container,
+    Field field,
+  ) {
     // Intentionally empty -- properties are embedded on the container page.
   }
 
@@ -659,8 +712,12 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   /// Uses a [visited] set to protect against symlink loops (same approach as
   /// `_collectMarkdownFiles` in `vitepress_guide_generator.dart`).
   /// Normalizes paths to POSIX separators for cross-platform consistency.
-  void _deleteStaleInDir(String dirRelative, String extension,
-      [Set<String>? visited, bool skipRootFiles = false]) {
+  void _deleteStaleInDir(
+    String dirRelative,
+    String extension, [
+    Set<String>? visited,
+    bool skipRootFiles = false,
+  ]) {
     visited ??= {};
     final dirPath = p.join(_outputPath, dirRelative);
     if (!visited.add(dirPath)) return; // Symlink loop protection.
@@ -679,8 +736,9 @@ class VitePressGeneratorBackend extends GeneratorBackend {
 
         // Normalize to POSIX separators so the path matches _expectedFiles
         // (which always uses forward slashes).
-        final relativePath =
-            p.posix.joinAll(p.split(p.relative(child.path, from: _outputPath)));
+        final relativePath = p.posix.joinAll(
+          p.split(p.relative(child.path, from: _outputPath)),
+        );
         if (relativePath.endsWith(extension) &&
             !_expectedFiles.contains(relativePath)) {
           try {
@@ -796,13 +854,13 @@ class _NoOpTemplates implements Templates {
 
   @override
   String renderSidebarForContainer(
-          TemplateDataWithContainer<Documentable> context) =>
-      '';
+    TemplateDataWithContainer<Documentable> context,
+  ) => '';
 
   @override
   String renderSidebarForLibrary(
-          TemplateDataWithLibrary<Documentable> context) =>
-      '';
+    TemplateDataWithLibrary<Documentable> context,
+  ) => '';
 
   @override
   String renderTopLevelProperty(TopLevelPropertyTemplateData context) => '';

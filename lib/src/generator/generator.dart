@@ -8,6 +8,8 @@ library;
 import 'dart:async';
 
 import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
+import 'package:dartdoc_vitepress/src/generator/core/docs_recipe.dart'
+    as docs_recipe;
 import 'package:dartdoc_vitepress/src/generator/generator_backend.dart';
 import 'package:dartdoc_vitepress/src/generator/html_generator_backend.dart';
 import 'package:dartdoc_vitepress/src/generator/jaspr/backend.dart';
@@ -107,10 +109,12 @@ class Generator {
       'writtenPropertyFileCount',
       'writtenSidebarFileCount',
       'writtenTopLevelPropertyFileCount',
-      'writtenTypedefFileCount'
+      'writtenTypedefFileCount',
     });
     _generatorBackend.generatePackage(
-        packageGraph, packageGraph.defaultPackage);
+      packageGraph,
+      packageGraph.defaultPackage,
+    );
 
     var indexAccumulator = <Documentable>[];
     var multiplePackages = packageGraph.localPackages.length > 1;
@@ -120,7 +124,11 @@ class Generator {
         if (!constant.isCanonical) continue;
         indexAccumulator.add(constant);
         _generatorBackend.generateProperty(
-            packageGraph, library, container, constant);
+          packageGraph,
+          library,
+          container,
+          constant,
+        );
       }
     }
 
@@ -129,7 +137,11 @@ class Generator {
         if (!constructor.isCanonical) continue;
         indexAccumulator.add(constructor);
         _generatorBackend.generateConstructor(
-            packageGraph, library, constructable, constructor);
+          packageGraph,
+          library,
+          constructable,
+          constructor,
+        );
       }
     }
 
@@ -138,7 +150,11 @@ class Generator {
         if (!method.isCanonical) continue;
         indexAccumulator.add(method);
         _generatorBackend.generateMethod(
-            packageGraph, library, container, method);
+          packageGraph,
+          library,
+          container,
+          method,
+        );
       }
     }
 
@@ -147,7 +163,11 @@ class Generator {
         if (!operator.isCanonical) continue;
         indexAccumulator.add(operator);
         _generatorBackend.generateMethod(
-            packageGraph, library, container, operator);
+          packageGraph,
+          library,
+          container,
+          operator,
+        );
       }
     }
 
@@ -156,7 +176,11 @@ class Generator {
         if (!property.isCanonical) continue;
         indexAccumulator.add(property);
         _generatorBackend.generateProperty(
-            packageGraph, library, container, property);
+          packageGraph,
+          library,
+          container,
+          property,
+        );
       }
     }
 
@@ -165,7 +189,11 @@ class Generator {
         if (!method.isCanonical) continue;
         indexAccumulator.add(method);
         _generatorBackend.generateMethod(
-            packageGraph, library, container, method);
+          packageGraph,
+          library,
+          container,
+          method,
+        );
       }
     }
 
@@ -174,7 +202,11 @@ class Generator {
         if (!property.isCanonical) continue;
         indexAccumulator.add(property);
         _generatorBackend.generateProperty(
-            packageGraph, library, container, property);
+          packageGraph,
+          library,
+          container,
+          property,
+        );
       }
     }
 
@@ -183,8 +215,10 @@ class Generator {
         logInfo('Generating docs for package ${package.name}...');
       }
       for (var category in package.categories.whereDocumented) {
-        logInfo('Generating docs for category ${category.name} from '
-            '${category.package.fullyQualifiedName}...');
+        logInfo(
+          'Generating docs for category ${category.name} from '
+          '${category.package.fullyQualifiedName}...',
+        );
         indexAccumulator.add(category);
         _generatorBackend.generateCategory(packageGraph, category);
       }
@@ -200,8 +234,10 @@ class Generator {
           continue;
         }
         if (!multiplePackages) {
-          logInfo('Generating docs for library ${lib.breadcrumbName} from '
-              '${lib.element.firstFragment.source.uri}...');
+          logInfo(
+            'Generating docs for library ${lib.breadcrumbName} from '
+            '${lib.element.firstFragment.source.uri}...',
+          );
         }
         if (!lib.isAnonymous && !lib.hasDocumentation) {
           packageGraph.warnOnElement(lib, PackageWarning.noLibraryLevelDocs);
@@ -239,7 +275,10 @@ class Generator {
         for (var extensionType in lib.extensionTypes.whereDocumentedIn(lib)) {
           indexAccumulator.add(extensionType);
           _generatorBackend.generateExtensionType(
-              packageGraph, lib, extensionType);
+            packageGraph,
+            lib,
+            extensionType,
+          );
 
           var canonicalLibrary = extensionType.canonicalLibraryOrThrow;
           generateConstants(extensionType, canonicalLibrary);
@@ -281,13 +320,19 @@ class Generator {
         for (var constant in lib.constants.whereDocumentedIn(lib)) {
           indexAccumulator.add(constant);
           _generatorBackend.generateTopLevelProperty(
-              packageGraph, lib, constant);
+            packageGraph,
+            lib,
+            constant,
+          );
         }
 
         for (var property in lib.properties.whereDocumentedIn(lib)) {
           indexAccumulator.add(property);
           _generatorBackend.generateTopLevelProperty(
-              packageGraph, lib, property);
+            packageGraph,
+            lib,
+            property,
+          );
         }
 
         for (var function in lib.functions.whereDocumentedIn(lib)) {
@@ -306,42 +351,68 @@ class Generator {
 }
 
 List<DartdocOption> createGeneratorOptions(
-    PackageMetaProvider packageMetaProvider) {
+  PackageMetaProvider packageMetaProvider,
+) {
   var resourceProvider = packageMetaProvider.resourceProvider;
   return [
-    DartdocOptionArgFile<List<String>>('footer', [], resourceProvider,
-        optionIs: OptionKind.file,
-        help:
-            'Paths to files with content to add to page footers, but possibly '
-            'outside of dedicated footer elements for the generator (e.g. '
-            'outside of <footer> for an HTML generator). To add text content '
-            'to dedicated footer elements, use --footer-text instead.',
-        mustExist: true,
-        splitCommas: true),
-    DartdocOptionArgFile<List<String>>('footerText', [], resourceProvider,
-        optionIs: OptionKind.file,
-        help: 'Paths to files with content to add to page footers (next to the '
-            'package name and version).',
-        mustExist: true,
-        splitCommas: true),
-    DartdocOptionArgFile<List<String>>('header', [], resourceProvider,
-        optionIs: OptionKind.file,
-        help: 'Paths to files with content to add to page headers.',
-        splitCommas: true),
-    DartdocOptionArgOnly<bool>('prettyIndexJson', false, resourceProvider,
-        help:
-            'Generates `index.json` with indentation and newlines. The file is '
-            'larger, but it\'s also easier to diff.',
-        negatable: false),
-    DartdocOptionArgFile<String?>('favicon', null, resourceProvider,
-        optionIs: OptionKind.file,
-        help: 'A path to a favicon for the generated docs.',
-        mustExist: true),
-    DartdocOptionArgOnly<String?>('relCanonicalPrefix', null, resourceProvider,
-        help:
-            'If provided, add a rel="canonical" prefixed with provided value. '
-            'Consider using if building many versions of the docs for public '
-            'SEO; learn more at https://goo.gl/gktN6F.'),
+    DartdocOptionArgFile<List<String>>(
+      'footer',
+      [],
+      resourceProvider,
+      optionIs: OptionKind.file,
+      help:
+          'Paths to files with content to add to page footers, but possibly '
+          'outside of dedicated footer elements for the generator (e.g. '
+          'outside of <footer> for an HTML generator). To add text content '
+          'to dedicated footer elements, use --footer-text instead.',
+      mustExist: true,
+      splitCommas: true,
+    ),
+    DartdocOptionArgFile<List<String>>(
+      'footerText',
+      [],
+      resourceProvider,
+      optionIs: OptionKind.file,
+      help:
+          'Paths to files with content to add to page footers (next to the '
+          'package name and version).',
+      mustExist: true,
+      splitCommas: true,
+    ),
+    DartdocOptionArgFile<List<String>>(
+      'header',
+      [],
+      resourceProvider,
+      optionIs: OptionKind.file,
+      help: 'Paths to files with content to add to page headers.',
+      splitCommas: true,
+    ),
+    DartdocOptionArgOnly<bool>(
+      'prettyIndexJson',
+      false,
+      resourceProvider,
+      help:
+          'Generates `index.json` with indentation and newlines. The file is '
+          'larger, but it\'s also easier to diff.',
+      negatable: false,
+    ),
+    DartdocOptionArgFile<String?>(
+      'favicon',
+      null,
+      resourceProvider,
+      optionIs: OptionKind.file,
+      help: 'A path to a favicon for the generated docs.',
+      mustExist: true,
+    ),
+    DartdocOptionArgOnly<String?>(
+      'relCanonicalPrefix',
+      null,
+      resourceProvider,
+      help:
+          'If provided, add a rel="canonical" prefixed with provided value. '
+          'Consider using if building many versions of the docs for public '
+          'SEO; learn more at https://goo.gl/gktN6F.',
+    ),
   ];
 }
 
@@ -353,7 +424,11 @@ Generator initHtmlGenerator(
   var templates = HtmlAotTemplates();
   var options = DartdocGeneratorBackendOptions.fromContext(context);
   var generatorBackend = HtmlGeneratorBackend(
-      options, templates, writer, context.resourceProvider);
+    options,
+    templates,
+    writer,
+    context.resourceProvider,
+  );
   return Generator(generatorBackend);
 }
 
@@ -365,6 +440,9 @@ Generator initVitePressGenerator(
   var resourceProvider = context.resourceProvider;
   var outputPath = resourceProvider.pathContext.absolute(context.output);
   var meta = context.topLevelPackageMeta;
+  final repositoryUrl = meta.repository.isNotEmpty
+      ? meta.repository
+      : meta.homepage;
   var options = DartdocGeneratorBackendOptions.fromContext(context);
   var generatorBackend = VitePressGeneratorBackend(
     options,
@@ -372,11 +450,16 @@ Generator initVitePressGenerator(
     resourceProvider,
     outputPath: outputPath,
     packageName: meta.name,
-    repositoryUrl: meta.repository.isNotEmpty ? meta.repository : meta.homepage,
+    repositoryUrl: repositoryUrl,
     guideDirs: context.guideDirs,
     guideInclude: context.guideInclude,
     guideExclude: context.guideExclude,
     allowedIframeHosts: context.allowedIframeHosts,
+    homePageMarkdown: docs_recipe.buildRecipeHomePageMarkdown(
+      context.recipe,
+      packageName: meta.name,
+      repositoryUrl: repositoryUrl,
+    ),
   );
   return Generator(generatorBackend);
 }
@@ -389,6 +472,9 @@ Generator initJasprGenerator(
   var resourceProvider = context.resourceProvider;
   var outputPath = resourceProvider.pathContext.absolute(context.output);
   var meta = context.topLevelPackageMeta;
+  final repositoryUrl = meta.repository.isNotEmpty
+      ? meta.repository
+      : meta.homepage;
   var options = DartdocGeneratorBackendOptions.fromContext(context);
   var generatorBackend = JasprGeneratorBackend(
     options,
@@ -396,11 +482,16 @@ Generator initJasprGenerator(
     resourceProvider,
     outputPath: outputPath,
     packageName: meta.name,
-    repositoryUrl: meta.repository.isNotEmpty ? meta.repository : meta.homepage,
+    repositoryUrl: repositoryUrl,
     guideDirs: context.guideDirs,
     guideInclude: context.guideInclude,
     guideExclude: context.guideExclude,
     allowedIframeHosts: context.allowedIframeHosts,
+    homePageMarkdown: docs_recipe.buildRecipeHomePageMarkdown(
+      context.recipe,
+      packageName: meta.name,
+      repositoryUrl: repositoryUrl,
+    ),
   );
   return Generator(generatorBackend);
 }

@@ -168,6 +168,7 @@ class JasprGeneratorBackend extends GeneratorBackend {
   final List<String> _guideInclude;
   final List<String> _guideExclude;
   final Set<String> _allowedIframeHosts;
+  final String? _homePageMarkdown;
 
   /// Tracks all file paths written during this generation run.
   ///
@@ -193,15 +194,17 @@ class JasprGeneratorBackend extends GeneratorBackend {
     List<String> guideInclude = const [],
     List<String> guideExclude = const [],
     List<String> allowedIframeHosts = const [],
-  })  : _paths = JasprPathResolver(),
-        _outputPath = outputPath,
-        _packageName = packageName,
-        _repositoryUrl = repositoryUrl,
-        _guideDirs = guideDirs,
-        _guideInclude = guideInclude,
-        _guideExclude = guideExclude,
-        _allowedIframeHosts = Set.of(allowedIframeHosts),
-        super(options, _NoOpTemplates(), writer, resourceProvider);
+    String? homePageMarkdown,
+  }) : _paths = JasprPathResolver(),
+       _outputPath = outputPath,
+       _packageName = packageName,
+       _repositoryUrl = repositoryUrl,
+       _guideDirs = guideDirs,
+       _guideInclude = guideInclude,
+       _guideExclude = guideExclude,
+       _allowedIframeHosts = Set.of(allowedIframeHosts),
+       _homePageMarkdown = homePageMarkdown,
+       super(options, _NoOpTemplates(), writer, resourceProvider);
 
   // ---------------------------------------------------------------------------
   // Lifecycle hooks
@@ -210,8 +213,11 @@ class JasprGeneratorBackend extends GeneratorBackend {
   @override
   void beforeGenerate(PackageGraph packageGraph) {
     _paths.initFromPackageGraph(packageGraph);
-    _docs = JasprDocProcessor(packageGraph, _paths,
-        allowedIframeHosts: _allowedIframeHosts);
+    _docs = JasprDocProcessor(
+      packageGraph,
+      _paths,
+      allowedIframeHosts: _allowedIframeHosts,
+    );
     _sidebar = JasprSidebarGenerator(_paths);
   }
 
@@ -266,8 +272,10 @@ class JasprGeneratorBackend extends GeneratorBackend {
     final isMultiPackage = packageGraph.localPackages.length > 1;
 
     if (isMultiPackage) {
-      logInfo('Generating Jaspr docs for workspace '
-          '(${packageGraph.localPackages.length} packages)...');
+      logInfo(
+        'Generating Jaspr docs for workspace '
+        '(${packageGraph.localPackages.length} packages)...',
+      );
     } else {
       logInfo('Generating Jaspr docs for package ${package.name}...');
     }
@@ -289,10 +297,7 @@ class JasprGeneratorBackend extends GeneratorBackend {
 
     // Generate sidebar from the full PackageGraph.
     var sidebarContent = _sidebar.generateApi(packageGraph);
-    _writeMarkdown(
-      'lib/generated/api_sidebar.dart',
-      sidebarContent,
-    );
+    _writeMarkdown('lib/generated/api_sidebar.dart', sidebarContent);
 
     // Generate guide files from doc/docs directories.
     final guideCollector = guide_core.GuideCollector(
@@ -336,10 +341,11 @@ class JasprGeneratorBackend extends GeneratorBackend {
       rewrittenGuideEntries,
       isMultiPackage: isMultiPackage,
     );
-    _writeMarkdown(
-      'lib/generated/guide_sidebar.dart',
-      guideSidebarContent,
-    );
+    _writeMarkdown('lib/generated/guide_sidebar.dart', guideSidebarContent);
+
+    if (_homePageMarkdown != null) {
+      _writeMarkdown('content/index.md', _homePageMarkdown!);
+    }
 
     runtimeStats.incrementAccumulator('writtenPackageFileCount');
   }
@@ -459,10 +465,17 @@ class JasprGeneratorBackend extends GeneratorBackend {
   /// Output: `api/<dirName>/<ExtensionName>.md`
   @override
   void generateExtension(
-      PackageGraph packageGraph, Library library, Extension extension) {
+    PackageGraph packageGraph,
+    Library library,
+    Extension extension,
+  ) {
     try {
-      var content =
-          renderer.renderExtensionPage(extension, library, _paths, _docs);
+      var content = renderer.renderExtensionPage(
+        extension,
+        library,
+        _paths,
+        _docs,
+      );
       var filePath = _paths.filePathFor(extension);
       if (filePath != null) {
         _writeMarkdown(filePath, content);
@@ -480,17 +493,25 @@ class JasprGeneratorBackend extends GeneratorBackend {
   /// Output: `api/<dirName>/<ExtensionTypeName>.md`
   @override
   void generateExtensionType(
-      PackageGraph packageGraph, Library library, ExtensionType extensionType) {
+    PackageGraph packageGraph,
+    Library library,
+    ExtensionType extensionType,
+  ) {
     try {
       var content = renderer.renderExtensionTypePage(
-          extensionType, library, _paths, _docs);
+        extensionType,
+        library,
+        _paths,
+        _docs,
+      );
       var filePath = _paths.filePathFor(extensionType);
       if (filePath != null) {
         _writeMarkdown(filePath, content);
       }
     } on Object catch (e) {
       logWarning(
-          'Failed to generate page for extension type ${extensionType.name}: $e');
+        'Failed to generate page for extension type ${extensionType.name}: $e',
+      );
     }
 
     runtimeStats.incrementAccumulator('writtenExtensionTypeFileCount');
@@ -507,10 +528,17 @@ class JasprGeneratorBackend extends GeneratorBackend {
   /// Output: `api/<dirName>/<FunctionName>.md`
   @override
   void generateFunction(
-      PackageGraph packageGraph, Library library, ModelFunction function) {
+    PackageGraph packageGraph,
+    Library library,
+    ModelFunction function,
+  ) {
     try {
-      var content =
-          renderer.renderFunctionPage(function, library, _paths, _docs);
+      var content = renderer.renderFunctionPage(
+        function,
+        library,
+        _paths,
+        _docs,
+      );
       var filePath = _paths.filePathFor(function);
       if (filePath != null) {
         _writeMarkdown(filePath, content);
@@ -527,10 +555,17 @@ class JasprGeneratorBackend extends GeneratorBackend {
   /// Output: `api/<dirName>/<PropertyName>.md`
   @override
   void generateTopLevelProperty(
-      PackageGraph packageGraph, Library library, TopLevelVariable property) {
+    PackageGraph packageGraph,
+    Library library,
+    TopLevelVariable property,
+  ) {
     try {
-      var content =
-          renderer.renderPropertyPage(property, library, _paths, _docs);
+      var content = renderer.renderPropertyPage(
+        property,
+        library,
+        _paths,
+        _docs,
+      );
       var filePath = _paths.filePathFor(property);
       if (filePath != null) {
         _writeMarkdown(filePath, content);
@@ -547,7 +582,10 @@ class JasprGeneratorBackend extends GeneratorBackend {
   /// Output: `api/<dirName>/<TypedefName>.md`
   @override
   void generateTypeDef(
-      PackageGraph packageGraph, Library library, Typedef typedef) {
+    PackageGraph packageGraph,
+    Library library,
+    Typedef typedef,
+  ) {
     try {
       var content = renderer.renderTypedefPage(typedef, library, _paths, _docs);
       var filePath = _paths.filePathFor(typedef);
@@ -572,22 +610,34 @@ class JasprGeneratorBackend extends GeneratorBackend {
 
   /// No-op: constructors are rendered inline on the class/enum page.
   @override
-  void generateConstructor(PackageGraph packageGraph, Library library,
-      Constructable constructable, Constructor constructor) {
+  void generateConstructor(
+    PackageGraph packageGraph,
+    Library library,
+    Constructable constructable,
+    Constructor constructor,
+  ) {
     // Intentionally empty -- constructors are embedded on the container page.
   }
 
   /// No-op: methods are rendered inline on the container page.
   @override
-  void generateMethod(PackageGraph packageGraph, Library library,
-      Container container, Method method) {
+  void generateMethod(
+    PackageGraph packageGraph,
+    Library library,
+    Container container,
+    Method method,
+  ) {
     // Intentionally empty -- methods are embedded on the container page.
   }
 
   /// No-op: properties/fields are rendered inline on the container page.
   @override
-  void generateProperty(PackageGraph packageGraph, Library library,
-      Container container, Field field) {
+  void generateProperty(
+    PackageGraph packageGraph,
+    Library library,
+    Container container,
+    Field field,
+  ) {
     // Intentionally empty -- properties are embedded on the container page.
   }
 
@@ -603,18 +653,9 @@ class JasprGeneratorBackend extends GeneratorBackend {
       outputPath: _outputPath,
     );
     final output = builder.build(_expectedFiles);
-    _writeMarkdown(
-      'web/generated/search_index.json',
-      output.manifestJson,
-    );
-    _writeMarkdown(
-      'web/generated/search_pages.json',
-      output.pagesJson,
-    );
-    _writeMarkdown(
-      'web/generated/search_sections.json',
-      output.sectionsJson,
-    );
+    _writeMarkdown('web/generated/search_index.json', output.manifestJson);
+    _writeMarkdown('web/generated/search_pages.json', output.pagesJson);
+    _writeMarkdown('web/generated/search_sections.json', output.sectionsJson);
     _writeMarkdown(
       'web/generated/search_sections_content.json',
       output.sectionsContentJson,
@@ -642,11 +683,12 @@ class JasprGeneratorBackend extends GeneratorBackend {
 
     final symbolNames = apiEntries.keys.toList()..sort();
     for (final symbolName in symbolNames) {
-      final entries = apiEntries[symbolName]!..sort((a, b) {
-        final dirCompare = a.apiDir.compareTo(b.apiDir);
-        if (dirCompare != 0) return dirCompare;
-        return a.relativePath.compareTo(b.relativePath);
-      });
+      final entries = apiEntries[symbolName]!
+        ..sort((a, b) {
+          final dirCompare = a.apiDir.compareTo(b.apiDir);
+          if (dirCompare != 0) return dirCompare;
+          return a.relativePath.compareTo(b.relativePath);
+        });
       buffer.writeln("  '${_dartEscape(symbolName)}': [");
       for (final entry in entries) {
         buffer.writeln(
@@ -691,8 +733,9 @@ class JasprGeneratorBackend extends GeneratorBackend {
 
   /// Writes markdown content to the output directory (incremental).
   // Pre-compiled patterns for VitePress syntax stripping.
-  static final _vitepressHeadingAnchor =
-      RegExp(r'^(#{1,6}[^\n]*?)\s+\{#[\w-]+\}[ \t]*$');
+  static final _vitepressHeadingAnchor = RegExp(
+    r'^(#{1,6}[^\n]*?)\s+\{#[\w-]+\}[ \t]*$',
+  );
   static final _vitepressFrontmatterLine = RegExp(r'^(editLink|prev|next):.*$');
   static final _apiBreadcrumbLine = RegExp(r'^\s*<ApiBreadcrumb\s*/?>\s*$');
   static final _tocMarkerLine = RegExp(r'^\s*\[\[toc\]\]\s*$');
@@ -705,8 +748,9 @@ class JasprGeneratorBackend extends GeneratorBackend {
   static final _markdownLinkPattern = RegExp(r'(!?\[[^\]]*\]\()([^)]+)(\))');
   static final _frontMatterFence = RegExp(r'^---\s*$');
   static final _headingPattern = RegExp(r'^\s{0,3}#{1,6}\s+(.*?)\s*$');
-  static final _explicitHeadingAnchor =
-      RegExp(r'\s+\{#([A-Za-z0-9:_\-.]+)\}\s*$');
+  static final _explicitHeadingAnchor = RegExp(
+    r'\s+\{#([A-Za-z0-9:_\-.]+)\}\s*$',
+  );
   static final _schemePattern = RegExp(r'^[a-zA-Z][a-zA-Z0-9+.-]*:');
 
   /// Strips VitePress-specific syntax from markdown so Jaspr renders cleanly.
@@ -825,8 +869,10 @@ class JasprGeneratorBackend extends GeneratorBackend {
     var selectedLines = fileLines;
     if (startLine != null) {
       final normalizedStart = startLine.clamp(1, fileLines.length);
-      final normalizedEnd =
-          (endLine ?? startLine).clamp(normalizedStart, fileLines.length);
+      final normalizedEnd = (endLine ?? startLine).clamp(
+        normalizedStart,
+        fileLines.length,
+      );
       selectedLines = fileLines.sublist(normalizedStart - 1, normalizedEnd);
     }
 
@@ -866,7 +912,8 @@ class JasprGeneratorBackend extends GeneratorBackend {
     return '/$firstGuide';
   }
 
-  String _buildRootIndexHtml(String overviewHref) => '''
+  String _buildRootIndexHtml(String overviewHref) =>
+      '''
 <!DOCTYPE html>
 <html>
   <head>
@@ -960,7 +1007,9 @@ class JasprGeneratorBackend extends GeneratorBackend {
     if (trimmed.startsWith('//')) return destination;
 
     final hashIndex = trimmed.indexOf('#');
-    final pathPart = hashIndex == -1 ? trimmed : trimmed.substring(0, hashIndex);
+    final pathPart = hashIndex == -1
+        ? trimmed
+        : trimmed.substring(0, hashIndex);
     final fragment = hashIndex == -1 ? null : trimmed.substring(hashIndex + 1);
 
     String rewriteFragment(String relativePath, String? currentFragment) {
@@ -982,9 +1031,7 @@ class JasprGeneratorBackend extends GeneratorBackend {
     }
 
     final currentDir = p.posix.dirname(currentRelativePath);
-    final relativeFile = p.posix.normalize(
-      p.posix.join(currentDir, pathPart),
-    );
+    final relativeFile = p.posix.normalize(p.posix.join(currentDir, pathPart));
     if (p.posix.extension(relativeFile) != '.md') return destination;
 
     final route = routeByRelativePath[relativeFile];
@@ -1098,14 +1145,17 @@ class JasprGeneratorBackend extends GeneratorBackend {
         }
         if (child is! File || !child.path.endsWith('.md')) continue;
 
-        final relativeFromOutput =
-            p.relative(child.path, from: p.normalize(_outputPath));
-        final normalizedRelative =
-            p.posix.joinAll(p.split(relativeFromOutput));
+        final relativeFromOutput = p.relative(
+          child.path,
+          from: p.normalize(_outputPath),
+        );
+        final normalizedRelative = p.posix.joinAll(p.split(relativeFromOutput));
         if (!normalizedRelative.startsWith('content/api/')) continue;
 
-        final relativePath =
-            normalizedRelative.replaceFirst(RegExp(r'^content/'), '');
+        final relativePath = normalizedRelative.replaceFirst(
+          RegExp(r'^content/'),
+          '',
+        );
         if (relativePath.endsWith('/index.md') ||
             relativePath.endsWith('/library.md') ||
             relativePath == 'api/index.md') {
@@ -1116,7 +1166,9 @@ class JasprGeneratorBackend extends GeneratorBackend {
         final href = '/${relativePath.replaceFirst('.md', '')}';
         final apiDir = _apiDirForRelativePath(relativePath);
 
-        entries.putIfAbsent(symbolName, () => []).add(
+        entries
+            .putIfAbsent(symbolName, () => [])
+            .add(
               _ApiSymbolEntry(
                 href: href,
                 relativePath: relativePath,
@@ -1211,8 +1263,12 @@ class JasprGeneratorBackend extends GeneratorBackend {
   /// Uses a [visited] set to protect against symlink loops, matching the
   /// shared guide collection traversal logic.
   /// Normalizes paths to POSIX separators for cross-platform consistency.
-  void _deleteStaleInDir(String dirRelative, String extension,
-      [Set<String>? visited, bool skipRootFiles = false]) {
+  void _deleteStaleInDir(
+    String dirRelative,
+    String extension, [
+    Set<String>? visited,
+    bool skipRootFiles = false,
+  ]) {
     visited ??= {};
     final dirPath = p.join(_outputPath, dirRelative);
     if (!visited.add(dirPath)) return; // Symlink loop protection.
@@ -1231,8 +1287,9 @@ class JasprGeneratorBackend extends GeneratorBackend {
 
         // Normalize to POSIX separators so the path matches _expectedFiles
         // (which always uses forward slashes).
-        final relativePath =
-            p.posix.joinAll(p.split(p.relative(child.path, from: _outputPath)));
+        final relativePath = p.posix.joinAll(
+          p.split(p.relative(child.path, from: _outputPath)),
+        );
         if (relativePath.endsWith(extension) &&
             !_expectedFiles.contains(relativePath)) {
           try {
@@ -1360,13 +1417,13 @@ class _NoOpTemplates implements Templates {
 
   @override
   String renderSidebarForContainer(
-          TemplateDataWithContainer<Documentable> context) =>
-      '';
+    TemplateDataWithContainer<Documentable> context,
+  ) => '';
 
   @override
   String renderSidebarForLibrary(
-          TemplateDataWithLibrary<Documentable> context) =>
-      '';
+    TemplateDataWithLibrary<Documentable> context,
+  ) => '';
 
   @override
   String renderTopLevelProperty(TopLevelPropertyTemplateData context) => '';
