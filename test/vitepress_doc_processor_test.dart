@@ -29,7 +29,8 @@ void main() {
     test('removes script tags', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            'before<script>alert("xss")</script>after'),
+          'before<script>alert("xss")</script>after',
+        ),
         equals('beforeafter'),
       );
     });
@@ -58,7 +59,8 @@ void main() {
     test('removes script tags with attributes', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            '<script type="text/javascript" src="evil.js"></script>safe'),
+          '<script type="text/javascript" src="evil.js"></script>safe',
+        ),
         equals('safe'),
       );
     });
@@ -68,7 +70,8 @@ void main() {
     test('removes style tags', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            'a<style>body{display:none}</style>b'),
+          'a<style>body{display:none}</style>b',
+        ),
         equals('ab'),
       );
     });
@@ -92,7 +95,8 @@ void main() {
     test('removes object tags', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            'a<object data="evil.swf"></object>b'),
+          'a<object data="evil.swf"></object>b',
+        ),
         equals('ab'),
       );
     });
@@ -100,7 +104,8 @@ void main() {
     test('removes applet tags', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            'a<applet code="Evil.class"></applet>b'),
+          'a<applet code="Evil.class"></applet>b',
+        ),
         equals('ab'),
       );
     });
@@ -108,7 +113,8 @@ void main() {
     test('removes form tags', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            'a<form action="evil"><input/></form>b'),
+          'a<form action="evil"><input/></form>b',
+        ),
         equals('ab'),
       );
     });
@@ -118,7 +124,8 @@ void main() {
     test('removes non-YouTube iframes', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            'a<iframe src="https://evil.com"></iframe>b'),
+          'a<iframe src="https://evil.com"></iframe>b',
+        ),
         equals('ab'),
       );
     });
@@ -172,7 +179,8 @@ void main() {
     test('removes iframe with dartpad in non-src attribute', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            'a<iframe title="dartpad.dev" src="https://evil.com/x"></iframe>b'),
+          'a<iframe title="dartpad.dev" src="https://evil.com/x"></iframe>b',
+        ),
         equals('ab'),
       );
     });
@@ -182,8 +190,10 @@ void main() {
     test('extraAllowedHosts keeps custom iframe', () {
       const custom = '<iframe src="https://codepen.io/embed/abc"></iframe>';
       expect(
-        VitePressDocProcessor.sanitizeHtml('a${custom}b',
-            extraAllowedHosts: {'codepen.io'}),
+        VitePressDocProcessor.sanitizeHtml(
+          'a${custom}b',
+          extraAllowedHosts: {'codepen.io'},
+        ),
         equals('a${custom}b'),
       );
     });
@@ -191,8 +201,9 @@ void main() {
     test('extraAllowedHosts does not affect non-matching iframes', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            'a<iframe src="https://evil.com/x"></iframe>b',
-            extraAllowedHosts: {'codepen.io'}),
+          'a<iframe src="https://evil.com/x"></iframe>b',
+          extraAllowedHosts: {'codepen.io'},
+        ),
         equals('ab'),
       );
     });
@@ -211,21 +222,24 @@ void main() {
 
     test('removes javascript: in href', () {
       final result = VitePressDocProcessor.sanitizeHtml(
-          '<a href="javascript:alert(1)">click</a>');
+        '<a href="javascript:alert(1)">click</a>',
+      );
       expect(result, contains('href="'));
       expect(result, isNot(contains('javascript:')));
     });
 
     test('removes javascript: in src', () {
-      final result =
-          VitePressDocProcessor.sanitizeHtml('<img src="javascript:alert(1)">');
+      final result = VitePressDocProcessor.sanitizeHtml(
+        '<img src="javascript:alert(1)">',
+      );
       expect(result, contains('src="'));
       expect(result, isNot(contains('javascript:')));
     });
 
     test('removes javascript: case-insensitively', () {
       final result = VitePressDocProcessor.sanitizeHtml(
-          '<a href="JaVaScRiPt:alert(1)">click</a>');
+        '<a href="JaVaScRiPt:alert(1)">click</a>',
+      );
       expect(result, isNot(contains('JaVaScRiPt:')));
     });
 
@@ -234,7 +248,8 @@ void main() {
     test('removes onclick handler', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            '<div onclick="alert(1)">text</div>'),
+          '<div onclick="alert(1)">text</div>',
+        ),
         equals('<div>text</div>'),
       );
     });
@@ -248,7 +263,8 @@ void main() {
 
     test('removes multiple event handlers', () {
       final result = VitePressDocProcessor.sanitizeHtml(
-          '<div onclick="a()" onload="b()">x</div>');
+        '<div onclick="a()" onload="b()">x</div>',
+      );
       expect(result, isNot(contains('onclick')));
       expect(result, isNot(contains('onload')));
     });
@@ -268,19 +284,22 @@ void main() {
 
     test('removes data: URI in href', () {
       final result = VitePressDocProcessor.sanitizeHtml(
-          '<a href="data:text/html,<script>alert(1)</script>">x</a>');
+        '<a href="data:text/html,<script>alert(1)</script>">x</a>',
+      );
       expect(result, isNot(contains('data:')));
     });
 
     test('removes data: URI in src', () {
       final result = VitePressDocProcessor.sanitizeHtml(
-          '<img src="data:text/html;base64,PHNjcmlwdD4=">');
+        '<img src="data:text/html;base64,PHNjcmlwdD4=">',
+      );
       expect(result, isNot(contains('data:')));
     });
 
     test('removes data: URI case-insensitively', () {
       final result = VitePressDocProcessor.sanitizeHtml(
-          '<a href="DaTa:text/html,evil">x</a>');
+        '<a href="DaTa:text/html,evil">x</a>',
+      );
       expect(result, isNot(contains('DaTa:')));
     });
 
@@ -289,7 +308,8 @@ void main() {
     test('removes svg tags', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            'a<svg onload="alert(1)"><circle/></svg>b'),
+          'a<svg onload="alert(1)"><circle/></svg>b',
+        ),
         equals('ab'),
       );
     });
@@ -297,7 +317,8 @@ void main() {
     test('removes svg with foreignObject', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            'a<svg><foreignObject><script>x</script></foreignObject></svg>b'),
+          'a<svg><foreignObject><script>x</script></foreignObject></svg>b',
+        ),
         equals('ab'),
       );
     });
@@ -314,7 +335,8 @@ void main() {
     test('removes base tags with spaces', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            'a< base href="https://evil.com/" />b'),
+          'a< base href="https://evil.com/" />b',
+        ),
         equals('ab'),
       );
     });
@@ -323,14 +345,16 @@ void main() {
 
     test('removes unquoted event handler', () {
       final result = VitePressDocProcessor.sanitizeHtml(
-          '<div onclick=alert(1)>text</div>');
+        '<div onclick=alert(1)>text</div>',
+      );
       expect(result, isNot(contains('onclick')));
       expect(result, contains('text'));
     });
 
     test('removes unquoted event handler with complex value', () {
       final result = VitePressDocProcessor.sanitizeHtml(
-          '<img onerror=fetch("evil") src="x">');
+        '<img onerror=fetch("evil") src="x">',
+      );
       expect(result, isNot(contains('onerror')));
     });
 
@@ -339,7 +363,8 @@ void main() {
     test('removes iframe with youtube.com in non-src attribute', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            '<iframe src="https://evil.com" title="youtube.com"></iframe>'),
+          '<iframe src="https://evil.com" title="youtube.com"></iframe>',
+        ),
         equals(''),
       );
     });
@@ -347,10 +372,7 @@ void main() {
     test('keeps iframe with youtube.com in src attribute', () {
       const tag =
           '<iframe src="https://www.youtube.com/embed/abc123"></iframe>';
-      expect(
-        VitePressDocProcessor.sanitizeHtml(tag),
-        equals(tag),
-      );
+      expect(VitePressDocProcessor.sanitizeHtml(tag), equals(tag));
     });
 
     // -- meta tag removal ---------------------------------------------------
@@ -358,7 +380,8 @@ void main() {
     test('removes meta refresh tag', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            'a<meta http-equiv="refresh" content="0;url=evil">b'),
+          'a<meta http-equiv="refresh" content="0;url=evil">b',
+        ),
         equals('ab'),
       );
     });
@@ -368,7 +391,8 @@ void main() {
     test('removes link stylesheet tag', () {
       expect(
         VitePressDocProcessor.sanitizeHtml(
-            'a<link rel="stylesheet" href="evil.css">b'),
+          'a<link rel="stylesheet" href="evil.css">b',
+        ),
         equals('ab'),
       );
     });
@@ -376,15 +400,17 @@ void main() {
     // -- Vue template interpolation -----------------------------------------
 
     test('escapes Vue template interpolation', () {
-      final result =
-          VitePressDocProcessor.sanitizeHtml('text {{ alert(1) }} more');
+      final result = VitePressDocProcessor.sanitizeHtml(
+        'text {{ alert(1) }} more',
+      );
       expect(result, isNot(contains('{{')));
       expect(result, contains(r'\{\{'));
     });
 
     test('escapes nested Vue interpolation', () {
-      final result =
-          VitePressDocProcessor.sanitizeHtml('{{ constructor("evil") }}');
+      final result = VitePressDocProcessor.sanitizeHtml(
+        '{{ constructor("evil") }}',
+      );
       expect(result, isNot(contains('{{')));
     });
   });
@@ -435,19 +461,27 @@ void main() {
     });
 
     test('escapes nested angle brackets', () {
-      expect(escapeGenerics('Map<String, List<int>>'),
-          equals(r'Map\<String, List\<int\>\>'));
+      expect(
+        escapeGenerics('Map<String, List<int>>'),
+        equals(r'Map\<String, List\<int\>\>'),
+      );
     });
 
     test('passes through text without angle brackets', () {
       expect(escapeGenerics('MyClass'), equals('MyClass'));
+    });
+
+    test('escapes square brackets in operator names', () {
+      expect(escapeGenerics('operator []'), equals(r'operator \[\]'));
+      expect(escapeGenerics('operator []='), equals(r'operator \[\]='));
     });
   });
 
   group('MarkdownRenderer _openTag attribute escaping', () {
     test('sanitizeHtml preserves safe attributes', () {
       final result = VitePressDocProcessor.sanitizeHtml(
-          '<a href="https://example.com">link</a>');
+        '<a href="https://example.com">link</a>',
+      );
       expect(result, contains('href="https://example.com"'));
     });
   });
@@ -491,8 +525,7 @@ void main() {
 
     test('normalizes dart.dom.html to dart-html', () {
       expect(
-        VitePressDocProcessor.normalizeSdkLibraryPath(
-            'dart.dom.html/Element'),
+        VitePressDocProcessor.normalizeSdkLibraryPath('dart.dom.html/Element'),
         equals('dart-html/Element'),
       );
     });
@@ -500,23 +533,22 @@ void main() {
     test('normalizes dart.dom.svg to dart-svg', () {
       expect(
         VitePressDocProcessor.normalizeSdkLibraryPath(
-            'dart.dom.svg/SvgElement'),
+          'dart.dom.svg/SvgElement',
+        ),
         equals('dart-svg/SvgElement'),
       );
     });
 
     test('returns empty string for dart._http (private library)', () {
       expect(
-        VitePressDocProcessor.normalizeSdkLibraryPath(
-            'dart._http/HttpClient'),
+        VitePressDocProcessor.normalizeSdkLibraryPath('dart._http/HttpClient'),
         equals(''),
       );
     });
 
     test('returns empty string for dart._internal (private library)', () {
       expect(
-        VitePressDocProcessor.normalizeSdkLibraryPath(
-            'dart._internal/Symbol'),
+        VitePressDocProcessor.normalizeSdkLibraryPath('dart._internal/Symbol'),
         equals(''),
       );
     });
@@ -540,7 +572,8 @@ void main() {
     test('preserves deep paths after library segment', () {
       expect(
         VitePressDocProcessor.normalizeSdkLibraryPath(
-            'dart.io/File/readAsString'),
+          'dart.io/File/readAsString',
+        ),
         equals('dart-io/File/readAsString'),
       );
     });
@@ -548,7 +581,8 @@ void main() {
     test('handles dart.collection correctly', () {
       expect(
         VitePressDocProcessor.normalizeSdkLibraryPath(
-            'dart.collection/HashMap'),
+          'dart.collection/HashMap',
+        ),
         equals('dart-collection/HashMap'),
       );
     });

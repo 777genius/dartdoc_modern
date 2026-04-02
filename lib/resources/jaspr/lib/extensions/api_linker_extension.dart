@@ -73,7 +73,7 @@ class ApiLinkerExtension implements PageExtension {
     'MaterialPageRoute',
   };
 
-  static final _identifierPattern = RegExp(r'^([A-Z][A-Za-z0-9]*)');
+  static final _identifierPattern = RegExp(r'^([A-Z][A-Za-z0-9]*)(?:\.(.+))?$');
 
   @override
   Future<List<Node>> apply(Page page, List<Node> nodes) async {
@@ -160,7 +160,7 @@ class ApiLinkerExtension implements PageExtension {
     final symbol = match.group(1)!;
     if (_ignore.contains(symbol)) return null;
 
-    final entries = symbolMap[symbol];
+    final entries = _resolveEntries(symbolMap, symbol, match.group(2));
     if (entries == null || entries.isEmpty) return null;
 
     final entry = _pickEntry(entries, currentApiDir);
@@ -173,6 +173,39 @@ class ApiLinkerExtension implements PageExtension {
       {'href': withDocsBasePath(entry.href), 'class': 'api-link'},
       [codeNode],
     );
+  }
+
+  List<generated.ApiSymbolEntry>? _resolveEntries(
+    Map<String, List<generated.ApiSymbolEntry>> symbolMap,
+    String symbol,
+    String? memberPath,
+  ) {
+    final normalizedMember = _normalizeMemberPath(memberPath);
+    if (normalizedMember != null) {
+      final qualifiedKey = '$symbol.$normalizedMember';
+      final qualifiedEntries = symbolMap[qualifiedKey];
+      if (qualifiedEntries != null && qualifiedEntries.isNotEmpty) {
+        return qualifiedEntries;
+      }
+    }
+    return symbolMap[symbol];
+  }
+
+  String? _normalizeMemberPath(String? memberPath) {
+    if (memberPath == null) return null;
+    var normalized = memberPath.trim();
+    if (normalized.isEmpty) return null;
+    normalized = normalized.replaceFirst(RegExp(r'\(\)$'), '').trim();
+    normalized = normalized.replaceFirst(RegExp(r'<[^>]+>$'), '').trim();
+    if (normalized.startsWith('operator ')) {
+      final operatorName = normalized.substring('operator '.length).trim();
+      if (operatorName.isEmpty) return null;
+      return 'operator $operatorName';
+    }
+    if (normalized.endsWith('=')) {
+      normalized = normalized.substring(0, normalized.length - 1).trim();
+    }
+    return normalized.isEmpty ? null : normalized;
   }
 
   generated.ApiSymbolEntry _pickEntry(

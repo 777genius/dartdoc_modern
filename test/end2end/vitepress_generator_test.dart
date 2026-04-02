@@ -21,16 +21,21 @@ import '../src/utils.dart';
 final _resourceProvider = pubPackageMetaProvider.resourceProvider;
 final _pathContext = _resourceProvider.pathContext;
 
-Folder _getFolder(String path) => _resourceProvider
-    .getFolder(_pathContext.absolute(_pathContext.canonicalize(path)));
+Folder _getFolder(String path) => _resourceProvider.getFolder(
+  _pathContext.absolute(_pathContext.canonicalize(path)),
+);
 
 final _testPackageDir = _getFolder('testing/test_package');
 final _testPackageWithDocsDir = _getFolder('testing/test_package_with_docs');
-final _testPackageExperimentsDir =
-    _getFolder('testing/test_package_experiments');
+final _testPackageExperimentsDir = _getFolder(
+  'testing/test_package_experiments',
+);
 
 Dartdoc _buildVitePressDartdoc(
-    List<String> extraArgv, Folder pkgRoot, Folder outDir) {
+  List<String> extraArgv,
+  Folder pkgRoot,
+  Folder outDir,
+) {
   var context = generatorContextFromArgv([
     '--format',
     'vitepress',
@@ -44,15 +49,19 @@ Dartdoc _buildVitePressDartdoc(
 
   return Dartdoc.fromContext(
     context,
-    PubPackageBuilder(context, pubPackageMetaProvider,
-        skipUnreachableSdkLibraries: true),
+    PubPackageBuilder(
+      context,
+      pubPackageMetaProvider,
+      skipUnreachableSdkLibraries: true,
+    ),
   );
 }
 
 /// Reads a file relative to [outDir] and returns its content.
 String _readOutput(Folder outDir, String relativePath) {
-  final file =
-      _resourceProvider.getFile(p.normalize(p.join(outDir.path, relativePath)));
+  final file = _resourceProvider.getFile(
+    p.normalize(p.join(outDir.path, relativePath)),
+  );
   expect(file.exists, isTrue, reason: 'Expected file to exist: $relativePath');
   return file.readAsStringSync();
 }
@@ -71,8 +80,9 @@ bool _dirExists(Folder outDir, String relativePath) {
       .exists;
 }
 
-Folder _createSystemTemp(String prefix) =>
-    _resourceProvider.getFolder(io.Directory.systemTemp.createTempSync(prefix).path);
+Folder _createSystemTemp(String prefix) => _resourceProvider.getFolder(
+  io.Directory.systemTemp.createTempSync(prefix).path,
+);
 
 Folder _copyPackageFixture(Folder source, String prefix) {
   final destination = io.Directory.systemTemp.createTempSync(prefix);
@@ -94,17 +104,18 @@ Folder _copyPackageFixture(Folder source, String prefix) {
 }
 
 bool _hasWarning(DartdocResults results, PackageWarning warning) {
-  return results.packageGraph.packageWarningCounter.countedWarnings.values
-      .any((warningsByKind) => warningsByKind.containsKey(warning));
+  return results.packageGraph.packageWarningCounter.countedWarnings.values.any(
+    (warningsByKind) => warningsByKind.containsKey(warning),
+  );
 }
 
 void main() {
   group('VitePress generator e2e', () {
     setUpAll(() async {
-      var optionSet = DartdocOptionRoot.fromOptionGenerators(
-          'dartdoc',
-          [createDartdocProgramOptions, createLoggingOptions],
-          pubPackageMetaProvider);
+      var optionSet = DartdocOptionRoot.fromOptionGenerators('dartdoc', [
+        createDartdocProgramOptions,
+        createLoggingOptions,
+      ], pubPackageMetaProvider);
       optionSet.parseArguments([]);
       startLogging(isJson: false, isQuiet: true, showProgress: false);
 
@@ -149,20 +160,26 @@ void main() {
       });
 
       test('api-sidebar.ts is valid TypeScript export', () {
-        var content =
-            _readOutput(outDir, '.vitepress/generated/api-sidebar.ts');
+        var content = _readOutput(
+          outDir,
+          '.vitepress/generated/api-sidebar.ts',
+        );
         expect(content, contains('export'));
         expect(content, contains('apiSidebar'));
       });
 
       test('guide-sidebar.ts exists', () {
-        expect(_outputExists(outDir, '.vitepress/generated/guide-sidebar.ts'),
-            isTrue);
+        expect(
+          _outputExists(outDir, '.vitepress/generated/guide-sidebar.ts'),
+          isTrue,
+        );
       });
 
       test('api-styles.css is generated with member-signature styles', () {
-        var content =
-            _readOutput(outDir, '.vitepress/generated/api-styles.css');
+        var content = _readOutput(
+          outDir,
+          '.vitepress/generated/api-styles.css',
+        );
         expect(content, contains('.member-signature'));
         expect(content, contains('.kw'));
         expect(content, contains('pre-line'));
@@ -260,8 +277,10 @@ void main() {
       // -- Sidebar content -------------------------------------------------
 
       test('sidebar has per-library base paths', () {
-        var content =
-            _readOutput(outDir, '.vitepress/generated/api-sidebar.ts');
+        var content = _readOutput(
+          outDir,
+          '.vitepress/generated/api-sidebar.ts',
+        );
         expect(content, contains("base: '/api/ex/'"));
         expect(content, contains("base: '/api/fake/'"));
       });
@@ -270,18 +289,24 @@ void main() {
 
       test('enum page exists and has Values section', () {
         var content = _readOutput(outDir, 'api/fake/MacrosFromAccessors.md');
-        expect(content,
-            matches(RegExp(r'^# MacrosFromAccessors', multiLine: true)));
+        expect(
+          content,
+          matches(RegExp(r'^# MacrosFromAccessors', multiLine: true)),
+        );
         expect(content, contains('## Values'));
       });
 
       // -- Mixin page ------------------------------------------------------
 
       test('mixin page exists and has Superclass Constraints', () {
-        var content =
-            _readOutput(outDir, 'api/fake/NewStyleMixinCallingSuper.md');
-        expect(content,
-            matches(RegExp(r'^# NewStyleMixinCallingSuper', multiLine: true)));
+        var content = _readOutput(
+          outDir,
+          'api/fake/NewStyleMixinCallingSuper.md',
+        );
+        expect(
+          content,
+          matches(RegExp(r'^# NewStyleMixinCallingSuper', multiLine: true)),
+        );
         expect(content, contains(':::info Superclass Constraints'));
       });
 
@@ -392,8 +417,10 @@ void main() {
 
       test('class declaration shows extends clause', () {
         // BoxConstraints extends Constraints in override_class
-        var content =
-            _readOutput(outDir, 'api/override_class/BoxConstraints.md');
+        var content = _readOutput(
+          outDir,
+          'api/override_class/BoxConstraints.md',
+        );
         expect(content, matches(RegExp(r'^# BoxConstraints', multiLine: true)));
         expect(content, contains('extends'));
         expect(content, contains('Constraints'));
@@ -436,8 +463,10 @@ void main() {
       test('function page renders parameters in signature', () {
         // topLevelFunction in fake has multiple params (it's also deprecated)
         var content = _readOutput(outDir, 'api/fake/topLevelFunction.md');
-        expect(content,
-            matches(RegExp(r'^# .*~~?topLevelFunction~~?', multiLine: true)));
+        expect(
+          content,
+          matches(RegExp(r'^# .*~~?topLevelFunction~~?', multiLine: true)),
+        );
         expect(content, contains('member-signature'));
         // Signature should mention parameter names
         expect(content, contains('param1'));
@@ -549,8 +578,10 @@ void main() {
       // -- Sidebar structure -----------------------------------------------
 
       test('sidebar contains library entries with items', () {
-        var content =
-            _readOutput(outDir, '.vitepress/generated/api-sidebar.ts');
+        var content = _readOutput(
+          outDir,
+          '.vitepress/generated/api-sidebar.ts',
+        );
         // Sidebar should list class names as items
         expect(content, contains('Apple'));
         expect(content, contains('Dog'));
@@ -581,7 +612,9 @@ void main() {
 
       test('private class does NOT generate page', () {
         expect(
-            _outputExists(outDir, 'api/fake/_APrivateConstClass.md'), isFalse);
+          _outputExists(outDir, 'api/fake/_APrivateConstClass.md'),
+          isFalse,
+        );
       });
 
       // -- Inherited members -------------------------------------------------
@@ -590,8 +623,10 @@ void main() {
         var content = _readOutput(outDir, 'api/fake/InheritingClassOne.md');
         // aMethod is inherited from _PrivateClassDefiningSomething
         expect(content, contains('### aMethod()'));
-        expect(content,
-            contains('*Inherited from _PrivateClassDefiningSomething.*'));
+        expect(
+          content,
+          contains('*Inherited from _PrivateClassDefiningSomething.*'),
+        );
       });
 
       test('inherited Object members show Inherited from Object', () {
@@ -635,10 +670,10 @@ void main() {
 
       test('operator [] and []= render with correct signatures', () {
         var content = _readOutput(outDir, 'api/fake/SpecialList.md');
-        expect(content, contains('### operator []()'));
+        expect(content, contains(r'### operator \[\]()'));
         // Signatures are now in member-signature HTML blocks
         expect(content, contains('operator []('));
-        expect(content, contains('### operator []=()'));
+        expect(content, contains(r'### operator \[\]=()'));
         expect(content, contains('operator []=('));
       });
 
@@ -705,15 +740,19 @@ void main() {
 
       // -- Generic function --------------------------------------------------
 
-      test('generic function shows type parameter in heading and signature',
-          () {
-        var content = _readOutput(outDir, 'api/ex/genericFunction.md');
-        expect(content, contains(r'# genericFunction\<T\>'));
-        // Signature uses HTML with fn span: genericFunction&lt;T&gt;(T arg)
-        expect(content,
-            contains('<span class="fn">genericFunction&lt;T&gt;</span>('));
-        expect(content, contains('member-signature'));
-      });
+      test(
+        'generic function shows type parameter in heading and signature',
+        () {
+          var content = _readOutput(outDir, 'api/ex/genericFunction.md');
+          expect(content, contains(r'# genericFunction\<T\>'));
+          // Signature uses HTML with fn span: genericFunction&lt;T&gt;(T arg)
+          expect(
+            content,
+            contains('<span class="fn">genericFunction&lt;T&gt;</span>('),
+          );
+          expect(content, contains('member-signature'));
+        },
+      );
 
       // -- Top-level getter --------------------------------------------------
 
@@ -760,14 +799,15 @@ void main() {
       // -- Admonition blocks in library docs ---------------------------------
 
       test(
-          'library documentation converts admonition blocks to VitePress containers',
-          () {
-        var content = _readOutput(outDir, 'api/fake/index.md');
-        expect(content, contains(':::info'));
-        expect(content, contains(':::tip'));
-        expect(content, contains(':::warning'));
-        expect(content, contains(':::danger'));
-      });
+        'library documentation converts admonition blocks to VitePress containers',
+        () {
+          var content = _readOutput(outDir, 'api/fake/index.md');
+          expect(content, contains(':::info'));
+          expect(content, contains(':::tip'));
+          expect(content, contains(':::warning'));
+          expect(content, contains(':::danger'));
+        },
+      );
 
       // -- Library overview table structure -----------------------------------
 
@@ -806,15 +846,19 @@ void main() {
       // -- Overridden method -------------------------------------------------
 
       test('overridden method shows own documentation', () {
-        var content =
-            _readOutput(outDir, 'api/override_class/BoxConstraints.md');
+        var content = _readOutput(
+          outDir,
+          'api/override_class/BoxConstraints.md',
+        );
         expect(content, contains('### debugAssertIsValid()'));
         expect(content, contains('Overrides the method in the superclass'));
       });
 
       test('const constructor in subclass shows const keyword', () {
-        var content =
-            _readOutput(outDir, 'api/override_class/BoxConstraints.md');
+        var content = _readOutput(
+          outDir,
+          'api/override_class/BoxConstraints.md',
+        );
         // const keyword is now in a <span class="kw">const</span>
         expect(content, contains('<span class="kw">const</span>'));
         expect(content, contains('BoxConstraints()'));
@@ -885,13 +929,17 @@ void main() {
       test('constant page description mentions constant', () {
         var content = _readOutput(outDir, 'api/ex/COLOR.md');
         expect(
-            content, contains('description: "API documentation for the COLOR'));
+          content,
+          contains('description: "API documentation for the COLOR'),
+        );
       });
 
       test('property page description mentions property', () {
         var content = _readOutput(outDir, 'api/ex/isCheck.md');
-        expect(content,
-            contains('description: "API documentation for the isCheck'));
+        expect(
+          content,
+          contains('description: "API documentation for the isCheck'),
+        );
       });
 
       // -- Frontmatter outline differs by page type --------------------------
@@ -908,19 +956,26 @@ void main() {
 
       // -- InheritingClassOne extends private class --------------------------
 
-      test('class extending private base shows private name in declaration',
-          () {
-        var content = _readOutput(outDir, 'api/fake/InheritingClassOne.md');
-        // Linked declaration: private base type rendered as unlinked span
-        expect(content, contains('<span class="fn">InheritingClassOne</span>'));
-        expect(content, contains('<span class="kw">extends</span>'));
-      });
+      test(
+        'class extending private base shows private name in declaration',
+        () {
+          var content = _readOutput(outDir, 'api/fake/InheritingClassOne.md');
+          // Linked declaration: private base type rendered as unlinked span
+          expect(
+            content,
+            contains('<span class="fn">InheritingClassOne</span>'),
+          );
+          expect(content, contains('<span class="kw">extends</span>'));
+        },
+      );
 
       // -- Multiple libraries in sidebar -------------------------------------
 
       test('sidebar has entries for many libraries', () {
-        var content =
-            _readOutput(outDir, '.vitepress/generated/api-sidebar.ts');
+        var content = _readOutput(
+          outDir,
+          '.vitepress/generated/api-sidebar.ts',
+        );
         // Should have entries for several libraries
         expect(content, contains("'/api/ex/'"));
         expect(content, contains("'/api/fake/'"));
@@ -1001,14 +1056,16 @@ void main() {
         expect(content, contains('>Apple</a>'));
       });
 
-      test('generic method return type uses HTML entities for angle brackets',
-          () {
-        // HasGenerics has convertToMap() returning Map<X, Y>?
-        var content = _readOutput(outDir, 'api/fake/HasGenerics.md');
-        // Angle brackets should be &lt; and &gt; in HTML
-        expect(content, contains('&lt;'));
-        expect(content, contains('&gt;'));
-      });
+      test(
+        'generic method return type uses HTML entities for angle brackets',
+        () {
+          // HasGenerics has convertToMap() returning Map<X, Y>?
+          var content = _readOutput(outDir, 'api/fake/HasGenerics.md');
+          // Angle brackets should be &lt; and &gt; in HTML
+          expect(content, contains('&lt;'));
+          expect(content, contains('&gt;'));
+        },
+      );
 
       test('constructor taking local type has type-link', () {
         // LongFirstLine.fromHasGenerics(HasGenerics hg)
@@ -1140,8 +1197,9 @@ void main() {
       test('short signature stays single-line', () {
         // Apple.fromString(String s) — well under 80 chars
         var content = _readOutput(outDir, 'api/ex/Apple.md');
-        var sigMatch = RegExp(r'Apple\.fromString[^<]*</span>\([^)]*\)')
-            .firstMatch(content);
+        var sigMatch = RegExp(
+          r'Apple\.fromString[^<]*</span>\([^)]*\)',
+        ).firstMatch(content);
         expect(sigMatch, isNotNull);
         // Should NOT contain newlines inside the signature parentheses
         expect(sigMatch!.group(0), isNot(contains('\n')));
@@ -1170,8 +1228,9 @@ void main() {
         // optionalParams(first, {second, int? third}) — ~45 chars → single-line
         var content = _readOutput(outDir, 'api/fake/LongFirstLine.md');
         // Find the optionalParams signature
-        var sigMatch = RegExp(r'optionalParams\([^)]*\{[^}]*\}[^)]*\)')
-            .firstMatch(content);
+        var sigMatch = RegExp(
+          r'optionalParams\([^)]*\{[^}]*\}[^)]*\)',
+        ).firstMatch(content);
         expect(sigMatch, isNotNull);
         expect(sigMatch!.group(0), isNot(contains('\n')));
       });
@@ -1187,8 +1246,10 @@ void main() {
       // -- Inheritance chain (P0) -------------------------------------------
 
       test('subclass page has inheritance chain', () {
-        var content =
-            _readOutput(outDir, 'api/override_class/BoxConstraints.md');
+        var content = _readOutput(
+          outDir,
+          'api/override_class/BoxConstraints.md',
+        );
         expect(content, contains(':::info Inheritance'));
         expect(content, contains('Object'));
         expect(content, contains('→'));
@@ -1225,14 +1286,16 @@ void main() {
 
       // -- Getter/setter separate docs (P1) ---------------------------------
 
-      test('property with both getter and setter docs shows separate sections',
-          () {
-        var content = _readOutput(outDir, 'api/fake/WithGetterAndSetter.md');
-        expect(content, contains('**getter:**'));
-        expect(content, contains('**setter:**'));
-        expect(content, contains('Returns a length'));
-        expect(content, contains('Sets the length'));
-      });
+      test(
+        'property with both getter and setter docs shows separate sections',
+        () {
+          var content = _readOutput(outDir, 'api/fake/WithGetterAndSetter.md');
+          expect(content, contains('**getter:**'));
+          expect(content, contains('**setter:**'));
+          expect(content, contains('Returns a length'));
+          expect(content, contains('Sets the length'));
+        },
+      );
 
       // -- Extension member attribution (P1) --------------------------------
 
@@ -1269,8 +1332,11 @@ void main() {
 
       setUpAll(() async {
         outDir = _resourceProvider.createSystemTemp('vitepress_guide.');
-        var dartdoc =
-            _buildVitePressDartdoc([], _testPackageWithDocsDir, outDir);
+        var dartdoc = _buildVitePressDartdoc(
+          [],
+          _testPackageWithDocsDir,
+          outDir,
+        );
         await dartdoc.generateDocs();
       });
 
@@ -1286,20 +1352,28 @@ void main() {
 
       test('nested guide directory structure is preserved', () {
         expect(
-            _outputExists(outDir, 'guide/advanced/configuration.md'), isTrue);
+          _outputExists(outDir, 'guide/advanced/configuration.md'),
+          isTrue,
+        );
         var content = _readOutput(outDir, 'guide/advanced/configuration.md');
         expect(content, contains('# Configuration'));
         expect(_outputExists(outDir, 'guide/advanced/architecture.md'), isTrue);
-        expect(_outputExists(outDir, 'guide/recipes/testing-workflows.md'),
-            isTrue);
-        expect(_outputExists(outDir, 'guide/recipes/pipeline-patterns.md'),
-            isTrue);
+        expect(
+          _outputExists(outDir, 'guide/recipes/testing-workflows.md'),
+          isTrue,
+        );
+        expect(
+          _outputExists(outDir, 'guide/recipes/pipeline-patterns.md'),
+          isTrue,
+        );
         expect(_outputExists(outDir, 'guide/ui/showcase.md'), isTrue);
       });
 
       test('guide-sidebar.ts contains guide entries', () {
-        var content =
-            _readOutput(outDir, '.vitepress/generated/guide-sidebar.ts');
+        var content = _readOutput(
+          outDir,
+          '.vitepress/generated/guide-sidebar.ts',
+        );
         expect(content, contains('Getting Started'));
         expect(content, contains('Configuration'));
         expect(content, contains('Architecture'));
@@ -1309,8 +1383,10 @@ void main() {
       });
 
       test('sidebar links do not contain .md extension', () {
-        var content =
-            _readOutput(outDir, '.vitepress/generated/guide-sidebar.ts');
+        var content = _readOutput(
+          outDir,
+          '.vitepress/generated/guide-sidebar.ts',
+        );
         expect(content, isNot(contains("link: '/guide/getting-started.md'")));
       });
     });
@@ -1324,8 +1400,11 @@ void main() {
       setUpAll(() async {
         outDir = _resourceProvider.createSystemTemp('vitepress_experiments.');
         runPubGet(_testPackageExperimentsDir.path);
-        var dartdoc =
-            _buildVitePressDartdoc([], _testPackageExperimentsDir, outDir);
+        var dartdoc = _buildVitePressDartdoc(
+          [],
+          _testPackageExperimentsDir,
+          outDir,
+        );
         await dartdoc.generateDocs();
       });
 
@@ -1417,7 +1496,9 @@ void main() {
       test('sealed class does NOT show abstract badge', () {
         var content = _readOutput(outDir, 'api/class_modifiers.dart/E.md');
         expect(
-            content, isNot(contains('<Badge type="info" text="abstract" />')));
+          content,
+          isNot(contains('<Badge type="info" text="abstract" />')),
+        );
       });
 
       test('base mixin has base badge in heading', () {
@@ -1461,8 +1542,9 @@ void main() {
     // -----------------------------------------------------------------------
     group('incremental generation', () {
       test('second run writes fewer files', () async {
-        var outDir =
-            _resourceProvider.createSystemTemp('vitepress_incremental.');
+        var outDir = _resourceProvider.createSystemTemp(
+          'vitepress_incremental.',
+        );
         try {
           var dartdoc1 = _buildVitePressDartdoc([], _testPackageDir, outDir);
           await dartdoc1.generateDocs();
@@ -1472,9 +1554,13 @@ void main() {
           await dartdoc2.generateDocs();
           var secondRunWritten = dartdoc2.generator.writtenFiles.length;
 
-          expect(secondRunWritten, lessThan(firstRunWritten),
-              reason: 'Second run should write fewer files than first run '
-                  '(first=$firstRunWritten, second=$secondRunWritten)');
+          expect(
+            secondRunWritten,
+            lessThan(firstRunWritten),
+            reason:
+                'Second run should write fewer files than first run '
+                '(first=$firstRunWritten, second=$secondRunWritten)',
+          );
         } finally {
           outDir.delete();
         }
@@ -1491,16 +1577,20 @@ void main() {
           var dartdoc1 = _buildVitePressDartdoc([], _testPackageDir, outDir);
           await dartdoc1.generateDocs();
 
-          var staleFile = _resourceProvider
-              .getFile(p.join(outDir.path, 'api', 'ex', 'StaleClass.md'));
+          var staleFile = _resourceProvider.getFile(
+            p.join(outDir.path, 'api', 'ex', 'StaleClass.md'),
+          );
           staleFile.writeAsStringSync('# StaleClass\nThis is stale.');
           expect(staleFile.exists, isTrue);
 
           var dartdoc2 = _buildVitePressDartdoc([], _testPackageDir, outDir);
           await dartdoc2.generateDocs();
 
-          expect(staleFile.exists, isFalse,
-              reason: 'Stale .md file should be deleted');
+          expect(
+            staleFile.exists,
+            isFalse,
+            reason: 'Stale .md file should be deleted',
+          );
         } finally {
           outDir.delete();
         }
@@ -1513,23 +1603,28 @@ void main() {
           await dartdoc1.generateDocs();
 
           var staleTs = _resourceProvider.getFile(
-              p.join(outDir.path, '.vitepress', 'generated', 'old-sidebar.ts'));
+            p.join(outDir.path, '.vitepress', 'generated', 'old-sidebar.ts'),
+          );
           staleTs.writeAsStringSync('export const old = {};');
           expect(staleTs.exists, isTrue);
 
           var dartdoc2 = _buildVitePressDartdoc([], _testPackageDir, outDir);
           await dartdoc2.generateDocs();
 
-          expect(staleTs.exists, isFalse,
-              reason: 'Stale .ts file should be deleted');
+          expect(
+            staleTs.exists,
+            isFalse,
+            reason: 'Stale .ts file should be deleted',
+          );
         } finally {
           outDir.delete();
         }
       });
 
       test('stale .md file in guide/ subdirectory is deleted', () async {
-        var outDir =
-            _resourceProvider.createSystemTemp('vitepress_stale_guide.');
+        var outDir = _resourceProvider.createSystemTemp(
+          'vitepress_stale_guide.',
+        );
         try {
           var dartdoc1 = _buildVitePressDartdoc([], _testPackageDir, outDir);
           await dartdoc1.generateDocs();
@@ -1537,39 +1632,47 @@ void main() {
           _resourceProvider
               .getFolder(p.join(outDir.path, 'guide', 'subdir'))
               .create();
-          var staleGuide = _resourceProvider
-              .getFile(p.join(outDir.path, 'guide', 'subdir', 'old-guide.md'));
+          var staleGuide = _resourceProvider.getFile(
+            p.join(outDir.path, 'guide', 'subdir', 'old-guide.md'),
+          );
           staleGuide.writeAsStringSync('# Old Guide\nThis is stale.');
           expect(staleGuide.exists, isTrue);
 
           var dartdoc2 = _buildVitePressDartdoc([], _testPackageDir, outDir);
           await dartdoc2.generateDocs();
 
-          expect(staleGuide.exists, isFalse,
-              reason:
-                  'Stale .md file in guide/ subdirectory should be deleted');
+          expect(
+            staleGuide.exists,
+            isFalse,
+            reason: 'Stale .md file in guide/ subdirectory should be deleted',
+          );
         } finally {
           outDir.delete();
         }
       });
 
       test('user .md file in guide/ root is NOT deleted', () async {
-        var outDir =
-            _resourceProvider.createSystemTemp('vitepress_guide_user.');
+        var outDir = _resourceProvider.createSystemTemp(
+          'vitepress_guide_user.',
+        );
         try {
           var dartdoc1 = _buildVitePressDartdoc([], _testPackageDir, outDir);
           await dartdoc1.generateDocs();
 
-          var userGuide = _resourceProvider
-              .getFile(p.join(outDir.path, 'guide', 'my-custom-guide.md'));
+          var userGuide = _resourceProvider.getFile(
+            p.join(outDir.path, 'guide', 'my-custom-guide.md'),
+          );
           userGuide.writeAsStringSync('# My Custom Guide');
           expect(userGuide.exists, isTrue);
 
           var dartdoc2 = _buildVitePressDartdoc([], _testPackageDir, outDir);
           await dartdoc2.generateDocs();
 
-          expect(userGuide.exists, isTrue,
-              reason: 'User .md file in guide/ root should not be deleted');
+          expect(
+            userGuide.exists,
+            isTrue,
+            reason: 'User .md file in guide/ root should not be deleted',
+          );
         } finally {
           outDir.delete();
         }
@@ -1582,65 +1685,86 @@ void main() {
           await dartdoc1.generateDocs();
 
           var staleCss = _resourceProvider.getFile(
-              p.join(outDir.path, '.vitepress', 'generated', 'old-theme.css'));
+            p.join(outDir.path, '.vitepress', 'generated', 'old-theme.css'),
+          );
           staleCss.writeAsStringSync('.old { color: red; }');
           expect(staleCss.exists, isTrue);
 
           var dartdoc2 = _buildVitePressDartdoc([], _testPackageDir, outDir);
           await dartdoc2.generateDocs();
 
-          expect(staleCss.exists, isFalse,
-              reason: 'Stale .css file should be deleted');
+          expect(
+            staleCss.exists,
+            isFalse,
+            reason: 'Stale .css file should be deleted',
+          );
         } finally {
           outDir.delete();
         }
       });
 
-      test('api-styles.css import is auto-patched into existing index.ts',
-          () async {
-        var outDir =
-            _resourceProvider.createSystemTemp('vitepress_patch_index.');
-        try {
-          var dartdoc1 = _buildVitePressDartdoc([], _testPackageDir, outDir);
-          await dartdoc1.generateDocs();
+      test(
+        'api-styles.css import is auto-patched into existing index.ts',
+        () async {
+          var outDir = _resourceProvider.createSystemTemp(
+            'vitepress_patch_index.',
+          );
+          try {
+            var dartdoc1 = _buildVitePressDartdoc([], _testPackageDir, outDir);
+            await dartdoc1.generateDocs();
 
-          // Simulate an old index.ts without the api-styles.css import.
-          var indexTs = _resourceProvider
-              .getFile(p.join(outDir.path, '.vitepress', 'theme', 'index.ts'));
-          var content = indexTs.readAsStringSync();
-          content =
-              content.replaceAll("import '../generated/api-styles.css'\n", '');
-          indexTs.writeAsStringSync(content);
-          expect(indexTs.readAsStringSync(), isNot(contains('api-styles.css')));
+            // Simulate an old index.ts without the api-styles.css import.
+            var indexTs = _resourceProvider.getFile(
+              p.join(outDir.path, '.vitepress', 'theme', 'index.ts'),
+            );
+            var content = indexTs.readAsStringSync();
+            content = content.replaceAll(
+              "import '../generated/api-styles.css'\n",
+              '',
+            );
+            indexTs.writeAsStringSync(content);
+            expect(
+              indexTs.readAsStringSync(),
+              isNot(contains('api-styles.css')),
+            );
 
-          // Re-run generation — should auto-patch index.ts.
-          var dartdoc2 = _buildVitePressDartdoc([], _testPackageDir, outDir);
-          await dartdoc2.generateDocs();
+            // Re-run generation — should auto-patch index.ts.
+            var dartdoc2 = _buildVitePressDartdoc([], _testPackageDir, outDir);
+            await dartdoc2.generateDocs();
 
-          var patched = indexTs.readAsStringSync();
-          expect(patched, contains("import '../generated/api-styles.css'"),
-              reason: 'Auto-patch should restore the api-styles.css import');
-        } finally {
-          outDir.delete();
-        }
-      });
+            var patched = indexTs.readAsStringSync();
+            expect(
+              patched,
+              contains("import '../generated/api-styles.css'"),
+              reason: 'Auto-patch should restore the api-styles.css import',
+            );
+          } finally {
+            outDir.delete();
+          }
+        },
+      );
 
       test('user files outside api/ are NOT deleted', () async {
-        var outDir =
-            _resourceProvider.createSystemTemp('vitepress_user_files.');
+        var outDir = _resourceProvider.createSystemTemp(
+          'vitepress_user_files.',
+        );
         try {
           var dartdoc1 = _buildVitePressDartdoc([], _testPackageDir, outDir);
           await dartdoc1.generateDocs();
 
-          var customFile =
-              _resourceProvider.getFile(p.join(outDir.path, 'custom-page.md'));
+          var customFile = _resourceProvider.getFile(
+            p.join(outDir.path, 'custom-page.md'),
+          );
           customFile.writeAsStringSync('# My Custom Page');
 
           var dartdoc2 = _buildVitePressDartdoc([], _testPackageDir, outDir);
           await dartdoc2.generateDocs();
 
-          expect(customFile.exists, isTrue,
-              reason: 'User files outside api/ should not be deleted');
+          expect(
+            customFile.exists,
+            isTrue,
+            reason: 'User files outside api/ should not be deleted',
+          );
         } finally {
           outDir.delete();
         }
@@ -1658,19 +1782,24 @@ void main() {
           await dartdoc1.generateDocs();
 
           // Modify config.ts to simulate user customization.
-          var configFile = _resourceProvider
-              .getFile(p.join(outDir.path, '.vitepress', 'config.ts'));
+          var configFile = _resourceProvider.getFile(
+            p.join(outDir.path, '.vitepress', 'config.ts'),
+          );
           var originalContent = configFile.readAsStringSync();
-          configFile
-              .writeAsStringSync('$originalContent\n// user customization');
+          configFile.writeAsStringSync(
+            '$originalContent\n// user customization',
+          );
 
           // Run generation again.
           var dartdoc2 = _buildVitePressDartdoc([], _testPackageDir, outDir);
           await dartdoc2.generateDocs();
 
           var afterContent = configFile.readAsStringSync();
-          expect(afterContent, contains('// user customization'),
-              reason: 'Scaffold files should not be overwritten');
+          expect(
+            afterContent,
+            contains('// user customization'),
+            reason: 'Scaffold files should not be overwritten',
+          );
         } finally {
           outDir.delete();
         }
@@ -1691,12 +1820,15 @@ void main() {
       });
 
       test('relative markdown guide links resolve without warnings', () async {
-        pkgDir =
-            _copyPackageFixture(_testPackageWithDocsDir, 'vitepress_links_ok.');
+        pkgDir = _copyPackageFixture(
+          _testPackageWithDocsDir,
+          'vitepress_links_ok.',
+        );
         outDir = _createSystemTemp('vitepress_links_out_ok.');
 
-        final guideFile = _resourceProvider
-            .getFile(p.join(pkgDir.path, 'doc', 'getting-started.md'));
+        final guideFile = _resourceProvider.getFile(
+          p.join(pkgDir.path, 'doc', 'getting-started.md'),
+        );
         guideFile.writeAsStringSync(
           '${guideFile.readAsStringSync()}\n\nSee the [Configuration](advanced/configuration.md) guide.\n',
         );
@@ -1710,11 +1842,14 @@ void main() {
 
       test('broken guide links emit broken-link warnings', () async {
         pkgDir = _copyPackageFixture(
-            _testPackageWithDocsDir, 'vitepress_links_bad.');
+          _testPackageWithDocsDir,
+          'vitepress_links_bad.',
+        );
         outDir = _createSystemTemp('vitepress_links_out_bad.');
 
-        final guideFile = _resourceProvider
-            .getFile(p.join(pkgDir.path, 'doc', 'getting-started.md'));
+        final guideFile = _resourceProvider.getFile(
+          p.join(pkgDir.path, 'doc', 'getting-started.md'),
+        );
         guideFile.writeAsStringSync(
           '${guideFile.readAsStringSync()}\n\nBroken: [Missing Guide](/guide/missing-page).\n',
         );

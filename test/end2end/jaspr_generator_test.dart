@@ -647,7 +647,19 @@ void main() {
         expect(
           navigationRuntimeWeb,
           contains(
+            "if (!updateHistory) {\n      web.window.location.replace(targetUri.toString());",
+          ),
+        );
+        expect(
+          navigationRuntimeWeb,
+          contains(
             "web.window.dispatchEvent(web.CustomEvent('docs:navigation'))",
+          ),
+        );
+        expect(
+          navigationRuntimeWeb,
+          contains(
+            "web.window.dispatchEvent(web.CustomEvent(_sidebarSyncEvent))",
           ),
         );
         expect(
@@ -680,6 +692,14 @@ void main() {
         );
         expect(sidebarToggle, contains("'data-docs-sidebar-toggle': ''"));
         expect(sidebarToggle, contains("aria-controls': 'docs-sidebar'"));
+        expect(sidebarToggle, contains("addEventListener(_sidebarSyncEvent"));
+        expect(sidebarToggle, contains('void _syncFromDom() {'));
+        expect(
+          sidebarToggle,
+          contains(
+            "web.window.dispatchEvent(web.CustomEvent(_sidebarSyncEvent))",
+          ),
+        );
         expect(sidebarToggle, contains("sidebar.classList.add('open')"));
         expect(
           sidebarToggle,
@@ -910,6 +930,11 @@ void main() {
         );
         expect(content, contains("import '../docs_base.dart';"));
         expect(content, contains("'href': withDocsBasePath(entry.href)"));
+        expect(content, contains('String? _normalizeMemberPath('));
+        expect(
+          content,
+          contains("final qualifiedKey = '\$symbol.\$normalizedMember';"),
+        );
       });
 
       test('base-path link extension normalizes content anchors', () {
@@ -932,6 +957,17 @@ void main() {
 
       test('members stay inline and no member subdirectory is created', () {
         expect(_dirExists(outDir, 'content/api/ex/Apple'), isFalse);
+      });
+
+      test('api layout recognizes library.md as the library overview page', () {
+        final content = _readOutput(outDir, 'lib/layouts/api_docs_layout.dart');
+        expect(content, contains("segments.last == 'library.md'"));
+      });
+
+      test('operator headings escape square brackets for markdown safety', () {
+        final content = _readOutput(outDir, 'content/api/fake/SpecialList.md');
+        expect(content, contains(r'### operator \[\]()'));
+        expect(content, contains(r'### operator \[\]=()'));
       });
 
       test(
@@ -1092,6 +1128,20 @@ void main() {
         expect(sectionContent, contains('PrefixStage'));
         expect(sectionContent, contains('ShowcasePageSpec'));
       });
+
+      test(
+        'api symbols include qualified member links for inline guide linking',
+        () {
+          final content = _readOutput(outDir, 'lib/generated/api_symbols.dart');
+          expect(content, contains("'GreetingScenario.smoke': ["));
+          expect(
+            content,
+            contains(
+              "href: '/api/testing_support/GreetingScenario#value-smoke'",
+            ),
+          );
+        },
+      );
 
       test('generated Jaspr scaffold passes pub get, analyze, and build', () {
         _runPubGetForScaffold(outDir.path);

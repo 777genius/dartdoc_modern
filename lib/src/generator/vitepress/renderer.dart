@@ -10,7 +10,8 @@
 /// [VitePressDocProcessor] for documentation processing.
 library;
 
-import 'package:dartdoc_vitepress/src/comment_references/parser.dart' show operatorNames;
+import 'package:dartdoc_vitepress/src/comment_references/parser.dart'
+    show operatorNames;
 import 'package:dartdoc_vitepress/src/element_type.dart';
 import 'package:dartdoc_vitepress/src/generator/vitepress/docs.dart';
 import 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart';
@@ -32,24 +33,29 @@ export 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart'
 /// contains HTML) and `tp.boundType?.nameWithGenericsPlain` for the bound.
 String plainNameWithGenerics(ModelElement element) {
   if (element is TypeParameters && element.typeParameters.isNotEmpty) {
-    final params = element.typeParameters.map((tp) {
-      var result = tp.element.name!;
-      final bound = tp.boundType;
-      if (bound != null) {
-        result += ' extends ${bound.nameWithGenericsPlain}';
-      }
-      return result;
-    }).join(', ');
+    final params = element.typeParameters
+        .map((tp) {
+          var result = tp.element.name!;
+          final bound = tp.boundType;
+          if (bound != null) {
+            result += ' extends ${bound.nameWithGenericsPlain}';
+          }
+          return result;
+        })
+        .join(', ');
     return '${element.name}<$params>';
   }
   return element.name;
 }
 
-/// Escapes angle brackets for use in markdown headings and inline text.
+/// Escapes markdown-sensitive punctuation for headings and inline text.
 ///
 /// In code fences and inline code, escaping is NOT needed.
-String escapeGenerics(String text) =>
-    text.replaceAll('<', r'\<').replaceAll('>', r'\>');
+String escapeGenerics(String text) => text
+    .replaceAll('<', r'\<')
+    .replaceAll('>', r'\>')
+    .replaceAll('[', r'\[')
+    .replaceAll(']', r'\]');
 
 // ---------------------------------------------------------------------------
 // Testable string helpers.
@@ -97,7 +103,9 @@ String _escapeAngleBracketsInCell(String text) {
     }
 
     // Skip already-escaped angle brackets.
-    if (ch == r'\' && i + 1 < len && (text[i + 1] == '<' || text[i + 1] == '>')) {
+    if (ch == r'\' &&
+        i + 1 < len &&
+        (text[i + 1] == '<' || text[i + 1] == '>')) {
       buf.write(text.substring(i, i + 2));
       i += 2;
       continue;
@@ -273,13 +281,13 @@ class _MarkdownPageBuilder {
     final normalizedSignature = _normalizeSignatureHtml(htmlSignature);
     final renderedSignature = normalizedSignature.contains('\n')
         ? normalizedSignature
-            .split('\n')
-            .map((line) =>
-                '<span class="member-signature-line">$line</span>')
-            .join()
+              .split('\n')
+              .map((line) => '<span class="member-signature-line">$line</span>')
+              .join()
         : normalizedSignature;
     _buffer.writeln(
-        '<div class="member-signature"><div class="member-signature-code">$renderedSignature</div></div>');
+      '<div class="member-signature"><div class="member-signature-code">$renderedSignature</div></div>',
+    );
     _buffer.writeln();
   }
 
@@ -536,8 +544,9 @@ List<String> _buildMemberBadges(ModelElement element) {
 String _markdownLink(Documentable element, VitePressPathResolver paths) {
   final url = paths.linkFor(element);
   // Use full name with generics for elements that have type parameters.
-  final rawName =
-      element is ModelElement ? plainNameWithGenerics(element) : element.name;
+  final rawName = element is ModelElement
+      ? plainNameWithGenerics(element)
+      : element.name;
   final name = escapeGenerics(rawName);
   if (url == null) return name;
   return '[$name]($url)';
@@ -565,7 +574,9 @@ String _extractDeprecationMessage(ModelElement element) {
 
 /// Builds linked HTML container declaration (class/enum) with clickable types.
 String _buildLinkedContainerDeclaration(
-    InheritingContainer container, VitePressPathResolver paths) {
+  InheritingContainer container,
+  VitePressPathResolver paths,
+) {
   final buf = StringBuffer();
 
   // Modifiers as keyword spans
@@ -589,14 +600,18 @@ String _buildLinkedContainerDeclaration(
   // Type parameters
   if (container.typeParameters.isNotEmpty) {
     buf.write('&lt;');
-    buf.write(container.typeParameters.map((tp) {
-      final tpBuf = StringBuffer(_htmlEsc(tp.element.name!));
-      if (tp.boundType != null) {
-        tpBuf.write(' <span class="kw">extends</span> ');
-        tpBuf.write(_renderTypeLinked(tp.boundType!, paths));
-      }
-      return tpBuf.toString();
-    }).join(', '));
+    buf.write(
+      container.typeParameters
+          .map((tp) {
+            final tpBuf = StringBuffer(_htmlEsc(tp.element.name!));
+            if (tp.boundType != null) {
+              tpBuf.write(' <span class="kw">extends</span> ');
+              tpBuf.write(_renderTypeLinked(tp.boundType!, paths));
+            }
+            return tpBuf.toString();
+          })
+          .join(', '),
+    );
     buf.write('&gt;');
   }
 
@@ -621,17 +636,18 @@ String _buildLinkedContainerDeclaration(
   // Implements clause
   if (container.publicInterfaces.isNotEmpty) {
     buf.write(' <span class="kw">implements</span> ');
-    buf.write(container.publicInterfaces
-        .map((i) => _renderTypeLinked(i, paths))
-        .join(', '));
+    buf.write(
+      container.publicInterfaces
+          .map((i) => _renderTypeLinked(i, paths))
+          .join(', '),
+    );
   }
 
   return buf.toString();
 }
 
 /// Builds linked HTML mixin declaration with clickable types.
-String _buildLinkedMixinDeclaration(
-    Mixin mixin_, VitePressPathResolver paths) {
+String _buildLinkedMixinDeclaration(Mixin mixin_, VitePressPathResolver paths) {
   final buf = StringBuffer();
 
   // Modifiers
@@ -645,14 +661,18 @@ String _buildLinkedMixinDeclaration(
   // Type parameters
   if (mixin_.typeParameters.isNotEmpty) {
     buf.write('&lt;');
-    buf.write(mixin_.typeParameters.map((tp) {
-      final tpBuf = StringBuffer(_htmlEsc(tp.element.name!));
-      if (tp.boundType != null) {
-        tpBuf.write(' <span class="kw">extends</span> ');
-        tpBuf.write(_renderTypeLinked(tp.boundType!, paths));
-      }
-      return tpBuf.toString();
-    }).join(', '));
+    buf.write(
+      mixin_.typeParameters
+          .map((tp) {
+            final tpBuf = StringBuffer(_htmlEsc(tp.element.name!));
+            if (tp.boundType != null) {
+              tpBuf.write(' <span class="kw">extends</span> ');
+              tpBuf.write(_renderTypeLinked(tp.boundType!, paths));
+            }
+            return tpBuf.toString();
+          })
+          .join(', '),
+    );
     buf.write('&gt;');
   }
 
@@ -666,9 +686,11 @@ String _buildLinkedMixinDeclaration(
   // Implements clause
   if (mixin_.publicInterfaces.isNotEmpty) {
     buf.write(' <span class="kw">implements</span> ');
-    buf.write(mixin_.publicInterfaces
-        .map((i) => _renderTypeLinked(i, paths))
-        .join(', '));
+    buf.write(
+      mixin_.publicInterfaces
+          .map((i) => _renderTypeLinked(i, paths))
+          .join(', '),
+    );
   }
 
   return buf.toString();
@@ -676,7 +698,9 @@ String _buildLinkedMixinDeclaration(
 
 /// Builds linked HTML extension declaration with clickable "on" type.
 String _buildLinkedExtensionDeclaration(
-    Extension ext, VitePressPathResolver paths) {
+  Extension ext,
+  VitePressPathResolver paths,
+) {
   final buf = StringBuffer();
   buf.write('<span class="kw">extension</span> ');
   buf.write('<span class="fn">${_htmlEsc(ext.name)}</span>');
@@ -684,14 +708,18 @@ String _buildLinkedExtensionDeclaration(
   // Type parameters
   if (ext.typeParameters.isNotEmpty) {
     buf.write('&lt;');
-    buf.write(ext.typeParameters.map((tp) {
-      final tpBuf = StringBuffer(_htmlEsc(tp.element.name!));
-      if (tp.boundType != null) {
-        tpBuf.write(' <span class="kw">extends</span> ');
-        tpBuf.write(_renderTypeLinked(tp.boundType!, paths));
-      }
-      return tpBuf.toString();
-    }).join(', '));
+    buf.write(
+      ext.typeParameters
+          .map((tp) {
+            final tpBuf = StringBuffer(_htmlEsc(tp.element.name!));
+            if (tp.boundType != null) {
+              tpBuf.write(' <span class="kw">extends</span> ');
+              tpBuf.write(_renderTypeLinked(tp.boundType!, paths));
+            }
+            return tpBuf.toString();
+          })
+          .join(', '),
+    );
     buf.write('&gt;');
   }
 
@@ -703,7 +731,9 @@ String _buildLinkedExtensionDeclaration(
 
 /// Builds linked HTML extension type declaration with clickable types.
 String _buildLinkedExtensionTypeDeclaration(
-    ExtensionType et, VitePressPathResolver paths) {
+  ExtensionType et,
+  VitePressPathResolver paths,
+) {
   final buf = StringBuffer();
   buf.write('<span class="kw">extension type</span> ');
   buf.write('<span class="fn">${_htmlEsc(et.name)}</span>');
@@ -711,14 +741,18 @@ String _buildLinkedExtensionTypeDeclaration(
   // Type parameters
   if (et.typeParameters.isNotEmpty) {
     buf.write('&lt;');
-    buf.write(et.typeParameters.map((tp) {
-      final tpBuf = StringBuffer(_htmlEsc(tp.element.name!));
-      if (tp.boundType != null) {
-        tpBuf.write(' <span class="kw">extends</span> ');
-        tpBuf.write(_renderTypeLinked(tp.boundType!, paths));
-      }
-      return tpBuf.toString();
-    }).join(', '));
+    buf.write(
+      et.typeParameters
+          .map((tp) {
+            final tpBuf = StringBuffer(_htmlEsc(tp.element.name!));
+            if (tp.boundType != null) {
+              tpBuf.write(' <span class="kw">extends</span> ');
+              tpBuf.write(_renderTypeLinked(tp.boundType!, paths));
+            }
+            return tpBuf.toString();
+          })
+          .join(', '),
+    );
     buf.write('&gt;');
   }
 
@@ -728,9 +762,9 @@ String _buildLinkedExtensionTypeDeclaration(
   // Implements clause
   if (et.publicInterfaces.isNotEmpty) {
     buf.write(' <span class="kw">implements</span> ');
-    buf.write(et.publicInterfaces
-        .map((i) => _renderTypeLinked(i, paths))
-        .join(', '));
+    buf.write(
+      et.publicInterfaces.map((i) => _renderTypeLinked(i, paths)).join(', '),
+    );
   }
 
   return buf.toString();
@@ -852,9 +886,11 @@ String _renderTypeLinked(ElementType type, VitePressPathResolver paths) {
     final buf = StringBuffer();
 
     // Type name — link if we have a page, styled span otherwise
-    buf.write(url != null
-        ? '<a href="$url" class="type-link">$name</a>'
-        : '<span class="type">$name</span>');
+    buf.write(
+      url != null
+          ? '<a href="$url" class="type-link">$name</a>'
+          : '<span class="type">$name</span>',
+    );
 
     // Type arguments (recursive)
     final args = type.typeArguments.toList();
@@ -911,7 +947,9 @@ String _wrapDefaultValue(String value) {
 
 /// Builds the inner parameter list for a callable type with linked types.
 String _buildLinkedCallableParamList(
-    List<Parameter> parameters, VitePressPathResolver paths) {
+  List<Parameter> parameters,
+  VitePressPathResolver paths,
+) {
   if (parameters.isEmpty) return '';
 
   final parts = <String>[];
@@ -959,8 +997,10 @@ String _buildLinkedCallableParamList(
 /// limit, parameters are formatted in tall style (one per line, 2-space
 /// indent, trailing commas) following `dart format` conventions.
 String _buildLinkedParameterSignature(
-    List<Parameter> parameters, VitePressPathResolver paths,
-    {int prefixLength = 0}) {
+  List<Parameter> parameters,
+  VitePressPathResolver paths, {
+  int prefixLength = 0,
+}) {
   if (parameters.isEmpty) return '()';
 
   // Build individual parameter HTML strings (without group brackets).
@@ -996,7 +1036,10 @@ String _buildLinkedParameterSignature(
 
   // Assemble single-line version with correct brackets.
   final singleLine = _buildSingleLineParams(
-      requiredPositional, optionalPositional, named);
+    requiredPositional,
+    optionalPositional,
+    named,
+  );
 
   // Check if it fits in 80 columns.
   if (prefixLength + _stripHtmlForLength(singleLine) <= 80) {
@@ -1005,12 +1048,18 @@ String _buildLinkedParameterSignature(
 
   // Tall style: one parameter per line, 2-space indent, trailing commas.
   return _buildTallParameterSignature(
-      requiredPositional, optionalPositional, named);
+    requiredPositional,
+    optionalPositional,
+    named,
+  );
 }
 
 /// Assembles a single-line `(...)` parameter list with correct brackets.
-String _buildSingleLineParams(List<String> requiredPositional,
-    List<String> optionalPositional, List<String> named) {
+String _buildSingleLineParams(
+  List<String> requiredPositional,
+  List<String> optionalPositional,
+  List<String> named,
+) {
   final all = <String>[];
   all.addAll(requiredPositional);
 
@@ -1031,8 +1080,11 @@ String _buildSingleLineParams(List<String> requiredPositional,
 /// - Only optional: `([\n  p1,\n  p2,\n])`
 /// - Only required: `(\n  p1,\n  p2,\n)`
 /// - Mixed: `(\n  pos, {\n  named,\n})` — `{`/`[` on same line as last positional
-String _buildTallParameterSignature(List<String> requiredPositional,
-    List<String> optionalPositional, List<String> named) {
+String _buildTallParameterSignature(
+  List<String> requiredPositional,
+  List<String> optionalPositional,
+  List<String> named,
+) {
   final buf = StringBuffer();
 
   if (named.isNotEmpty && requiredPositional.isEmpty) {
@@ -1092,7 +1144,9 @@ String _buildTallParameterSignature(List<String> requiredPositional,
 
 /// Builds a linked method/function signature as HTML.
 String _buildLinkedCallableSignature(
-    ModelElement element, VitePressPathResolver paths) {
+  ModelElement element,
+  VitePressPathResolver paths,
+) {
   final buf = StringBuffer();
 
   if (element is Method) {
@@ -1101,18 +1155,27 @@ String _buildLinkedCallableSignature(
     buf.write('${_renderTypeLinked(element.modelType.returnType, paths)} ');
   }
 
-  buf.write('<span class="fn">${_htmlEsc(plainNameWithGenerics(element))}</span>');
+  buf.write(
+    '<span class="fn">${_htmlEsc(plainNameWithGenerics(element))}</span>',
+  );
 
   final prefixLength = _stripHtmlForLength(buf.toString());
-  buf.write(_buildLinkedParameterSignature(element.parameters, paths,
-      prefixLength: prefixLength));
+  buf.write(
+    _buildLinkedParameterSignature(
+      element.parameters,
+      paths,
+      prefixLength: prefixLength,
+    ),
+  );
 
   return buf.toString();
 }
 
 /// Builds a linked constructor signature as HTML.
 String _buildLinkedConstructorSignature(
-    Constructor constructor, VitePressPathResolver paths) {
+  Constructor constructor,
+  VitePressPathResolver paths,
+) {
   final buf = StringBuffer();
 
   if (constructor.isConst) buf.write('<span class="kw">const</span> ');
@@ -1121,15 +1184,19 @@ String _buildLinkedConstructorSignature(
   buf.write('<span class="fn">${_htmlEsc(constructor.displayName)}</span>');
 
   final prefixLength = _stripHtmlForLength(buf.toString());
-  buf.write(_buildLinkedParameterSignature(constructor.parameters, paths,
-      prefixLength: prefixLength));
+  buf.write(
+    _buildLinkedParameterSignature(
+      constructor.parameters,
+      paths,
+      prefixLength: prefixLength,
+    ),
+  );
 
   return buf.toString();
 }
 
 /// Builds a linked field/property signature as HTML.
-String _buildLinkedFieldSignature(
-    Field field, VitePressPathResolver paths) {
+String _buildLinkedFieldSignature(Field field, VitePressPathResolver paths) {
   final sig = StringBuffer();
   if (field.isConst) {
     sig.write('<span class="kw">const</span> ');
@@ -1146,7 +1213,8 @@ String _buildLinkedFieldSignature(
     sig.write('$linkedType <span class="kw">get</span> $fnName');
   } else if (field.hasExplicitSetter && !field.hasExplicitGetter) {
     sig.write(
-        '<span class="kw">set</span> $fnName($linkedType <span class="param">value</span>)');
+      '<span class="kw">set</span> $fnName($linkedType <span class="param">value</span>)',
+    );
   } else if (field.hasExplicitGetter && field.hasExplicitSetter) {
     sig.write('$linkedType <span class="kw">get</span> $fnName');
   } else {
@@ -1162,7 +1230,9 @@ String _buildLinkedFieldSignature(
 
 /// Builds a linked top-level property/constant signature as HTML.
 String _buildLinkedPropertySignature(
-    TopLevelVariable prop, VitePressPathResolver paths) {
+  TopLevelVariable prop,
+  VitePressPathResolver paths,
+) {
   final sig = StringBuffer();
   if (prop.isConst) {
     sig.write('<span class="kw">const</span> ');
@@ -1170,7 +1240,8 @@ String _buildLinkedPropertySignature(
     sig.write('<span class="kw">final</span> ');
   }
   sig.write(
-      '${_renderTypeLinked(prop.modelType, paths)} <span class="fn">${_htmlEsc(prop.name)}</span>');
+    '${_renderTypeLinked(prop.modelType, paths)} <span class="fn">${_htmlEsc(prop.name)}</span>',
+  );
 
   if (prop.isConst && prop.hasConstantValueForDisplay) {
     sig.write(' = ${_wrapDefaultValue(prop.constantValueBase)}');
@@ -1280,7 +1351,8 @@ void _renderMemberDocumentation(
         ? _markdownLink(onType.modelElement, paths)
         : escapeGenerics(onType.nameWithGenericsPlain);
     builder.writeParagraph(
-        '*Available on $onTypeName, provided by the $extLink extension*');
+      '*Available on $onTypeName, provided by the $extLink extension*',
+    );
   }
 }
 
@@ -1324,7 +1396,8 @@ void _renderAnnotations(_MarkdownPageBuilder builder, ModelElement element) {
   final annotations = element.annotations
       .map(_annotationPlainText)
       .where(
-          (text) => text != '@deprecated' && !text.startsWith('@Deprecated('))
+        (text) => text != '@deprecated' && !text.startsWith('@Deprecated('),
+      )
       .map((text) => '`$text`')
       .toList();
   if (annotations.isEmpty) return;
@@ -1443,8 +1516,9 @@ void _renderLibraryOverviewTable(
   // Filter out elements that don't have a link (e.g. re-exported external/SDK
   // classes whose canonical library is not local). The sidebar already excludes
   // these via _belongsToLibrary() filtering; apply the same logic here.
-  final linkableElements =
-      elements.where((e) => paths.linkFor(e) != null).toList();
+  final linkableElements = elements
+      .where((e) => paths.linkFor(e) != null)
+      .toList();
   if (linkableElements.isEmpty) return;
 
   builder.writeH2(sectionTitle);
@@ -1480,10 +1554,7 @@ void _renderLibraryOverviewTable(
   };
   final singularName = singularNames[sectionTitle] ?? sectionTitle;
 
-  builder.writeTable(
-    headers: [singularName, 'Description'],
-    rows: rows,
-  );
+  builder.writeTable(headers: [singularName, 'Description'], rows: rows);
 }
 
 // ---------------------------------------------------------------------------
@@ -1604,13 +1675,20 @@ void _renderConstructorMember(
 
   builder.writeSignature(_buildLinkedConstructorSignature(constructor, paths));
 
-  _renderMemberDocumentation(builder, constructor, docs, paths,
-      memberAnchor: anchor);
+  _renderMemberDocumentation(
+    builder,
+    constructor,
+    docs,
+    paths,
+    memberAnchor: anchor,
+  );
 
   // Source code (only when --include-source is enabled)
   if (constructor.hasSourceCode) {
     builder.writeDetailsContainer(
-        'Implementation', '```dart\n${_htmlUnescape(constructor.sourceCode)}\n```');
+      'Implementation',
+      '```dart\n${_htmlUnescape(constructor.sourceCode)}\n```',
+    );
   }
 }
 
@@ -1633,13 +1711,14 @@ void _renderFieldMember(
 
   builder.writeSignature(_buildLinkedFieldSignature(field, paths));
 
-  _renderMemberDocumentation(builder, field, docs, paths,
-      memberAnchor: anchor);
+  _renderMemberDocumentation(builder, field, docs, paths, memberAnchor: anchor);
 
   // Source code (only when --include-source is enabled)
   if (field.hasSourceCode) {
     builder.writeDetailsContainer(
-        'Implementation', '```dart\n${_htmlUnescape(field.sourceCode)}\n```');
+      'Implementation',
+      '```dart\n${_htmlUnescape(field.sourceCode)}\n```',
+    );
   }
 }
 
@@ -1667,13 +1746,20 @@ void _renderMethodMember(
 
   builder.writeSignature(_buildLinkedCallableSignature(method, paths));
 
-  _renderMemberDocumentation(builder, method, docs, paths,
-      memberAnchor: anchor);
+  _renderMemberDocumentation(
+    builder,
+    method,
+    docs,
+    paths,
+    memberAnchor: anchor,
+  );
 
   // Source code (only when --include-source is enabled)
   if (method.hasSourceCode) {
     builder.writeDetailsContainer(
-        'Implementation', '```dart\n${_htmlUnescape(method.sourceCode)}\n```');
+      'Implementation',
+      '```dart\n${_htmlUnescape(method.sourceCode)}\n```',
+    );
   }
 }
 
@@ -1740,13 +1826,14 @@ String renderPackagePage(
   // Libraries table (filter out stub libraries with no API elements and
   // duplicate internal SDK libraries like `dart.collection`).
   final allLibs = package.libraries.toList();
-  final libraries = allLibs
-      .where((lib) => lib.isPublic && lib.isDocumented)
-      .where(_hasApiElements)
-      .where((lib) => !isDuplicateSdkLibrary(lib, allLibs))
-      .where((lib) => !isInternalSdkLibrary(lib))
-      .toList()
-    ..sort((a, b) => a.name.compareTo(b.name));
+  final libraries =
+      allLibs
+          .where((lib) => lib.isPublic && lib.isDocumented)
+          .where(_hasApiElements)
+          .where((lib) => !isDuplicateSdkLibrary(lib, allLibs))
+          .where((lib) => !isInternalSdkLibrary(lib))
+          .toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
 
   if (libraries.isNotEmpty) {
     builder.writeH2('Libraries');
@@ -1763,10 +1850,7 @@ String renderPackagePage(
       rows.add([link, description]);
     }
 
-    builder.writeTable(
-      headers: ['Library', 'Description'],
-      rows: rows,
-    );
+    builder.writeTable(headers: ['Library', 'Description'], rows: rows);
   }
 
   return builder.toString();
@@ -1792,9 +1876,7 @@ String renderWorkspaceOverview(
   );
 
   builder.writeH1(workspaceName);
-  builder.writeParagraph(
-    'This workspace contains the following packages.',
-  );
+  builder.writeParagraph('This workspace contains the following packages.');
 
   // Sort packages by name for deterministic output.
   final localPackages = [...packageGraph.localPackages]
@@ -1816,13 +1898,14 @@ String renderWorkspaceOverview(
     // Libraries table for this package (filter out stub libraries and
     // duplicate internal SDK libraries).
     final allPackageLibs = package.libraries.toList();
-    final libraries = allPackageLibs
-        .where((lib) => lib.isPublic && lib.isDocumented)
-        .where(_hasApiElements)
-        .where((lib) => !isDuplicateSdkLibrary(lib, allPackageLibs))
-        .where((lib) => !isInternalSdkLibrary(lib))
-        .toList()
-      ..sort((a, b) => a.name.compareTo(b.name));
+    final libraries =
+        allPackageLibs
+            .where((lib) => lib.isPublic && lib.isDocumented)
+            .where(_hasApiElements)
+            .where((lib) => !isDuplicateSdkLibrary(lib, allPackageLibs))
+            .where((lib) => !isInternalSdkLibrary(lib))
+            .toList()
+          ..sort((a, b) => a.name.compareTo(b.name));
 
     if (libraries.isNotEmpty) {
       final rows = <List<String>>[];
@@ -1835,10 +1918,7 @@ String renderWorkspaceOverview(
         rows.add([link, libDescription]);
       }
 
-      builder.writeTable(
-        headers: ['Library', 'Description'],
-        rows: rows,
-      );
+      builder.writeTable(headers: ['Library', 'Description'], rows: rows);
     }
   }
 
@@ -1862,7 +1942,6 @@ String renderLibraryPage(
     description: 'API documentation for the ${library.name} library',
     outline: [2, 3],
   );
-
 
   builder.writeH1(library.name);
 
@@ -1977,7 +2056,6 @@ String renderClassPage(
     sourceUrl: clazz.hasSourceHref ? clazz.sourceHref : null,
   );
 
-
   builder.writeH1(
     nameWithGenerics,
     deprecated: clazz.isDeprecated,
@@ -2041,7 +2119,6 @@ String renderEnumPage(
     library: library.name,
     sourceUrl: enumeration.hasSourceHref ? enumeration.sourceHref : null,
   );
-
 
   builder.writeH1(
     nameWithGenerics,
@@ -2126,7 +2203,6 @@ String renderMixinPage(
     sourceUrl: mixin_.hasSourceHref ? mixin_.sourceHref : null,
   );
 
-
   builder.writeH1(
     nameWithGenerics,
     deprecated: mixin_.isDeprecated,
@@ -2200,7 +2276,6 @@ String renderExtensionPage(
     sourceUrl: ext.hasSourceHref ? ext.sourceHref : null,
   );
 
-
   builder.writeH1(nameWithGenerics, deprecated: ext.isDeprecated);
 
   // Declaration line (linked)
@@ -2238,7 +2313,8 @@ String renderExtensionTypePage(
 
   builder.writeFrontmatter(
     title: nameWithGenerics,
-    description: 'API documentation for $nameWithGenerics extension type '
+    description:
+        'API documentation for $nameWithGenerics extension type '
         'from ${library.name}',
     outline: [2, 3],
     outlineCollapsible: _isOutlineCollapsible(et),
@@ -2246,7 +2322,6 @@ String renderExtensionTypePage(
     library: library.name,
     sourceUrl: et.hasSourceHref ? et.sourceHref : null,
   );
-
 
   builder.writeH1(
     nameWithGenerics,
@@ -2291,14 +2366,14 @@ String renderFunctionPage(
 
   builder.writeFrontmatter(
     title: '$nameWithGenerics function',
-    description: 'API documentation for the $nameWithGenerics function '
+    description:
+        'API documentation for the $nameWithGenerics function '
         'from ${library.name}',
     outline: false,
     category: 'Functions',
     library: library.name,
     sourceUrl: func.hasSourceHref ? func.sourceHref : null,
   );
-
 
   builder.writeH1(nameWithGenerics, deprecated: func.isDeprecated);
 
@@ -2336,14 +2411,14 @@ String renderPropertyPage(
 
   builder.writeFrontmatter(
     title: '${prop.name} $kindLabel',
-    description: 'API documentation for the ${prop.name} $kindLabel '
+    description:
+        'API documentation for the ${prop.name} $kindLabel '
         'from ${library.name}',
     outline: false,
     category: sidebarKind,
     library: library.name,
     sourceUrl: prop.hasSourceHref ? prop.sourceHref : null,
   );
-
 
   builder.writeH1(prop.name, deprecated: prop.isDeprecated);
 
@@ -2378,27 +2453,33 @@ String renderTypedefPage(
 
   builder.writeFrontmatter(
     title: '$nameWithGenerics typedef',
-    description: 'API documentation for the $nameWithGenerics typedef '
+    description:
+        'API documentation for the $nameWithGenerics typedef '
         'from ${library.name}',
     outline: false,
     category: 'Typedefs',
     library: library.name,
   );
 
-
   builder.writeH1(nameWithGenerics, deprecated: td.isDeprecated);
 
   // Typedef declaration
   final sig = StringBuffer(
-      '<span class="kw">typedef</span> <span class="fn">${_htmlEsc(nameWithGenerics)}</span> = ');
+    '<span class="kw">typedef</span> <span class="fn">${_htmlEsc(nameWithGenerics)}</span> = ',
+  );
 
   if (td is FunctionTypedef) {
     // Function typedef: show the return type and parameter types
     sig.write(_renderTypeLinked(td.modelType.returnType, paths));
     sig.write(' <span class="type">Function</span>');
     final prefixLength = _stripHtmlForLength(sig.toString());
-    sig.write(_buildLinkedParameterSignature(td.parameters, paths,
-        prefixLength: prefixLength));
+    sig.write(
+      _buildLinkedParameterSignature(
+        td.parameters,
+        paths,
+        prefixLength: prefixLength,
+      ),
+    );
   } else {
     // Type alias (ClassTypedef, GeneralizedTypedef)
     sig.write(_renderTypeLinked(td.modelType, paths));
@@ -2545,10 +2626,7 @@ void _renderExtensionsTable(
         : oneLineDoc;
     rows.add([nameCell, escapeGenerics(onType), descCell]);
   }
-  builder.writeTable(
-    headers: ['Extension', 'on', 'Description'],
-    rows: rows,
-  );
+  builder.writeTable(headers: ['Extension', 'on', 'Description'], rows: rows);
 }
 
 // Plain-text mixin/extension-type declarations (kept for potential future use).

@@ -104,7 +104,8 @@ class ApiDocsLayout extends DocsLayout {
       final libraryName = (pageData['library'] as String?) ??
           (segments.length == 3 ? pageTitle : libraryDir);
       final isLibraryOverview =
-          segments.length == 3 && segments.last == 'index.md';
+          segments.length == 3 &&
+          (segments.last == 'library.md' || segments.last == 'index.md');
 
       if (isLibraryOverview) {
         trail.addAll([

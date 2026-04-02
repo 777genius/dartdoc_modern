@@ -21,6 +21,7 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
   JSFunction? _clickListener;
   JSFunction? _popStateListener;
   int _navigationToken = 0;
+  static const _sidebarSyncEvent = 'docs:sidebar-sync';
 
   @override
   void initState() {
@@ -217,7 +218,10 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
     required bool replace,
     required bool updateHistory,
   }) {
-    if (!updateHistory) return;
+    if (!updateHistory) {
+      web.window.location.replace(targetUri.toString());
+      return;
+    }
     if (replace) {
       web.window.location.replace(targetUri.toString());
     } else {
@@ -240,10 +244,15 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
     sidebar?.classList.remove('open');
     web.document.body?.classList.remove('sidebar-open');
     web.document.body?.style.overflow = '';
+    _syncSidebarToggle();
   }
 
   void _notifyNavigation() {
     web.window.dispatchEvent(web.CustomEvent('docs:navigation'));
+  }
+
+  void _syncSidebarToggle() {
+    web.window.dispatchEvent(web.CustomEvent(_sidebarSyncEvent));
   }
 
   void _normalizeDocumentAnchors({web.Element? root}) {
