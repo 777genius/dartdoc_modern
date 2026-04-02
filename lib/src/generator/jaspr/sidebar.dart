@@ -73,7 +73,7 @@ class JasprSidebarGenerator {
             for (final entry in sorted)
               (
                 text: entry.title,
-                link: '/${entry.relativePath}'.replaceAll('.md', ''),
+                link: _guideLink(entry.relativePath),
               ),
           ],
         );
@@ -87,7 +87,7 @@ class JasprSidebarGenerator {
             for (final entry in sorted)
               (
                 text: entry.title,
-                link: '/${entry.relativePath}'.replaceAll('.md', ''),
+                link: _guideLink(entry.relativePath),
               ),
           ],
         );
@@ -96,6 +96,15 @@ class JasprSidebarGenerator {
 
     buf.writeln('];');
     return buf.toString();
+  }
+
+  String _guideLink(String relativePath) {
+    var link = '/$relativePath'.replaceAll('.md', '');
+    if (link.endsWith('/index')) {
+      link = link.substring(0, link.length - '/index'.length);
+      return link.isEmpty ? '/' : link;
+    }
+    return link;
   }
 
   void _writeHeader(StringBuffer buf) {

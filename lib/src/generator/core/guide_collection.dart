@@ -257,6 +257,12 @@ List<GuideEntry> sortGuideEntries(List<GuideEntry> entries) {
       return depthA.compareTo(depthB);
     }
 
+    final aIsIndex = p.basenameWithoutExtension(a.relativePath) == 'index';
+    final bIsIndex = p.basenameWithoutExtension(b.relativePath) == 'index';
+    if (aIsIndex != bIsIndex) {
+      return aIsIndex ? -1 : 1;
+    }
+
     return a.title.compareTo(b.title);
   });
   return entries;

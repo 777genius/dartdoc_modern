@@ -111,7 +111,7 @@ class VitePressGuideGenerator {
         buffer.writeln('      collapsed: false,');
         buffer.writeln('      items: [');
         for (final entry in packageEntries) {
-          final link = '/${entry.relativePath}'.replaceAll('.md', '');
+          final link = _guideLink(entry.relativePath);
           buffer.writeln(
             "        { text: '${escapeForTs(entry.title)}', "
             "link: '${escapeForTs(link)}' },",
@@ -124,7 +124,7 @@ class VitePressGuideGenerator {
       // Flat list.
       final sorted = guide_core.sortGuideEntries(entries);
       for (final entry in sorted) {
-        final link = '/${entry.relativePath}'.replaceAll('.md', '');
+        final link = _guideLink(entry.relativePath);
         buffer.writeln(
           "    { text: '${escapeForTs(entry.title)}', link: '${escapeForTs(link)}' },",
         );
@@ -146,5 +146,14 @@ class VitePressGuideGenerator {
   @visibleForTesting
   bool matchesFilters(String relativePath) {
     return _collector.matchesFilters(relativePath);
+  }
+
+  String _guideLink(String relativePath) {
+    var link = '/$relativePath'.replaceAll('.md', '');
+    if (link.endsWith('/index')) {
+      link = link.substring(0, link.length - '/index'.length);
+      return link.isEmpty ? '/' : link;
+    }
+    return link;
   }
 }
