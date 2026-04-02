@@ -282,11 +282,24 @@ class ApiDocsLayout extends DocsLayout {
     css('.header-container').styles(
       position: Position.sticky(top: Unit.zero),
       zIndex: ZIndex(20),
-      backgroundColor: ContentColors.background,
+      backgroundColor: Color('rgba(255, 255, 255, 0.74)'),
       border: Border.only(
         bottom: BorderSide(
           width: 1.px,
-          color: Color('var(--docs-shell-border)'),
+          color: Color('rgba(148, 163, 184, 0.18)'),
+        ),
+      ),
+      raw: {
+        'backdrop-filter': 'blur(18px) saturate(160%)',
+        '-webkit-backdrop-filter': 'blur(18px) saturate(160%)',
+      },
+    ),
+    css('[data-theme="dark"] .header-container').styles(
+      backgroundColor: Color('rgba(24, 24, 27, 0.74)'),
+      border: Border.only(
+        bottom: BorderSide(
+          width: 1.px,
+          color: Color('rgba(148, 163, 184, 0.14)'),
         ),
       ),
     ),
@@ -1348,22 +1361,31 @@ class ApiDocsLayout extends DocsLayout {
       css('&').styles(
         position: Position.sticky(top: Unit.zero),
         zIndex: ZIndex(40),
+        backgroundColor: Color('rgba(255, 255, 255, 0.74)'),
         border: Border.only(
           bottom: BorderSide(
             width: 1.px,
-            color: Color('var(--docs-shell-border)'),
+            color: Color('rgba(148, 163, 184, 0.18)'),
           ),
         ),
         raw: {
-          'backdrop-filter': 'blur(14px)',
-          '-webkit-backdrop-filter': 'blur(14px)',
-          'background': 'var(--background)',
-          'box-shadow': '0 10px 24px -22px var(--docs-shell-shadow)',
+          'backdrop-filter': 'blur(18px) saturate(160%)',
+          '-webkit-backdrop-filter': 'blur(18px) saturate(160%)',
+          'box-shadow': '0 14px 36px -28px var(--docs-shell-shadow)',
         },
+      ),
+      css('[data-theme="dark"] &').styles(
+        backgroundColor: Color('rgba(24, 24, 27, 0.74)'),
+        border: Border.only(
+          bottom: BorderSide(
+            width: 1.px,
+            color: Color('rgba(148, 163, 184, 0.14)'),
+          ),
+        ),
       ),
       css('body.search-open &').styles(
         zIndex: ZIndex(70),
-        raw: {'box-shadow': '0 14px 30px -24px var(--docs-shell-shadow)'},
+        raw: {'box-shadow': '0 18px 42px -28px var(--docs-shell-shadow)'},
       ),
       css('[data-has-sidebar] .header').styles(
         maxWidth: 100.percent,
