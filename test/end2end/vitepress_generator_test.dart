@@ -1210,6 +1210,7 @@ void main() {
         var content = _readOutput(outDir, 'api/fake/paintImage1.md');
         expect(content, contains('member-signature'));
         expect(content, contains('member-signature-line'));
+        expect(content, contains('<span class="member-signature-line">  '));
         // Each param on its own line with 2-space indent and trailing comma
         expect(content, contains('>canvas</span>,'));
         expect(content, contains('>rect</span>,'));

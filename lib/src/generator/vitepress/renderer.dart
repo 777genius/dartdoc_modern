@@ -142,13 +142,14 @@ String _escapeAngleBracketsInCell(String text) {
 }
 
 String _normalizeSignatureHtml(String html) {
-  return html
-      .replaceAll('\r\n', '\n')
-      .split('\n')
-      .map((line) => line.trim())
-      .where((line) => line.isNotEmpty)
-      .join('\n')
-      .trim();
+  final lines = html.replaceAll('\r\n', '\n').split('\n');
+  while (lines.isNotEmpty && lines.first.trim().isEmpty) {
+    lines.removeAt(0);
+  }
+  while (lines.isNotEmpty && lines.last.trim().isEmpty) {
+    lines.removeLast();
+  }
+  return lines.where((line) => line.trim().isNotEmpty).join('\n');
 }
 
 /// Escapes characters that are special in YAML double-quoted string values.
