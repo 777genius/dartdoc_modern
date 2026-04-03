@@ -335,8 +335,8 @@ class ApiDocsLayout extends DocsLayout {
       display: Display.inlineFlex,
       alignItems: AlignItems.center,
       justifyContent: JustifyContent.center,
-      width: 2.25.rem,
-      height: 2.25.rem,
+      width: 2.6.rem,
+      height: 2.6.rem,
       padding: Padding.zero,
       border: Border.all(width: 1.px, color: Color('var(--docs-shell-border)')),
       radius: BorderRadius.circular(999.px),
@@ -1488,8 +1488,11 @@ class ApiDocsLayout extends DocsLayout {
         duration: Duration(milliseconds: 170),
       ),
     ),
+    downMobile([
+      css('.theme-toggle').styles(width: 2.45.rem, height: 2.45.rem),
+    ]),
     downCompact([
-      css('.theme-toggle').styles(width: 2.05.rem, height: 2.05.rem),
+      css('.theme-toggle').styles(width: 2.3.rem, height: 2.3.rem),
       css('.theme-toggle-icon').styles(fontSize: 0.92.rem),
     ]),
     css('.theme-toggle:hover').styles(
