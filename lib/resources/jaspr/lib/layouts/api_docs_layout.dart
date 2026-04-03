@@ -220,38 +220,61 @@ class ApiDocsLayout extends DocsLayout {
     }
 
     return ul([
-      for (final entry in toc.entries) _buildCollapsibleEntry(entry, baseUrl),
+      for (final entry in toc.entries) ..._buildCollapsibleToc(entry, baseUrl),
     ]);
   }
 
   Iterable<Component> _buildFlatToc(TocEntry entry, String baseUrl) sync* {
+    final label = entry.text.trim();
+    final anchorId = entry.id.trim();
+    final children = [
+      for (final child in entry.children) ..._buildFlatToc(child, baseUrl),
+    ];
+
+    if (label.isEmpty || anchorId.isEmpty) {
+      yield* children;
+      return;
+    }
+
     yield li([
       DocsNavLink(
-        to: '$baseUrl#${entry.id}',
+        to: '$baseUrl#$anchorId',
         classes: 'toc-link',
-        attributes: {'data-toc-link': entry.id},
-        children: [Component.text(entry.text)],
+        attributes: {'data-toc-link': anchorId},
+        children: [Component.text(label)],
       ),
-      if (entry.children.isNotEmpty)
-        ul([
-          for (final child in entry.children) ..._buildFlatToc(child, baseUrl),
-        ]),
+      if (children.isNotEmpty) ul(children),
     ]);
   }
 
-  Component _buildCollapsibleEntry(TocEntry entry, String baseUrl) {
-    if (entry.children.isEmpty) {
-      return li([
-        DocsNavLink(
-          to: '$baseUrl#${entry.id}',
-          classes: 'toc-link',
-          attributes: {'data-toc-link': entry.id},
-          children: [Component.text(entry.text)],
-        ),
-      ]);
+  Iterable<Component> _buildCollapsibleToc(
+    TocEntry entry,
+    String baseUrl,
+  ) sync* {
+    final label = entry.text.trim();
+    final anchorId = entry.id.trim();
+    final children = [
+      for (final child in entry.children) ..._buildCollapsibleToc(child, baseUrl),
+    ];
+
+    if (label.isEmpty || anchorId.isEmpty) {
+      yield* children;
+      return;
     }
 
-    return li([
+    if (children.isEmpty) {
+      yield li([
+        DocsNavLink(
+          to: '$baseUrl#$anchorId',
+          classes: 'toc-link',
+          attributes: {'data-toc-link': anchorId},
+          children: [Component.text(label)],
+        ),
+      ]);
+      return;
+    }
+
+    yield li([
       details(classes: 'toc-section', [
         summary(classes: 'toc-summary', [
           span(
@@ -260,16 +283,13 @@ class ApiDocsLayout extends DocsLayout {
             [Component.text('›')],
           ),
           DocsNavLink(
-            to: '$baseUrl#${entry.id}',
+            to: '$baseUrl#$anchorId',
             classes: 'toc-link',
-            attributes: {'data-toc-link': entry.id},
-            children: [Component.text(entry.text)],
+            attributes: {'data-toc-link': anchorId},
+            children: [Component.text(label)],
           ),
         ]),
-        ul([
-          for (final child in entry.children)
-            _buildCollapsibleEntry(child, baseUrl),
-        ]),
+        ul(children),
       ]),
     ]);
   }

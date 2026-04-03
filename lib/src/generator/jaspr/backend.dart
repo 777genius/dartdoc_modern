@@ -951,6 +951,10 @@ class JasprGeneratorBackend extends GeneratorBackend {
       for (final entry in entries)
         entry.relativePath: _buildJasprAnchorRewriteMap(entry.content),
     };
+    final jasprAnchorsByRelativePath = <String, Set<String>>{
+      for (final entry in entries)
+        entry.relativePath: _extractJasprHeadingAnchors(entry.content).toSet(),
+    };
 
     return [
       for (final entry in entries)
@@ -964,6 +968,7 @@ class JasprGeneratorBackend extends GeneratorBackend {
             routeByRelativePath: routeByRelativePath,
             relativePathByRoute: relativePathByRoute,
             anchorMapByRelativePath: anchorMapByRelativePath,
+            jasprAnchorsByRelativePath: jasprAnchorsByRelativePath,
           ),
           sourcePath: entry.sourcePath,
           sidebarPosition: entry.sidebarPosition,
@@ -977,6 +982,7 @@ class JasprGeneratorBackend extends GeneratorBackend {
     required Map<String, String> routeByRelativePath,
     required Map<String, String> relativePathByRoute,
     required Map<String, Map<String, String>> anchorMapByRelativePath,
+    required Map<String, Set<String>> jasprAnchorsByRelativePath,
   }) {
     return content.replaceAllMapped(_markdownLinkPattern, (match) {
       final prefix = match.group(1)!;
@@ -989,6 +995,7 @@ class JasprGeneratorBackend extends GeneratorBackend {
         routeByRelativePath: routeByRelativePath,
         relativePathByRoute: relativePathByRoute,
         anchorMapByRelativePath: anchorMapByRelativePath,
+        jasprAnchorsByRelativePath: jasprAnchorsByRelativePath,
       );
 
       return '$prefix$rewritten$suffix';
@@ -1001,6 +1008,7 @@ class JasprGeneratorBackend extends GeneratorBackend {
     required Map<String, String> routeByRelativePath,
     required Map<String, String> relativePathByRoute,
     required Map<String, Map<String, String>> anchorMapByRelativePath,
+    required Map<String, Set<String>> jasprAnchorsByRelativePath,
   }) {
     final trimmed = destination.trim();
     if (trimmed.isEmpty || _schemePattern.hasMatch(trimmed)) return destination;
@@ -1015,12 +1023,24 @@ class JasprGeneratorBackend extends GeneratorBackend {
     String rewriteFragment(String relativePath, String? currentFragment) {
       if (currentFragment == null || currentFragment.isEmpty) return '';
       final anchorMap = anchorMapByRelativePath[relativePath];
-      final rewritten = anchorMap?[currentFragment] ?? currentFragment;
+      final jasprAnchors = jasprAnchorsByRelativePath[relativePath] ?? const {};
+      final normalizedLegacy = _normalizeLegacyGuideAnchor(currentFragment);
+      final rewritten =
+          jasprAnchors.contains(currentFragment)
+              ? currentFragment
+              : jasprAnchors.contains(normalizedLegacy)
+              ? normalizedLegacy
+              : anchorMap?[currentFragment] ??
+                  anchorMap?[normalizedLegacy] ??
+                  currentFragment;
       return '#$rewritten';
     }
 
     if (pathPart.isEmpty) {
-      return rewriteFragment(currentRelativePath, fragment);
+      final currentRoute =
+          routeByRelativePath[currentRelativePath] ??
+          _guideRouteForRelativePath(currentRelativePath);
+      return '$currentRoute${rewriteFragment(currentRelativePath, fragment)}';
     }
 
     if (pathPart.startsWith('/')) {
@@ -1054,6 +1074,23 @@ class JasprGeneratorBackend extends GeneratorBackend {
       return route.isEmpty ? '/' : route;
     }
     return route;
+  }
+
+  static String _normalizeLegacyGuideAnchor(String fragment) {
+    final trimmed = fragment.trim();
+    if (trimmed.isEmpty) return trimmed;
+
+    final withoutUnderscore = trimmed.startsWith('_')
+        ? trimmed.substring(1)
+        : trimmed;
+    final numberedPrefix = RegExp(r'^(\d+(?:-\d+)+)(-.+)$').firstMatch(
+      withoutUnderscore,
+    );
+    if (numberedPrefix == null) return withoutUnderscore;
+
+    final compactNumber = numberedPrefix.group(1)!.replaceAll('-', '');
+    final suffix = numberedPrefix.group(2)!;
+    return '$compactNumber$suffix';
   }
 
   static Map<String, String> _buildJasprAnchorRewriteMap(String content) {

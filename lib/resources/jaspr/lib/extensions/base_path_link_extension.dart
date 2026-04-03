@@ -9,17 +9,22 @@ class BasePathLinkExtension implements PageExtension {
 
   @override
   Future<List<Node>> apply(Page page, List<Node> nodes) async {
-    return _rewriteNodes(nodes);
+    return _rewriteNodes(nodes, currentPageUrl: page.url);
   }
 
-  List<Node> _rewriteNodes(List<Node> nodes) {
-    return [for (final node in nodes) _rewriteNode(node)];
+  List<Node> _rewriteNodes(List<Node> nodes, {required String currentPageUrl}) {
+    return [
+      for (final node in nodes) _rewriteNode(node, currentPageUrl: currentPageUrl),
+    ];
   }
 
-  Node _rewriteNode(Node node) {
+  Node _rewriteNode(Node node, {required String currentPageUrl}) {
     if (node is! ElementNode) return node;
 
-    final rewrittenChildren = _rewriteNodes(node.children ?? const <Node>[]);
+    final rewrittenChildren = _rewriteNodes(
+      node.children ?? const <Node>[],
+      currentPageUrl: currentPageUrl,
+    );
     if (node.tag != 'a') {
       return ElementNode(node.tag, node.attributes, rewrittenChildren);
     }
@@ -29,7 +34,7 @@ class BasePathLinkExtension implements PageExtension {
       return ElementNode(node.tag, node.attributes, rewrittenChildren);
     }
 
-    final rewrittenHref = _rewriteHref(href);
+    final rewrittenHref = _rewriteHref(href, currentPageUrl: currentPageUrl);
     final shouldEnableClientNav =
         !_isExternalHref(rewrittenHref) &&
         !rewrittenHref.startsWith('#') &&
@@ -43,8 +48,9 @@ class BasePathLinkExtension implements PageExtension {
     }, rewrittenChildren);
   }
 
-  String _rewriteHref(String href) {
-    if (_isExternalHref(href) || href.startsWith('#')) return href;
+  String _rewriteHref(String href, {required String currentPageUrl}) {
+    if (_isExternalHref(href)) return href;
+    if (href.startsWith('#')) return '$currentPageUrl$href';
     if (!href.startsWith('/')) return href;
     return withDocsBasePath(href);
   }

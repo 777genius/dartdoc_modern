@@ -970,9 +970,13 @@ void main() {
           content,
           contains('bool _hasVisibleTocEntries(Iterable<TocEntry> entries)'),
         );
-        expect(content, contains("'data-toc-link': entry.id"));
+        expect(content, contains("final label = entry.text.trim();"));
+        expect(content, contains("final anchorId = entry.id.trim();"));
+        expect(content, contains("'data-toc-link': anchorId"));
         expect(content, contains("classes: 'toc-indicator'"));
         expect(content, contains("classes: 'toc-link'"));
+        expect(content, contains('yield* children;'));
+        expect(content, contains('..._buildCollapsibleToc(entry, baseUrl)'));
         expect(
           content,
           contains("'border-left': '1px solid var(--docs-shell-border)'"),
@@ -1186,6 +1190,8 @@ void main() {
         );
         expect(content, contains("import '../docs_base.dart';"));
         expect(content, contains('return withDocsBasePath(href);'));
+        expect(content, contains("required String currentPageUrl"));
+        expect(content, contains("if (href.startsWith('#')) return '\$currentPageUrl\$href';"));
         expect(content, contains("'data-docs-nav-link': 'true'"));
       });
 

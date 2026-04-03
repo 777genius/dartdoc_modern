@@ -180,7 +180,7 @@ Return to the [Guide](/guide/index.md).
       expect(rewritten.first.content, contains('[Guide](/guide)'));
     });
 
-    test('rewrites same-page anchors to Jaspr heading ids', () {
+    test('rewrites same-page anchors to route-scoped Jaspr heading ids', () {
       final entries = [
         GuideEntry(
           packageName: 'pkg',
@@ -201,7 +201,42 @@ See [Section 5.2](#_5-2-scope-precedence-hierarchy).
       );
       expect(
         rewritten.single.content,
-        contains('[Section 5.2](#52-scope-precedence-hierarchy)'),
+        contains('[Section 5.2](/guide/spec#52-scope-precedence-hierarchy)'),
+      );
+    });
+
+    test('preserves valid guide heading anchors and upgrades legacy slugs', () {
+      final entries = [
+        GuideEntry(
+          packageName: 'pkg',
+          relativePath: 'guide/spec.md',
+          title: 'Spec',
+          content: '''
+# Spec
+
+## 3.5. Invalid Placements
+
+## 4. Referenceable Elements
+
+See [Section 4](#4-referenceable-elements).
+
+#### 6.2.2. Getters and Setters
+
+See [Section 6.2.2](#_6-2-2-getters-and-setters).
+''',
+        ),
+      ];
+
+      final rewritten = JasprGeneratorBackend.rewriteGuideLinksForJaspr(
+        entries,
+      );
+      expect(
+        rewritten.single.content,
+        contains('[Section 4](/guide/spec#4-referenceable-elements)'),
+      );
+      expect(
+        rewritten.single.content,
+        contains('[Section 6.2.2](/guide/spec#622-getters-and-setters)'),
       );
     });
   });
