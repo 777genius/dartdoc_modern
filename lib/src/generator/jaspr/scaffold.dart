@@ -49,6 +49,12 @@ class JasprInitGenerator {
 
     _writeTemplateIfAbsent(
       templateDir: templateDir,
+      templateFile: 'analysis_options.yaml',
+      outputFile: 'analysis_options.yaml',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
       templateFile: 'pubspec.yaml',
       outputFile: 'pubspec.yaml',
       placeholders: placeholders,
@@ -93,6 +99,12 @@ class JasprInitGenerator {
       templateDir: templateDir,
       templateFile: p.join('lib', 'components', 'docs_code_block.dart'),
       outputFile: 'lib/components/docs_code_block.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateDirectoryIfAbsent(
+      templateDir: templateDir,
+      templateSubdir: p.join('lib', 'vendor', 'highlighting'),
+      outputSubdir: p.join('lib', 'vendor', 'highlighting'),
       placeholders: placeholders,
     );
     _writeTemplateIfAbsent(
@@ -495,6 +507,57 @@ class JasprInitGenerator {
     }
 
     writer.write(outputFile, content);
+  }
+
+  void _writeTemplateDirectoryIfAbsent({
+    required String templateDir,
+    required String templateSubdir,
+    required String outputSubdir,
+    required Map<String, String> placeholders,
+  }) {
+    final sourceFolder = resourceProvider.getFolder(
+      p.join(templateDir, templateSubdir),
+    );
+    if (!sourceFolder.exists) return;
+
+    _copyTemplateFolderContentsIfAbsent(
+      folder: sourceFolder,
+      outputSubdir: outputSubdir,
+      placeholders: placeholders,
+    );
+  }
+
+  void _copyTemplateFolderContentsIfAbsent({
+    required Folder folder,
+    required String outputSubdir,
+    required Map<String, String> placeholders,
+  }) {
+    for (final child in folder.getChildren()) {
+      final childName = p.basename(child.path);
+      final childOutputPath = p.join(outputSubdir, childName);
+
+      if (child is Folder) {
+        _copyTemplateFolderContentsIfAbsent(
+          folder: child,
+          outputSubdir: childOutputPath,
+          placeholders: placeholders,
+        );
+        continue;
+      }
+
+      if (child is File) {
+        final existingFile = resourceProvider.getFile(
+          p.normalize(p.join(outputPath, childOutputPath)),
+        );
+        if (existingFile.exists) continue;
+
+        var content = child.readAsStringSync();
+        for (final entry in placeholders.entries) {
+          content = content.replaceAll(entry.key, entry.value);
+        }
+        writer.write(childOutputPath, content);
+      }
+    }
   }
 
   static String _emptySidebarStub(String constantName) =>

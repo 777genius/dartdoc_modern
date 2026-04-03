@@ -528,6 +528,14 @@ void main() {
           outDir,
           'lib/components/docs_code_block.dart',
         );
+        final vendorHighlighting = _readOutput(
+          outDir,
+          'lib/vendor/highlighting/highlighting.dart',
+        );
+        final vendorCommonLanguages = _readOutput(
+          outDir,
+          'lib/vendor/highlighting/languages/common.dart',
+        );
         final sidebarToggleStub = _readOutput(
           outDir,
           'lib/components/docs_sidebar_toggle_stub.dart',
@@ -679,23 +687,30 @@ void main() {
           contains("import '../components/docs_page_actions_runtime.dart';"),
         );
         expect(content, contains('const DocsPageActionsRuntime()'));
-        expect(content, contains(".content pre .code-token-command"));
+        expect(content, contains('.content pre code.hljs'));
+        expect(content, contains('.content pre .hljs-keyword'));
+        expect(content, contains('.content pre .hljs-comment'));
         expect(
           content,
           contains(
-            "color-mix(in srgb, var(--docs-shell-accent-strong) 74%, var(--docs-shell-shadow))",
+            'color-mix(in srgb, var(--docs-shell-accent-strong) 74%, var(--docs-shell-shadow))',
           ),
         );
-        expect(codeBlock, contains('static const _shellLanguages = {'));
-        expect(codeBlock, contains("'shellsession'"));
         expect(
           codeBlock,
-          contains('shellTokens: _ShellSyntaxHighlighter.highlight(source)'),
+          contains("import '../vendor/highlighting/highlighting.dart'"),
         );
-        expect(codeBlock, contains("classes: 'code-token \$className'"));
-        expect(codeBlock, contains("command('code-token-command')"));
-        expect(codeBlock, contains("comment('code-token-comment')"));
-        expect(codeBlock, contains('final class _ShellSyntaxHighlighter'));
+        expect(codeBlock, contains('highlighting.docsHighlight.highlight('));
+        expect(codeBlock, contains("class': 'hljs language-\$language'"));
+        expect(codeBlock, isNot(contains('_ShellSyntaxHighlighter')));
+        expect(
+          vendorHighlighting,
+          contains('final docsHighlight = DocsHighlightEngine._();'),
+        );
+        expect(vendorHighlighting, contains("'shellsession': 'shell'"));
+        expect(vendorCommonLanguages, contains("'bash': bash"));
+        expect(vendorCommonLanguages, contains("'typescript': typescript"));
+        expect(vendorCommonLanguages, contains("'yaml': yaml"));
         expect(content, contains("'data-docs-copy-link': 'true'"));
         expect(
           content,
@@ -737,7 +752,7 @@ void main() {
         expect(navigationRuntimeWeb, contains('_syncHeaderNavActive();'));
         expect(
           navigationRuntimeWeb,
-          contains(".header-nav a[data-docs-header-nav-link]"),
+          contains('.header-nav a[data-docs-header-nav-link]'),
         );
         expect(
           navigationRuntimeWeb,
@@ -992,8 +1007,8 @@ void main() {
           content,
           contains('bool _hasVisibleTocEntries(Iterable<TocEntry> entries)'),
         );
-        expect(content, contains("final label = entry.text.trim();"));
-        expect(content, contains("final anchorId = entry.id.trim();"));
+        expect(content, contains('final label = entry.text.trim();'));
+        expect(content, contains('final anchorId = entry.id.trim();'));
         expect(content, contains("'data-toc-link': anchorId"));
         expect(content, contains("classes: 'toc-link'"));
         expect(content, contains('yield* children;'));
@@ -1205,7 +1220,7 @@ void main() {
         );
         expect(content, contains("import '../docs_base.dart';"));
         expect(content, contains('return withDocsBasePath(href);'));
-        expect(content, contains("required String currentPageUrl"));
+        expect(content, contains('required String currentPageUrl'));
         expect(
           content,
           contains(
