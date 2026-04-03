@@ -946,13 +946,8 @@ void main() {
         expect(tocRuntimeWeb, contains("window.addEventListener('scroll'"));
         expect(tocRuntimeWeb, contains("window.addEventListener('hashchange'"));
         expect(tocRuntimeWeb, contains('requestAnimationFrame('));
-        expect(tocRuntimeWeb, contains("querySelector('.toc-indicator')"));
-        expect(tocRuntimeWeb, contains('indicator.style.transform ='));
-        expect(tocRuntimeWeb, isNot(contains('indicator.style.width =')));
-        expect(
-          tocRuntimeWeb,
-          contains('linkRect.left - containerRect.left - 6'),
-        );
+        expect(tocRuntimeWeb, isNot(contains("querySelector('.toc-indicator')")));
+        expect(tocRuntimeWeb, isNot(contains('indicator.style.transform =')));
         expect(tocRuntimeWeb, contains('final hash = web.window.location.hash;'));
         expect(
           content,
@@ -973,7 +968,6 @@ void main() {
         expect(content, contains("final label = entry.text.trim();"));
         expect(content, contains("final anchorId = entry.id.trim();"));
         expect(content, contains("'data-toc-link': anchorId"));
-        expect(content, contains("classes: 'toc-indicator'"));
         expect(content, contains("classes: 'toc-link'"));
         expect(content, contains('yield* children;'));
         expect(content, contains('..._buildCollapsibleToc(entry, baseUrl)'));
@@ -997,6 +991,8 @@ void main() {
         expect(content, contains("css('ul ul').styles("));
         expect(content, contains("css('ul ul > li').styles"));
         expect(content, contains("'ul ul .toc-link'"));
+        expect(content, contains("css('.toc-link::before').styles("));
+        expect(content, contains("css('.toc-link.active::before').styles("));
         expect(content, isNot(contains("css('.toc ul ul').styles(")));
         expect(content, contains("'margin-left': '0.52rem'"));
         expect(content, contains("'margin-left': '0.86rem'"));

@@ -133,7 +133,6 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
     }
 
     _openAncestorDetails(active.link);
-    _updateIndicator(active.link);
     _ensureLinkVisible(active.link, active.id);
   }
 
@@ -174,26 +173,6 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
         targetScroll.clamp(0, container.scrollHeight.toDouble());
     if ((container.scrollTop - clampedScroll).abs() < 8) return;
     container.scrollTop = clampedScroll;
-  }
-
-  void _updateIndicator(web.HTMLElement link) {
-    final container = link.closest('.toc > div');
-    if (container is! web.HTMLElement) return;
-    final indicator = container.querySelector('.toc-indicator');
-    if (indicator is! web.HTMLElement) return;
-
-    final containerRect = container.getBoundingClientRect();
-    final linkRect = link.getBoundingClientRect();
-    final top = (linkRect.top - containerRect.top) + container.scrollTop + 4;
-    final left = (linkRect.left - containerRect.left - 6).clamp(
-      0,
-      container.clientWidth.toDouble(),
-    );
-    final height = (linkRect.height - 8).clamp(18, linkRect.height).toDouble();
-
-    indicator.style.opacity = '1';
-    indicator.style.height = '${height}px';
-    indicator.style.transform = 'translate3d(${left}px, ${top}px, 0)';
   }
 
   _TocTarget _resolveActiveTarget(List<_TocTarget> targets, double offset) {

@@ -97,15 +97,10 @@ class ApiDocsLayout extends DocsLayout {
               if (this.footer != null)
                 div(classes: 'content-footer', [this.footer!]),
             ]),
-            if (page.data['toc'] case final TableOfContents toc
+              if (page.data['toc'] case final TableOfContents toc
                 when _hasVisibleTocEntries(toc.entries))
               aside(classes: 'toc', [
                 div([
-                  div(
-                    classes: 'toc-indicator',
-                    attributes: {'aria-hidden': 'true'},
-                    const [],
-                  ),
                   h3([Component.text('On this page')]),
                   _buildToc(toc, page.url, collapsibleOutline),
                 ]),
@@ -1841,26 +1836,6 @@ class ApiDocsLayout extends DocsLayout {
           'box-sizing': 'border-box',
         },
       ),
-      css('.toc-indicator').styles(
-        position: Position.absolute(),
-        radius: BorderRadius.circular(999.px),
-        opacity: 0,
-        raw: {
-          'top': '0.18rem',
-          'left': '-1px',
-          'width': '3px',
-          'height': '0',
-          'pointer-events': 'none',
-          'z-index': '0',
-          'background': 'var(--docs-shell-accent)',
-          'box-shadow':
-              '0 0 0 1px color-mix(in srgb, var(--docs-shell-accent) 18%, transparent)',
-          'transform': 'translate3d(0, 0, 0)',
-          'transition':
-              'transform 180ms cubic-bezier(.22, 1, .36, 1), width 180ms cubic-bezier(.22, 1, .36, 1), height 180ms cubic-bezier(.22, 1, .36, 1), opacity 120ms ease',
-          'will-change': 'transform, width, height',
-        },
-      ),
       css('h3').styles(
         margin: Margin.only(bottom: 0.28.rem),
         fontSize: 0.72.rem,
@@ -1875,7 +1850,7 @@ class ApiDocsLayout extends DocsLayout {
           top: 0.09.rem,
           right: Unit.zero,
           bottom: 0.09.rem,
-          left: 0.28.rem,
+          left: 0.42.rem,
         ),
         radius: BorderRadius.circular(Unit.zero),
         color: ContentColors.text,
@@ -1892,6 +1867,23 @@ class ApiDocsLayout extends DocsLayout {
           'text-wrap': 'pretty',
         },
       ),
+      css('.toc-link::before').styles(
+        position: Position.absolute(),
+        radius: BorderRadius.circular(999.px),
+        opacity: 0,
+        raw: {
+          'content': "''",
+          'top': '0.18rem',
+          'bottom': '0.18rem',
+          'left': '-0.34rem',
+          'width': '3px',
+          'pointer-events': 'none',
+          'background': 'var(--docs-shell-accent)',
+          'box-shadow':
+              '0 0 0 1px color-mix(in srgb, var(--docs-shell-accent) 18%, transparent)',
+          'transition': 'opacity 120ms ease',
+        },
+      ),
       css('.toc-link:hover').styles(
         color: Color('var(--docs-shell-accent-strong)'),
         raw: {'opacity': '1'},
@@ -1900,6 +1892,7 @@ class ApiDocsLayout extends DocsLayout {
       css(
         '.toc-link.active',
       ).styles(color: Color('var(--docs-shell-accent)'), raw: {'opacity': '1'}),
+      css('.toc-link.active::before').styles(opacity: 1),
       css('ul ul').styles(
         margin: Margin.only(top: 0.01.rem),
         padding: Padding.zero,
