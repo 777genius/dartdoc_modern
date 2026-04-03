@@ -220,30 +220,29 @@ When a name is enclosed in square brackets (e.g., `[MyClass.myMethod]`), documen
 The resolution process for a reference `[name]` follows the standard Dart scope of the documented element with the extension of the doc imported scope at the end. The resolution starts with the first *identifier* of a name. Search is done in a specific order of precedence from the narrowest (most local) scope to the broadest (globally available).
 
 The hierarchy is searched from the inside out. Below is an example for an instance method:
-```
-+--------------------------------------------------------------------------+
-| 7. Doc Imported Scope (documentation-only imports with @docImport )      |
-| +----------------------------------------------------------------------+ |
-| | 6. Imported Scopes (all 'import' directives + implicit 'dart:core')  | |
-| | +------------------------------------------------------------------+ | |
-| | | 5. Library Scope (all declarations incl. prefixes in the file).  | | |
-| | | +--------------------------------------------------------------+ | | |
-| | | | 4. Class Type Parameter Scope (e.g., <T>)                    | | | |
-| | | | +----------------------------------------------------------+ | | | |
-| | | | | 3. Class Member Scope (e.g., static/instance members)    | | | | |
-| | | | | +------------------------------------------------------+ | | | | |
-| | | | | | 2. Method Type Parameter Scope (e.g., <R>)           | | | | | |
-| | | | | | +--------------------------------------------------+ | | | | | |
-| | | | | | | 1. Formal Parameter Scope (e.g., parameter names)| | | | | | |
-| | | | | | +--------------------------------------------------+ | | | | | |
-| | | | | +------------------------------------------------------+ | | | | |
-| | | | +----------------------------------------------------------+ | | | |
-| | | +--------------------------------------------------------------+ | | |
-| | +------------------------------------------------------------------+ | |
-| +----------------------------------------------------------------------+ |
-+--------------------------------------------------------------------------+
 
+```mermaid
+flowchart TD
+  p1["1. Formal Parameters"]
+  p2["2. Method Type Parameters"]
+  p3["3. Class Members"]
+  p4["4. Class Type Parameters"]
+  p5["5. Library Scope"]
+  p6["6. Imported Scopes"]
+  p7["7. Doc Imported Scope"]
+
+  p1 --> p2 --> p3 --> p4 --> p5 --> p6 --> p7
 ```
+
+Where:
+
+* **1. Formal Parameters**: parameter names of the documented method.
+* **2. Method Type Parameters**: method-level generics such as `<R>`.
+* **3. Class Members**: static and instance members in the enclosing class.
+* **4. Class Type Parameters**: enclosing class generics such as `<T>`.
+* **5. Library Scope**: declarations and prefixes defined in the file.
+* **6. Imported Scopes**: explicit imports plus implicit `dart:core`.
+* **7. Doc Imported Scope**: documentation-only imports added via `@docImport`.
 ### **5.3. Detailed Lookup Process**
 
 The lookup process begins at a specific "starting scope" determined by the context of the doc comment and then follows the scope hierarchy.
