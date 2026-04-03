@@ -1778,7 +1778,7 @@ class ApiDocsLayout extends DocsLayout {
         position: Position.sticky(top: Unit.zero),
         maxHeight: 80.vh,
         overflow: Overflow.auto,
-        padding: Padding.only(left: 1.1.rem),
+        padding: Padding.only(left: 0.55.rem),
         raw: {
           'top': 'var(--docs-shell-sticky-top)',
           'overscroll-behavior': 'contain',
@@ -1815,7 +1815,12 @@ class ApiDocsLayout extends DocsLayout {
       ),
       css('.toc-link').styles(
         display: Display.block,
-        padding: Padding.only(top: 0.34.rem, right: Unit.zero, bottom: 0.34.rem, left: 0.7.rem),
+        padding: Padding.only(
+          top: 0.34.rem,
+          right: Unit.zero,
+          bottom: 0.34.rem,
+          left: 0.55.rem,
+        ),
         radius: BorderRadius.circular(Unit.zero),
         color: ContentColors.text,
         textDecoration: TextDecoration.none,
@@ -1841,8 +1846,8 @@ class ApiDocsLayout extends DocsLayout {
         raw: {'opacity': '1'},
       ),
       css('.toc ul ul').styles(
-        margin: Margin.only(top: 0.2.rem, left: 0.7.rem),
-        padding: Padding.only(left: 0.7.rem),
+        margin: Margin.only(top: 0.2.rem, left: 0.45.rem),
+        padding: Padding.only(left: 0.45.rem),
         border: Border.unset,
       ),
       css(
@@ -1889,7 +1894,12 @@ class ApiDocsLayout extends DocsLayout {
         raw: {'transform': 'rotate(90deg)'},
       ),
       css('.toc-summary .toc-link').styles(
-        padding: Padding.only(top: 0.34.rem, right: Unit.zero, bottom: 0.34.rem, left: 0.7.rem),
+        padding: Padding.only(
+          top: 0.34.rem,
+          right: Unit.zero,
+          bottom: 0.34.rem,
+          left: 0.55.rem,
+        ),
         raw: {'flex': '1 1 auto'},
       ),
       css('a').styles(color: ContentColors.text),

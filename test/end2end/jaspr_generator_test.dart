@@ -1055,8 +1055,8 @@ void main() {
           expect(responsive, contains("'--docs-shell-grid-gap'"));
           expect(responsive, contains("'--docs-shell-sidebar-width'"));
           expect(responsive, contains("'--docs-shell-toc-width'"));
-          expect(responsive, contains("'13.5rem'"));
-          expect(responsive, contains("'12.5rem'"));
+          expect(responsive, contains("'11.25rem'"));
+          expect(responsive, contains("'10.5rem'"));
           expect(responsive, contains("'--docs-shell-search-panel-width'"));
           expect(responsive, contains("'--docs-shell-drawer-width'"));
 
