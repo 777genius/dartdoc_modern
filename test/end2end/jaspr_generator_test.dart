@@ -524,6 +524,10 @@ void main() {
           outDir,
           'lib/components/docs_sidebar_toggle_runtime_web.dart',
         );
+        final codeBlock = _readOutput(
+          outDir,
+          'lib/components/docs_code_block.dart',
+        );
         final sidebarToggleStub = _readOutput(
           outDir,
           'lib/components/docs_sidebar_toggle_stub.dart',
@@ -675,6 +679,23 @@ void main() {
           contains("import '../components/docs_page_actions_runtime.dart';"),
         );
         expect(content, contains('const DocsPageActionsRuntime()'));
+        expect(content, contains(".content pre .code-token-command"));
+        expect(
+          content,
+          contains(
+            "color-mix(in srgb, var(--docs-shell-accent-strong) 74%, var(--docs-shell-shadow))",
+          ),
+        );
+        expect(codeBlock, contains('static const _shellLanguages = {'));
+        expect(codeBlock, contains("'shellsession'"));
+        expect(
+          codeBlock,
+          contains('shellTokens: _ShellSyntaxHighlighter.highlight(source)'),
+        );
+        expect(codeBlock, contains("classes: 'code-token \$className'"));
+        expect(codeBlock, contains("command('code-token-command')"));
+        expect(codeBlock, contains("comment('code-token-comment')"));
+        expect(codeBlock, contains('final class _ShellSyntaxHighlighter'));
         expect(content, contains("'data-docs-copy-link': 'true'"));
         expect(
           content,
@@ -946,9 +967,15 @@ void main() {
         expect(tocRuntimeWeb, contains("window.addEventListener('scroll'"));
         expect(tocRuntimeWeb, contains("window.addEventListener('hashchange'"));
         expect(tocRuntimeWeb, contains('requestAnimationFrame('));
-        expect(tocRuntimeWeb, isNot(contains("querySelector('.toc-indicator')")));
+        expect(
+          tocRuntimeWeb,
+          isNot(contains("querySelector('.toc-indicator')")),
+        );
         expect(tocRuntimeWeb, isNot(contains('indicator.style.transform =')));
-        expect(tocRuntimeWeb, contains('final hash = web.window.location.hash;'));
+        expect(
+          tocRuntimeWeb,
+          contains('final hash = web.window.location.hash;'),
+        );
         expect(
           content,
           contains(
@@ -977,10 +1004,7 @@ void main() {
           contains("'border-left': '1px solid var(--docs-shell-border)'"),
         );
         expect(content, contains("'max-width': 'none !important'"));
-        expect(
-          content,
-          contains("css('.main-container main > div').styles("),
-        );
+        expect(content, contains("css('.main-container main > div').styles("));
         expect(content, contains("'padding-right': '0 !important'"));
         expect(content, contains("'padding-left': '2.5rem !important'"));
         expect(content, contains("'gap': '2.5rem !important'"));
@@ -1182,7 +1206,12 @@ void main() {
         expect(content, contains("import '../docs_base.dart';"));
         expect(content, contains('return withDocsBasePath(href);'));
         expect(content, contains("required String currentPageUrl"));
-        expect(content, contains("if (href.startsWith('#')) return '\$currentPageUrl\$href';"));
+        expect(
+          content,
+          contains(
+            "if (href.startsWith('#')) return '\$currentPageUrl\$href';",
+          ),
+        );
         expect(content, contains("'data-docs-nav-link': 'true'"));
       });
 

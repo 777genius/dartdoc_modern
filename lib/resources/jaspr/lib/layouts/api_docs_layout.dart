@@ -97,7 +97,7 @@ class ApiDocsLayout extends DocsLayout {
               if (this.footer != null)
                 div(classes: 'content-footer', [this.footer!]),
             ]),
-              if (page.data['toc'] case final TableOfContents toc
+            if (page.data['toc'] case final TableOfContents toc
                 when _hasVisibleTocEntries(toc.entries))
               aside(classes: 'toc', [
                 div([
@@ -497,17 +497,10 @@ class ApiDocsLayout extends DocsLayout {
           'transform-origin': 'center',
         },
       ),
-      css(
-        '.action-btn-icon-source::before',
-      ).styles(
-        raw: {
-          'left': '0.1rem',
-          'transform': 'translateY(-50%) rotate(45deg)',
-        },
+      css('.action-btn-icon-source::before').styles(
+        raw: {'left': '0.1rem', 'transform': 'translateY(-50%) rotate(45deg)'},
       ),
-      css(
-        '.action-btn-icon-source::after',
-      ).styles(
+      css('.action-btn-icon-source::after').styles(
         raw: {
           'right': '0.1rem',
           'transform': 'translateY(-50%) rotate(-135deg)',
@@ -1186,10 +1179,9 @@ class ApiDocsLayout extends DocsLayout {
       css('strong').styles(fontWeight: FontWeight.w700),
     ]),
     css('.code-block', [
-      css('&').styles(
-        position: Position.relative(),
-        raw: {'isolation': 'isolate'},
-      ),
+      css(
+        '&',
+      ).styles(position: Position.relative(), raw: {'isolation': 'isolate'}),
       css('button').styles(
         position: Position.absolute(top: 0.75.rem, right: 0.75.rem),
         display: Display.inlineFlex,
@@ -1680,9 +1672,9 @@ class ApiDocsLayout extends DocsLayout {
             'padding-top': 'var(--docs-shell-content-pad-top)',
             'padding-right': 'var(--docs-shell-content-pad-right)',
             'padding-bottom': 'var(--docs-shell-content-pad-bottom)',
-        },
-      ),
-    ]),
+          },
+        ),
+      ]),
     ]),
     css('.docs .main-container main > div > .content-container').styles(
       raw: {
@@ -1914,9 +1906,9 @@ class ApiDocsLayout extends DocsLayout {
       css(
         'ul ul .toc-link',
       ).styles(fontSize: 0.8.rem, color: Color('var(--docs-shell-muted)')),
-      css('ul ul .toc-link:visited').styles(
-        color: Color('var(--docs-shell-muted)'),
-      ),
+      css(
+        'ul ul .toc-link:visited',
+      ).styles(color: Color('var(--docs-shell-muted)')),
       css(
         'ul ul .toc-link.active',
       ).styles(color: Color('var(--docs-shell-accent)')),
@@ -2111,6 +2103,32 @@ class ApiDocsLayout extends DocsLayout {
         blur: 40.px,
         color: Color('var(--docs-shell-shadow)'),
       ),
+    ),
+    css('.content pre .code-token-command').styles(
+      color: Color('var(--docs-shell-accent-strong)'),
+      fontWeight: FontWeight.w600,
+    ),
+    css(
+      '.content pre .code-token-option',
+    ).styles(color: Color('var(--docs-shell-accent)')),
+    css('.content pre .code-token-variable').styles(
+      color: Color('var(--docs-shell-accent)'),
+      fontWeight: FontWeight.w500,
+    ),
+    css('.content pre .code-token-string').styles(
+      color: Color('var(--docs-shell-shadow)'),
+      raw: {
+        'color':
+            'color-mix(in srgb, var(--docs-shell-accent-strong) 74%, var(--docs-shell-shadow))',
+      },
+    ),
+    css('.content pre .code-token-comment').styles(
+      color: Color('var(--docs-shell-muted)'),
+      fontStyle: FontStyle.italic,
+    ),
+    css('.content pre .code-token-operator').styles(
+      color: Color('var(--docs-shell-border-strong)'),
+      fontWeight: FontWeight.w500,
     ),
     css('.content .member-signature').styles(
       margin: Margin.only(top: 0.32.rem, bottom: 0.72.rem),
