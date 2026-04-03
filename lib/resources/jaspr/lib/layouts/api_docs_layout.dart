@@ -1361,7 +1361,9 @@ class ApiDocsLayout extends DocsLayout {
         },
       ),
       css('.main-container main > div').styles(raw: {
+        'padding-left': '2.5rem !important',
         'padding-right': '0 !important',
+        'gap': '2.5rem !important',
       }),
       downWide([
         css('main > div').styles(
@@ -1851,17 +1853,21 @@ class ApiDocsLayout extends DocsLayout {
         fontWeight: FontWeight.w700,
         raw: {'opacity': '1'},
       ),
-      css('.toc ul ul').styles(
-        margin: Margin.only(top: 0.2.rem, left: 0.45.rem),
-        padding: Padding.only(left: 0.45.rem),
+      css('ul ul').styles(
+        margin: Margin.only(top: 0.18.rem),
+        padding: Padding.zero,
         border: Border.unset,
       ),
-      css(
-        '.toc ul ul .toc-link',
-      ).styles(fontSize: 0.84.rem, color: Color('var(--docs-shell-muted)')),
-      css(
-        '.toc ul ul .toc-link.active',
-      ).styles(color: Color('var(--docs-shell-accent)')),
+      css('ul ul > li').styles(raw: {'margin-left': '1rem'}),
+      css('ul ul ul > li').styles(raw: {'margin-left': '1.65rem'}),
+      css('ul ul ul ul > li').styles(raw: {'margin-left': '2.3rem'}),
+      css('ul ul .toc-link').styles(
+        fontSize: 0.84.rem,
+        color: Color('var(--docs-shell-muted)'),
+      ),
+      css('ul ul .toc-link.active').styles(
+        color: Color('var(--docs-shell-accent)'),
+      ),
       downContent([css('&').styles(display: Display.none)]),
     ]),
     css('.docs .main-container main > div > aside.toc').styles(raw: {

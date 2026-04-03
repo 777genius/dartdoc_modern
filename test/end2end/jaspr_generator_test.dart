@@ -979,10 +979,18 @@ void main() {
           contains("css('.main-container main > div').styles(raw: {"),
         );
         expect(content, contains("'padding-right': '0 !important'"));
+        expect(content, contains("'padding-left': '2.5rem !important'"));
+        expect(content, contains("'gap': '2.5rem !important'"));
         expect(
           content,
           contains("'width': 'var(--docs-shell-toc-width) !important'"),
         );
+        expect(content, contains("css('ul ul').styles("));
+        expect(content, contains("css('ul ul > li').styles"));
+        expect(content, contains("css('ul ul .toc-link').styles("));
+        expect(content, isNot(contains("css('.toc ul ul').styles(")));
+        expect(content, contains("'margin-left': '1rem'"));
+        expect(content, contains("'margin-left': '1.65rem'"));
         expect(
           content,
           contains(
