@@ -1850,7 +1850,6 @@ class ApiDocsLayout extends DocsLayout {
       ),
       css('.toc-link.active').styles(
         color: Color('var(--docs-shell-accent)'),
-        fontWeight: FontWeight.w700,
         raw: {'opacity': '1'},
       ),
       css('ul ul').styles(

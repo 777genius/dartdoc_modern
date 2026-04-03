@@ -949,6 +949,10 @@ void main() {
         expect(tocRuntimeWeb, contains("querySelector('.toc-indicator')"));
         expect(tocRuntimeWeb, contains('indicator.style.transform ='));
         expect(tocRuntimeWeb, isNot(contains('indicator.style.width =')));
+        expect(
+          tocRuntimeWeb,
+          contains('linkRect.left - containerRect.left - 6'),
+        );
         expect(tocRuntimeWeb, contains('final hash = web.window.location.hash;'));
         expect(
           content,

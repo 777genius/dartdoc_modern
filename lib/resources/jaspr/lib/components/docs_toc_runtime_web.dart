@@ -178,7 +178,10 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
     final containerRect = container.getBoundingClientRect();
     final linkRect = link.getBoundingClientRect();
     final top = (linkRect.top - containerRect.top) + container.scrollTop + 4;
-    final left = linkRect.left - containerRect.left;
+    final left = (linkRect.left - containerRect.left - 6).clamp(
+      0,
+      container.clientWidth.toDouble(),
+    );
     final height = (linkRect.height - 8).clamp(18, linkRect.height).toDouble();
 
     indicator.style.opacity = '1';
