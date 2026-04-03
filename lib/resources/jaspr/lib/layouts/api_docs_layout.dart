@@ -1896,6 +1896,7 @@ class ApiDocsLayout extends DocsLayout {
         color: Color('var(--docs-shell-accent-strong)'),
         raw: {'opacity': '1'},
       ),
+      css('.toc-link:visited').styles(color: ContentColors.text),
       css(
         '.toc-link.active',
       ).styles(color: Color('var(--docs-shell-accent)'), raw: {'opacity': '1'}),
@@ -1910,6 +1911,9 @@ class ApiDocsLayout extends DocsLayout {
       css(
         'ul ul .toc-link',
       ).styles(fontSize: 0.8.rem, color: Color('var(--docs-shell-muted)')),
+      css('ul ul .toc-link:visited').styles(
+        color: Color('var(--docs-shell-muted)'),
+      ),
       css(
         'ul ul .toc-link.active',
       ).styles(color: Color('var(--docs-shell-accent)')),

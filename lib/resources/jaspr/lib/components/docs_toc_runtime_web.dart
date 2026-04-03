@@ -18,6 +18,7 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
   JSFunction? _resizeListener;
   JSFunction? _navigationListener;
   JSFunction? _hashChangeListener;
+  Timer? _syncTimer;
   bool _updateQueued = false;
   String? _lastActiveId;
 
@@ -39,6 +40,10 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
     web.window.addEventListener('resize', _resizeListener);
     web.window.addEventListener('docs:navigation', _navigationListener);
     web.window.addEventListener('hashchange', _hashChangeListener);
+    _syncTimer = Timer.periodic(
+      const Duration(milliseconds: 180),
+      (_) => _queueUpdate(),
+    );
 
     Timer(const Duration(milliseconds: 50), _queueUpdate);
   }
@@ -61,6 +66,8 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
       web.window.removeEventListener('hashchange', _hashChangeListener);
       _hashChangeListener = null;
     }
+    _syncTimer?.cancel();
+    _syncTimer = null;
     super.dispose();
   }
 
@@ -190,6 +197,7 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
   }
 
   _TocTarget _resolveActiveTarget(List<_TocTarget> targets, double offset) {
+    final activationOffset = offset + 28.0;
     final hash = web.window.location.hash;
     if (hash.isNotEmpty) {
       final hashId = Uri.decodeComponent(hash.substring(1));
@@ -197,7 +205,7 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
         if (target.id != hashId) continue;
         final hashTop = target.heading.getBoundingClientRect().top;
         final isHashTargetInFocus =
-            hashTop <= offset + 120 &&
+            hashTop <= activationOffset + 72 &&
             hashTop >= -(target.link.clientHeight + 24);
         if (isHashTargetInFocus) {
           return target;
@@ -213,13 +221,14 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
           ? targets[index + 1].heading.getBoundingClientRect().top
           : double.infinity;
 
-      if (currentTop - offset <= 0 && nextTop - offset > 0) {
+      if (currentTop - activationOffset <= 0 &&
+          nextTop - activationOffset > 0) {
         return current;
       }
     }
 
     final firstTop = targets.first.heading.getBoundingClientRect().top;
-    if (firstTop - offset > 0) {
+    if (firstTop - activationOffset > 0) {
       return targets.first;
     }
 
