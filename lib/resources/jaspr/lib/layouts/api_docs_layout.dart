@@ -478,24 +478,35 @@ class ApiDocsLayout extends DocsLayout {
         '.action-btn-icon-source::before, .action-btn-icon-source::after',
       ).styles(
         position: Position.absolute(),
-        width: 0.48.rem,
-        height: 0.48.rem,
+        width: 0.5.rem,
+        height: 0.5.rem,
         border: Border.all(width: 2.px, color: Color('currentColor')),
         backgroundColor: Color('transparent'),
         raw: {
           'content': '""',
           'box-sizing': 'border-box',
-          'top': '0.23rem',
+          'top': '50%',
           'border-right': '0',
           'border-top': '0',
+          'transform-origin': 'center',
         },
       ),
       css(
         '.action-btn-icon-source::before',
-      ).styles(raw: {'left': '0.08rem', 'transform': 'rotate(45deg)'}),
+      ).styles(
+        raw: {
+          'left': '0.1rem',
+          'transform': 'translateY(-50%) rotate(45deg)',
+        },
+      ),
       css(
         '.action-btn-icon-source::after',
-      ).styles(raw: {'right': '0.08rem', 'transform': 'rotate(-135deg)'}),
+      ).styles(
+        raw: {
+          'right': '0.1rem',
+          'transform': 'translateY(-50%) rotate(-135deg)',
+        },
+      ),
       css('.action-btn-label').styles(fontWeight: FontWeight.w700),
       downCompact([
         css('.icon-action-btn').styles(width: 2.85.rem, height: 2.85.rem),
