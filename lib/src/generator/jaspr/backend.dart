@@ -40,12 +40,12 @@ const _apiStylesCss = '''
 /* Member signature blocks with clickable type links */
 
 .member-signature {
-  margin: 5px 0 10px;
+  margin: 4px 0 9px;
 }
 .member-signature .member-signature-code {
   background: var(--content-pre-bg);
   border-radius: 10px;
-  padding: 6px 12px;
+  padding: 4px 12px;
   overflow-x: auto;
   white-space: pre-wrap;
   overflow-wrap: break-word;
@@ -53,7 +53,7 @@ const _apiStylesCss = '''
   font-family: var(--content-code-font);
   font-size: 0.92rem;
   color: var(--content-pre-code);
-  line-height: 1.22;
+  line-height: 1.08;
 }
 .member-signature .member-signature-line {
   display: block;

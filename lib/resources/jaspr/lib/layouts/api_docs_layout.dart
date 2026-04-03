@@ -2110,7 +2110,7 @@ class ApiDocsLayout extends DocsLayout {
       ),
     ),
     css('.content .member-signature').styles(
-      margin: Margin.only(top: 0.4.rem, bottom: 0.82.rem),
+      margin: Margin.only(top: 0.32.rem, bottom: 0.72.rem),
     ),
     css('.content .member-signature .member-signature-code').styles(
       radius: BorderRadius.circular(0.8.rem),
@@ -2126,9 +2126,9 @@ class ApiDocsLayout extends DocsLayout {
         'overflow-wrap': 'break-word',
         'font-family': 'var(--content-code-font)',
         'font-size': '0.92rem',
-        'line-height': '1.22',
-        'padding-top': '0.42rem',
-        'padding-bottom': '0.42rem',
+        'line-height': '1.08',
+        'padding-top': '0.26rem',
+        'padding-bottom': '0.26rem',
       },
     ),
     css(
