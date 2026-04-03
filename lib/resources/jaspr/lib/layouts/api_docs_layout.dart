@@ -319,6 +319,17 @@ class ApiDocsLayout extends DocsLayout {
         ),
       ),
     ),
+    css('body.search-open .header-container').styles(
+      zIndex: ZIndex(70),
+      opacity: 0,
+      raw: {
+        'pointer-events': 'none',
+        'box-shadow': 'none',
+        'backdrop-filter': 'none',
+        '-webkit-backdrop-filter': 'none',
+        'transition': 'opacity 120ms ease',
+      },
+    ),
     css(
       '[data-docs-nav-loading] body, [data-docs-nav-loading] .main-container',
     ).styles(raw: {'cursor': 'progress'}),
@@ -1450,10 +1461,6 @@ class ApiDocsLayout extends DocsLayout {
           ),
         ),
       ),
-      css('body.search-open &').styles(
-        zIndex: ZIndex(70),
-        raw: {'box-shadow': '0 18px 42px -28px var(--docs-shell-shadow)'},
-      ),
       css('[data-has-sidebar] .header').styles(
         maxWidth: 100.percent,
         margin: Margin.zero,
@@ -1673,9 +1680,9 @@ class ApiDocsLayout extends DocsLayout {
             'padding-top': 'var(--docs-shell-content-pad-top)',
             'padding-right': 'var(--docs-shell-content-pad-right)',
             'padding-bottom': 'var(--docs-shell-content-pad-bottom)',
-          },
-        ),
-      ]),
+        },
+      ),
+    ]),
     ]),
     css('.docs .main-container main > div > .content-container').styles(
       raw: {
