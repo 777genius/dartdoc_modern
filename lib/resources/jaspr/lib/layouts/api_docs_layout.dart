@@ -1360,6 +1360,9 @@ class ApiDocsLayout extends DocsLayout {
               'var(--docs-shell-main-pad-top) var(--docs-shell-main-pad-inline) var(--docs-shell-main-pad-bottom)',
         },
       ),
+      css('.main-container main > div').styles(raw: {
+        'padding-right': '0 !important',
+      }),
       downWide([
         css('main > div').styles(
           raw: {
@@ -1629,6 +1632,12 @@ class ApiDocsLayout extends DocsLayout {
         ),
       ]),
     ]),
+    css('.docs .main-container main > div > .content-container').styles(raw: {
+      'width': '100%',
+      'max-width': 'none !important',
+      'padding-right': '0 !important',
+      'box-sizing': 'border-box',
+    }),
     css('.content-header', [
       css('&').styles(
         margin: Margin.only(bottom: 2.rem),
@@ -1762,9 +1771,6 @@ class ApiDocsLayout extends DocsLayout {
       '.docs-search-overlay .docs-search-url',
     ).styles(raw: {'word-break': 'break-word'}),
     css('.toc', [
-      css(
-        '.docs .main-container main > div &',
-      ).styles(raw: {'width': 'var(--docs-shell-toc-width)'}),
       css('&').styles(
         padding: Padding.only(top: 0.15.rem, right: Unit.zero, bottom: 2.rem),
       ),
@@ -1858,6 +1864,12 @@ class ApiDocsLayout extends DocsLayout {
       ).styles(color: Color('var(--docs-shell-accent)')),
       downContent([css('&').styles(display: Display.none)]),
     ]),
+    css('.docs .main-container main > div > aside.toc').styles(raw: {
+      'width': 'var(--docs-shell-toc-width) !important',
+      'max-width': 'var(--docs-shell-toc-width) !important',
+      'min-width': '0',
+      'justify-self': 'end',
+    }),
     downContent([css('.code-block button').styles(opacity: 1)]),
     css('.toc .toc-section', [
       css('&').styles(

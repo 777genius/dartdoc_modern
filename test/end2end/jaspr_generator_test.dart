@@ -973,6 +973,16 @@ void main() {
           content,
           contains("'border-left': '1px solid var(--docs-shell-border)'"),
         );
+        expect(content, contains("'max-width': 'none !important'"));
+        expect(
+          content,
+          contains("css('.main-container main > div').styles(raw: {"),
+        );
+        expect(content, contains("'padding-right': '0 !important'"));
+        expect(
+          content,
+          contains("'width': 'var(--docs-shell-toc-width) !important'"),
+        );
         expect(
           content,
           contains(
