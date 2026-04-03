@@ -998,8 +998,8 @@ void main() {
         expect(content, contains("css('ul ul > li').styles"));
         expect(content, contains("'ul ul .toc-link'"));
         expect(content, isNot(contains("css('.toc ul ul').styles(")));
-        expect(content, contains("'margin-left': '1rem'"));
-        expect(content, contains("'margin-left': '1.65rem'"));
+        expect(content, contains("'margin-left': '0.72rem'"));
+        expect(content, contains("'margin-left': '1.18rem'"));
         expect(content, isNot(contains("'table-layout': 'fixed'")));
         expect(
           content,
