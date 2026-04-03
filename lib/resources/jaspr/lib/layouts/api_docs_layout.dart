@@ -2105,8 +2105,11 @@ class ApiDocsLayout extends DocsLayout {
       ),
     ),
     css('.content pre code.hljs').styles(
-      color: Color('var(--docs-shell-shadow)'),
-      raw: {'display': 'block', 'background': 'transparent'},
+      raw: {
+        'display': 'block',
+        'background': 'transparent',
+        'color': 'inherit',
+      },
     ),
     css('.content pre .hljs-comment, .content pre .hljs-quote').styles(
       color: Color('var(--docs-shell-muted)'),
@@ -2126,16 +2129,16 @@ class ApiDocsLayout extends DocsLayout {
     ),
     css(
       '.content pre .hljs-string, .content pre .hljs-regexp, .content pre .hljs-link, .content pre .hljs-symbol, .content pre .hljs-bullet',
-    ).styles(
-      color: Color('var(--docs-shell-shadow)'),
-      raw: {
-        'color':
-            'color-mix(in srgb, var(--docs-shell-accent-strong) 74%, var(--docs-shell-shadow))',
-      },
-    ),
+    ).styles(raw: {
+      'color':
+          'color-mix(in srgb, var(--docs-shell-accent-strong) 66%, currentColor)',
+    }),
     css(
       '.content pre .hljs-number, .content pre .hljs-literal, .content pre .hljs-variable, .content pre .hljs-template-variable, .content pre .hljs-params, .content pre .hljs-attr, .content pre .hljs-operator, .content pre .hljs-punctuation',
-    ).styles(color: Color('var(--docs-shell-border-strong)')),
+    ).styles(raw: {
+      'color':
+          'color-mix(in srgb, currentColor 72%, var(--docs-shell-accent) 28%)',
+    }),
     css('.content pre .hljs-addition').styles(
       color: Color('var(--docs-shell-accent-strong)'),
       raw: {

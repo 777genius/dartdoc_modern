@@ -693,7 +693,7 @@ void main() {
         expect(
           content,
           contains(
-            'color-mix(in srgb, var(--docs-shell-accent-strong) 74%, var(--docs-shell-shadow))',
+            'color-mix(in srgb, var(--docs-shell-accent-strong) 66%, currentColor)',
           ),
         );
         expect(
