@@ -395,7 +395,7 @@ class ApiDocsLayout extends DocsLayout {
         gap: Gap.column(0.55.rem),
         padding: Padding.symmetric(vertical: 0.45.rem, horizontal: 0.75.rem),
         radius: BorderRadius.circular(0.8.rem),
-        color: Color('var(--docs-shell-accent)'),
+        color: Color('var(--docs-shell-muted)'),
         textDecoration: TextDecoration.none,
         fontWeight: FontWeight.w600,
         backgroundColor: Color('var(--docs-shell-surface)'),
@@ -423,6 +423,7 @@ class ApiDocsLayout extends DocsLayout {
       ),
       css('.action-btn:hover').styles(
         backgroundColor: Color('var(--docs-shell-accent-soft)'),
+        color: Color('var(--docs-shell-accent)'),
         border: Border.all(
           width: 1.px,
           color: Color('var(--docs-shell-border-strong)'),
@@ -431,6 +432,7 @@ class ApiDocsLayout extends DocsLayout {
       ),
       css('.action-btn-copy[data-copy-state="copied"]').styles(
         backgroundColor: Color('var(--docs-shell-accent-soft)'),
+        color: Color('var(--docs-shell-accent)'),
         border: Border.all(
           width: 1.px,
           color: Color('var(--docs-shell-border-strong)'),
@@ -440,18 +442,11 @@ class ApiDocsLayout extends DocsLayout {
         display: Display.inlineFlex,
         alignItems: AlignItems.center,
         justifyContent: JustifyContent.center,
-        minWidth: 1.55.rem,
-        height: 1.55.rem,
-        radius: BorderRadius.circular(0.45.rem),
-        fontSize: 0.74.rem,
-        fontWeight: FontWeight.w800,
-        color: Color('var(--docs-shell-accent)'),
-        backgroundColor: Color('var(--docs-shell-accent-soft)'),
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-border)'),
-        ),
-        raw: {'letter-spacing': '-0.04em'},
+        width: 1.3.rem,
+        minWidth: 1.3.rem,
+        height: 1.3.rem,
+        color: Color('currentColor'),
+        raw: {'line-height': '1'},
       ),
       css('.action-btn-icon-copy').styles(
         position: Position.relative(),
@@ -460,31 +455,47 @@ class ApiDocsLayout extends DocsLayout {
       ),
       css('.action-btn-icon-copy::before, .action-btn-icon-copy::after').styles(
         position: Position.absolute(),
-        width: 0.82.rem,
-        height: 0.82.rem,
-        radius: BorderRadius.circular(0.18.rem),
+        width: 0.72.rem,
+        height: 0.72.rem,
+        radius: BorderRadius.circular(0.16.rem),
         border: Border.all(width: 2.px, color: Color('currentColor')),
         backgroundColor: Color('transparent'),
         raw: {'content': '""', 'box-sizing': 'border-box'},
       ),
       css(
         '.action-btn-icon-copy::before',
-      ).styles(raw: {'transform': 'translate(-0.16rem, -0.16rem)'}),
+      ).styles(raw: {'transform': 'translate(-0.14rem, -0.14rem)'}),
       css(
         '.action-btn-icon-copy::after',
-      ).styles(raw: {'transform': 'translate(0.12rem, 0.12rem)'}),
+      ).styles(raw: {'transform': 'translate(0.14rem, 0.14rem)'}),
       css('.action-btn-icon-source').styles(
+        position: Position.relative(),
         backgroundColor: Color('transparent'),
         border: Border.unset,
-        raw: {'font-family': 'var(--content-code-font)'},
+      ),
+      css(
+        '.action-btn-icon-source::before, .action-btn-icon-source::after',
+      ).styles(
+        position: Position.absolute(),
+        width: 0.48.rem,
+        height: 0.48.rem,
+        border: Border.all(width: 2.px, color: Color('currentColor')),
+        backgroundColor: Color('transparent'),
+        raw: {
+          'content': '""',
+          'box-sizing': 'border-box',
+          'top': '0.23rem',
+          'border-right': '0',
+          'border-top': '0',
+        },
       ),
       css('.action-btn-icon-source::before').styles(
-        color: Color('currentColor'),
-        fontWeight: FontWeight.w800,
+        raw: {'left': '0.08rem', 'transform': 'rotate(45deg)'},
+      ),
+      css('.action-btn-icon-source::after').styles(
         raw: {
-          'content': '"<>"',
-          'font-size': '1rem',
-          'letter-spacing': '-0.08em',
+          'right': '0.08rem',
+          'transform': 'rotate(-135deg)',
         },
       ),
       css('.action-btn-label').styles(fontWeight: FontWeight.w700),
