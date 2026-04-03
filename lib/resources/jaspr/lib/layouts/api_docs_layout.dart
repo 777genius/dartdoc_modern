@@ -1862,8 +1862,8 @@ class ApiDocsLayout extends DocsLayout {
         },
       ),
       css('h3').styles(
-        margin: Margin.only(bottom: 0.45.rem),
-        fontSize: 0.76.rem,
+        margin: Margin.only(bottom: 0.28.rem),
+        fontSize: 0.72.rem,
         fontWeight: FontWeight.w800,
         textTransform: TextTransform.upperCase,
         color: Color('var(--docs-shell-muted)'),
@@ -1872,21 +1872,21 @@ class ApiDocsLayout extends DocsLayout {
       css('.toc-link').styles(
         display: Display.block,
         padding: Padding.only(
-          top: 0.18.rem,
+          top: 0.09.rem,
           right: Unit.zero,
-          bottom: 0.18.rem,
-          left: 0.42.rem,
+          bottom: 0.09.rem,
+          left: 0.28.rem,
         ),
         radius: BorderRadius.circular(Unit.zero),
         color: ContentColors.text,
         textDecoration: TextDecoration.none,
-        fontSize: 0.89.rem,
+        fontSize: 0.85.rem,
         transition: Transition(
           'color, opacity',
           duration: Duration(milliseconds: 150),
         ),
         raw: {
-          'line-height': '1.28',
+          'line-height': '1.16',
           'position': 'relative',
           'z-index': '1',
           'text-wrap': 'pretty',
@@ -1900,16 +1900,16 @@ class ApiDocsLayout extends DocsLayout {
         '.toc-link.active',
       ).styles(color: Color('var(--docs-shell-accent)'), raw: {'opacity': '1'}),
       css('ul ul').styles(
-        margin: Margin.only(top: 0.04.rem),
+        margin: Margin.only(top: 0.01.rem),
         padding: Padding.zero,
         border: Border.unset,
       ),
-      css('ul ul > li').styles(raw: {'margin-left': '0.72rem'}),
-      css('ul ul ul > li').styles(raw: {'margin-left': '1.18rem'}),
-      css('ul ul ul ul > li').styles(raw: {'margin-left': '1.64rem'}),
+      css('ul ul > li').styles(raw: {'margin-left': '0.52rem'}),
+      css('ul ul ul > li').styles(raw: {'margin-left': '0.86rem'}),
+      css('ul ul ul ul > li').styles(raw: {'margin-left': '1.2rem'}),
       css(
         'ul ul .toc-link',
-      ).styles(fontSize: 0.83.rem, color: Color('var(--docs-shell-muted)')),
+      ).styles(fontSize: 0.8.rem, color: Color('var(--docs-shell-muted)')),
       css(
         'ul ul .toc-link.active',
       ).styles(color: Color('var(--docs-shell-accent)')),
@@ -1926,7 +1926,7 @@ class ApiDocsLayout extends DocsLayout {
     downContent([css('.code-block button').styles(opacity: 1)]),
     css('.toc .toc-section', [
       css('&').styles(
-        padding: Padding.only(top: 0.08.rem, bottom: 0.08.rem),
+        padding: Padding.only(top: 0.02.rem, bottom: 0.02.rem),
         border: Border.unset,
       ),
       css('summary').styles(
@@ -1939,8 +1939,8 @@ class ApiDocsLayout extends DocsLayout {
       css('.toc-summary').styles(
         display: Display.flex,
         alignItems: AlignItems.center,
-        gap: Gap.column(0.2.rem),
-        padding: Padding.only(bottom: 0.02.rem),
+        gap: Gap.column(0.14.rem),
+        padding: Padding.zero,
       ),
       css('.toc-summary-chevron').styles(
         display: Display.inlineFlex,
@@ -1960,10 +1960,10 @@ class ApiDocsLayout extends DocsLayout {
       ),
       css('.toc-summary .toc-link').styles(
         padding: Padding.only(
-          top: 0.18.rem,
+          top: 0.09.rem,
           right: Unit.zero,
-          bottom: 0.18.rem,
-          left: 0.42.rem,
+          bottom: 0.09.rem,
+          left: 0.28.rem,
         ),
         raw: {'flex': '1 1 auto'},
       ),
