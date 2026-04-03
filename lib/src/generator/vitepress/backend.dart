@@ -41,7 +41,7 @@ const _apiStylesCss = '''
   border-radius: 8px;
   padding: 10px 14px;
   overflow-x: auto;
-  white-space: pre-line;
+  white-space: pre-wrap;
   overflow-wrap: break-word;
   margin: 0;
   font-family: var(--vp-font-family-mono);

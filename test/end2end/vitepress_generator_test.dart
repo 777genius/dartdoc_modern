@@ -182,7 +182,7 @@ void main() {
         );
         expect(content, contains('.member-signature'));
         expect(content, contains('.kw'));
-        expect(content, contains('pre-line'));
+        expect(content, contains('pre-wrap'));
         expect(content, contains('a.api-link'));
       });
 

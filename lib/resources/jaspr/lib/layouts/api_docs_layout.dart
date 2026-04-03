@@ -254,7 +254,8 @@ class ApiDocsLayout extends DocsLayout {
     final label = entry.text.trim();
     final anchorId = entry.id.trim();
     final children = [
-      for (final child in entry.children) ..._buildCollapsibleToc(child, baseUrl),
+      for (final child in entry.children)
+        ..._buildCollapsibleToc(child, baseUrl),
     ];
 
     if (label.isEmpty || anchorId.isEmpty) {
@@ -489,15 +490,12 @@ class ApiDocsLayout extends DocsLayout {
           'border-top': '0',
         },
       ),
-      css('.action-btn-icon-source::before').styles(
-        raw: {'left': '0.08rem', 'transform': 'rotate(45deg)'},
-      ),
-      css('.action-btn-icon-source::after').styles(
-        raw: {
-          'right': '0.08rem',
-          'transform': 'rotate(-135deg)',
-        },
-      ),
+      css(
+        '.action-btn-icon-source::before',
+      ).styles(raw: {'left': '0.08rem', 'transform': 'rotate(45deg)'}),
+      css(
+        '.action-btn-icon-source::after',
+      ).styles(raw: {'right': '0.08rem', 'transform': 'rotate(-135deg)'}),
       css('.action-btn-label').styles(fontWeight: FontWeight.w700),
       downCompact([
         css('.icon-action-btn').styles(width: 2.85.rem, height: 2.85.rem),
@@ -1391,11 +1389,13 @@ class ApiDocsLayout extends DocsLayout {
               'var(--docs-shell-main-pad-top) var(--docs-shell-main-pad-inline) var(--docs-shell-main-pad-bottom)',
         },
       ),
-      css('.main-container main > div').styles(raw: {
-        'padding-left': '2.5rem !important',
-        'padding-right': '0 !important',
-        'gap': '2.5rem !important',
-      }),
+      css('.main-container main > div').styles(
+        raw: {
+          'padding-left': '2.5rem !important',
+          'padding-right': '0 !important',
+          'gap': '2.5rem !important',
+        },
+      ),
       downWide([
         css('main > div').styles(
           raw: {
@@ -1665,12 +1665,14 @@ class ApiDocsLayout extends DocsLayout {
         ),
       ]),
     ]),
-    css('.docs .main-container main > div > .content-container').styles(raw: {
-      'width': '100%',
-      'max-width': 'none !important',
-      'padding-right': '0 !important',
-      'box-sizing': 'border-box',
-    }),
+    css('.docs .main-container main > div > .content-container').styles(
+      raw: {
+        'width': '100%',
+        'max-width': 'none !important',
+        'padding-right': '0 !important',
+        'box-sizing': 'border-box',
+      },
+    ),
     css('.content-header', [
       css('&').styles(
         margin: Margin.only(bottom: 2.rem),
@@ -1837,7 +1839,8 @@ class ApiDocsLayout extends DocsLayout {
           'pointer-events': 'none',
           'z-index': '0',
           'background': 'var(--docs-shell-accent)',
-          'box-shadow': '0 0 0 1px color-mix(in srgb, var(--docs-shell-accent) 18%, transparent)',
+          'box-shadow':
+              '0 0 0 1px color-mix(in srgb, var(--docs-shell-accent) 18%, transparent)',
           'transform': 'translate3d(0, 0, 0)',
           'transition':
               'transform 180ms cubic-bezier(.22, 1, .36, 1), width 180ms cubic-bezier(.22, 1, .36, 1), height 180ms cubic-bezier(.22, 1, .36, 1), opacity 120ms ease',
@@ -1879,10 +1882,9 @@ class ApiDocsLayout extends DocsLayout {
         color: Color('var(--docs-shell-accent-strong)'),
         raw: {'opacity': '1'},
       ),
-      css('.toc-link.active').styles(
-        color: Color('var(--docs-shell-accent)'),
-        raw: {'opacity': '1'},
-      ),
+      css(
+        '.toc-link.active',
+      ).styles(color: Color('var(--docs-shell-accent)'), raw: {'opacity': '1'}),
       css('ul ul').styles(
         margin: Margin.only(top: 0.18.rem),
         padding: Padding.zero,
@@ -1891,21 +1893,22 @@ class ApiDocsLayout extends DocsLayout {
       css('ul ul > li').styles(raw: {'margin-left': '1rem'}),
       css('ul ul ul > li').styles(raw: {'margin-left': '1.65rem'}),
       css('ul ul ul ul > li').styles(raw: {'margin-left': '2.3rem'}),
-      css('ul ul .toc-link').styles(
-        fontSize: 0.84.rem,
-        color: Color('var(--docs-shell-muted)'),
-      ),
-      css('ul ul .toc-link.active').styles(
-        color: Color('var(--docs-shell-accent)'),
-      ),
+      css(
+        'ul ul .toc-link',
+      ).styles(fontSize: 0.84.rem, color: Color('var(--docs-shell-muted)')),
+      css(
+        'ul ul .toc-link.active',
+      ).styles(color: Color('var(--docs-shell-accent)')),
       downContent([css('&').styles(display: Display.none)]),
     ]),
-    css('.docs .main-container main > div > aside.toc').styles(raw: {
-      'width': 'var(--docs-shell-toc-width) !important',
-      'max-width': 'var(--docs-shell-toc-width) !important',
-      'min-width': '0',
-      'justify-self': 'end',
-    }),
+    css('.docs .main-container main > div > aside.toc').styles(
+      raw: {
+        'width': 'var(--docs-shell-toc-width) !important',
+        'max-width': 'var(--docs-shell-toc-width) !important',
+        'min-width': '0',
+        'justify-self': 'end',
+      },
+    ),
     downContent([css('.code-block button').styles(opacity: 1)]),
     css('.toc .toc-section', [
       css('&').styles(
@@ -2101,7 +2104,7 @@ class ApiDocsLayout extends DocsLayout {
         color: Color('var(--docs-shell-shadow)'),
       ),
       raw: {
-        'white-space': 'pre-line',
+        'white-space': 'pre-wrap',
         'overflow-wrap': 'break-word',
         'font-family': 'var(--content-code-font)',
         'font-size': '0.92rem',

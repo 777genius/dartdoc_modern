@@ -47,7 +47,7 @@ const _apiStylesCss = '''
   border-radius: 10px;
   padding: 8px 12px;
   overflow-x: auto;
-  white-space: pre-line;
+  white-space: pre-wrap;
   overflow-wrap: break-word;
   margin: 0;
   font-family: var(--content-code-font);
@@ -1025,14 +1025,13 @@ class JasprGeneratorBackend extends GeneratorBackend {
       final anchorMap = anchorMapByRelativePath[relativePath];
       final jasprAnchors = jasprAnchorsByRelativePath[relativePath] ?? const {};
       final normalizedLegacy = _normalizeLegacyGuideAnchor(currentFragment);
-      final rewritten =
-          jasprAnchors.contains(currentFragment)
-              ? currentFragment
-              : jasprAnchors.contains(normalizedLegacy)
-              ? normalizedLegacy
-              : anchorMap?[currentFragment] ??
-                  anchorMap?[normalizedLegacy] ??
-                  currentFragment;
+      final rewritten = jasprAnchors.contains(currentFragment)
+          ? currentFragment
+          : jasprAnchors.contains(normalizedLegacy)
+          ? normalizedLegacy
+          : anchorMap?[currentFragment] ??
+                anchorMap?[normalizedLegacy] ??
+                currentFragment;
       return '#$rewritten';
     }
 
@@ -1083,9 +1082,9 @@ class JasprGeneratorBackend extends GeneratorBackend {
     final withoutUnderscore = trimmed.startsWith('_')
         ? trimmed.substring(1)
         : trimmed;
-    final numberedPrefix = RegExp(r'^(\d+(?:-\d+)+)(-.+)$').firstMatch(
-      withoutUnderscore,
-    );
+    final numberedPrefix = RegExp(
+      r'^(\d+(?:-\d+)+)(-.+)$',
+    ).firstMatch(withoutUnderscore);
     if (numberedPrefix == null) return withoutUnderscore;
 
     final compactNumber = numberedPrefix.group(1)!.replaceAll('-', '');

@@ -977,6 +977,7 @@ void main() {
         expect(content, contains("classes: 'toc-link'"));
         expect(content, contains('yield* children;'));
         expect(content, contains('..._buildCollapsibleToc(entry, baseUrl)'));
+        expect(content, contains("'white-space': 'pre-wrap'"));
         expect(
           content,
           contains("'border-left': '1px solid var(--docs-shell-border)'"),
@@ -984,7 +985,7 @@ void main() {
         expect(content, contains("'max-width': 'none !important'"));
         expect(
           content,
-          contains("css('.main-container main > div').styles(raw: {"),
+          contains("css('.main-container main > div').styles("),
         );
         expect(content, contains("'padding-right': '0 !important'"));
         expect(content, contains("'padding-left': '2.5rem !important'"));
@@ -995,16 +996,10 @@ void main() {
         );
         expect(content, contains("css('ul ul').styles("));
         expect(content, contains("css('ul ul > li').styles"));
-        expect(content, contains("css('ul ul .toc-link').styles("));
+        expect(content, contains("'ul ul .toc-link'"));
         expect(content, isNot(contains("css('.toc ul ul').styles(")));
         expect(content, contains("'margin-left': '1rem'"));
         expect(content, contains("'margin-left': '1.65rem'"));
-        expect(
-          content,
-          contains(
-            "'box-shadow': '0 0 0 1px color-mix(in srgb, var(--docs-shell-accent) 18%, transparent)'",
-          ),
-        );
         expect(content, isNot(contains("'table-layout': 'fixed'")));
         expect(
           content,

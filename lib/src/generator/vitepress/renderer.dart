@@ -10,6 +10,7 @@
 /// [VitePressDocProcessor] for documentation processing.
 library;
 
+import 'package:dart_style/dart_style.dart';
 import 'package:dartdoc_vitepress/src/comment_references/parser.dart'
     show operatorNames;
 import 'package:dartdoc_vitepress/src/element_type.dart';
@@ -22,6 +23,10 @@ import 'package:meta/meta.dart';
 
 export 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart'
     show isDuplicateSdkLibrary, isInternalSdkLibrary;
+
+final _dartSignatureFormatter = DartFormatter(
+  languageVersion: DartFormatter.latestLanguageVersion,
+);
 
 // ---------------------------------------------------------------------------
 // Generic name helpers (ADR-7).
@@ -944,9 +949,7 @@ String _renderTypeLinked(ElementType type, VitePressPathResolver paths) {
     buf.write(' <span class="type">Function</span>(');
     buf.write(_buildLinkedCallableParamList(type.parameters, paths));
     buf.write(')');
-    if (type.nullabilitySuffix.isNotEmpty) {
-      return '(${buf.toString()})${_htmlEsc(type.nullabilitySuffix)}';
-    }
+    buf.write(_htmlEsc(type.nullabilitySuffix));
     return buf.toString();
   }
 
@@ -1180,28 +1183,47 @@ String _buildLinkedCallableSignature(
   ModelElement element,
   VitePressPathResolver paths,
 ) {
-  final buf = StringBuffer();
+  final fallbackSignature = _buildLinkedCallableSignatureFallback(
+    element,
+    paths,
+  );
+  final placeholders = _SignaturePlaceholders();
+  final declaration = StringBuffer();
 
   if (element is Method) {
-    buf.write('${_renderTypeLinked(element.modelType.returnType, paths)} ');
+    declaration.write(
+      '${_renderTypePlaceholder(element.modelType.returnType, paths, placeholders)} ',
+    );
   } else if (element is ModelFunctionTyped) {
-    buf.write('${_renderTypeLinked(element.modelType.returnType, paths)} ');
+    declaration.write(
+      '${_renderTypePlaceholder(element.modelType.returnType, paths, placeholders)} ',
+    );
   }
 
-  buf.write(
-    '<span class="fn">${_htmlEsc(plainNameWithGenerics(element))}</span>',
+  declaration.write(
+    placeholders.token(
+      _signaturePlaceholderPrefixFn,
+      '<span class="fn">${_htmlEsc(plainNameWithGenerics(element))}</span>',
+      plainText: plainNameWithGenerics(element),
+    ),
   );
-
-  final prefixLength = _stripHtmlForLength(buf.toString());
-  buf.write(
-    _buildLinkedParameterSignature(
+  declaration.write(
+    _buildPlaceholderParameterSignature(
       element.parameters,
       paths,
-      prefixLength: prefixLength,
+      placeholders,
     ),
   );
 
-  return buf.toString();
+  final formatted = _formatLinkedMemberDeclaration(
+    declaration.toString(),
+    placeholders,
+    wrapperClassName: '_SignatureHost',
+  );
+  if (!_shouldKeepFormattedSignature(formatted, fallbackSignature)) {
+    return fallbackSignature;
+  }
+  return formatted;
 }
 
 /// Builds a linked constructor signature as HTML.
@@ -1209,23 +1231,374 @@ String _buildLinkedConstructorSignature(
   Constructor constructor,
   VitePressPathResolver paths,
 ) {
-  final buf = StringBuffer();
+  final fallbackSignature = _buildLinkedConstructorSignatureFallback(
+    constructor,
+    paths,
+  );
+  final placeholders = _SignaturePlaceholders();
+  final declaration = StringBuffer();
 
-  if (constructor.isConst) buf.write('<span class="kw">const</span> ');
-  if (constructor.isFactory) buf.write('<span class="kw">factory</span> ');
+  if (constructor.isConst) declaration.write('const ');
+  if (constructor.isFactory) declaration.write('factory ');
 
-  buf.write('<span class="fn">${_htmlEsc(constructor.displayName)}</span>');
+  declaration.write(
+    placeholders.token(
+      _signaturePlaceholderPrefixFn,
+      '<span class="fn">${_htmlEsc(constructor.displayName)}</span>',
+      plainText: constructor.displayName,
+    ),
+  );
+  declaration.write(
+    _buildPlaceholderParameterSignature(
+      constructor.parameters,
+      paths,
+      placeholders,
+    ),
+  );
 
-  final prefixLength = _stripHtmlForLength(buf.toString());
-  buf.write(
+  final formatted = _formatLinkedMemberDeclaration(
+    declaration.toString(),
+    placeholders,
+    wrapperClassName: constructor.enclosingElement.name,
+  );
+  if (!_shouldKeepFormattedSignature(formatted, fallbackSignature)) {
+    return fallbackSignature;
+  }
+  return formatted;
+}
+
+bool _shouldKeepFormattedSignature(String formatted, String fallback) {
+  if (formatted.contains('\n')) return true;
+  return _stripHtmlForLength(formatted) <= _stripHtmlForLength(fallback);
+}
+
+String _buildLinkedCallableSignatureFallback(
+  ModelElement element,
+  VitePressPathResolver paths,
+) {
+  final buffer = StringBuffer();
+  var prefixLength = 0;
+
+  if (element is Method) {
+    final returnType = _renderTypeLinked(element.modelType.returnType, paths);
+    buffer.write('$returnType ');
+    prefixLength += _stripHtmlForLength(returnType) + 1;
+  } else if (element is ModelFunctionTyped) {
+    final returnType = _renderTypeLinked(element.modelType.returnType, paths);
+    buffer.write('$returnType ');
+    prefixLength += _stripHtmlForLength(returnType) + 1;
+  }
+
+  final fnName = plainNameWithGenerics(element);
+  buffer.write('<span class="fn">${_htmlEsc(fnName)}</span>');
+  prefixLength += fnName.length;
+  buffer.write(
+    _buildLinkedParameterSignature(
+      element.parameters,
+      paths,
+      prefixLength: prefixLength,
+    ),
+  );
+  return buffer.toString();
+}
+
+String _buildLinkedConstructorSignatureFallback(
+  Constructor constructor,
+  VitePressPathResolver paths,
+) {
+  final buffer = StringBuffer();
+  var prefixLength = 0;
+
+  if (constructor.isConst) {
+    buffer.write('<span class="kw">const</span> ');
+    prefixLength += 'const '.length;
+  }
+  if (constructor.isFactory) {
+    buffer.write('<span class="kw">factory</span> ');
+    prefixLength += 'factory '.length;
+  }
+
+  final displayName = constructor.displayName;
+  buffer.write('<span class="fn">${_htmlEsc(displayName)}</span>');
+  prefixLength += displayName.length;
+  buffer.write(
     _buildLinkedParameterSignature(
       constructor.parameters,
       paths,
       prefixLength: prefixLength,
     ),
   );
+  return buffer.toString();
+}
 
-  return buf.toString();
+const _signaturePlaceholderPrefixType = '_t';
+const _signaturePlaceholderPrefixParam = '_p';
+const _signaturePlaceholderPrefixFn = '_f';
+
+final class _SignaturePlaceholders {
+  final Map<String, String> replacements = <String, String>{};
+  int _nextId = 0;
+
+  String token(String prefix, String html, {required String plainText}) {
+    final id = _nextId++;
+    final baseKey = '${prefix}_$id';
+    final targetLength = plainText.length.clamp(baseKey.length, 120);
+    final fillerLength = targetLength - baseKey.length;
+    final key = fillerLength > 0 ? '$baseKey${'x' * fillerLength}' : baseKey;
+    replacements[key] = html;
+    return key;
+  }
+}
+
+String _renderTypePlaceholder(
+  ElementType type,
+  VitePressPathResolver paths,
+  _SignaturePlaceholders placeholders,
+) {
+  if (type is DefinedElementType) {
+    final url = paths.relativeUrlFor(type.modelElement);
+    final token = placeholders.token(
+      _signaturePlaceholderPrefixType,
+      url != null
+          ? '<a href="$url" class="type-link">${_htmlEsc(type.name)}</a>'
+          : '<span class="type">${_htmlEsc(type.name)}</span>',
+      plainText: type.name,
+    );
+    final buffer = StringBuffer()..write(token);
+    final typeArguments = type.typeArguments.toList();
+    if (typeArguments.isNotEmpty) {
+      buffer.write('<');
+      buffer.write(
+        typeArguments
+            .map((arg) => _renderTypePlaceholder(arg, paths, placeholders))
+            .join(', '),
+      );
+      buffer.write('>');
+    }
+    buffer.write(type.nullabilitySuffix);
+    return buffer.toString();
+  }
+
+  if (type is Callable) {
+    final buffer = StringBuffer()
+      ..write(_renderTypePlaceholder(type.returnType, paths, placeholders))
+      ..write(' Function(')
+      ..write(
+        _buildPlaceholderCallableParamList(
+          type.parameters,
+          paths,
+          placeholders,
+        ),
+      )
+      ..write(')');
+    buffer.write(type.nullabilitySuffix);
+    return buffer.toString();
+  }
+
+  return placeholders.token(
+    _signaturePlaceholderPrefixType,
+    '<span class="type">${_htmlEsc(type.nameWithGenericsPlain)}</span>',
+    plainText: type.nameWithGenericsPlain,
+  );
+}
+
+String _buildPlaceholderCallableParamList(
+  List<Parameter> parameters,
+  VitePressPathResolver paths,
+  _SignaturePlaceholders placeholders,
+) {
+  if (parameters.isEmpty) return '';
+
+  final parts = <String>[];
+  var inOptionalPositional = false;
+  var inNamed = false;
+
+  for (final param in parameters) {
+    final buffer = StringBuffer();
+
+    if (param.isOptionalPositional && !inOptionalPositional) {
+      inOptionalPositional = true;
+      buffer.write('[');
+    } else if (param.isNamed && !inNamed) {
+      inNamed = true;
+      buffer.write('{');
+    }
+
+    if (param.isRequiredNamed) {
+      buffer.write('required ');
+    }
+
+    buffer.write(_renderTypePlaceholder(param.modelType, paths, placeholders));
+    if (param.name.isNotEmpty) {
+      buffer.write(
+        ' ${placeholders.token(_signaturePlaceholderPrefixParam, '<span class="param">${_htmlEsc(param.name)}</span>', plainText: param.name)}',
+      );
+    }
+
+    final defaultValue = param.defaultValue;
+    if (defaultValue != null && defaultValue.isNotEmpty) {
+      buffer.write(' = ${defaultValue.trim()}');
+    }
+
+    parts.add(buffer.toString());
+  }
+
+  var result = parts.join(', ');
+  if (inOptionalPositional) result += ']';
+  if (inNamed) result += '}';
+  return result;
+}
+
+String _buildPlaceholderParameterSignature(
+  List<Parameter> parameters,
+  VitePressPathResolver paths,
+  _SignaturePlaceholders placeholders,
+) {
+  if (parameters.isEmpty) return '()';
+
+  final requiredPositional = <String>[];
+  final optionalPositional = <String>[];
+  final named = <String>[];
+
+  for (final param in parameters) {
+    final buffer = StringBuffer();
+
+    if (param.isRequiredNamed) {
+      buffer.write('required ');
+    }
+
+    buffer.write(_renderTypePlaceholder(param.modelType, paths, placeholders));
+    if (param.name.isNotEmpty) {
+      buffer.write(
+        ' ${placeholders.token(_signaturePlaceholderPrefixParam, '<span class="param">${_htmlEsc(param.name)}</span>', plainText: param.name)}',
+      );
+    }
+
+    final defaultValue = param.defaultValue;
+    if (defaultValue != null && defaultValue.isNotEmpty) {
+      buffer.write(' = ${defaultValue.trim()}');
+    }
+
+    if (param.isNamed) {
+      named.add(buffer.toString());
+    } else if (param.isOptionalPositional) {
+      optionalPositional.add(buffer.toString());
+    } else {
+      requiredPositional.add(buffer.toString());
+    }
+  }
+
+  final all = <String>[...requiredPositional];
+  if (optionalPositional.isNotEmpty) {
+    all.add('[${optionalPositional.join(', ')}]');
+  } else if (named.isNotEmpty) {
+    all.add('{${named.join(', ')}}');
+  }
+
+  return '(${all.join(', ')})';
+}
+
+String _formatLinkedMemberDeclaration(
+  String declaration,
+  _SignaturePlaceholders placeholders, {
+  required String wrapperClassName,
+}) {
+  final formattedDeclaration = _formatMemberDeclaration(
+    declaration,
+    wrapperClassName: wrapperClassName,
+  );
+  return _replaceSignaturePlaceholders(
+    formattedDeclaration,
+    placeholders.replacements,
+  );
+}
+
+String _formatMemberDeclaration(
+  String declaration, {
+  required String wrapperClassName,
+}) {
+  final wrapped = 'abstract class $wrapperClassName {\n  $declaration;\n}\n';
+  try {
+    final formatted = _dartSignatureFormatter.format(wrapped);
+    final lines = formatted.split('\n');
+    if (lines.length < 3) return declaration;
+    final bodyLines = lines.sublist(1, lines.length - 2);
+    return bodyLines
+        .map((line) => line.startsWith('  ') ? line.substring(2) : line)
+        .join('\n')
+        .trimRight();
+  } on FormatterException {
+    return declaration;
+  }
+}
+
+String _replaceSignaturePlaceholders(
+  String formatted,
+  Map<String, String> replacements,
+) {
+  if (replacements.isEmpty) return _renderRawSignatureSegment(formatted);
+
+  final keys = replacements.keys.toList()
+    ..sort((a, b) => b.length.compareTo(a.length));
+  final pattern = RegExp(keys.map(RegExp.escape).join('|'));
+  final buffer = StringBuffer();
+  var lastIndex = 0;
+
+  for (final match in pattern.allMatches(formatted)) {
+    if (match.start > lastIndex) {
+      buffer.write(
+        _renderRawSignatureSegment(formatted.substring(lastIndex, match.start)),
+      );
+    }
+    buffer.write(replacements[match.group(0)!]);
+    lastIndex = match.end;
+  }
+
+  if (lastIndex < formatted.length) {
+    buffer.write(_renderRawSignatureSegment(formatted.substring(lastIndex)));
+  }
+
+  return buffer.toString();
+}
+
+String _renderRawSignatureSegment(String raw) {
+  if (raw.isEmpty) return '';
+
+  final buffer = StringBuffer();
+  final tokenPattern = RegExp(
+    r'''-?\d+(?:\.\d+)?|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\b(?:const|factory|required|get|set|Function|true|false|null)\b''',
+    multiLine: true,
+  );
+  var lastIndex = 0;
+
+  for (final match in tokenPattern.allMatches(raw)) {
+    if (match.start > lastIndex) {
+      buffer.write(_htmlEsc(raw.substring(lastIndex, match.start)));
+    }
+    final token = match.group(0)!;
+    if (token == 'Function') {
+      buffer.write('<span class="type">Function</span>');
+    } else if (token == 'true' || token == 'false' || token == 'null') {
+      buffer.write('<span class="kw">${_htmlEsc(token)}</span>');
+    } else if (token == 'const' ||
+        token == 'factory' ||
+        token == 'required' ||
+        token == 'get' ||
+        token == 'set') {
+      buffer.write('<span class="kw">${_htmlEsc(token)}</span>');
+    } else if (token.startsWith('"') || token.startsWith("'")) {
+      buffer.write('<span class="str-lit">${_htmlEsc(token)}</span>');
+    } else {
+      buffer.write('<span class="num-lit">${_htmlEsc(token)}</span>');
+    }
+    lastIndex = match.end;
+  }
+
+  if (lastIndex < raw.length) {
+    buffer.write(_htmlEsc(raw.substring(lastIndex)));
+  }
+
+  return buffer.toString();
 }
 
 /// Builds a linked field/property signature as HTML.
