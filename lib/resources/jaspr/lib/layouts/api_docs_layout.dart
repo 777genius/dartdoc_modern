@@ -1175,7 +1175,10 @@ class ApiDocsLayout extends DocsLayout {
       css('strong').styles(fontWeight: FontWeight.w700),
     ]),
     css('.code-block', [
-      css('&').styles(position: Position.relative()),
+      css('&').styles(
+        position: Position.relative(),
+        raw: {'isolation': 'isolate'},
+      ),
       css('button').styles(
         position: Position.absolute(top: 0.75.rem, right: 0.75.rem),
         display: Display.inlineFlex,
@@ -1192,7 +1195,7 @@ class ApiDocsLayout extends DocsLayout {
         backgroundColor: Color('var(--docs-shell-code-button-bg)'),
         color: Color('var(--docs-shell-code-button-fg)'),
         opacity: 0,
-        zIndex: ZIndex(10),
+        zIndex: ZIndex(1),
         cursor: Cursor.pointer,
         transition: Transition(
           'opacity',
