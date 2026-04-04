@@ -1038,8 +1038,11 @@ void main() {
         expect(content, contains("css('.toc-link::before').styles("));
         expect(content, contains("css('.toc-link.active::before').styles("));
         expect(content, isNot(contains("css('.toc ul ul').styles(")));
-        expect(content, contains("'margin-left': '0.52rem'"));
-        expect(content, contains("'margin-left': '0.86rem'"));
+        expect(
+          content,
+          contains("css('ul ul ul').styles(padding: Padding.only(left: 0.78.rem))"),
+        );
+        expect(content, contains("css('.toc-summary .toc-link').styles("));
         expect(content, isNot(contains("'table-layout': 'fixed'")));
         expect(
           content,
