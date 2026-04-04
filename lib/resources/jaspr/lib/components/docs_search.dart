@@ -462,7 +462,22 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
     try {
       await _ensurePagesReady();
       _scheduleSectionsWarmup();
-      _scheduleSearch(initialValue, immediate: true);
+      if (!mounted || !_isOpen) return;
+
+      final activeQuery = _query.trim();
+      if (activeQuery.isNotEmpty) {
+        _scheduleSearch(activeQuery, immediate: true);
+        return;
+      }
+
+      if (initialValue.trim().isNotEmpty) {
+        _scheduleSearch(initialValue, immediate: true);
+        return;
+      }
+
+      setState(() {
+        _status = _defaultStatus;
+      });
     } catch (_) {
       if (!mounted) return;
       setState(() {
