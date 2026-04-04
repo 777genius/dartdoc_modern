@@ -70,6 +70,56 @@ jobs:
           cp -R "$JASPR_OUTPUT_DIR/build/jaspr/." publish/
           cp -R docs-site/.vitepress/dist/. publish/vitepress/
 
+          create_redirect() {
+            local output_path="$1"
+            local target_path="$2"
+            mkdir -p "$(dirname "$output_path")"
+            cat > "$output_path" <<EOF
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <meta http-equiv="refresh" content="0; url=$target_path">
+              <link rel="canonical" href="$target_path">
+              <script>window.location.replace("$target_path");</script>
+              <title>Redirecting...</title>
+            </head>
+            <body>
+              <p>Redirecting to <a href="$target_path">$target_path</a>.</p>
+            </body>
+          </html>
+          EOF
+          }
+
+          if [ -d "$JASPR_OUTPUT_DIR/web/guide" ]; then
+            (
+              cd "$JASPR_OUTPUT_DIR/web"
+              find guide -name '*.html' -type f -exec cp --parents {} "$GITHUB_WORKSPACE/publish" \;
+            )
+          fi
+
+          if [ ! -f publish/guide/index.html ]; then
+            create_redirect "publish/guide/index.html" "${VITEPRESS_BASE_PATH}guide/"
+          fi
+
+          while IFS= read -r relative_path; do
+            [ -n "$relative_path" ] || continue
+
+            html_output="publish/guide/$relative_path"
+            if [ ! -f "$html_output" ]; then
+              create_redirect "$html_output" "${VITEPRESS_BASE_PATH}guide/$relative_path"
+            fi
+
+            clean_path="${relative_path%.html}"
+            clean_output="publish/guide/$clean_path/index.html"
+            if [ ! -f "$clean_output" ]; then
+              create_redirect "$clean_output" "${VITEPRESS_BASE_PATH}guide/$relative_path"
+            fi
+          done < <(
+            cd docs-site/.vitepress/dist/guide
+            find . -name '*.html' -type f | sed 's#^\./##' | sort
+          )
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
