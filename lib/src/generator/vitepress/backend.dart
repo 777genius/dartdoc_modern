@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
+import 'package:dartdoc_vitepress/src/generator/core/legacy_guide_redirects.dart';
 import 'package:dartdoc_vitepress/src/generator/generator.dart';
 import 'package:dartdoc_vitepress/src/generator/generator_backend.dart';
 import 'package:dartdoc_vitepress/src/generator/template_data.dart';
@@ -305,6 +306,13 @@ class VitePressGeneratorBackend extends GeneratorBackend {
     // Write guide files through _writeMarkdown for incremental checks.
     for (final entry in guideEntries) {
       _writeMarkdown(entry.relativePath, entry.content);
+      final legacyRedirect = legacyGuideRedirectFor(entry.relativePath);
+      if (legacyRedirect != null) {
+        _writeGeneratedFile(
+          legacyRedirect.outputPath,
+          renderLegacyGuideRedirectHtml(legacyRedirect.redirectTarget),
+        );
+      }
     }
 
     var guideSidebarContent = guideGen.generateSidebar(
@@ -660,6 +668,10 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   /// skips the write if identical, incrementing [_unchangedCount] instead
   /// of [_writtenCount].
   void _writeMarkdown(String filePath, String content) {
+    _writeGeneratedFile(filePath, content);
+  }
+
+  void _writeGeneratedFile(String filePath, String content) {
     _expectedFiles.add(filePath);
 
     // Incremental generation: skip write if content is unchanged.
@@ -698,8 +710,53 @@ class VitePressGeneratorBackend extends GeneratorBackend {
     _deletedCount = 0;
     _deleteStaleInDir('api', '.md');
     _deleteStaleInDir('guide', '.md', null, true);
+    _deleteStaleLegacyGuideRedirects('guide');
     _deleteStaleInDir(p.join('.vitepress', 'generated'), '.ts');
     _deleteStaleInDir(p.join('.vitepress', 'generated'), '.css');
+  }
+
+  void _deleteStaleLegacyGuideRedirects(
+    String dirRelative, [
+    Set<String>? visited,
+  ]) {
+    visited ??= {};
+    final pathContext = resourceProvider.pathContext;
+    final dirPath = pathContext.normalize(
+      pathContext.join(_outputPath, dirRelative),
+    );
+    if (!visited.add(dirPath)) return;
+
+    final folder = resourceProvider.getFolder(dirPath);
+    if (!folder.exists) return;
+
+    for (final child in folder.getChildren()) {
+      if (child is Folder) {
+        final relativePath = pathContext.relative(
+          child.path,
+          from: _outputPath,
+        );
+        _deleteStaleLegacyGuideRedirects(relativePath, visited);
+        continue;
+      }
+
+      final relativePath = p.posix.joinAll(
+        pathContext.split(pathContext.relative(child.path, from: _outputPath)),
+      );
+      if (!relativePath.endsWith('.html') ||
+          _expectedFiles.contains(relativePath)) {
+        continue;
+      }
+
+      try {
+        final file = child as File;
+        if (isLegacyGuideRedirectHtml(file.readAsStringSync())) {
+          file.delete();
+          _deletedCount++;
+        }
+      } on FileSystemException {
+        // If we can't read or delete the file, skip it silently.
+      }
+    }
   }
 
   /// Recursively scans [dirRelative] under [_outputPath] and deletes files

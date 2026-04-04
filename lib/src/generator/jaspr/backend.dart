@@ -10,6 +10,7 @@ import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
 import 'package:dartdoc_vitepress/src/generator/core/guide_collection.dart'
     as guide_core;
 import 'package:dartdoc_vitepress/src/generator/core/html_sanitizer.dart';
+import 'package:dartdoc_vitepress/src/generator/core/legacy_guide_redirects.dart';
 import 'package:dartdoc_vitepress/src/generator/generator.dart';
 import 'package:dartdoc_vitepress/src/generator/generator_backend.dart';
 import 'package:dartdoc_vitepress/src/generator/jaspr/docs.dart';
@@ -326,6 +327,13 @@ class JasprGeneratorBackend extends GeneratorBackend {
     // Write guide files through _writeMarkdown for incremental checks.
     for (final entry in rewrittenGuideEntries) {
       _writeMarkdown(entry.relativePath, entry.content);
+      final legacyRedirect = legacyGuideRedirectFor(entry.relativePath);
+      if (legacyRedirect != null) {
+        _writeGeneratedFile(
+          p.posix.join('web', legacyRedirect.outputPath),
+          renderLegacyGuideRedirectHtml(legacyRedirect.redirectTarget),
+        );
+      }
     }
 
     _writeMarkdown(
@@ -1368,17 +1376,22 @@ class JasprGeneratorBackend extends GeneratorBackend {
   void _writeMarkdown(String filePath, String content) {
     // Jaspr expects markdown content in content/ directory.
     final jasprPath = _remapToContentDir(filePath);
-    _expectedFiles.add(jasprPath);
 
     // Strip VitePress-specific syntax from markdown content.
     if (jasprPath.endsWith('.md')) {
       content = stripVitePressSyntaxForJaspr(content);
     }
 
+    _writeGeneratedFile(jasprPath, content);
+  }
+
+  void _writeGeneratedFile(String filePath, String content) {
+    _expectedFiles.add(filePath);
+
     // Incremental generation: skip write if content is unchanged.
     // Normalize the path: filePath uses POSIX separators (/) but on Windows
     // _outputPath uses backslashes. p.normalize resolves mixed separators.
-    final fullPath = p.normalize(p.join(_outputPath, jasprPath));
+    final fullPath = p.normalize(p.join(_outputPath, filePath));
     final existingFile = resourceProvider.getFile(fullPath);
     if (existingFile.exists) {
       try {
@@ -1391,7 +1404,7 @@ class JasprGeneratorBackend extends GeneratorBackend {
       }
     }
 
-    writer.write(jasprPath, content);
+    writer.write(filePath, content);
     _writtenCount++;
   }
 
@@ -1412,9 +1425,54 @@ class JasprGeneratorBackend extends GeneratorBackend {
     _deletedCount = 0;
     _deleteStaleInDir('content/api', '.md');
     _deleteStaleInDir('content/guide', '.md', null, true);
+    _deleteStaleLegacyGuideRedirects('web/guide');
     _deleteStaleInDir(p.join('lib', 'generated'), '.dart');
     _deleteStaleInDir(p.join('web', 'generated'), '.css');
     _deleteStaleInDir(p.join('web', 'generated'), '.json');
+  }
+
+  void _deleteStaleLegacyGuideRedirects(
+    String dirRelative, [
+    Set<String>? visited,
+  ]) {
+    visited ??= {};
+    final pathContext = resourceProvider.pathContext;
+    final dirPath = pathContext.normalize(
+      pathContext.join(_outputPath, dirRelative),
+    );
+    if (!visited.add(dirPath)) return;
+
+    final folder = resourceProvider.getFolder(dirPath);
+    if (!folder.exists) return;
+
+    for (final child in folder.getChildren()) {
+      if (child is Folder) {
+        final relativePath = pathContext.relative(
+          child.path,
+          from: _outputPath,
+        );
+        _deleteStaleLegacyGuideRedirects(relativePath, visited);
+        continue;
+      }
+
+      final relativePath = p.posix.joinAll(
+        pathContext.split(pathContext.relative(child.path, from: _outputPath)),
+      );
+      if (!relativePath.endsWith('.html') ||
+          _expectedFiles.contains(relativePath)) {
+        continue;
+      }
+
+      try {
+        final file = child as File;
+        if (isLegacyGuideRedirectHtml(file.readAsStringSync())) {
+          file.delete();
+          _deletedCount++;
+        }
+      } on FileSystemException {
+        // If we can't read or delete the file, skip it silently.
+      }
+    }
   }
 
   /// Recursively scans [dirRelative] under [_outputPath] and deletes files

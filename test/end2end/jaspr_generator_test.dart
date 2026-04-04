@@ -1298,6 +1298,44 @@ void main() {
         expect(_outputExists(outDir, 'content/guide/ui/showcase.md'), isTrue);
       });
 
+      test('legacy guide html redirects are emitted for static hosting', () {
+        expect(_outputExists(outDir, 'web/guide/getting-started.html'), isTrue);
+        expect(
+          _outputExists(outDir, 'web/guide/advanced/configuration.html'),
+          isTrue,
+        );
+
+        final rootRedirect = _readOutput(
+          outDir,
+          'web/guide/getting-started.html',
+        );
+        expect(
+          rootRedirect,
+          contains(
+            '<meta http-equiv="refresh" content="0; url=getting-started">',
+          ),
+        );
+        expect(
+          rootRedirect,
+          contains('window.location.replace("getting-started");'),
+        );
+
+        final nestedRedirect = _readOutput(
+          outDir,
+          'web/guide/advanced/configuration.html',
+        );
+        expect(
+          nestedRedirect,
+          contains(
+            '<meta http-equiv="refresh" content="0; url=configuration">',
+          ),
+        );
+        expect(
+          nestedRedirect,
+          contains('window.location.replace("configuration");'),
+        );
+      });
+
       test('guide sidebar is generated as Dart data', () {
         final content = _readOutput(outDir, 'lib/generated/guide_sidebar.dart');
         expect(content, contains('const guideSidebarGroups = <SidebarGroup>['));

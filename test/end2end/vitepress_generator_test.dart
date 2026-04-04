@@ -1370,6 +1370,41 @@ void main() {
         expect(_outputExists(outDir, 'guide/ui/showcase.md'), isTrue);
       });
 
+      test('legacy guide html redirects are emitted for clean URLs', () {
+        expect(_outputExists(outDir, 'guide/getting-started.html'), isTrue);
+        expect(
+          _outputExists(outDir, 'guide/advanced/configuration.html'),
+          isTrue,
+        );
+
+        final rootRedirect = _readOutput(outDir, 'guide/getting-started.html');
+        expect(
+          rootRedirect,
+          contains(
+            '<meta http-equiv="refresh" content="0; url=getting-started">',
+          ),
+        );
+        expect(
+          rootRedirect,
+          contains('window.location.replace("getting-started");'),
+        );
+
+        final nestedRedirect = _readOutput(
+          outDir,
+          'guide/advanced/configuration.html',
+        );
+        expect(
+          nestedRedirect,
+          contains(
+            '<meta http-equiv="refresh" content="0; url=configuration">',
+          ),
+        );
+        expect(
+          nestedRedirect,
+          contains('window.location.replace("configuration");'),
+        );
+      });
+
       test('guide-sidebar.ts contains guide entries', () {
         var content = _readOutput(
           outDir,
