@@ -125,13 +125,6 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
       }
     }
 
-    final detailsNodes = web.document.querySelectorAll('.toc details');
-    for (var index = 0; index < detailsNodes.length; index++) {
-      final node = detailsNodes.item(index);
-      if (node is! web.HTMLDetailsElement) continue;
-      node.open = node.querySelector('.toc-link.active') != null;
-    }
-
     _openAncestorDetails(active.link);
     _ensureLinkVisible(active.link, active.id);
   }

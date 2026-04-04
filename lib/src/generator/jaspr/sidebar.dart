@@ -4,6 +4,7 @@
 
 import 'package:dartdoc_vitepress/src/generator/core/guide_collection.dart'
     as guide_core;
+import 'package:dartdoc_vitepress/src/generator/jaspr/dart_string.dart';
 import 'package:dartdoc_vitepress/src/generator/jaspr/paths.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
 
@@ -137,7 +138,7 @@ class JasprSidebarGenerator {
     if (items.isEmpty) return;
     buf.writeln('  SidebarGroup(');
     if (title != null) {
-      buf.writeln("    title: '${_esc(title)}',");
+      buf.writeln("    title: '${escapeDartSingleQuotedString(title)}',");
     }
     buf.writeln('    items: [');
     for (final item in items) {
@@ -150,9 +151,9 @@ class JasprSidebarGenerator {
   void _writeItem(StringBuffer buf, _SidebarNode item, {required int indent}) {
     final pad = ' ' * indent;
     buf.writeln('${pad}SidebarItem(');
-    buf.writeln("$pad  text: '${_esc(item.text)}',");
+    buf.writeln("$pad  text: '${escapeDartSingleQuotedString(item.text)}',");
     if (item.link case final link?) {
-      buf.writeln("$pad  link: '${_esc(link)}',");
+      buf.writeln("$pad  link: '${escapeDartSingleQuotedString(link)}',");
     }
     if (item.collapsed) {
       buf.writeln('$pad  collapsed: true,');
@@ -310,9 +311,6 @@ class JasprSidebarGenerator {
     }
     return result;
   }
-
-  static String _esc(String s) =>
-      s.replaceAll(r'\', r'\\').replaceAll("'", r"\'");
 
   static bool _hasApiElements(Library library) {
     return library.publicClassesSorted.isNotEmpty ||

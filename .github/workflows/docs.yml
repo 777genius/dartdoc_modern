@@ -14,6 +14,11 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+env:
+  PAGES_BASE_PATH: /${{ github.event.repository.name }}
+  VITEPRESS_BASE_PATH: /${{ github.event.repository.name }}/vitepress/
+  JASPR_OUTPUT_DIR: jaspr-site
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,22 +38,42 @@ jobs:
       - name: Get dependencies
         run: dart pub get
 
+      - name: Generate Jaspr docs
+        run: dart run bin/dartdoc_vitepress.dart --format jaspr --output $JASPR_OUTPUT_DIR
+
+      - name: Install Jaspr dependencies
+        run: dart pub get
+        working-directory: ${{ env.JASPR_OUTPUT_DIR }}
+
+      - name: Build Jaspr site
+        run: dart run jaspr_cli:jaspr build --dart-define DOCS_BASE_PATH=${{ env.PAGES_BASE_PATH }}
+        working-directory: ${{ env.JASPR_OUTPUT_DIR }}
+
       # Use the local dartdoc (dogfooding!)
-      - name: Generate API docs
+      - name: Generate VitePress docs
         run: dart run bin/dartdoc_vitepress.dart --format vitepress --output docs-site
 
-      - name: Install dependencies
+      - name: Install VitePress dependencies
         run: npm ci
         working-directory: docs-site
 
       - name: Build VitePress site
         run: npx vitepress build
         working-directory: docs-site
+        env:
+          DOCS_BASE_PATH: ${{ env.VITEPRESS_BASE_PATH }}
+
+      - name: Assemble Pages artifact
+        run: |
+          rm -rf publish
+          mkdir -p publish/vitepress
+          cp -R "$JASPR_OUTPUT_DIR/build/jaspr/." publish/
+          cp -R docs-site/.vitepress/dist/. publish/vitepress/
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs-site/.vitepress/dist
+          path: publish
 
   deploy:
     needs: build

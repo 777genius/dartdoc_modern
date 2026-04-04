@@ -848,6 +848,9 @@ void main() {
         expect(content, contains('defineConfig'));
         expect(content, contains('apiSidebar'));
         expect(content, contains('guideSidebar'));
+        expect(content, contains("process.env.DOCS_BASE_PATH ?? '/'"));
+        expect(content, contains('base: docsBasePath'));
+        expect(content, contains("withDocsBasePath('/favicon.svg')"));
       });
 
       test('config.ts has socialLinks from repository URL', () {

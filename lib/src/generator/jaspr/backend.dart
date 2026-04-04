@@ -13,6 +13,7 @@ import 'package:dartdoc_vitepress/src/generator/core/html_sanitizer.dart';
 import 'package:dartdoc_vitepress/src/generator/core/legacy_guide_redirects.dart';
 import 'package:dartdoc_vitepress/src/generator/generator.dart';
 import 'package:dartdoc_vitepress/src/generator/generator_backend.dart';
+import 'package:dartdoc_vitepress/src/generator/jaspr/dart_string.dart';
 import 'package:dartdoc_vitepress/src/generator/jaspr/docs.dart';
 import 'package:dartdoc_vitepress/src/generator/jaspr/paths.dart'
     show JasprPathResolver, isDuplicateSdkLibrary, isInternalSdkLibrary;
@@ -119,6 +120,43 @@ const _apiStylesCss = '''
 }
 .dark .member-signature .num-lit {
   color: #79B8FF;
+}
+
+.docs-badge {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: 0.55rem;
+  padding: 0.26rem 0.82rem;
+  border-radius: 999px;
+  font-size: 0.72em;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.docs-badge-info {
+  background: #eef0f4;
+  color: #5f6773;
+}
+.docs-badge-tip {
+  background: #e9defe;
+  color: #6b4ff7;
+}
+.docs-badge-warning {
+  background: #fff0cf;
+  color: #966300;
+}
+.dark .docs-badge-info {
+  background: #3f3f46;
+  color: #d4d4d8;
+}
+.dark .docs-badge-tip {
+  background: #3f2f70;
+  color: #d5c6ff;
+}
+.dark .docs-badge-warning {
+  background: #5f4416;
+  color: #fde68a;
 }
 
 /* API auto-linker — inline code that links to API docs */
@@ -697,10 +735,10 @@ class JasprGeneratorBackend extends GeneratorBackend {
           if (dirCompare != 0) return dirCompare;
           return a.relativePath.compareTo(b.relativePath);
         });
-      buffer.writeln("  '${_dartEscape(symbolName)}': [");
+      buffer.writeln("  '${escapeDartSingleQuotedString(symbolName)}': [");
       for (final entry in entries) {
         buffer.writeln(
-          "    ApiSymbolEntry(href: '${_dartEscape(entry.href)}', relativePath: '${_dartEscape(entry.relativePath)}', apiDir: '${_dartEscape(entry.apiDir)}'),",
+          "    ApiSymbolEntry(href: '${escapeDartSingleQuotedString(entry.href)}', relativePath: '${escapeDartSingleQuotedString(entry.relativePath)}', apiDir: '${escapeDartSingleQuotedString(entry.apiDir)}'),",
         );
       }
       buffer.writeln('  ],');
@@ -741,13 +779,11 @@ class JasprGeneratorBackend extends GeneratorBackend {
 
   /// Writes markdown content to the output directory (incremental).
   // Pre-compiled patterns for VitePress syntax stripping.
-  static final _vitepressHeadingAnchor = RegExp(
-    r'^(#{1,6}[^\n]*?)\s+\{#[\w-]+\}[ \t]*$',
-  );
   static final _vitepressFrontmatterLine = RegExp(r'^(editLink|prev|next):.*$');
   static final _apiBreadcrumbLine = RegExp(r'^\s*<ApiBreadcrumb\s*/?>\s*$');
   static final _tocMarkerLine = RegExp(r'^\s*\[\[toc\]\]\s*$');
-  static final _badgeComponent = RegExp(r'\s*<Badge\b[^>]*/>\s*');
+  static final _badgeComponent = RegExp(r'<Badge\b[^>]*/>');
+  static final _badgeAttribute = RegExp(r'([A-Za-z][A-Za-z0-9_-]*)="([^"]*)"');
   static final _codeFenceLine = RegExp(r'^\s*(```|~~~)');
   static final _codeImportLine = RegExp(r'^<<<\s+(.+?)\s*$');
   static final _codeImportSpec = RegExp(
@@ -803,13 +839,9 @@ class JasprGeneratorBackend extends GeneratorBackend {
         }
 
         if (_badgeComponent.hasMatch(line)) {
-          line = line.replaceAll(_badgeComponent, ' ').trimRight();
+          line = _replaceVitePressBadges(line);
         }
 
-        final match = _vitepressHeadingAnchor.firstMatch(line);
-        if (match != null) {
-          line = match.group(1)!;
-        }
       }
 
       output.add(line);
@@ -826,6 +858,39 @@ class JasprGeneratorBackend extends GeneratorBackend {
     result = result.replaceAll(RegExp(r'\n{3,}'), '\n\n');
     return result;
   }
+
+  static String _replaceVitePressBadges(String line) {
+    return line
+        .replaceAllMapped(_badgeComponent, _renderJasprBadge)
+        .replaceAll(RegExp(r' {2,}'), ' ')
+        .trimRight();
+  }
+
+  static String _renderJasprBadge(Match match) {
+    final attrs = <String, String>{};
+    for (final attr in _badgeAttribute.allMatches(match.group(0)!)) {
+      attrs[attr.group(1)!] = attr.group(2)!;
+    }
+
+    final text = attrs['text']?.trim();
+    if (text == null || text.isEmpty) {
+      return '';
+    }
+
+    final type = switch (attrs['type']?.trim()) {
+      'tip' => 'tip',
+      'warning' => 'warning',
+      _ => 'info',
+    };
+
+    return '<span class="docs-badge docs-badge-$type">${_escapeInlineHtml(text)}</span>';
+  }
+
+  static String _escapeInlineHtml(String value) => value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;');
 
   String _expandCodeImports(String content, String sourcePath) {
     final sourceDir = p.dirname(sourcePath);
@@ -1165,7 +1230,7 @@ class JasprGeneratorBackend extends GeneratorBackend {
   }
 
   static List<String> _extractJasprHeadingAnchors(String content) {
-    final document = md.Document(extensionSet: md.ExtensionSet.gitHubWeb);
+    final document = _buildJasprMarkdownDocument();
     final nodes = document.parse(content);
     final anchors = <String>[];
 
@@ -1189,6 +1254,16 @@ class JasprGeneratorBackend extends GeneratorBackend {
     }
 
     return anchors;
+  }
+
+  static md.Document _buildJasprMarkdownDocument() {
+    return md.Document(
+      blockSyntaxes: const [
+        md.HeaderWithIdSyntax(),
+        md.SetextHeaderWithIdSyntax(),
+      ],
+      extensionSet: md.ExtensionSet.gitHubWeb,
+    );
   }
 
   Map<String, List<_ApiSymbolEntry>> _collectApiSymbolEntries(
@@ -1358,9 +1433,6 @@ class JasprGeneratorBackend extends GeneratorBackend {
     final parts = relativePath.split('/');
     return parts.length >= 2 ? parts[1] : '';
   }
-
-  String _dartEscape(String value) =>
-      value.replaceAll(r'\', r'\\').replaceAll("'", r"\'");
 
   String _escapeHtml(String value) => value
       .replaceAll('&', '&amp;')

@@ -274,9 +274,9 @@ class ApiDocsLayout extends DocsLayout {
       details(classes: 'toc-section', [
         summary(classes: 'toc-summary', [
           span(
-            classes: 'toc-summary-chevron',
+            classes: 'outline-section-toggle toc-summary-chevron',
             attributes: {'aria-hidden': 'true'},
-            [Component.text('›')],
+            [Component.text('▸')],
           ),
           DocsNavLink(
             to: '$baseUrl#$anchorId',
@@ -424,8 +424,8 @@ class ApiDocsLayout extends DocsLayout {
       ),
       css('.icon-action-btn').styles(
         justifyContent: JustifyContent.center,
-        width: 3.1.rem,
-        height: 3.1.rem,
+        width: 1.55.rem,
+        height: 1.55.rem,
         padding: Padding.zero,
       ),
       css('.action-btn:hover').styles(
@@ -449,9 +449,9 @@ class ApiDocsLayout extends DocsLayout {
         display: Display.inlineFlex,
         alignItems: AlignItems.center,
         justifyContent: JustifyContent.center,
-        width: 1.3.rem,
-        minWidth: 1.3.rem,
-        height: 1.3.rem,
+        width: 0.65.rem,
+        minWidth: 0.65.rem,
+        height: 0.65.rem,
         color: Color('currentColor'),
         raw: {'line-height': '1'},
       ),
@@ -462,19 +462,19 @@ class ApiDocsLayout extends DocsLayout {
       ),
       css('.action-btn-icon-copy::before, .action-btn-icon-copy::after').styles(
         position: Position.absolute(),
-        width: 0.72.rem,
-        height: 0.72.rem,
-        radius: BorderRadius.circular(0.16.rem),
-        border: Border.all(width: 2.px, color: Color('currentColor')),
+        width: 0.36.rem,
+        height: 0.36.rem,
+        radius: BorderRadius.circular(0.08.rem),
+        border: Border.all(width: 1.px, color: Color('currentColor')),
         backgroundColor: Color('transparent'),
         raw: {'content': '""', 'box-sizing': 'border-box'},
       ),
       css(
         '.action-btn-icon-copy::before',
-      ).styles(raw: {'transform': 'translate(-0.14rem, -0.14rem)'}),
+      ).styles(raw: {'transform': 'translate(-0.07rem, -0.07rem)'}),
       css(
         '.action-btn-icon-copy::after',
-      ).styles(raw: {'transform': 'translate(0.14rem, 0.14rem)'}),
+      ).styles(raw: {'transform': 'translate(0.07rem, 0.07rem)'}),
       css('.action-btn-icon-source').styles(
         position: Position.relative(),
         backgroundColor: Color('transparent'),
@@ -484,9 +484,9 @@ class ApiDocsLayout extends DocsLayout {
         '.action-btn-icon-source::before, .action-btn-icon-source::after',
       ).styles(
         position: Position.absolute(),
-        width: 0.5.rem,
-        height: 0.5.rem,
-        border: Border.all(width: 2.px, color: Color('currentColor')),
+        width: 0.25.rem,
+        height: 0.25.rem,
+        border: Border.all(width: 1.px, color: Color('currentColor')),
         backgroundColor: Color('transparent'),
         raw: {
           'content': '""',
@@ -498,17 +498,17 @@ class ApiDocsLayout extends DocsLayout {
         },
       ),
       css('.action-btn-icon-source::before').styles(
-        raw: {'left': '0.1rem', 'transform': 'translateY(-50%) rotate(45deg)'},
+        raw: {'left': '0.05rem', 'transform': 'translateY(-50%) rotate(45deg)'},
       ),
       css('.action-btn-icon-source::after').styles(
         raw: {
-          'right': '0.1rem',
+          'right': '0.05rem',
           'transform': 'translateY(-50%) rotate(-135deg)',
         },
       ),
       css('.action-btn-label').styles(fontWeight: FontWeight.w700),
       downCompact([
-        css('.icon-action-btn').styles(width: 2.85.rem, height: 2.85.rem),
+        css('.icon-action-btn').styles(width: 1.425.rem, height: 1.425.rem),
       ]),
     ]),
     css('.header-search-shell', [
@@ -1890,19 +1890,32 @@ class ApiDocsLayout extends DocsLayout {
         color: Color('var(--docs-shell-accent-strong)'),
         raw: {'opacity': '1'},
       ),
+      css('.toc-link:focus-visible').styles(
+        radius: BorderRadius.circular(0.45.rem),
+        raw: {
+          'outline': '2px solid var(--docs-shell-accent)',
+          'outline-offset': '2px',
+        },
+      ),
       css('.toc-link:visited').styles(color: ContentColors.text),
       css(
         '.toc-link.active',
-      ).styles(color: Color('var(--docs-shell-accent)'), raw: {'opacity': '1'}),
+      ).styles(
+        color: Color('var(--docs-shell-accent)'),
+        fontWeight: FontWeight.w600,
+        raw: {'opacity': '1'},
+      ),
       css('.toc-link.active::before').styles(opacity: 1),
       css('ul ul').styles(
         margin: Margin.only(top: 0.01.rem),
-        padding: Padding.zero,
+        padding: Padding.only(left: 1.rem),
         border: Border.unset,
       ),
-      css('ul ul > li').styles(raw: {'margin-left': '0.52rem'}),
-      css('ul ul ul > li').styles(raw: {'margin-left': '0.86rem'}),
-      css('ul ul ul ul > li').styles(raw: {'margin-left': '1.2rem'}),
+      css('ul ul ul').styles(padding: Padding.only(left: 0.78.rem)),
+      css('ul ul ul ul').styles(padding: Padding.only(left: 0.78.rem)),
+      css('ul ul > li').styles(raw: {'margin-left': '0'}),
+      css('ul ul ul > li').styles(raw: {'margin-left': '0'}),
+      css('ul ul ul ul > li').styles(raw: {'margin-left': '0'}),
       css(
         'ul ul .toc-link',
       ).styles(fontSize: 0.8.rem, color: Color('var(--docs-shell-muted)')),
@@ -1928,41 +1941,52 @@ class ApiDocsLayout extends DocsLayout {
         padding: Padding.only(top: 0.02.rem, bottom: 0.02.rem),
         border: Border.unset,
       ),
+      css('> summary').styles(display: Display.block),
       css('summary').styles(
         padding: Padding.zero,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w500,
         listStyle: ListStyle.none,
         cursor: Cursor.pointer,
       ),
       css('summary::-webkit-details-marker').styles(display: Display.none),
       css('.toc-summary').styles(
         display: Display.flex,
-        alignItems: AlignItems.center,
-        gap: Gap.column(0.14.rem),
+        alignItems: AlignItems.baseline,
+        gap: Gap.column(0.1.rem),
         padding: Padding.zero,
+        raw: {'width': '100%'},
       ),
-      css('.toc-summary-chevron').styles(
+      css('.outline-section-toggle').styles(
         display: Display.inlineFlex,
         alignItems: AlignItems.center,
         justifyContent: JustifyContent.center,
-        width: 0.8.rem,
+        width: 0.875.rem,
         color: Color('var(--docs-shell-muted)'),
         transition: Transition(
           'transform, color',
           duration: Duration(milliseconds: 150),
         ),
-        raw: {'flex': '0 0 auto', 'font-size': '0.9rem', 'line-height': '1'},
+        raw: {
+          'flex': '0 0 auto',
+          'font-size': '11px',
+          'line-height': '1',
+          'user-select': 'none',
+        },
+      ),
+      css('summary:hover .outline-section-toggle').styles(
+        color: Color('var(--docs-shell-accent)'),
       ),
       css('&[open] .toc-summary-chevron').styles(
         color: Color('var(--docs-shell-accent)'),
         raw: {'transform': 'rotate(90deg)'},
       ),
+      css('> ul').styles(raw: {'width': '100%'}),
       css('.toc-summary .toc-link').styles(
         padding: Padding.only(
           top: 0.09.rem,
           right: Unit.zero,
           bottom: 0.09.rem,
-          left: 0.28.rem,
+          left: 0.08.rem,
         ),
         raw: {'flex': '1 1 auto'},
       ),

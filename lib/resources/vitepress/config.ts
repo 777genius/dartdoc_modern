@@ -5,11 +5,33 @@ import { dartpadPlugin } from './theme/plugins/dartpad'
 import { apiLinkerPlugin } from './theme/plugins/api-linker'
 // import llmstxt from 'vitepress-plugin-llms'
 
+function normalizeDocsBasePath(raw = process.env.DOCS_BASE_PATH ?? '/'): string {
+  const trimmed = raw.trim()
+  if (!trimmed || trimmed === '/') return '/'
+
+  let normalized = trimmed
+  if (!normalized.startsWith('/')) {
+    normalized = `/${normalized}`
+  }
+  if (!normalized.endsWith('/')) {
+    normalized = `${normalized}/`
+  }
+  return normalized
+}
+
+function withDocsBasePath(path: string): string {
+  const normalizedPath = path.replace(/^\/+/, '')
+  return `${docsBasePath}${normalizedPath}`
+}
+
+const docsBasePath = normalizeDocsBasePath()
+
 export default defineConfig({
   title: '{{packageName}} API',
   description: 'API documentation for {{packageName}}',
+  base: docsBasePath,
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: withDocsBasePath('/favicon.svg') }],
   ],
   srcExclude: ['CLAUDE.md', 'AGENTS.md'],
   // Cross-references to SDK types (dart:core, dart:collection) produce

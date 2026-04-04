@@ -19,6 +19,7 @@ import 'docs_base.dart';
 import 'components/mermaid_diagram.dart';
 import 'extensions/api_linker_extension.dart';
 import 'extensions/base_path_link_extension.dart';
+import 'extensions/explicit_heading_ids_extension.dart';
 import 'generated/api_sidebar.dart' as api;
 import 'generated/guide_sidebar.dart' as guide;
 import 'layouts/api_docs_layout.dart';
@@ -37,9 +38,10 @@ Component buildDocsApp({
 
   return ContentApp(
     templateEngine: templateEngine,
-    parsers: [MarkdownParser()],
+    parsers: const [MarkdownParser()],
     extensions: [
       const ApiLinkerExtension(),
+      const ExplicitHeadingIdsExtension(),
       HeadingAnchorsExtension(),
       TableOfContentsExtension(),
       const BasePathLinkExtension(),

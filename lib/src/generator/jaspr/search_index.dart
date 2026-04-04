@@ -279,6 +279,9 @@ class _ParsedPage {
 
   static final _frontmatterField = RegExp(r'^([A-Za-z][\w-]*):\s*(.*)$');
   static final _heading = RegExp(r'^(#{1,6})\s+(.*?)\s*$');
+  static final _explicitHeadingAnchor = RegExp(
+    r'\s+\{#([A-Za-z0-9:_\-.]+)\}\s*$',
+  );
   static final _fence = RegExp(r'^\s*(```|~~~)');
 
   static _ParsedPage parse(String relativePath, String markdown) {
@@ -304,7 +307,11 @@ class _ParsedPage {
       final headingMatch = !inFence ? _heading.firstMatch(line) : null;
       if (headingMatch != null) {
         final level = headingMatch.group(1)!.length;
-        final headingText = _normalizeText(headingMatch.group(2)!);
+        final rawHeading = headingMatch.group(2)!.trim();
+        final explicitAnchor = _explicitHeadingAnchor.firstMatch(rawHeading);
+        final headingText = _normalizeText(
+          rawHeading.replaceFirst(_explicitHeadingAnchor, ''),
+        );
         if (headingText.isEmpty) continue;
 
         if (level == 1) {
@@ -314,7 +321,10 @@ class _ParsedPage {
         if (currentSection != null) {
           sections.add(currentSection.finish());
         }
-        currentSection = _SectionBuffer(headingText);
+        currentSection = _SectionBuffer(
+          headingText,
+          anchor: explicitAnchor?.group(1),
+        );
         continue;
       }
 
@@ -418,9 +428,10 @@ class _ParsedPage {
 }
 
 class _SectionBuffer {
-  _SectionBuffer(this.heading);
+  _SectionBuffer(this.heading, {this.anchor});
 
   final String heading;
+  final String? anchor;
   final StringBuffer _buffer = StringBuffer();
 
   void addLine(String line) {
@@ -430,7 +441,7 @@ class _SectionBuffer {
   _ParsedSection finish() {
     return _ParsedSection(
       heading: heading,
-      anchor: sanitizeAnchor(heading),
+      anchor: anchor ?? sanitizeAnchor(heading),
       text: _normalizeText(_buffer.toString()),
     );
   }

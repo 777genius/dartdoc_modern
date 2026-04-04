@@ -441,6 +441,11 @@ void main() {
         expect(app, contains("text: 'API Reference',"));
         expect(app, contains('const DocsSearchShell()'));
         expect(app, contains('const DocsThemeToggle()'));
+        expect(
+          app,
+          contains("import 'extensions/explicit_heading_ids_extension.dart';"),
+        );
+        expect(app, contains('const ExplicitHeadingIdsExtension(),'));
         expect(app, contains('sidebar: DocsSidebar('));
         expect(app, contains('DocsSidebarGroup('));
         expect(app, contains('DocsSidebarItem('));
@@ -1238,6 +1243,38 @@ void main() {
         expect(content, isNot(contains('[[toc]]')));
       });
 
+      test('API pages preserve explicit section and member anchors', () {
+        final content = _readOutput(outDir, 'content/api/fake/LongFirstLine.md');
+        expect(content, contains('{#section-constructors}'));
+        expect(content, contains('{#prop-hashcode}'));
+        expect(content, contains('{#operator-equals}'));
+      });
+
+      test('API pages keep Jaspr-renderable member badges', () {
+        final content = _readOutput(
+          outDir,
+          'content/api/fake/ClassWithUnusualProperties.md',
+        );
+        expect(
+          content,
+          contains(
+            '<span class="docs-badge docs-badge-tip">no setter</span>',
+          ),
+        );
+      });
+
+      test('API signature links stay root-aware for Jaspr routing', () {
+        final content = _readOutput(
+          outDir,
+          'content/api/fake/ClassWithUnusualProperties.md',
+        );
+        expect(
+          content,
+          contains('href="/api/fake/ImplicitProperties" class="type-link"'),
+        );
+        expect(content, contains('href="/api/fake/Cool" class="type-link"'));
+      });
+
       test('members stay inline and no member subdirectory is created', () {
         expect(_dirExists(outDir, 'content/api/ex/Apple'), isFalse);
       });
@@ -1251,6 +1288,12 @@ void main() {
         final content = _readOutput(outDir, 'content/api/fake/SpecialList.md');
         expect(content, contains(r'### operator \[\]()'));
         expect(content, contains(r'### operator \[\]=()'));
+      });
+
+      test('search index keeps explicit anchors for API member deep links', () {
+        final sections = _readOutput(outDir, 'web/generated/search_sections.json');
+        expect(sections, contains('"prop-hashcode"'));
+        expect(sections, contains('"operator-equals"'));
       });
 
       test(

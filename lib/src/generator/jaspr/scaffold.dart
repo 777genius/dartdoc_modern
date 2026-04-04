@@ -407,6 +407,16 @@ class JasprInitGenerator {
     );
     _writeTemplateIfAbsent(
       templateDir: templateDir,
+      templateFile: p.join(
+        'lib',
+        'extensions',
+        'explicit_heading_ids_extension.dart',
+      ),
+      outputFile: 'lib/extensions/explicit_heading_ids_extension.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
       templateFile: p.join('lib', 'layouts', 'api_docs_layout.dart'),
       outputFile: 'lib/layouts/api_docs_layout.dart',
       placeholders: placeholders,

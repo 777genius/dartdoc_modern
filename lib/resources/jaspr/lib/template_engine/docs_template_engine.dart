@@ -3,8 +3,9 @@ import 'package:jaspr_content/src/template_engine/template_engine.dart';
 
 class DocsTemplateEngine extends TemplateEngine {
   static final _codeFenceLine = RegExp(r'^\s*(```|~~~)');
-  static final _containerStart =
-      RegExp(r'^:::(info|warning|tip|danger|details)\s*(.*)$');
+  static final _containerStart = RegExp(
+    r'^:::(info|note|important|warning|caution|tip|danger|details)\s*(.*)$',
+  );
 
   @override
   Future<void> render(Page page, List<Page> pages) async {
@@ -78,8 +79,11 @@ class DocsTemplateEngine extends TemplateEngine {
 
     switch (kind) {
       case 'info':
+      case 'note':
+      case 'important':
         return _renderCallout('Info', title, trimmedBody);
       case 'warning':
+      case 'caution':
         return _renderCallout('Warning', title, trimmedBody);
       case 'tip':
         return _renderCallout('Success', title, trimmedBody);
@@ -87,10 +91,7 @@ class DocsTemplateEngine extends TemplateEngine {
         return _renderCallout('Error', title, trimmedBody);
       case 'details':
         final summaryText = title.isEmpty ? 'Details' : _escapeHtml(title);
-        final parts = <String>[
-          '<details>',
-          '<summary>$summaryText</summary>',
-        ];
+        final parts = <String>['<details>', '<summary>$summaryText</summary>'];
         if (trimmedBody.isNotEmpty) {
           parts
             ..add('')
@@ -105,18 +106,38 @@ class DocsTemplateEngine extends TemplateEngine {
   }
 
   String _renderCallout(String tag, String title, String body) {
-    final heading = title.isEmpty ? tag : title;
-    final parts = <String>['> **$heading**'];
+    final parts = <String>['<$tag>'];
+    final trimmedTitle = title.trim();
 
-    if (body.isNotEmpty) {
-      parts.add('>');
-      for (final line in body.split('\n')) {
-        parts.add(line.isEmpty ? '>' : '> $line');
-      }
+    if (trimmedTitle.isNotEmpty) {
+      parts
+        ..add('')
+        ..add('**${_escapeMarkdownInline(trimmedTitle)}**');
     }
 
+    if (body.isNotEmpty) {
+      parts
+        ..add('')
+        ..add(body);
+    }
+
+    if (parts.length == 1) {
+      parts.add('');
+    }
+
+    parts
+      ..add('')
+      ..add('</$tag>');
     return parts.join('\n');
   }
+
+  String _escapeMarkdownInline(String value) => value
+      .replaceAll(r'\', r'\\')
+      .replaceAll('*', r'\*')
+      .replaceAll('_', r'\_')
+      .replaceAll('[', r'\[')
+      .replaceAll(']', r'\]')
+      .replaceAll('`', r'\`');
 
   String _escapeHtml(String value) => value
       .replaceAll('&', '&amp;')

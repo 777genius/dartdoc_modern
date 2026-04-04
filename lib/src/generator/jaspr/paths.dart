@@ -6,7 +6,6 @@ import 'package:dartdoc_vitepress/src/generator/core/path_utils.dart'
     as path_utils;
 import 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart';
 import 'package:dartdoc_vitepress/src/model/model.dart';
-import 'package:path/path.dart' as p;
 
 export 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart'
     show VitePressPathResolver, isDuplicateSdkLibrary, isInternalSdkLibrary;
@@ -38,11 +37,7 @@ class JasprPathResolver extends VitePressPathResolver {
   }
 
   @override
-  String? relativeUrlFor(Documentable element) {
-    final url = urlFor(element);
-    if (url == null) return null;
-    return p.posix.relative(url, from: '/');
-  }
+  String? relativeUrlFor(Documentable element) => urlFor(element);
 
   static String sanitizeFileName(String name) {
     return path_utils.sanitizeFileName(name);
