@@ -1,12 +1,11 @@
 ---
-internal: true
+sidebar_position: 6
 ---
 
 # **Dart Documentation Comments Specification**
 Version: 1.0.0
 
-[TOC]
-
+[[toc]]
 ## **1\. Introduction**
 
 ### **1.1. Purpose**
@@ -471,8 +470,6 @@ The following elements are "leaf" nodes. If an Identifier resolves to one of the
 * **Namespace**: Empty.
 * **Explanation**: A function or method element is a leaf node. While functions have parameters and type parameters, these are not accessible as a namespace using dot notation.
 * **Example**: If `myFunction<T>(int param)` is a top-level function, references like `[myFunction.param]` or `[myFunction.T]` are invalid.
-
-###
 
 *Case 4: Variable, Field, or Formal Parameter*
 

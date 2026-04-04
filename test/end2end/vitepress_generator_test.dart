@@ -196,6 +196,25 @@ void main() {
         expect(_outputExists(outDir, '.vitepress/config.ts'), isTrue);
         expect(_outputExists(outDir, 'index.md'), isTrue);
         expect(_outputExists(outDir, 'guide/index.md'), isTrue);
+        expect(
+          _outputExists(outDir, 'guide/package-maintainer-recipes.md'),
+          isTrue,
+        );
+        expect(_outputExists(outDir, 'guide/jaspr-vs-vitepress.md'), isTrue);
+        expect(_outputExists(outDir, 'guide/dartpad-embeds.md'), isTrue);
+        expect(_outputExists(outDir, 'guide/jaspr-deployment.md'), isTrue);
+        expect(
+          _outputExists(outDir, 'guide/jaspr-launch-readiness.md'),
+          isTrue,
+        );
+        expect(_outputExists(outDir, 'guide/directives.md'), isTrue);
+        expect(
+          _outputExists(
+            outDir,
+            'guide/dart_documentation_comment_specification.md',
+          ),
+          isTrue,
+        );
       });
 
       test('DartPad component is scaffolded', () {

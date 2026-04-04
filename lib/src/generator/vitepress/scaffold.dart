@@ -34,7 +34,8 @@ class VitePressInitGenerator {
   final String outputPath;
 
   /// Package URI prefix for VitePress template files.
-  static const _templatePrefix = 'package:dartdoc_vitepress/resources/vitepress';
+  static const _templatePrefix =
+      'package:dartdoc_vitepress/resources/vitepress';
 
   VitePressInitGenerator({
     required this.writer,
@@ -57,8 +58,9 @@ class VitePressInitGenerator {
       '{{socialLinks}}': buildSocialLinks(repositoryUrl),
     };
 
-    final templateDir =
-        (await resourceProvider.getResourceFolder(_templatePrefix)).path;
+    final templateDir = (await resourceProvider.getResourceFolder(
+      _templatePrefix,
+    )).path;
 
     _writeTemplateIfAbsent(
       templateDir: templateDir,
@@ -82,6 +84,48 @@ class VitePressInitGenerator {
       templateDir: templateDir,
       templateFile: 'guide-index.md',
       outputFile: 'guide/index.md',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: 'guide-package-maintainer-recipes.md',
+      outputFile: 'guide/package-maintainer-recipes.md',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: 'guide-jaspr-vs-vitepress.md',
+      outputFile: 'guide/jaspr-vs-vitepress.md',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: 'guide-dartpad-embeds.md',
+      outputFile: 'guide/dartpad-embeds.md',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: 'guide-jaspr-deployment.md',
+      outputFile: 'guide/jaspr-deployment.md',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: 'guide-jaspr-launch-readiness.md',
+      outputFile: 'guide/jaspr-launch-readiness.md',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: 'guide-directives.md',
+      outputFile: 'guide/directives.md',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: 'guide-dart_documentation_comment_specification.md',
+      outputFile: 'guide/dart_documentation_comment_specification.md',
       placeholders: placeholders,
     );
     _writeTemplateIfAbsent(
@@ -173,12 +217,14 @@ class VitePressInitGenerator {
     // writer's duplicate-file detection would trigger an assertion.
     _writeFileToDisk(
       outputFile: '.vitepress/generated/guide-sidebar.ts',
-      content: "import type { DefaultTheme } from 'vitepress'\n\n"
+      content:
+          "import type { DefaultTheme } from 'vitepress'\n\n"
           'export const guideSidebar: DefaultTheme.Sidebar = {}\n',
     );
     _writeFileToDisk(
       outputFile: '.vitepress/generated/api-sidebar.ts',
-      content: "import type { DefaultTheme } from 'vitepress'\n\n"
+      content:
+          "import type { DefaultTheme } from 'vitepress'\n\n"
           'export const apiSidebar: DefaultTheme.Sidebar = {}\n',
     );
     _writeFileToDisk(
@@ -217,10 +263,7 @@ class VitePressInitGenerator {
   /// Writes [content] directly to disk (bypassing [writer]) only if the file
   /// doesn't exist. Use this for stub files that will be overwritten by the
   /// main generation pass to avoid writer duplicate-file assertions.
-  void _writeFileToDisk({
-    required String outputFile,
-    required String content,
-  }) {
+  void _writeFileToDisk({required String outputFile, required String content}) {
     final fullOutputPath = p.normalize(p.join(outputPath, outputFile));
     final existingFile = resourceProvider.getFile(fullOutputPath);
     if (existingFile.exists) return;
@@ -243,8 +286,9 @@ class VitePressInitGenerator {
   /// Idempotent: does nothing if the import already exists or if the file
   /// doesn't exist yet (it will be created by `_writeTemplateIfAbsent`).
   void _patchIndexTsImport() {
-    final indexTsPath =
-        p.normalize(p.join(outputPath, '.vitepress', 'theme', 'index.ts'));
+    final indexTsPath = p.normalize(
+      p.join(outputPath, '.vitepress', 'theme', 'index.ts'),
+    );
     final file = resourceProvider.getFile(indexTsPath);
     if (!file.exists) return;
 
