@@ -1,4 +1,4 @@
-# dartdoc-vitepress
+# dartdoc_modern
 
 > Fork of [dart-lang/dartdoc](https://github.com/dart-lang/dartdoc) with modern docs backends for generating polished API documentation as either a VitePress site or a Jaspr content site instead of default HTML.
 
@@ -10,6 +10,10 @@
 
 This project is already good enough to show publicly and collect feedback from real Dart and Flutter package maintainers.
 
+Live docs:
+- [VitePress version](https://777genius.github.io/dartdoc_modern/vitepress/)
+- [Jaspr version](https://777genius.github.io/dartdoc_modern/jaspr/)
+
 ## Why This Exists
 
 Default `dartdoc` HTML is useful, but many teams want a documentation site that feels more like a modern product docs experience:
@@ -19,11 +23,11 @@ Default `dartdoc` HTML is useful, but many teams want a documentation site that 
 - theming that does not feel like an afterthought
 - a scaffold they can actually extend
 
-`dartdoc-vitepress` keeps `dartdoc`'s analyzer-driven API model and adds multiple output backends on top of it.
+`dartdoc_modern` keeps `dartdoc`'s analyzer-driven API model and adds multiple output backends on top of it.
 
 ## What Is Different From dartdoc?
 
-| Feature | dartdoc | dartdoc-vitepress |
+| Feature | dartdoc | dartdoc_modern |
 |---|---|---|
 | Output format | Static HTML | `--format html|vitepress|jaspr` |
 | Search | Built-in (basic) | VitePress local search, Jaspr staged local search |
@@ -56,14 +60,15 @@ That message is stronger and more credible than pretending one output replaces t
 If you want to use the tool as a normal package consumer:
 
 ```bash
-dart pub global activate dartdoc_vitepress
+dart pub global activate dartdoc_modern
 ```
 
 This package exposes both:
-- `dartdoc_vitepress`
+- `dartdoc_modern`
+- `dartdoc_vitepress` (legacy alias)
 - `dartdoc`
 
-For public examples and support requests, prefer `dartdoc_vitepress` in docs and snippets so it is obvious that the multi-backend fork is being used.
+For public examples and support requests, prefer `dartdoc_modern` in docs and snippets so it is obvious that the multi-backend fork is being used.
 
 ## Quick Start
 
@@ -71,10 +76,10 @@ For public examples and support requests, prefer `dartdoc_vitepress` in docs and
 
 ```bash
 # Generate VitePress docs
-dartdoc_vitepress --format vitepress --output docs-site
+dartdoc_modern --format vitepress --output docs-site
 
 # Generate Jaspr docs
-dartdoc_vitepress --format jaspr --output docs-site
+dartdoc_modern --format jaspr --output docs-site
 ```
 
 ### Package Maintainer Recipes
@@ -84,7 +89,7 @@ Choose one of these two practical flows.
 #### VitePress Recipe
 
 ```bash
-dartdoc_vitepress --format vitepress --output docs-site
+dartdoc_modern --format vitepress --output docs-site
 cd docs-site
 npm install
 npx vitepress build
@@ -96,7 +101,7 @@ Deploy:
 #### Jaspr Recipe
 
 ```bash
-dartdoc_vitepress --format jaspr --output docs-site
+dartdoc_modern --format jaspr --output docs-site
 cd docs-site
 dart pub get
 dart pub global activate jaspr_cli
@@ -118,12 +123,12 @@ Use the local source while evaluating or developing the project:
 
 ```bash
 # Generate VitePress docs for a single package
-dart run ./bin/dartdoc_vitepress.dart \
+dart run ./bin/dartdoc_modern.dart \
   --format vitepress \
   --output docs-site
 
 # Generate Jaspr docs for a single package
-dart run ./bin/dartdoc_vitepress.dart \
+dart run ./bin/dartdoc_modern.dart \
   --format jaspr \
   --output docs-site
 ```
@@ -131,7 +136,7 @@ dart run ./bin/dartdoc_vitepress.dart \
 ### Workspace Example
 
 ```bash
-dart run /path/to/dartdoc-vitepress/bin/dartdoc_vitepress.dart \
+dart run /path/to/dartdoc_modern/bin/dartdoc_modern.dart \
   --format vitepress \
   --workspace-docs \
   --exclude-packages 'package_a,package_b' \
@@ -301,7 +306,7 @@ jobs:
           cache-dependency-path: docs-site/package-lock.json
 
       - name: Generate API docs
-        run: dart run ./bin/dartdoc_vitepress.dart --format vitepress --output docs-site
+        run: dart run ./bin/dartdoc_modern.dart --format vitepress --output docs-site
 
       - run: npm ci
         working-directory: docs-site
@@ -364,7 +369,7 @@ jobs:
         run: dart pub global activate jaspr_cli
 
       - name: Generate Jaspr docs
-        run: dart run ./bin/dartdoc_vitepress.dart --format jaspr --output docs-site
+        run: dart run ./bin/dartdoc_modern.dart --format jaspr --output docs-site
 
       - name: Build static Jaspr site
         run: |
@@ -411,7 +416,7 @@ Use this when the deployed site lives under a path prefix like
 The Jaspr backend generates a real app scaffold that you build and then deploy as static files:
 
 ```bash
-dartdoc_vitepress --format jaspr --output docs-site
+dartdoc_modern --format jaspr --output docs-site
 cd docs-site
 dart pub get
 dart pub global activate jaspr_cli

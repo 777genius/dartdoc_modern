@@ -1,7 +1,7 @@
 ---
 layout: home
 hero:
-  name: "dartdoc-vitepress"
+  name: "dartdoc_modern"
   text: Modern API Docs for Dart
   tagline: Drop-in replacement for dart doc — generates a VitePress site with search, dark mode, and full customization
   actions:
@@ -12,8 +12,14 @@ hero:
       text: API Reference
       link: /api/
     - theme: alt
+      text: Jaspr Version
+      link: https://777genius.github.io/dartdoc_modern/jaspr/
+    - theme: alt
+      text: VitePress Version
+      link: https://777genius.github.io/dartdoc_modern/vitepress/
+    - theme: alt
       text: GitHub
-      link: https://github.com/777genius/dartdoc_vitepress
+      link: https://github.com/777genius/dartdoc_modern
 features:
   - icon: 📚
     title: Full API Reference
@@ -44,30 +50,30 @@ features:
 ## Install
 
 ```bash
-dart pub global activate dartdoc_vitepress
+dart pub global activate dartdoc_modern
 ```
 
 ## Usage
 
 ::: code-group
 ```bash [Single package]
-dartdoc_vitepress --format vitepress --output docs-site
+dartdoc_modern --format vitepress --output docs-site
 cd docs-site && npm install && npx vitepress dev
 ```
 ```bash [Mono-repo]
-dartdoc_vitepress --format vitepress \
+dartdoc_modern --format vitepress \
   --workspace-docs \
   --exclude-packages 'example,test_utils' \
   --output docs-site
 ```
 ```bash [Dart SDK]
-dartdoc_vitepress --sdk-docs --format vitepress --output docs-site
+dartdoc_modern --sdk-docs --format vitepress --output docs-site
 ```
 :::
 
-## dart doc vs dartdoc-vitepress
+## dart doc vs dartdoc_modern
 
-| | dart doc | dartdoc-vitepress |
+| | dart doc | dartdoc_modern |
 |---|---|---|
 | Output | Static HTML | VitePress (Markdown + Vue) |
 | Search | Basic | Full-text, offline |
@@ -80,4 +86,9 @@ dartdoc_vitepress --sdk-docs --format vitepress --output docs-site
 
 ## Live Example
 
-[Dart SDK API docs](https://777genius.github.io/dart-sdk-api/) — 56 libraries, 1800+ pages, generated with dartdoc-vitepress.
+[Dart SDK API docs](https://777genius.github.io/dart-sdk-api/) — 56 libraries, 1800+ pages, generated with dartdoc_modern.
+
+## Live Versions
+
+- [VitePress version](https://777genius.github.io/dartdoc_modern/vitepress/)
+- [Jaspr version](https://777genius.github.io/dartdoc_modern/jaspr/)

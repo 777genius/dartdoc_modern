@@ -46,6 +46,7 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
     super.initState();
     if (!kIsWeb) return;
     _isApplePlatform = _detectApplePlatform();
+    Timer.run(_mountOverlayToBody);
   }
 
   @override
@@ -374,6 +375,16 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
     return element is web.HTMLInputElement ? element : null;
   }
 
+  void _mountOverlayToBody() {
+    if (!kIsWeb) return;
+    final overlay = _overlayElement;
+    final body = web.window.document.body;
+    if (overlay == null || body == null || overlay.parentElement == body) {
+      return;
+    }
+    body.append(overlay);
+  }
+
   List<web.HTMLElement> _focusableNodesWithin(web.Element? root) {
     if (root == null) return const [];
     final nodes = root.querySelectorAll(
@@ -390,6 +401,7 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
   }
 
   void _openSearch([String initialValue = '']) {
+    _mountOverlayToBody();
     if (kIsWeb) {
       final active = web.window.document.activeElement;
       if (active is web.HTMLElement) {
@@ -411,6 +423,7 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
     unawaited(_primeSearch(initialValue));
 
     Timer.run(() {
+      _mountOverlayToBody();
       _inputElement?.focus();
     });
   }

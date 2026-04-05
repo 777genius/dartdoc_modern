@@ -27,7 +27,7 @@ function withDocsBasePath(path: string): string {
 const docsBasePath = normalizeDocsBasePath()
 
 export default withMermaid(defineConfig({
-  title: 'dartdoc-vitepress',
+  title: 'dartdoc_modern',
   description: 'Modern API documentation generator for Dart — VitePress fork of dartdoc',
   base: docsBasePath,
   head: [
@@ -56,11 +56,13 @@ export default withMermaid(defineConfig({
     nav: [
       { text: 'Guide', link: '/guide/' },
       { text: 'API Reference', link: '/api/' },
+      { text: 'Jaspr Version', link: 'https://777genius.github.io/dartdoc_modern/jaspr/' },
+      { text: 'VitePress Version', link: 'https://777genius.github.io/dartdoc_modern/vitepress/' },
     ],
     sidebar: {
       ...apiSidebar,
       ...guideSidebar,
     },
-    socialLinks: [{ icon: 'github', link: 'https://github.com/777genius/dartdoc_vitepress' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/777genius/dartdoc_modern' }],
   },
 }))

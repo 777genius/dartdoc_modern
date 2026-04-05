@@ -35,7 +35,7 @@ class DocsNavLink extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
-    final resolvedTo = withDocsBasePath(to);
+    final resolvedTo = _resolveHref(to);
     final isExternal = _isExternalTarget(to);
     final isHashOnly = to.startsWith('#');
     final useClientRouter = !hasDocsBasePath;
@@ -47,25 +47,20 @@ class DocsNavLink extends StatelessComponent {
       if (replace) 'data-docs-nav-replace': 'true',
     };
 
-    return a(
-      href: resolvedTo,
-      target: target,
-      classes: classes,
-      attributes: mergedAttributes,
-      events: {
-        if (preload && !isPlainAnchorOnly)
-          'mouseover': (event) {
-            final router = Router.maybeOf(context);
-            if (router != null) {
-              router.preload(to);
-            }
-          },
-        if (onMouseEnter != null) 'mouseenter': onMouseEnter!,
+    final events = <String, EventCallback>{
+      if (preload && !isPlainAnchorOnly)
+        'mouseover': (event) {
+          final router = Router.maybeOf(context);
+          if (router != null) {
+            router.preload(to);
+          }
+        },
+      if (onMouseEnter != null) 'mouseenter': onMouseEnter!,
+      if (!isPlainAnchorOnly)
         'click': (event) {
           if (_isModifiedClick(event)) return;
 
           onNavigate?.call();
-          if (isPlainAnchorOnly) return;
 
           final router = Router.maybeOf(context);
           if (router == null) return;
@@ -77,7 +72,14 @@ class DocsNavLink extends StatelessComponent {
             router.push(to, extra: extra);
           }
         },
-      },
+    };
+
+    return a(
+      href: resolvedTo,
+      target: target,
+      classes: classes,
+      attributes: mergedAttributes,
+      events: events,
       [
         if (child != null) child!,
         ...?children,
@@ -90,6 +92,37 @@ class DocsNavLink extends StatelessComponent {
         value.startsWith('https://') ||
         value.startsWith('mailto:') ||
         value.startsWith('tel:');
+  }
+
+  String _resolveHref(String value) {
+    if (_isExternalTarget(value) || value.startsWith('#')) {
+      return withDocsBasePath(value);
+    }
+
+    final hashIndex = value.indexOf('#');
+    final queryIndex = value.indexOf('?');
+    final splitIndex = switch ((hashIndex, queryIndex)) {
+      (-1, -1) => -1,
+      (final hash, -1) => hash,
+      (-1, final query) => query,
+      (final hash, final query) => hash < query ? hash : query,
+    };
+
+    final pathPart = splitIndex == -1 ? value : value.substring(0, splitIndex);
+    final suffix = splitIndex == -1 ? '' : value.substring(splitIndex);
+    final normalized = withDocsBasePath(pathPart);
+
+    if (normalized == '/' || normalized.endsWith('/')) {
+      return '$normalized$suffix';
+    }
+
+    final lastSegment = normalized.split('/').last;
+    final looksLikeFile = lastSegment.contains('.');
+    if (looksLikeFile) {
+      return '$normalized$suffix';
+    }
+
+    return '$normalized/$suffix';
   }
 
   bool _isModifiedClick(web.Event event) {

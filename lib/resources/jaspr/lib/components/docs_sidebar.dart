@@ -235,9 +235,9 @@ class DocsSidebar extends StatelessComponent {
             ),
             css('.sidebar-trigger').styles(
               display: Display.flex,
-              justifyContent: JustifyContent.spaceBetween,
+              justifyContent: JustifyContent.start,
               alignItems: AlignItems.center,
-              gap: Gap.column(0.75.rem),
+              gap: Gap.column(0.4.rem),
               padding:
                   Padding.symmetric(vertical: 0.48.rem, horizontal: Unit.zero),
               color: ContentColors.text,

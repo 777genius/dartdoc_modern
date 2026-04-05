@@ -11,13 +11,14 @@ void main() {
   Jaspr.initializeApp(options: defaultServerOptions);
   const themeName = String.fromEnvironment('DOCS_THEME', defaultValue: 'ocean');
   final themePreset = DocsThemePresetX.parse(themeName);
+  final assetVersion = DateTime.now().millisecondsSinceEpoch.toString();
 
   runApp(
     Document(
       base: hasDocsBasePath ? '$docsBasePath/' : '/',
       head: [
         link(
-          href: withDocsBasePath('/generated/api_styles.css'),
+          href: '${withDocsBasePath('/generated/api_styles.css')}?v=$assetVersion',
           rel: 'stylesheet',
         ),
         link(

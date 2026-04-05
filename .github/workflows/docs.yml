@@ -16,6 +16,7 @@ concurrency:
 
 env:
   PAGES_BASE_PATH: /${{ github.event.repository.name }}
+  JASPR_BASE_PATH: /${{ github.event.repository.name }}/jaspr/
   VITEPRESS_BASE_PATH: /${{ github.event.repository.name }}/vitepress/
   JASPR_OUTPUT_DIR: jaspr-site
 
@@ -39,19 +40,19 @@ jobs:
         run: dart pub get
 
       - name: Generate Jaspr docs
-        run: dart run bin/dartdoc_vitepress.dart --format jaspr --output $JASPR_OUTPUT_DIR
+        run: dart run bin/dartdoc_modern.dart --format jaspr --output $JASPR_OUTPUT_DIR
 
       - name: Install Jaspr dependencies
         run: dart pub get
         working-directory: ${{ env.JASPR_OUTPUT_DIR }}
 
       - name: Build Jaspr site
-        run: dart run jaspr_cli:jaspr build --dart-define DOCS_BASE_PATH=${{ env.PAGES_BASE_PATH }}
+        run: dart run jaspr_cli:jaspr build --dart-define DOCS_BASE_PATH=${{ env.JASPR_BASE_PATH }}
         working-directory: ${{ env.JASPR_OUTPUT_DIR }}
 
       # Use the local dartdoc (dogfooding!)
       - name: Generate VitePress docs
-        run: dart run bin/dartdoc_vitepress.dart --format vitepress --output docs-site
+        run: dart run bin/dartdoc_modern.dart --format vitepress --output docs-site
 
       - name: Install VitePress dependencies
         run: npm ci
@@ -66,8 +67,8 @@ jobs:
       - name: Assemble Pages artifact
         run: |
           rm -rf publish
-          mkdir -p publish/vitepress
-          cp -R "$JASPR_OUTPUT_DIR/build/jaspr/." publish/
+          mkdir -p publish/jaspr publish/vitepress
+          cp -R "$JASPR_OUTPUT_DIR/build/jaspr/." publish/jaspr/
           cp -R docs-site/.vitepress/dist/. publish/vitepress/
 
           create_redirect() {
@@ -90,6 +91,8 @@ jobs:
           </html>
           EOF
           }
+
+          create_redirect "publish/index.html" "${JASPR_BASE_PATH}"
 
           if [ -d "$JASPR_OUTPUT_DIR/web/guide" ]; then
             (

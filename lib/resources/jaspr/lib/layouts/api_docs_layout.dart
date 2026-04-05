@@ -7,6 +7,8 @@ import '../components/docs_dartpad_runtime.dart';
 import '../components/docs_header.dart';
 import '../components/docs_nav_link.dart';
 import '../components/docs_page_actions_runtime.dart';
+import 'docs_header_shell_styles.dart';
+import 'docs_search_styles.dart';
 import '../theme/docs_responsive.dart';
 
 class ApiDocsLayout extends DocsLayout {
@@ -63,48 +65,55 @@ class ApiDocsLayout extends DocsLayout {
             (pageDescription?.isNotEmpty ?? false) ||
             (pageImage?.isNotEmpty ?? false));
 
-    return div(classes: 'docs', [
-      const DocsDartPadRuntime(),
-      const DocsPageActionsRuntime(),
-      if (headerComponent case final Component header)
-        div(
-          classes: 'header-container',
-          attributes: {if (this.sidebar != null) 'data-has-sidebar': ''},
-          [header],
-        ),
-      div(classes: 'main-container', [
-        div(
-          classes: 'sidebar-barrier',
-          attributes: {'role': 'button', 'data-docs-sidebar-barrier': 'true'},
-          [],
-        ),
-        if (this.sidebar case final Component sidebar)
-          div(classes: 'sidebar-container', [sidebar]),
-        main_([
-          div([
-            div(classes: 'content-container', [
-              if (breadcrumb != null) breadcrumb,
-              if (hasContentHeader)
-                div(classes: 'content-header', [
-                  if (pageTitle != null && pageTitle.isNotEmpty)
-                    h1([Component.text(pageTitle)]),
-                  if (pageDescription != null && pageDescription.isNotEmpty)
-                    p([Component.text(pageDescription)]),
-                  if (pageImage != null && pageImage.isNotEmpty)
-                    img(src: pageImage, alt: pageImageAlt),
-                ]),
-              child,
-              if (this.footer != null)
-                div(classes: 'content-footer', [this.footer!]),
-            ]),
-            if (page.data['toc'] case final TableOfContents toc
-                when _hasVisibleTocEntries(toc.entries))
-              aside(classes: 'toc', [
-                div([
-                  h3([Component.text('On this page')]),
-                  _buildToc(toc, page.url, collapsibleOutline),
-                ]),
+    return Component.fragment([
+      Document.head(children: [
+        Style(styles: _styles),
+        script(src: 'docs_mermaid_runtime.js?v=5', defer: true),
+        script(src: 'docs_lightbox_runtime.js?v=3', defer: true),
+      ]),
+      div(classes: 'docs', attributes: {'data-docs-layout': 'docs'}, [
+        const DocsDartPadRuntime(),
+        const DocsPageActionsRuntime(),
+        if (headerComponent case final Component header)
+          div(
+            classes: 'header-container',
+            attributes: {if (this.sidebar != null) 'data-has-sidebar': ''},
+            [header],
+          ),
+        div(classes: 'main-container', [
+          div(
+            classes: 'sidebar-barrier',
+            attributes: {'role': 'button', 'data-docs-sidebar-barrier': 'true'},
+            [],
+          ),
+          if (this.sidebar case final Component sidebar)
+            div(classes: 'sidebar-container', [sidebar]),
+          main_([
+            div([
+              div(classes: 'content-container', [
+                if (breadcrumb != null) breadcrumb,
+                if (hasContentHeader)
+                  div(classes: 'content-header', [
+                    if (pageTitle != null && pageTitle.isNotEmpty)
+                      h1([Component.text(pageTitle)]),
+                    if (pageDescription != null && pageDescription.isNotEmpty)
+                      p([Component.text(pageDescription)]),
+                    if (pageImage != null && pageImage.isNotEmpty)
+                      img(src: pageImage, alt: pageImageAlt),
+                  ]),
+                child,
+                if (this.footer != null)
+                  div(classes: 'content-footer', [this.footer!]),
               ]),
+              if (page.data['toc'] case final TableOfContents toc
+                  when _hasVisibleTocEntries(toc.entries))
+                aside(classes: 'toc', [
+                  div([
+                    h3([Component.text('On this page')]),
+                    _buildToc(toc, page.url, collapsibleOutline),
+                  ]),
+                ]),
+            ]),
           ]),
         ]),
       ]),
@@ -295,41 +304,7 @@ class ApiDocsLayout extends DocsLayout {
 
   static List<StyleRule> get _styles => [
     ...docsResponsiveRootStyles(),
-    css('.header-container').styles(
-      position: Position.sticky(top: Unit.zero),
-      zIndex: ZIndex(20),
-      backgroundColor: Color('rgba(255, 255, 255, 0.74)'),
-      border: Border.only(
-        bottom: BorderSide(
-          width: 1.px,
-          color: Color('rgba(148, 163, 184, 0.18)'),
-        ),
-      ),
-      raw: {
-        'backdrop-filter': 'blur(18px) saturate(160%)',
-        '-webkit-backdrop-filter': 'blur(18px) saturate(160%)',
-      },
-    ),
-    css('[data-theme="dark"] .header-container').styles(
-      backgroundColor: Color('rgba(24, 24, 27, 0.74)'),
-      border: Border.only(
-        bottom: BorderSide(
-          width: 1.px,
-          color: Color('rgba(148, 163, 184, 0.14)'),
-        ),
-      ),
-    ),
-    css('body.search-open .header-container').styles(
-      zIndex: ZIndex(70),
-      opacity: 0,
-      raw: {
-        'pointer-events': 'none',
-        'box-shadow': 'none',
-        'backdrop-filter': 'none',
-        '-webkit-backdrop-filter': 'none',
-        'transition': 'opacity 120ms ease',
-      },
-    ),
+    ...docsHeaderShellStyles(),
     css(
       '[data-docs-nav-loading] body, [data-docs-nav-loading] .main-container',
     ).styles(raw: {'cursor': 'progress'}),
@@ -337,33 +312,6 @@ class ApiDocsLayout extends DocsLayout {
     css(
       'body.search-open::before',
     ).styles(raw: {'content': 'none', 'display': 'none'}),
-    css('.theme-toggle').styles(
-      display: Display.inlineFlex,
-      alignItems: AlignItems.center,
-      justifyContent: JustifyContent.center,
-      width: 2.6.rem,
-      height: 2.6.rem,
-      padding: Padding.zero,
-      border: Border.all(width: 1.px, color: Color('var(--docs-shell-border)')),
-      radius: BorderRadius.circular(999.px),
-      backgroundColor: Color('var(--docs-shell-surface-soft)'),
-      color: ContentColors.text,
-      cursor: Cursor.pointer,
-    ),
-    css('.theme-toggle-icon').styles(
-      display: Display.inlineFlex,
-      alignItems: AlignItems.center,
-      justifyContent: JustifyContent.center,
-      fontSize: 1.rem,
-      raw: {'line-height': '1'},
-    ),
-    css('.theme-toggle:hover').styles(
-      backgroundColor: Color('var(--docs-shell-accent-soft)'),
-      border: Border.all(
-        width: 1.px,
-        color: Color('var(--docs-shell-border-strong)'),
-      ),
-    ),
     css('.api-breadcrumb', [
       css('&').styles(
         display: Display.flex,
@@ -511,504 +459,7 @@ class ApiDocsLayout extends DocsLayout {
         css('.icon-action-btn').styles(width: 1.425.rem, height: 1.425.rem),
       ]),
     ]),
-    css('.header-search-shell', [
-      css('&').styles(
-        display: Display.flex,
-        alignItems: AlignItems.center,
-        justifyContent: JustifyContent.end,
-        padding: Padding.zero,
-        margin: Margin.zero,
-        minWidth: Unit.zero,
-      ),
-      css('.search-launcher').styles(
-        display: Display.flex,
-        justifyContent: JustifyContent.spaceBetween,
-        alignItems: AlignItems.center,
-        gap: Gap.column(0.55.rem),
-        minWidth: 8.5.rem,
-        padding: Padding.symmetric(vertical: 0.42.rem, horizontal: 0.68.rem),
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-border-strong)'),
-        ),
-        radius: BorderRadius.circular(999.px),
-        backgroundColor: Color('var(--docs-shell-surface-soft)'),
-        cursor: Cursor.pointer,
-        color: ContentColors.text,
-        transition: Transition(
-          'border-color, background-color, transform',
-          duration: Duration(milliseconds: 150),
-        ),
-        raw: {'position': 'relative', 'flex': '0 1 auto', 'max-width': '100%'},
-      ),
-      css('.search-launcher::before').styles(
-        display: Display.none,
-        raw: {'content': '"⌕"', 'font-size': '0.82rem', 'line-height': '1'},
-      ),
-      css('.search-launcher:hover').styles(
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-accent)'),
-        ),
-        backgroundColor: Color('var(--docs-shell-accent-soft)'),
-        raw: {'transform': 'translateY(-1px)'},
-      ),
-      css('.search-launcher:focus-visible').styles(
-        outline: Outline(
-          width: OutlineWidth(3.px),
-          style: OutlineStyle.solid,
-          color: Color('var(--docs-shell-focus)'),
-          offset: 2.px,
-        ),
-      ),
-      css(
-        '.search-launcher-label',
-      ).styles(fontWeight: FontWeight.w600, fontSize: 0.95.rem),
-      css('.search-launcher-shortcut').styles(
-        fontSize: 0.74.rem,
-        opacity: 0.7,
-        padding: Padding.symmetric(vertical: 0.12.rem, horizontal: 0.32.rem),
-        radius: BorderRadius.circular(999.px),
-        backgroundColor: Color('var(--docs-shell-surface-elevated)'),
-        raw: {'line-height': '1'},
-      ),
-      downMobile([
-        css('&').styles(justifyContent: JustifyContent.end),
-        css('.search-launcher').styles(
-          minWidth: 0.rem,
-          gap: Gap.column(0.55.rem),
-          padding: Padding.symmetric(vertical: 0.54.rem, horizontal: 0.72.rem),
-          raw: {'min-width': 'var(--docs-shell-search-launcher-min)'},
-        ),
-        css('.search-launcher-label').styles(fontSize: 0.88.rem),
-        css('.search-launcher-shortcut').styles(
-          fontSize: 0.75.rem,
-          padding: Padding.symmetric(vertical: 0.14.rem, horizontal: 0.34.rem),
-        ),
-      ]),
-      downCompact([
-        css(
-          '&',
-        ).styles(justifyContent: JustifyContent.end, raw: {'flex': '0 0 auto'}),
-        css('.search-launcher').styles(
-          minWidth: 0.rem,
-          gap: Gap.column(0.38.rem),
-          padding: Padding.symmetric(vertical: 0.5.rem, horizontal: 0.62.rem),
-          raw: {
-            'width': 'var(--docs-shell-search-launcher-min)',
-            'max-width': 'var(--docs-shell-search-launcher-min)',
-            'justify-content': 'center',
-          },
-        ),
-        css('.search-launcher::before').styles(
-          display: Display.inlineFlex,
-          justifyContent: JustifyContent.center,
-          alignItems: AlignItems.center,
-        ),
-        css('.search-launcher-label').styles(display: Display.none),
-        css('.search-launcher-shortcut').styles(display: Display.none),
-      ]),
-    ]),
-    css(
-      '[data-theme="dark"] .header-search-shell .search-launcher-shortcut',
-    ).styles(opacity: 0.6),
-    css('.docs-search-overlay', [
-      css('&').styles(
-        position: Position.fixed(
-          top: Unit.zero,
-          left: Unit.zero,
-          right: Unit.zero,
-          bottom: Unit.zero,
-        ),
-        zIndex: ZIndex(90),
-        raw: {'pointer-events': 'none'},
-      ),
-      css('&[hidden]').styles(display: Display.none),
-      css('.docs-search-backdrop').styles(
-        position: Position.absolute(
-          top: Unit.zero,
-          left: Unit.zero,
-          right: Unit.zero,
-          bottom: Unit.zero,
-        ),
-        backgroundColor: Color('var(--docs-shell-overlay)'),
-        zIndex: ZIndex(0),
-        raw: {'pointer-events': 'auto'},
-      ),
-      css('.docs-search-panel').styles(
-        position: Position.relative(),
-        margin: Margin.only(top: 7.vh),
-        width: 100.percent,
-        maxWidth: 100.percent,
-        backgroundColor: Color('var(--docs-shell-surface-elevated)'),
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-border)'),
-        ),
-        radius: BorderRadius.circular(1.15.rem),
-        shadow: BoxShadow(
-          offsetX: Unit.zero,
-          offsetY: 22.px,
-          blur: 42.px,
-          color: Color('var(--docs-shell-shadow)'),
-        ),
-        overflow: Overflow.hidden,
-        raw: {
-          'margin-left': 'auto',
-          'margin-right': 'auto',
-          'max-width': 'var(--docs-shell-search-panel-width)',
-          'z-index': '1',
-          'backdrop-filter': 'blur(18px)',
-          '-webkit-backdrop-filter': 'blur(18px)',
-          'pointer-events': 'auto',
-        },
-      ),
-      css('.docs-search-header').styles(
-        display: Display.grid,
-        alignItems: AlignItems.center,
-        gap: Gap.column(0.65.rem),
-        padding: Padding.only(
-          top: 1.05.rem,
-          right: 1.05.rem,
-          bottom: 0.9.rem,
-          left: 1.05.rem,
-        ),
-        border: Border.only(
-          bottom: BorderSide(
-            width: 1.px,
-            color: Color('var(--docs-shell-border)'),
-          ),
-        ),
-        raw: {
-          'grid-template-columns': 'minmax(0, 1fr) auto',
-          'grid-template-areas': '"heading heading" "input close"',
-        },
-      ),
-      css('.docs-search-heading').styles(
-        width: 100.percent,
-        fontSize: 0.84.rem,
-        fontWeight: FontWeight.w800,
-        textTransform: TextTransform.upperCase,
-        color: Color('var(--docs-shell-muted)'),
-        raw: {'grid-area': 'heading', 'letter-spacing': '0.12em'},
-      ),
-      css('.docs-search-input').styles(
-        raw: {'grid-area': 'input'},
-        width: 100.percent,
-        padding: Padding.symmetric(vertical: 0.84.rem, horizontal: 0.98.rem),
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-border-strong)'),
-        ),
-        radius: BorderRadius.circular(0.82.rem),
-        backgroundColor: Color('var(--docs-shell-surface-soft)'),
-        color: ContentColors.text,
-        shadow: BoxShadow(
-          offsetX: Unit.zero,
-          offsetY: 10.px,
-          blur: 22.px,
-          color: Color('var(--docs-shell-shadow)'),
-        ),
-      ),
-      css('.docs-search-input:focus-visible').styles(
-        outline: Outline(
-          width: OutlineWidth(3.px),
-          style: OutlineStyle.solid,
-          color: Color('var(--docs-shell-focus)'),
-          offset: 1.px,
-        ),
-      ),
-      css('.docs-search-close').styles(
-        raw: {'grid-area': 'close'},
-        alignSelf: AlignSelf.center,
-        padding: Padding.symmetric(vertical: 0.48.rem, horizontal: 0.74.rem),
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-border-strong)'),
-        ),
-        radius: BorderRadius.circular(0.82.rem),
-        backgroundColor: Color('var(--docs-shell-surface-soft)'),
-        cursor: Cursor.pointer,
-        color: ContentColors.text,
-      ),
-      css('.docs-search-close:hover').styles(
-        backgroundColor: Color('var(--docs-shell-accent-soft)'),
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-accent)'),
-        ),
-      ),
-      css('.docs-search-status').styles(
-        padding: Padding.symmetric(vertical: 0.72.rem, horizontal: 1.05.rem),
-        fontSize: 0.88.rem,
-        color: Color('var(--docs-shell-muted)'),
-        backgroundColor: Color('var(--docs-shell-surface-soft)'),
-      ),
-      css(
-        '.docs-search-status[data-search-state="loading"]',
-      ).styles(color: Color('var(--docs-shell-accent-strong)')),
-      css('.docs-search-status[data-search-state="error"]').styles(
-        color: Color('var(--docs-shell-accent-strong)'),
-        backgroundColor: Color('var(--docs-shell-callout-bg)'),
-      ),
-      css('.docs-search-results').styles(
-        maxHeight: 65.vh,
-        overflow: Overflow.auto,
-        padding: Padding.only(
-          top: 0.42.rem,
-          right: 0.42.rem,
-          bottom: 0.5.rem,
-          left: 0.42.rem,
-        ),
-        backgroundColor: Color('var(--docs-shell-surface)'),
-      ),
-      css('.docs-search-empty-state').styles(
-        display: Display.flex,
-        alignItems: AlignItems.center,
-        gap: Gap.column(0.95.rem),
-        padding: Padding.symmetric(vertical: 1.1.rem, horizontal: 1.05.rem),
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-border)'),
-        ),
-        radius: BorderRadius.circular(1.rem),
-        backgroundColor: Color('var(--docs-shell-surface-elevated)'),
-      ),
-      css('.docs-search-empty-icon').styles(
-        display: Display.inlineFlex,
-        justifyContent: JustifyContent.center,
-        alignItems: AlignItems.center,
-        width: 2.35.rem,
-        height: 2.35.rem,
-        fontSize: 1.05.rem,
-        fontWeight: FontWeight.w800,
-        radius: BorderRadius.circular(999.px),
-        backgroundColor: Color('var(--docs-shell-accent-soft)'),
-        color: Color('var(--docs-shell-accent-strong)'),
-        raw: {'flex': '0 0 auto'},
-      ),
-      css(
-        '.docs-search-empty-copy',
-      ).styles(minWidth: Unit.zero, raw: {'flex': '1 1 auto'}),
-      css('.docs-search-empty-title').styles(
-        fontWeight: FontWeight.w700,
-        margin: Margin.only(bottom: 0.16.rem),
-      ),
-      css('.docs-search-empty-text').styles(
-        fontSize: 0.9.rem,
-        color: Color('var(--docs-shell-muted)'),
-        raw: {'line-height': '1.55'},
-      ),
-      css('.docs-search-footer').styles(
-        display: Display.flex,
-        justifyContent: JustifyContent.spaceBetween,
-        alignItems: AlignItems.center,
-        flexWrap: FlexWrap.wrap,
-        gap: Gap.row(0.75.rem),
-        padding: Padding.symmetric(vertical: 0.72.rem, horizontal: 0.95.rem),
-        border: Border.only(
-          top: BorderSide(
-            width: 1.px,
-            color: Color('var(--docs-shell-border)'),
-          ),
-        ),
-        backgroundColor: Color('var(--docs-shell-surface-soft)'),
-      ),
-      css('.docs-search-hints').styles(
-        display: Display.flex,
-        alignItems: AlignItems.center,
-        flexWrap: FlexWrap.wrap,
-        gap: Gap.column(0.45.rem),
-      ),
-      css('.docs-search-key').styles(
-        display: Display.inlineFlex,
-        justifyContent: JustifyContent.center,
-        alignItems: AlignItems.center,
-        minWidth: 2.rem,
-        padding: Padding.symmetric(vertical: 0.22.rem, horizontal: 0.4.rem),
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-border-strong)'),
-        ),
-        radius: BorderRadius.circular(0.5.rem),
-        backgroundColor: Color('var(--docs-shell-surface-elevated)'),
-        color: ContentColors.text,
-        fontSize: 0.76.rem,
-        fontWeight: FontWeight.w700,
-        shadow: BoxShadow(
-          offsetX: Unit.zero,
-          offsetY: 10.px,
-          blur: 24.px,
-          color: Color('var(--docs-shell-shadow)'),
-        ),
-      ),
-      css(
-        '.docs-search-hint-label, .docs-search-footnote',
-      ).styles(fontSize: 0.82.rem, color: Color('var(--docs-shell-muted)')),
-      css('.docs-search-result').styles(
-        display: Display.flex,
-        gap: Gap.column(1.rem),
-        margin: Margin.only(bottom: 0.45.rem),
-        padding: Padding.symmetric(vertical: 0.84.rem, horizontal: 0.95.rem),
-        textDecoration: TextDecoration.none,
-        color: ContentColors.text,
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-border)'),
-        ),
-        radius: BorderRadius.circular(0.95.rem),
-        backgroundColor: Color('var(--docs-shell-surface-elevated)'),
-        transition: Transition(
-          'background-color, border-color, transform, box-shadow',
-          duration: Duration(milliseconds: 150),
-        ),
-      ),
-      css(
-        '.docs-search-result:last-child',
-      ).styles(margin: Margin.only(bottom: Unit.zero)),
-      css('.docs-search-result:hover').styles(
-        backgroundColor: Color('var(--docs-shell-accent-soft)'),
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-border-strong)'),
-        ),
-        raw: {'transform': 'translateY(-1px)'},
-      ),
-      css('.docs-search-result.active').styles(
-        backgroundColor: Color('var(--docs-shell-accent-soft)'),
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-accent)'),
-        ),
-        shadow: BoxShadow(
-          offsetX: Unit.zero,
-          offsetY: 16.px,
-          blur: 28.px,
-          color: Color('var(--docs-shell-shadow)'),
-        ),
-        raw: {
-          'outline': '1px solid var(--docs-shell-accent)',
-          'box-shadow':
-              'inset 3px 0 0 var(--docs-shell-accent), 0 16px 28px var(--docs-shell-shadow)',
-        },
-      ),
-      css('.docs-search-result:focus-visible').styles(
-        outline: Outline(
-          width: OutlineWidth(3.px),
-          style: OutlineStyle.solid,
-          color: Color('var(--docs-shell-focus)'),
-        ),
-        raw: {'outline-offset': '-2px'},
-      ),
-      css(
-        '.docs-search-result-section',
-      ).styles(backgroundColor: Color('var(--docs-shell-surface-soft)')),
-      css('.docs-search-kind').styles(
-        display: Display.inlineFlex,
-        justifyContent: JustifyContent.center,
-        alignItems: AlignItems.center,
-        minWidth: 3.5.rem,
-        padding: Padding.symmetric(vertical: 0.28.rem, horizontal: 0.55.rem),
-        fontSize: 0.72.rem,
-        fontWeight: FontWeight.w700,
-        textTransform: TextTransform.upperCase,
-        radius: BorderRadius.circular(999.px),
-        backgroundColor: Color('var(--docs-shell-accent-soft)'),
-        color: Color('var(--docs-shell-accent-strong)'),
-      ),
-      css('.docs-search-meta').styles(flex: Flex(grow: 1)),
-      css('.docs-search-topline').styles(
-        display: Display.flex,
-        justifyContent: JustifyContent.spaceBetween,
-        alignItems: AlignItems.center,
-        flexWrap: FlexWrap.wrap,
-        gap: Gap.row(0.6.rem),
-        margin: Margin.only(bottom: 0.35.rem),
-      ),
-      css('.docs-search-title').styles(
-        fontWeight: FontWeight.w700,
-        margin: Margin.only(bottom: 0.24.rem),
-        raw: {'line-height': '1.32'},
-      ),
-      css('.docs-search-title mark, .docs-search-summary mark').styles(
-        backgroundColor: Color('var(--docs-shell-accent-soft)'),
-        color: Color('var(--docs-shell-accent-strong)'),
-        radius: BorderRadius.circular(0.35.rem),
-        padding: Padding.symmetric(vertical: 0.04.rem, horizontal: 0.16.rem),
-        raw: {
-          'box-decoration-break': 'clone',
-          '-webkit-box-decoration-break': 'clone',
-        },
-      ),
-      css('.docs-search-section').styles(
-        fontWeight: FontWeight.w500,
-        opacity: 0.8,
-        margin: Margin.only(left: 0.35.rem),
-      ),
-      css('.docs-search-url').styles(
-        fontSize: 0.8.rem,
-        color: Color('var(--docs-shell-muted)'),
-        raw: {'word-break': 'break-word'},
-      ),
-      css('.docs-search-summary').styles(
-        fontSize: 0.89.rem,
-        opacity: 0.9,
-        color: Color('var(--docs-shell-muted)'),
-        raw: {
-          'line-height': '1.48',
-          'display': '-webkit-box',
-          '-webkit-box-orient': 'vertical',
-          '-webkit-line-clamp': '2',
-          'overflow': 'hidden',
-        },
-      ),
-      css('.docs-search-kind-guide').styles(
-        backgroundColor: Color('var(--docs-shell-surface-elevated)'),
-        color: Color('var(--docs-shell-accent)'),
-      ),
-      css('.docs-search-kind-page').styles(
-        backgroundColor: Color('var(--docs-shell-surface-elevated)'),
-        color: Color('var(--docs-shell-accent)'),
-      ),
-      css('.docs-search-kind-section').styles(
-        backgroundColor: Color('var(--docs-shell-callout-bg)'),
-        color: Color('var(--docs-shell-accent-strong)'),
-      ),
-      downMobile([
-        css('.docs-search-panel').styles(
-          margin: Margin.only(top: 2.5.vh),
-          maxWidth: 100.percent,
-          raw: {'margin-left': '0.55rem', 'margin-right': '0.55rem'},
-        ),
-        css('.docs-search-header').styles(
-          display: Display.block,
-          raw: {'grid-template-columns': 'none', 'grid-template-areas': 'none'},
-        ),
-        css(
-          '.docs-search-heading',
-        ).styles(margin: Margin.only(bottom: 0.8.rem)),
-        css('.docs-search-close').styles(margin: Margin.only(top: 0.65.rem)),
-        css('.docs-search-footer').styles(display: Display.block),
-        css('.docs-search-footnote').styles(
-          display: Display.block,
-          margin: Margin.only(top: 0.65.rem),
-        ),
-        css('.docs-search-result').styles(
-          display: Display.block,
-          padding: Padding.symmetric(vertical: 0.78.rem, horizontal: 0.82.rem),
-        ),
-        css('.docs-search-empty-state').styles(
-          display: Display.block,
-          padding: Padding.symmetric(vertical: 0.95.rem, horizontal: 0.9.rem),
-        ),
-        css(
-          '.docs-search-empty-icon',
-        ).styles(margin: Margin.only(bottom: 0.55.rem)),
-        css('.docs-search-kind').styles(margin: Margin.only(bottom: 0.4.rem)),
-        css('.docs-search-topline').styles(display: Display.block),
-        css('.docs-search-url').styles(margin: Margin.only(top: 0.3.rem)),
-      ]),
-    ]),
+    ...docsSearchStyles(),
     css('.toc .toc-section', [
       css('&').styles(margin: Margin.only(bottom: 0.5.rem)),
       css('summary').styles(cursor: Cursor.pointer),
@@ -1427,87 +878,13 @@ class ApiDocsLayout extends DocsLayout {
         ),
       ]),
     ]),
-    css('.header-container', [
-      css('&').styles(
-        position: Position.sticky(top: Unit.zero),
-        zIndex: ZIndex(40),
-        backgroundColor: Color('rgba(255, 255, 255, 0.74)'),
-        border: Border.only(
-          bottom: BorderSide(
-            width: 1.px,
-            color: Color('rgba(148, 163, 184, 0.18)'),
-          ),
-        ),
-        raw: {
-          'backdrop-filter': 'blur(18px) saturate(160%)',
-          '-webkit-backdrop-filter': 'blur(18px) saturate(160%)',
-          'box-shadow': '0 14px 36px -28px var(--docs-shell-shadow)',
-        },
-      ),
-      css('[data-theme="dark"] &').styles(
-        backgroundColor: Color('rgba(24, 24, 27, 0.74)'),
-        border: Border.only(
-          bottom: BorderSide(
-            width: 1.px,
-            color: Color('rgba(148, 163, 184, 0.14)'),
-          ),
-        ),
-      ),
-      css('[data-has-sidebar] .header').styles(
-        maxWidth: 100.percent,
-        margin: Margin.zero,
-        raw: {
-          'margin-left': 'auto',
-          'margin-right': 'auto',
-          'max-width': 'var(--docs-shell-main-max-width)',
-          'padding-block': 'var(--docs-shell-header-block-pad)',
-          'padding-inline': 'var(--docs-shell-header-inline-pad)',
-        },
-      ),
-      css(
-        '.header .header-title',
-      ).styles(fontWeight: FontWeight.w800, raw: {'letter-spacing': '-0.03em'}),
-      css('.header .header-logo').styles(
-        radius: BorderRadius.circular(1.rem),
-        backgroundColor: Color('var(--docs-shell-accent-soft)'),
-        padding: Padding.all(0.35.rem),
-      ),
-    ]),
-    css('.theme-toggle').styles(
-      shadow: BoxShadow(
-        offsetX: Unit.zero,
-        offsetY: 10.px,
-        blur: 20.px,
-        color: Color('var(--docs-shell-shadow)'),
-      ),
-      transition: Transition(
-        'background-color, border-color, transform, box-shadow',
-        duration: Duration(milliseconds: 170),
-      ),
-    ),
-    downMobile([
-      css('.theme-toggle').styles(width: 2.45.rem, height: 2.45.rem),
-    ]),
-    downCompact([
-      css('.theme-toggle').styles(width: 2.3.rem, height: 2.3.rem),
-      css('.theme-toggle-icon').styles(fontSize: 0.92.rem),
-    ]),
-    css('.theme-toggle:hover').styles(
-      raw: {'transform': 'translateY(-1px)'},
-      shadow: BoxShadow(
-        offsetX: Unit.zero,
-        offsetY: 14.px,
-        blur: 24.px,
-        color: Color('var(--docs-shell-shadow)'),
-      ),
+    css('.docs .main-container .sidebar-container').styles(
+      raw: {
+        'top': 'var(--docs-shell-sticky-top)',
+        'width': 'var(--docs-shell-sidebar-width)',
+      },
     ),
     css('.sidebar-container', [
-      css('.docs .main-container &').styles(
-        raw: {
-          'top': 'var(--docs-shell-sticky-top)',
-          'width': 'var(--docs-shell-sidebar-width)',
-        },
-      ),
       css('&').styles(
         alignSelf: AlignSelf.start,
         padding: Padding.only(
@@ -1576,86 +953,97 @@ class ApiDocsLayout extends DocsLayout {
         fontWeight: FontWeight.w700,
       ),
       downContent([
-        css('&').styles(
-          position: Position.fixed(top: 0.rem, left: 0.rem, bottom: 0.rem),
-          zIndex: ZIndex(55),
-          width: 100.percent,
-          maxWidth: 88.vw,
-          padding: Padding.only(
-            top: 0.9.rem,
-            left: 0.8.rem,
-            right: 0.8.rem,
-            bottom: 0.9.rem,
-          ),
-          raw: {
-            'width': 'var(--docs-shell-drawer-width)',
-            'transform': 'translateX(-108%)',
-            'opacity': '0',
-            'pointer-events': 'none',
-            'transition': 'transform 220ms ease, opacity 180ms ease',
-          },
-        ),
-        css('&.open').styles(
-          raw: {
-            'transform': 'translateX(0)',
-            'opacity': '1',
-            'pointer-events': 'auto',
-          },
-        ),
         css('.sidebar').styles(
           position: Position.relative(),
-          maxHeight: 100.vh,
+          maxHeight: 100.percent,
           height: 100.percent,
-          radius: BorderRadius.circular(1.25.rem),
+          radius: BorderRadius.circular(Unit.zero),
+          border: Border.only(
+            right: BorderSide(
+              width: 1.px,
+              color: Color('var(--docs-shell-border)'),
+            ),
+          ),
+          backgroundColor: Color('var(--docs-shell-surface-elevated)'),
           shadow: BoxShadow(
-            offsetX: Unit.zero,
-            offsetY: 24.px,
+            offsetX: 8.px,
+            offsetY: Unit.zero,
             blur: 40.px,
             color: Color('var(--docs-shell-shadow)'),
           ),
-          raw: {'top': 'auto'},
+          overflow: Overflow.hidden,
+          padding: Padding.zero,
+          raw: {'border-radius': '0 1.25rem 1.25rem 0', 'top': 'auto'},
         ),
         css('.sidebar > div').styles(
           maxHeight: 100.percent,
           overflow: Overflow.auto,
           padding: Padding.only(
-            top: 1.rem,
-            right: 0.8.rem,
+            top: 0.75.rem,
+            right: 0.6.rem,
             bottom: 1.rem,
-            left: 0.8.rem,
+            left: 4.rem,
           ),
         ),
         css('.sidebar .sidebar-close').styles(
           position: Position.sticky(top: 0.1.rem),
+          border: Border.none,
+          backgroundColor: Color('transparent'),
           raw: {'margin-left': 'auto'},
         ),
       ]),
     ]),
-    css('.sidebar-barrier', [
-      css('&').styles(display: Display.none),
-      downContent([
-        css('&').styles(
-          position: Position.fixed(
-            top: Unit.zero,
-            left: Unit.zero,
-            right: Unit.zero,
-            bottom: Unit.zero,
-          ),
-          zIndex: ZIndex(54),
-          backgroundColor: Color('var(--docs-shell-overlay)'),
-          opacity: 0,
-          transition: Transition(
-            'opacity',
-            duration: Duration(milliseconds: 180),
-          ),
-          raw: {'pointer-events': 'none'},
+    downContent([
+      css('.docs .main-container .sidebar-container').styles(
+        position: Position.fixed(
+          left: Unit.zero,
+          bottom: Unit.zero,
         ),
-        css('body.sidebar-open &').styles(
-          display: Display.block,
-          opacity: 1,
-          raw: {'pointer-events': 'auto'},
+        zIndex: ZIndex(55),
+        padding: Padding.zero,
+        raw: {
+          'top': 'var(--docs-shell-sticky-top)',
+          'width': 'min(var(--docs-shell-drawer-width), 85vw)',
+          'transform': 'translateX(-100%)',
+          'opacity': '0',
+          'pointer-events': 'none',
+          'transition': 'transform 220ms ease, opacity 180ms ease',
+        },
+      ),
+      css('.docs .main-container .sidebar-container.open').styles(
+        raw: {
+          'transform': 'translateX(0)',
+          'opacity': '1',
+          'pointer-events': 'auto',
+        },
+      ),
+    ]),
+    css('.docs .main-container .sidebar-barrier').styles(
+      display: Display.none,
+    ),
+    downContent([
+      css('.docs .main-container .sidebar-barrier').styles(
+        display: Display.block,
+        position: Position.fixed(
+          top: Unit.zero,
+          left: Unit.zero,
+          right: Unit.zero,
+          bottom: Unit.zero,
         ),
-      ]),
+        zIndex: ZIndex(54),
+        backgroundColor: Color('var(--docs-shell-overlay)'),
+        opacity: 0,
+        transition: Transition(
+          'opacity',
+          duration: Duration(milliseconds: 180),
+        ),
+        raw: {'pointer-events': 'none'},
+      ),
+      css('.docs .main-container .sidebar-barrier:has(+ .sidebar-container.open)')
+          .styles(
+        opacity: 1,
+        raw: {'pointer-events': 'auto'},
+      ),
     ]),
     css('.content-container', [
       css('&').styles(

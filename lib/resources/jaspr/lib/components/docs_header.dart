@@ -131,7 +131,11 @@ class DocsHeader extends StatelessComponent {
           minWidth: Unit.zero,
           raw: {'max-width': 'min(28rem, 100%)'},
         ),
-        css('img').styles(height: 1.5.rem, width: Unit.auto),
+        css('img').styles(
+          height: 2.25.rem,
+          width: 2.25.rem,
+          raw: {'flex': '0 0 auto'},
+        ),
         css('span').styles(
           fontWeight: FontWeight.w700,
           minWidth: Unit.zero,
@@ -243,6 +247,19 @@ class DocsHeader extends StatelessComponent {
           raw: {'flex-wrap': 'nowrap'},
         ),
       ]),
+      downContent([
+        css('&').styles(
+          gap: Gap.column(0.72.rem),
+          padding: Padding.symmetric(horizontal: 0.9.rem, vertical: 0.22.rem),
+        ),
+        css('.header-title').styles(
+          flex: Flex(grow: 1, shrink: 1, basis: 7.8.rem),
+          gap: Gap.column(0.65.rem),
+          raw: {'max-width': 'calc(100vw - 14rem)'},
+        ),
+        css('.header-nav').styles(display: Display.none),
+        css('.header-items').styles(gap: Gap.column(0.5.rem)),
+      ]),
       downMobile([
         css('&').styles(
           gap: Gap.column(0.6.rem),
@@ -253,7 +270,7 @@ class DocsHeader extends StatelessComponent {
           gap: Gap.column(0.55.rem),
           raw: {'max-width': 'calc(100vw - 11rem)'},
         ),
-        css('.header-title img').styles(height: 1.3.rem),
+        css('.header-title img').styles(height: 1.25.rem, width: 1.25.rem),
         css(
           '.header-title span',
         ).styles(fontSize: 0.95.rem, raw: {'max-width': '100%'}),
@@ -271,7 +288,7 @@ class DocsHeader extends StatelessComponent {
           gap: Gap.column(0.45.rem),
           raw: {'max-width': 'calc(100vw - 6.8rem)'},
         ),
-        css('.header-title img').styles(height: 1.16.rem),
+        css('.header-title img').styles(height: 1.1.rem, width: 1.1.rem),
         css(
           '.header-content',
         ).styles(raw: {'flex': '0 0 auto', 'min-width': '0'}),

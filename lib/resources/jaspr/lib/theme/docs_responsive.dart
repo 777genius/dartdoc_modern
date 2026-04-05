@@ -2,7 +2,7 @@ import 'package:jaspr/dom.dart';
 
 const docsCompactBreakpoint = 479;
 const docsMobileBreakpoint = 767;
-const docsContentBreakpoint = 959;
+const docsContentBreakpoint = 1023;
 const docsWideBreakpoint = 1180;
 
 StyleRule downCompact(List<StyleRule> rules) => css.media(
@@ -28,8 +28,8 @@ StyleRule downWide(List<StyleRule> rules) => css.media(
 List<StyleRule> docsResponsiveRootStyles() => [
       css('.docs').styles(
         raw: {
-          '--docs-shell-header-height': '4rem',
-          '--docs-shell-header-block-pad': '0.9rem',
+          '--docs-shell-header-height': '3.75rem',
+          '--docs-shell-header-block-pad': '0.75rem',
           '--docs-shell-header-inline-pad': '1.5rem',
           '--docs-shell-gutter': '1.5rem',
           '--docs-shell-main-max-width':
@@ -44,8 +44,8 @@ List<StyleRule> docsResponsiveRootStyles() => [
           '--docs-shell-content-pad-top': '1.55rem',
           '--docs-shell-content-pad-right': '0.25rem',
           '--docs-shell-content-pad-bottom': '3rem',
-          '--docs-shell-sticky-top': '5.15rem',
-          '--docs-shell-anchor-offset': '7rem',
+          '--docs-shell-sticky-top': '4.7rem',
+          '--docs-shell-anchor-offset': '6.45rem',
           '--docs-shell-search-panel-width': '46rem',
           '--docs-shell-search-launcher-min': '8.5rem',
           '--docs-shell-content-header-pad-y': '1.75rem',

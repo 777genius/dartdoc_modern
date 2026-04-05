@@ -167,6 +167,19 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
         utf8.decode(response.bodyBytes).toJS,
         'text/html',
       );
+      final currentLayout = _resolveDocumentLayout(web.document);
+      final targetLayout = _resolveDocumentLayout(nextDocument);
+      if (currentLayout != null &&
+          targetLayout != null &&
+          currentLayout != targetLayout) {
+        _hardNavigate(
+          targetUri,
+          replace: replace,
+          updateHistory: updateHistory,
+        );
+        return;
+      }
+
       final nextMain = nextDocument.querySelector('.main-container');
       final currentMain = web.document.querySelector('.main-container');
       if (nextMain == null || currentMain == null) {
@@ -355,5 +368,12 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
         href.startsWith('https://') ||
         href.startsWith('mailto:') ||
         href.startsWith('tel:');
+  }
+
+  String? _resolveDocumentLayout(web.Document document) {
+    final root = document.querySelector('[data-docs-layout]');
+    final layout = root?.getAttribute('data-docs-layout')?.trim();
+    if (layout == null || layout.isEmpty) return null;
+    return layout;
   }
 }
