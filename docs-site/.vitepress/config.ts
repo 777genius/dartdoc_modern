@@ -56,8 +56,6 @@ export default withMermaid(defineConfig({
     nav: [
       { text: 'Guide', link: '/guide/' },
       { text: 'API Reference', link: '/api/' },
-      { text: 'Jaspr Version', link: 'https://777genius.github.io/dartdoc_modern/jaspr/' },
-      { text: 'VitePress Version', link: 'https://777genius.github.io/dartdoc_modern/vitepress/' },
     ],
     sidebar: {
       ...apiSidebar,
