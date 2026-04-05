@@ -995,6 +995,7 @@ class ApiDocsLayout extends DocsLayout {
           raw: {'border-radius': '0', 'top': 'auto'},
         ),
         css('.sidebar > div').styles(
+          maxHeight: 100.percent,
           overflow: Overflow.auto,
           padding: Padding.only(
             top: Unit.zero,
