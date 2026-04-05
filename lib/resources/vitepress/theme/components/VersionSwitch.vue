@@ -190,7 +190,7 @@ watch(() => route.path, refreshLinks, { immediate: true })
     :class="{ 'is-mobile': props.mobile }"
     aria-label="Documentation version switch"
   >
-    <a class="docs-version-switch__option" :href="jasprHref">Jaspr</a>
-    <a class="docs-version-switch__option is-active" :href="vitepressHref">VitePress</a>
+    <a class="docs-version-switch__option" :href="jasprHref" target="_self">Jaspr</a>
+    <a class="docs-version-switch__option is-active" :href="vitepressHref" target="_self">VitePress</a>
   </div>
 </template>

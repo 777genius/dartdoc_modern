@@ -38,7 +38,7 @@ List<StyleRule> docsResponsiveRootStyles() => [
           '--docs-shell-toc-width': '11.25rem',
           '--docs-shell-sidebar-width': '19rem',
           '--docs-shell-drawer-width': '20.5rem',
-          '--docs-shell-main-pad-top': '2.15rem',
+          '--docs-shell-main-pad-top': '0.75rem',
           '--docs-shell-main-pad-bottom': '3.5rem',
           '--docs-shell-main-pad-inline': '0.9rem',
           '--docs-shell-content-pad-top': '1.55rem',
