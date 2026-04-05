@@ -49,7 +49,15 @@ Set<String> resolveExcludedLibrariesForRecipe(
     return fallback;
   }
 
-  final excludes = <String>{...fallback, 'api_symbols'};
+  final excludes = <String>{
+    ...fallback,
+    'api_symbols',
+    'api_sidebar',
+    'guide_sidebar',
+    'package:$packageName/resources/jaspr/lib/generated/api_sidebar.dart',
+    'package:$packageName/resources/jaspr/lib/generated/guide_sidebar.dart',
+    'package:$packageName/resources/jaspr/lib/generated/api_symbols.dart',
+  };
   final pathContext = resourceProvider.pathContext;
   final packageLibDir = pathContext.normalize(
     pathContext.join(inputDir, 'lib'),

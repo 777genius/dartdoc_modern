@@ -50,6 +50,20 @@ repository: https://github.com/777genius/dartdoc_modern
       expect(context.guideDirs, ['docs-site/guide']);
       expect(context.guideExclude, ['api/static-assets/.*']);
       expect(context.exclude, contains('api_symbols'));
+      expect(context.exclude, contains('api_sidebar'));
+      expect(context.exclude, contains('guide_sidebar'));
+      expect(
+        context.exclude,
+        contains(
+          'package:dartdoc_modern/resources/jaspr/lib/generated/api_sidebar.dart',
+        ),
+      );
+      expect(
+        context.exclude,
+        contains(
+          'package:dartdoc_modern/resources/jaspr/lib/generated/guide_sidebar.dart',
+        ),
+      );
       expect(
         context.exclude,
         contains('package:dartdoc_modern/resources/jaspr/lib/app.dart'),
