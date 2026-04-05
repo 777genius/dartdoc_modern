@@ -1,4 +1,4 @@
-## 1.2.1
+## 1.0.0
 
 * Fix scaffold generation to include `useOutlineCollapse` composable for new projects.
 

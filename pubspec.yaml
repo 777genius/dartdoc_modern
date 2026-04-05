@@ -1,5 +1,5 @@
 name: dartdoc_modern
-version: 1.2.1
+version: 1.0.0
 description: Fork of dartdoc with VitePress and Jaspr backends for generating modern API and guide documentation sites.
 repository: https://github.com/777genius/dartdoc_modern
 
