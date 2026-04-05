@@ -973,6 +973,7 @@ class ApiDocsLayout extends DocsLayout {
         css('.sidebar').styles(
           position: Position.relative(),
           height: 100.percent,
+          maxHeight: 100.percent,
           radius: BorderRadius.circular(Unit.zero),
           border: Border.only(
             right: BorderSide(
@@ -1019,7 +1020,7 @@ class ApiDocsLayout extends DocsLayout {
         display: Display.flex,
         flexDirection: FlexDirection.column,
         raw: {
-          'top': 'var(--docs-shell-sticky-top)',
+          'top': 'var(--docs-shell-header-height)',
           'width': 'min(var(--docs-shell-drawer-width), 85vw)',
           'transform': 'translateX(-100%)',
           'opacity': '0',
