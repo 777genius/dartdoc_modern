@@ -6,14 +6,14 @@ import 'dart:io';
 import 'dart:io' as io;
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_vitepress/src/dartdoc.dart'
+import 'package:dartdoc_modern/src/dartdoc.dart'
     show Dartdoc, DartdocResults;
-import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
-import 'package:dartdoc_vitepress/src/failure.dart';
-import 'package:dartdoc_vitepress/src/logging.dart';
-import 'package:dartdoc_vitepress/src/model/package_builder.dart';
-import 'package:dartdoc_vitepress/src/package_meta.dart';
-import 'package:dartdoc_vitepress/src/warnings.dart';
+import 'package:dartdoc_modern/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/failure.dart';
+import 'package:dartdoc_modern/src/logging.dart';
+import 'package:dartdoc_modern/src/model/package_builder.dart';
+import 'package:dartdoc_modern/src/package_meta.dart';
+import 'package:dartdoc_modern/src/warnings.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -229,6 +229,10 @@ void main() {
           isTrue,
         );
         expect(
+          _outputExists(outDir, 'lib/components/docs_home_hero.dart'),
+          isTrue,
+        );
+        expect(
           _outputExists(outDir, 'lib/components/docs_theme_toggle.dart'),
           isTrue,
         );
@@ -328,6 +332,10 @@ void main() {
           isTrue,
         );
         expect(
+          _outputExists(outDir, 'lib/layouts/docs_home_layout.dart'),
+          isTrue,
+        );
+        expect(
           _outputExists(
             outDir,
             'lib/template_engine/docs_template_engine.dart',
@@ -379,7 +387,9 @@ void main() {
         );
         expect(
           content,
-          contains("href: withDocsBasePath('/generated/api_styles.css')"),
+          contains(
+            "href: '\${withDocsBasePath('/generated/api_styles.css')}?v=\$assetVersion'",
+          ),
         );
         expect(
           content,
@@ -419,11 +429,16 @@ void main() {
         expect(app, contains('templateEngine: templateEngine,'));
         expect(
           app,
+          contains("import 'package:jaspr_content/components/tabs.dart';"),
+        );
+        expect(
+          app,
           isNot(
             contains("import 'template_engine/docs_template_engine.dart';"),
           ),
         );
         expect(app, contains("import 'components/docs_header.dart';"));
+        expect(app, contains("import 'layouts/docs_home_layout.dart';"));
         expect(app, contains("import 'components/docs_search.dart';"));
         expect(app, contains("import 'components/docs_sidebar.dart';"));
         expect(app, contains("import 'components/docs_theme_toggle.dart';"));
@@ -436,9 +451,13 @@ void main() {
         expect(app, contains('header: DocsHeader('));
         expect(app, contains('title: packageName,'));
         expect(app, contains("logo: withDocsBasePath('/favicon.svg')"));
-        expect(app, contains("homeHref: hasGuideLinks ? '/' : overviewHref,"));
+        expect(app, contains("homeHref: '/'"));
         expect(app, contains("text: 'Guide',"));
         expect(app, contains("text: 'API Reference',"));
+        expect(app, contains('const Tabs(),'));
+        expect(app, contains('DocsHomeLayout('));
+        expect(app, contains('primaryActionHref: primaryHomeActionHref,'));
+        expect(app, contains('hasGuideLinks: hasGuideLinks,'));
         expect(app, contains('const DocsSearchShell()'));
         expect(app, contains('const DocsThemeToggle()'));
         expect(
@@ -461,6 +480,46 @@ void main() {
         expect(docsBase, contains('bool get hasDocsBasePath =>'));
         expect(docsBase, contains('String withDocsBasePath(String path) {'));
         expect(docsBase, contains('String stripDocsBasePath(String path) {'));
+      });
+
+      test('home scaffold uses home layout frontmatter contract', () {
+        final content = _readOutput(outDir, 'content/index.md');
+        final homeLayout = _readOutput(
+          outDir,
+          'lib/layouts/docs_home_layout.dart',
+        );
+        final headerShellStyles = _readOutput(
+          outDir,
+          'lib/layouts/docs_header_shell_styles.dart',
+        );
+        final heroComponent = _readOutput(
+          outDir,
+          'lib/components/docs_home_hero.dart',
+        );
+
+        expect(content, contains('layout: home'));
+        expect(content, contains('hero:'));
+        expect(content, contains('features:'));
+        expect(content, contains('<Tabs defaultValue="guide">'));
+        expect(homeLayout, contains("String get name => 'home';"));
+        expect(
+          homeLayout,
+          contains("import 'docs_header_shell_styles.dart';"),
+        );
+        expect(homeLayout, contains('DocsHomeHero('));
+        expect(
+          homeLayout,
+          contains('_resolveFeatures(pageData[\'features\'])'),
+        );
+        expect(
+          headerShellStyles,
+          contains('List<StyleRule> docsHeaderShellStyles()'),
+        );
+        expect(heroComponent, contains("section(classes: 'docs-home-hero'"));
+        expect(
+          heroComponent,
+          contains("MediaQuery.raw('(prefers-reduced-motion: reduce)')"),
+        );
       });
 
       test('custom layout wires feature runtimes', () {
@@ -686,7 +745,6 @@ void main() {
           contains("import 'extensions/base_path_link_extension.dart';"),
         );
         expect(app, contains('const BasePathLinkExtension()'));
-        expect(app, contains("additionalMatchPrefixes: ['/'],"));
         expect(
           content,
           contains("import '../components/docs_page_actions_runtime.dart';"),
@@ -998,9 +1056,11 @@ void main() {
         );
         expect(
           content,
-          contains(
-            "if (page.data['toc'] case final TableOfContents toc\n                when _hasVisibleTocEntries(toc.entries))",
-          ),
+          contains("if (page.data['toc'] case final TableOfContents toc"),
+        );
+        expect(
+          content,
+          contains('when _hasVisibleTocEntries(toc.entries))'),
         );
         expect(
           content,
@@ -1040,7 +1100,9 @@ void main() {
         expect(content, isNot(contains("css('.toc ul ul').styles(")));
         expect(
           content,
-          contains("css('ul ul ul').styles(padding: Padding.only(left: 0.78.rem))"),
+          contains(
+            "css('ul ul ul').styles(padding: Padding.only(left: 0.78.rem))",
+          ),
         );
         expect(content, contains("css('.toc-summary .toc-link').styles("));
         expect(content, isNot(contains("'table-layout': 'fixed'")));
@@ -1109,7 +1171,7 @@ void main() {
 
           expect(responsive, contains('const docsCompactBreakpoint = 479;'));
           expect(responsive, contains('const docsMobileBreakpoint = 767;'));
-          expect(responsive, contains('const docsContentBreakpoint = 959;'));
+          expect(responsive, contains('const docsContentBreakpoint = 1023;'));
           expect(responsive, contains('const docsWideBreakpoint = 1180;'));
           expect(responsive, contains('StyleRule downCompact('));
           expect(responsive, contains('StyleRule downMobile('));
@@ -1247,7 +1309,10 @@ void main() {
       });
 
       test('API pages preserve explicit section and member anchors', () {
-        final content = _readOutput(outDir, 'content/api/fake/LongFirstLine.md');
+        final content = _readOutput(
+          outDir,
+          'content/api/fake/LongFirstLine.md',
+        );
         expect(content, contains('{#section-constructors}'));
         expect(content, contains('{#prop-hashcode}'));
         expect(content, contains('{#operator-equals}'));
@@ -1260,9 +1325,7 @@ void main() {
         );
         expect(
           content,
-          contains(
-            '<span class="docs-badge docs-badge-tip">no setter</span>',
-          ),
+          contains('<span class="docs-badge docs-badge-tip">no setter</span>'),
         );
       });
 
@@ -1294,7 +1357,10 @@ void main() {
       });
 
       test('search index keeps explicit anchors for API member deep links', () {
-        final sections = _readOutput(outDir, 'web/generated/search_sections.json');
+        final sections = _readOutput(
+          outDir,
+          'web/generated/search_sections.json',
+        );
         expect(sections, contains('"prop-hashcode"'));
         expect(sections, contains('"operator-equals"'));
       });
@@ -1398,26 +1464,21 @@ void main() {
         );
       });
 
-      test('root preview entry boots the app shell and rewrites to overview', () {
-        final content = _readOutput(outDir, 'web/index.html');
-        expect(
-          content,
-          contains(
-            '<meta http-equiv="refresh" content="0; url=guide/getting-started">',
-          ),
-        );
-        expect(
-          content,
-          contains('window.location.replace("guide/getting-started");'),
-        );
-        expect(content, contains('<link rel="icon" href="favicon.svg"'));
-        expect(
-          content,
-          contains('<link rel="stylesheet" href="generated/api_styles.css"'),
-        );
-        expect(content, contains('Redirecting to the documentation overview'));
-        expect(_outputExists(outDir, 'web/404.html'), isTrue);
-      });
+      test(
+        'root preview entry boots the app shell without redirecting from /',
+        () {
+          final content = _readOutput(outDir, 'web/index.html');
+          expect(content, isNot(contains('http-equiv="refresh"')));
+          expect(content, isNot(contains('window.location.replace(')));
+          expect(content, contains('<link rel="icon" href="favicon.svg"'));
+          expect(
+            content,
+            contains('<link rel="stylesheet" href="generated/api_styles.css?v='),
+          );
+          expect(content, contains('Loading documentation...'));
+          expect(_outputExists(outDir, 'web/404.html'), isTrue);
+        },
+      );
 
       test('guide markdown remains clean for Jaspr consumption', () {
         final content = _readOutput(outDir, 'content/guide/getting-started.md');

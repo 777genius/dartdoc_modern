@@ -10,17 +10,17 @@ import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:analyzer/src/dart/sdk/sdk.dart';
 import 'package:analyzer/src/test_utilities/mock_sdk.dart';
 import 'package:analyzer_testing/utilities/extensions/resource_provider.dart';
-import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
-import 'package:dartdoc_vitepress/src/failure.dart';
-import 'package:dartdoc_vitepress/src/generator/generator.dart';
-import 'package:dartdoc_vitepress/src/generator/resource_loader.dart';
-import 'package:dartdoc_vitepress/src/logging.dart';
-import 'package:dartdoc_vitepress/src/markdown_processor.dart';
-import 'package:dartdoc_vitepress/src/matching_link_result.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
-import 'package:dartdoc_vitepress/src/model_utils.dart';
-import 'package:dartdoc_vitepress/src/package_meta.dart';
-import 'package:dartdoc_vitepress/src/warnings.dart';
+import 'package:dartdoc_modern/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/failure.dart';
+import 'package:dartdoc_modern/src/generator/generator.dart';
+import 'package:dartdoc_modern/src/generator/resource_loader.dart';
+import 'package:dartdoc_modern/src/logging.dart';
+import 'package:dartdoc_modern/src/markdown_processor.dart';
+import 'package:dartdoc_modern/src/matching_link_result.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
+import 'package:dartdoc_modern/src/model_utils.dart';
+import 'package:dartdoc_modern/src/package_meta.dart';
+import 'package:dartdoc_modern/src/warnings.dart';
 import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:test/test.dart';
@@ -400,7 +400,7 @@ extension PackageExtension on Package {
 extension on ResourceProvider {
   Future<void> writeDartdocResource(String resourcePath, String content) async {
     var fileUri =
-        await resolveResourceUri(Uri.parse('package:dartdoc_vitepress/$resourcePath'));
+        await resolveResourceUri(Uri.parse('package:dartdoc_modern/$resourcePath'));
     getFile(fileUri.toFilePath()).writeAsStringSync(content);
   }
 }

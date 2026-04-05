@@ -3,9 +3,9 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_vitepress/src/generator/core/guide_collection.dart'
+import 'package:dartdoc_modern/src/generator/core/guide_collection.dart'
     as guide_core;
-import 'package:dartdoc_vitepress/src/generator/vitepress_guide_generator.dart';
+import 'package:dartdoc_modern/src/generator/vitepress_guide_generator.dart';
 import 'package:test/test.dart';
 
 void main() {

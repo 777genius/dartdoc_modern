@@ -4,11 +4,11 @@
 
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:analyzer/file_system/memory_file_system.dart';
-import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
-import 'package:dartdoc_vitepress/src/model/class.dart';
-import 'package:dartdoc_vitepress/src/model/documentable.dart';
-import 'package:dartdoc_vitepress/src/model/kind.dart';
-import 'package:dartdoc_vitepress/src/package_meta.dart';
+import 'package:dartdoc_modern/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/model/class.dart';
+import 'package:dartdoc_modern/src/model/documentable.dart';
+import 'package:dartdoc_modern/src/model/kind.dart';
+import 'package:dartdoc_modern/src/package_meta.dart';
 import 'package:test/test.dart';
 import 'package:test_reflective_loader/test_reflective_loader.dart';
 

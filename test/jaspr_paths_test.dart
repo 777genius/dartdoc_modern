@@ -1,5 +1,5 @@
-import 'package:dartdoc_vitepress/src/generator/jaspr/paths.dart';
-import 'package:dartdoc_vitepress/src/package_meta.dart';
+import 'package:dartdoc_modern/src/generator/jaspr/paths.dart';
+import 'package:dartdoc_modern/src/package_meta.dart';
 import 'package:test/test.dart';
 
 import 'src/utils.dart';

@@ -2,8 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'package:dartdoc_vitepress/src/io_utils.dart';
-import 'package:dartdoc_vitepress/src/package_meta.dart';
+import 'package:dartdoc_modern/src/io_utils.dart';
+import 'package:dartdoc_modern/src/package_meta.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -39,7 +39,7 @@ void main() {
         resourceProvider.getFolder(resourceProvider.pathContext.current))!;
 
     test('has a name', () {
-      expect(p.name, 'dartdoc_vitepress');
+      expect(p.name, 'dartdoc_modern');
     });
 
     test('has a version', () {
@@ -53,7 +53,7 @@ void main() {
 
     test('has a repository', () {
       expect(
-          p.repository, equals('https://github.com/777genius/dartdoc_vitepress'));
+          p.repository, equals('https://github.com/777genius/dartdoc_modern'));
     });
 
     test('has a readme', () {
@@ -61,7 +61,7 @@ void main() {
       expect(
           resourceProvider
               .readAsMalformedAllowedStringSync(p.getReadmeContents()!),
-          contains('dartdoc-vitepress'));
+          contains('dartdoc_modern'));
     });
   });
 

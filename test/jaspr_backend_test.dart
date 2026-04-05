@@ -1,9 +1,11 @@
-import 'package:dartdoc_vitepress/src/generator/core/guide_collection.dart';
-import 'package:dartdoc_vitepress/src/generator/jaspr/backend.dart';
-import 'package:dartdoc_vitepress/src/generator/jaspr/dart_string.dart';
-import 'package:dartdoc_vitepress/src/generator/jaspr/paths.dart';
-import 'package:dartdoc_vitepress/src/generator/jaspr/sidebar.dart';
-import 'package:dartdoc_vitepress/src/package_meta.dart';
+import 'package:dartdoc_modern/src/generator/core/docs_recipe.dart'
+    as docs_recipe;
+import 'package:dartdoc_modern/src/generator/core/guide_collection.dart';
+import 'package:dartdoc_modern/src/generator/jaspr/backend.dart';
+import 'package:dartdoc_modern/src/generator/jaspr/dart_string.dart';
+import 'package:dartdoc_modern/src/generator/jaspr/paths.dart';
+import 'package:dartdoc_modern/src/generator/jaspr/sidebar.dart';
+import 'package:dartdoc_modern/src/package_meta.dart';
 import 'package:test/test.dart';
 
 import 'src/utils.dart';
@@ -63,8 +65,10 @@ Paragraph with {{ value }}
 ''');
     });
 
-    test('converts Badge components and removes TOC markers outside code fences', () {
-      const input = '''
+    test(
+      'converts Badge components and removes TOC markers outside code fences',
+      () {
+        const input = '''
 [[toc]]
 
 # Example <Badge type="warning" text="deprecated" />
@@ -75,7 +79,7 @@ Paragraph with {{ value }}
 ```
 ''';
 
-      expect(JasprGeneratorBackend.stripVitePressSyntaxForJaspr(input), '''
+        expect(JasprGeneratorBackend.stripVitePressSyntaxForJaspr(input), '''
 # Example <span class="docs-badge docs-badge-warning">deprecated</span>
 
 ```md
@@ -83,7 +87,8 @@ Paragraph with {{ value }}
 <Badge type="tip" text="keep" />
 ```
 ''');
-    });
+      },
+    );
   });
 
   group('escapeDartSingleQuotedString', () {
@@ -92,6 +97,27 @@ Paragraph with {{ value }}
         escapeDartSingleQuotedString(r"$begin\path's"),
         r"\$begin\\path\'s",
       );
+    });
+  });
+
+  group('buildRecipeHomePageMarkdown', () {
+    test('self-docs recipe emits Jaspr home frontmatter contract', () {
+      final markdown = docs_recipe.buildRecipeHomePageMarkdown(
+        docs_recipe.selfDocsRecipeName,
+        packageName: 'dartdoc_modern',
+        repositoryUrl: 'https://github.com/777genius/dartdoc_modern',
+      );
+
+      expect(markdown, isNotNull);
+      expect(markdown, contains('layout: home'));
+      expect(markdown, contains('hero:'));
+      expect(markdown, contains('features:'));
+      expect(markdown, contains('text: Quick Start'));
+      expect(markdown, contains('text: GitHub'));
+      expect(markdown, contains('<Tabs defaultValue="single-package">'));
+      expect(markdown, contains('label="Mono-repo"'));
+      expect(markdown, contains('## dart doc vs dartdoc_modern'));
+      expect(markdown, contains('## Live Example'));
     });
   });
 
@@ -117,20 +143,23 @@ Paragraph with {{ value }}
       expect(output, isNot(contains('export const guideSidebar')));
     });
 
-    test('generateGuide escapes Dart string interpolation in labels and links', () {
-      final generator = JasprSidebarGenerator(JasprPathResolver());
-      final output = generator.generateGuide([
-        GuideEntry(
-          packageName: 'pkg',
-          relativePath: r'guide/$begin.md',
-          title: r"$begin's path",
-          content: '# Example',
-        ),
-      ], isMultiPackage: false);
+    test(
+      'generateGuide escapes Dart string interpolation in labels and links',
+      () {
+        final generator = JasprSidebarGenerator(JasprPathResolver());
+        final output = generator.generateGuide([
+          GuideEntry(
+            packageName: 'pkg',
+            relativePath: r'guide/$begin.md',
+            title: r"$begin's path",
+            content: '# Example',
+          ),
+        ], isMultiPackage: false);
 
-      expect(output, contains(r"text: '\$begin\'s path'"));
-      expect(output, contains(r"link: '/guide/\$begin'"));
-    });
+        expect(output, contains(r"text: '\$begin\'s path'"));
+        expect(output, contains(r"link: '/guide/\$begin'"));
+      },
+    );
 
     test('generateApi emits nested library and kind groups', () async {
       final packageGraph = await bootBasicPackage(

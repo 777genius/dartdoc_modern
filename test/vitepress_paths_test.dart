@@ -2,8 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'package:dartdoc_vitepress/src/generator/vitepress_paths.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart' show Library;
+import 'package:dartdoc_modern/src/generator/vitepress_paths.dart';
+import 'package:dartdoc_modern/src/model/model.dart' show Library;
 import 'package:test/test.dart';
 
 void main() {

@@ -1,4 +1,4 @@
-import 'package:dartdoc_vitepress/src/generator/jaspr/search_index.dart';
+import 'package:dartdoc_modern/src/generator/jaspr/search_index.dart';
 import 'package:test/test.dart';
 
 void main() {

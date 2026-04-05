@@ -1,5 +1,5 @@
 import 'package:analyzer/file_system/memory_file_system.dart';
-import 'package:dartdoc_vitepress/src/generator/core/docs_recipe.dart';
+import 'package:dartdoc_modern/src/generator/core/docs_recipe.dart';
 import 'package:test/test.dart';
 
 import 'src/utils.dart';
@@ -11,12 +11,12 @@ void main() {
       final resourceProvider =
           packageMetaProvider.resourceProvider as MemoryResourceProvider;
       final packageDir = writePackage(
-        'dartdoc_vitepress',
+        'dartdoc_modern',
         resourceProvider,
         pubspecContent: '''
-name: dartdoc_vitepress
+name: dartdoc_modern
 version: 0.0.1
-repository: https://github.com/777genius/dartdoc_vitepress
+repository: https://github.com/777genius/dartdoc_modern
 ''',
       );
       packageDir
@@ -52,12 +52,12 @@ repository: https://github.com/777genius/dartdoc_vitepress
       expect(context.exclude, contains('api_symbols'));
       expect(
         context.exclude,
-        contains('package:dartdoc_vitepress/resources/jaspr/lib/app.dart'),
+        contains('package:dartdoc_modern/resources/jaspr/lib/app.dart'),
       );
       expect(
         context.exclude,
         contains(
-          'package:dartdoc_vitepress/resources/jaspr/lib/components/docs_header.dart',
+          'package:dartdoc_modern/resources/jaspr/lib/components/docs_header.dart',
         ),
       );
     });
@@ -65,17 +65,18 @@ repository: https://github.com/777genius/dartdoc_vitepress
     test('builds branded home page markdown', () {
       final markdown = buildRecipeHomePageMarkdown(
         selfDocsRecipeName,
-        packageName: 'dartdoc_vitepress',
-        repositoryUrl: 'https://github.com/777genius/dartdoc_vitepress',
+        packageName: 'dartdoc_modern',
+        repositoryUrl: 'https://github.com/777genius/dartdoc_modern',
       );
 
       expect(markdown, isNotNull);
-      expect(markdown, contains('title: "dartdoc-vitepress"'));
-      expect(markdown, contains('# dartdoc-vitepress'));
-      expect(markdown, contains('[Guide](/guide)'));
+      expect(markdown, contains('title: "dartdoc_modern"'));
+      expect(markdown, contains('text: Quick Start'));
+      expect(markdown, contains('link: https://777genius.github.io/dartdoc_modern/vitepress/'));
+      expect(markdown, contains('link: https://777genius.github.io/dartdoc_modern/jaspr/'));
       expect(
         markdown,
-        contains('[GitHub](https://github.com/777genius/dartdoc_vitepress)'),
+        contains('link: https://github.com/777genius/dartdoc_modern'),
       );
     });
   });
