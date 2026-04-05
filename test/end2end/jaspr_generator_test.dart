@@ -500,7 +500,18 @@ void main() {
         expect(content, contains('layout: home'));
         expect(content, contains('hero:'));
         expect(content, contains('features:'));
-        expect(content, contains('<Tabs defaultValue="guide">'));
+        expect(content, contains('text: Quick Start'));
+        expect(content, contains('### Install'));
+        expect(content, contains('dart pub global activate dartdoc_modern'));
+        expect(content, contains('<Tabs defaultValue="vitepress">'));
+        expect(content, contains('label="Jaspr" value="jaspr"'));
+        expect(content, contains('<Tabs defaultValue="single-package">'));
+        expect(content, contains('label="Mono-repo" value="mono-repo"'));
+        expect(
+          content,
+          contains('dartdoc_modern --format jaspr \\\n  --workspace-docs \\'),
+        );
+        expect(content, contains('## Live Versions'));
         expect(homeLayout, contains("String get name => 'home';"));
         expect(
           homeLayout,
