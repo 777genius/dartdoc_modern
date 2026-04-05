@@ -177,7 +177,7 @@ class ApiDocsLayout extends DocsLayout {
     } else if (path.startsWith('guide/') && pageTitle.isNotEmpty) {
       trail.addAll([
         DocsNavLink(
-          to: '/',
+          to: '/guide',
           classes: 'breadcrumb-link',
           children: [Component.text('Guides')],
         ),

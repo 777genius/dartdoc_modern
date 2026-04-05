@@ -481,6 +481,12 @@ class JasprInitGenerator {
     );
     _writeTemplateIfAbsent(
       templateDir: templateDir,
+      templateFile: p.join('content', 'guide', 'index.md'),
+      outputFile: 'content/guide/index.md',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
       templateFile: '.gitignore',
       outputFile: '.gitignore',
       placeholders: placeholders,

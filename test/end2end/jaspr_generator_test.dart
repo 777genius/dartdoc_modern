@@ -342,6 +342,7 @@ void main() {
           isTrue,
         );
         expect(_outputExists(outDir, 'content/index.md'), isTrue);
+        expect(_outputExists(outDir, 'content/guide/index.md'), isTrue);
         expect(_outputExists(outDir, 'web/favicon.svg'), isTrue);
         expect(_outputExists(outDir, 'lib/generated/api_sidebar.dart'), isTrue);
         expect(
@@ -458,6 +459,14 @@ void main() {
         expect(app, contains("homeHref: '/'"));
         expect(app, contains("text: 'Guide',"));
         expect(app, contains("text: 'API Reference',"));
+        expect(
+          app,
+          contains("final guideLandingHref = hasGuideLinks ? '/guide' : null;"),
+        );
+        expect(
+          app,
+          contains("final guideNavHref = guideLandingHref ?? '/api';"),
+        );
         expect(app, contains('const Tabs(),'));
         expect(app, contains('DocsHomeLayout('));
         expect(app, contains('primaryActionHref: primaryHomeActionHref,'));
@@ -557,6 +566,10 @@ void main() {
         expect(
           homeLayout,
           contains('_resolveFeatures(pageData[\'features\'])'),
+        );
+        expect(
+          _readOutput(outDir, 'content/guide/index.md'),
+          contains('# Guide'),
         );
         expect(
           headerShellStyles,

@@ -36,11 +36,11 @@ Component buildDocsApp({
   String repositoryUrl = '',
   TemplateEngine? templateEngine,
 }) {
-  final guideLandingHref = _resolveGuideLandingHref();
-  final overviewHref = guideLandingHref ?? _resolveOverviewHref();
   final hasGuideLinks = guide.guideSidebarGroups.any(
     (group) => group.items.isNotEmpty,
   );
+  final guideLandingHref = hasGuideLinks ? '/guide' : null;
+  final overviewHref = guideLandingHref ?? _resolveOverviewHref();
   final guideNavHref = guideLandingHref ?? '/api';
   final primaryHomeActionHref = guideLandingHref ?? '/api';
   final isProjectDocs =
@@ -188,9 +188,11 @@ DocsSidebarItem _mapApiItem(api.SidebarItem item) {
 }
 
 String _resolveOverviewHref() {
-  final guideLandingHref = _resolveGuideLandingHref();
-  if (guideLandingHref != null) {
-    return guideLandingHref;
+  final hasGuideLinks = guide.guideSidebarGroups.any(
+    (group) => group.items.isNotEmpty,
+  );
+  if (hasGuideLinks) {
+    return '/guide';
   }
 
   for (final group in api.apiSidebarGroups) {
@@ -200,23 +202,4 @@ String _resolveOverviewHref() {
   }
 
   return '/api';
-}
-
-String? _resolveGuideLandingHref() {
-  for (final group in guide.guideSidebarGroups) {
-    final firstLink = _firstGuideLink(group.items);
-    if (firstLink != null) return firstLink;
-  }
-  return null;
-}
-
-String? _firstGuideLink(List<guide.SidebarItem> items) {
-  for (final item in items) {
-    if (item.link case final link? when link.isNotEmpty) {
-      return link;
-    }
-    final nested = _firstGuideLink(item.items);
-    if (nested != null) return nested;
-  }
-  return null;
 }
