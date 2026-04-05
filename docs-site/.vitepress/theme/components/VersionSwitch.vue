@@ -88,9 +88,27 @@ function sharedApiLibraryDir(pathname: string): string | null {
   return SHARED_API_LIBRARY_DIRS.has(libraryDir) ? libraryDir : null
 }
 
+function guideRouteForTarget(pathname: string, target: 'jaspr' | 'vitepress'): string {
+  const normalizedPath = normalizeRoutePath(pathname)
+  if (normalizedPath === '/guide' || normalizedPath === '/guide/') {
+    return target === 'jaspr' ? '/guide' : '/guide/'
+  }
+  if (!normalizedPath.startsWith('/guide/')) {
+    return normalizedPath
+  }
+  if (target === 'jaspr' && !normalizedPath.endsWith('.html')) {
+    return `${normalizedPath}.html`
+  }
+  return normalizedPath
+}
+
 function routeForTarget(pathname: string, target: 'jaspr' | 'vitepress'): string {
   const currentPath = resolveRelativeRoute(pathname)
   const sharedLibraryDir = sharedApiLibraryDir(currentPath)
+
+  if (currentPath === '/guide' || currentPath === '/guide/' || currentPath.startsWith('/guide/')) {
+    return guideRouteForTarget(currentPath, target)
+  }
 
   if (target === 'vitepress') {
     if (currentPath === '/api') {

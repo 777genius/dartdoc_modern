@@ -98,6 +98,7 @@ jobs:
             (
               cd "$JASPR_OUTPUT_DIR/web"
               find guide -name '*.html' -type f -exec cp --parents {} "$GITHUB_WORKSPACE/publish" \;
+              find guide -name '*.html' -type f -exec cp --parents {} "$GITHUB_WORKSPACE/publish/jaspr" \;
             )
           fi
 
@@ -117,6 +118,17 @@ jobs:
             clean_output="publish/guide/$clean_path/index.html"
             if [ ! -f "$clean_output" ]; then
               create_redirect "$clean_output" "${VITEPRESS_BASE_PATH}guide/$relative_path"
+            fi
+
+            jaspr_html_output="publish/jaspr/guide/$relative_path"
+            if [ ! -f "$jaspr_html_output" ] && [ -f "$JASPR_OUTPUT_DIR/web/guide/$relative_path" ]; then
+              mkdir -p "$(dirname "$jaspr_html_output")"
+              cp "$JASPR_OUTPUT_DIR/web/guide/$relative_path" "$jaspr_html_output"
+            fi
+
+            jaspr_clean_output="publish/jaspr/guide/$clean_path/index.html"
+            if [ ! -f "$jaspr_clean_output" ] && [ -f "$JASPR_OUTPUT_DIR/web/guide/$relative_path" ]; then
+              create_redirect "$jaspr_clean_output" "${JASPR_BASE_PATH}guide/$relative_path"
             fi
           done < <(
             cd docs-site/.vitepress/dist/guide

@@ -37,7 +37,22 @@ void main() {
       );
       expect(
         projectJasprUrlForRoute('/guide/jaspr-vs-vitepress?tab=usage#switch'),
-        'https://777genius.github.io/dartdoc_modern/jaspr/guide/jaspr-vs-vitepress?tab=usage#switch',
+        'https://777genius.github.io/dartdoc_modern/jaspr/guide/jaspr-vs-vitepress.html?tab=usage#switch',
+      );
+    });
+
+    test('normalizes guide deep links for Jaspr static hosting', () {
+      expect(
+        projectJasprUrlForRoute('/guide/jaspr-deployment'),
+        'https://777genius.github.io/dartdoc_modern/jaspr/guide/jaspr-deployment.html',
+      );
+      expect(
+        projectJasprUrlForRoute('/guide/jaspr-deployment.html'),
+        'https://777genius.github.io/dartdoc_modern/jaspr/guide/jaspr-deployment.html',
+      );
+      expect(
+        projectVitePressUrlForRoute('/guide/jaspr-deployment.html'),
+        'https://777genius.github.io/dartdoc_modern/vitepress/guide/jaspr-deployment.html',
       );
     });
 

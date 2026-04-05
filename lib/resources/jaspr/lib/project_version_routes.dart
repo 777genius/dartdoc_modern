@@ -46,6 +46,11 @@ String _routeForVitePress(String currentRoute) {
   final path = _normalizeRoutePath(routeUri.path);
   final sharedLibraryDir = _sharedApiLibraryDir(path);
 
+  if (path == '/guide' || path == '/guide/' || path.startsWith('/guide/')) {
+    return _replaceRoutePath(routeUri, _guideRouteForTarget(path, 'vitepress'))
+        .toString();
+  }
+
   if (path == '/api') {
     return _replaceRoutePath(routeUri, '/api/').toString();
   }
@@ -70,6 +75,11 @@ String _routeForJaspr(String currentRoute) {
   final routeUri = Uri.parse(currentRoute.isEmpty ? '/' : currentRoute);
   final path = _normalizeRoutePath(routeUri.path);
   final sharedLibraryDir = _sharedApiLibraryDir(path);
+
+  if (path == '/guide' || path == '/guide/' || path.startsWith('/guide/')) {
+    return _replaceRoutePath(routeUri, _guideRouteForTarget(path, 'jaspr'))
+        .toString();
+  }
 
   if (path == '/api') {
     return _replaceRoutePath(routeUri, '/api').toString();
@@ -104,6 +114,20 @@ String? _sharedApiLibraryDir(String path) {
 
   final libraryDir = segments[1];
   return _sharedApiLibraryDirs.contains(libraryDir) ? libraryDir : null;
+}
+
+String _guideRouteForTarget(String path, String target) {
+  final normalizedPath = _normalizeRoutePath(path);
+  if (normalizedPath == '/guide' || normalizedPath == '/guide/') {
+    return target == 'jaspr' ? '/guide' : '/guide/';
+  }
+  if (!normalizedPath.startsWith('/guide/')) {
+    return normalizedPath;
+  }
+  if (target == 'jaspr' && !normalizedPath.endsWith('.html')) {
+    return '$normalizedPath.html';
+  }
+  return normalizedPath;
 }
 
 Uri _replaceRoutePath(Uri uri, String path) {
