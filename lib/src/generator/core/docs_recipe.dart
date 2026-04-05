@@ -123,12 +123,6 @@ hero:
     - theme: alt
       text: API Reference
       link: /api/
-    - theme: alt
-      text: VitePress Version
-      link: $projectVitePressSiteUrl
-    - theme: alt
-      text: Jaspr Version
-      link: $projectJasprSiteUrl
 $gitHubAction
 features:
   - icon: 📚
