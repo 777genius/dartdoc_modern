@@ -373,13 +373,62 @@ class DocsHomeLayout extends PageLayoutBase {
     css('.docs-home-markdown .tabs').styles(margin: Margin.only(top: 1.rem)),
     css(
       '.docs-home-markdown .tab-bar',
-    ).styles(raw: {'overflow-x': 'auto', 'overflow-y': 'hidden'}),
+    ).styles(
+      display: Display.flex,
+      alignItems: AlignItems.center,
+      gap: Gap.column(1.25.rem),
+      margin: Margin.only(bottom: 1.15.rem),
+      padding: Padding.zero,
+      border: Border.only(
+        bottom: BorderSide(
+          width: 1.px,
+          color: Color('var(--docs-shell-border)'),
+        ),
+      ),
+      backgroundColor: Color('transparent'),
+      radius: BorderRadius.circular(0.px),
+      raw: {'overflow-x': 'auto', 'overflow-y': 'hidden'},
+    ),
     css(
       '.docs-home-markdown .tab-bar button',
-    ).styles(raw: {'white-space': 'nowrap'}),
+    ).styles(
+      padding: Padding.only(bottom: 0.7.rem),
+      raw: {'white-space': 'nowrap', 'border': 'none'},
+      backgroundColor: Color('transparent'),
+      radius: BorderRadius.circular(0.px),
+      color: Color('var(--docs-shell-muted)'),
+      fontWeight: FontWeight.w800,
+      fontSize: 1.02.rem,
+    ),
+    css('.docs-home-markdown .tab-bar .tab-item').styles(
+      minHeight: Unit.zero,
+      padding: Padding.only(bottom: 0.7.rem),
+      border: Border.only(
+        bottom: BorderSide(width: 3.px, color: Color('transparent')),
+      ),
+      radius: BorderRadius.circular(0.px),
+      color: Color('var(--docs-shell-muted)'),
+      fontWeight: FontWeight.w800,
+      fontSize: 1.02.rem,
+      backgroundColor: Color('transparent'),
+      transition: Transition(
+        'color, border-color',
+        duration: Duration(milliseconds: 150),
+      ),
+    ),
+    css('.docs-home-markdown .tab-bar .tab-item[active]').styles(
+      color: Color('var(--docs-shell-accent-strong)'),
+      border: Border.only(
+        bottom: BorderSide(
+          width: 3.px,
+          color: Color('var(--docs-shell-accent)'),
+        ),
+      ),
+      backgroundColor: Color('transparent'),
+    ),
     css(
       '.docs-home-markdown .tab-content',
-    ).styles(margin: Margin.only(top: 1.rem)),
+    ).styles(margin: Margin.only(top: 0.4.rem)),
     css(
       '.docs-home-markdown .content > :first-child',
     ).styles(margin: Margin.only(top: Unit.zero)),

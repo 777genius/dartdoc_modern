@@ -165,50 +165,17 @@ dart pub global activate dartdoc_modern
 
 ## Usage
 
-<Tabs defaultValue="vitepress">
-  <TabItem label="VitePress" value="vitepress">
-
-<Tabs defaultValue="single-package">
-  <TabItem label="Single package" value="single-package">
-
-```bash
-dartdoc_modern --format vitepress --output docs-site
-cd docs-site && npm install && npx vitepress dev
-```
-
-  </TabItem>
-  <TabItem label="Mono-repo" value="mono-repo">
-
-```bash
-dartdoc_modern --format vitepress \\
-  --workspace-docs \\
-  --exclude-packages 'example,test_utils' \\
-  --output docs-site
-```
-
-  </TabItem>
-  <TabItem label="Dart SDK" value="dart-sdk">
-
-```bash
-dartdoc_modern --sdk-docs --format vitepress --output docs-site
-```
-
-  </TabItem>
-</Tabs>
-
-  </TabItem>
+<Tabs defaultValue="jaspr">
   <TabItem label="Jaspr" value="jaspr">
 
-<Tabs defaultValue="single-package">
-  <TabItem label="Single package" value="single-package">
+#### Single package
 
 ```bash
 dartdoc_modern --format jaspr --output docs-site
 cd docs-site && dart pub get && jaspr serve
 ```
 
-  </TabItem>
-  <TabItem label="Mono-repo" value="mono-repo">
+#### Mono-repo
 
 ```bash
 dartdoc_modern --format jaspr \\
@@ -218,8 +185,7 @@ dartdoc_modern --format jaspr \\
 cd docs-site && dart pub get && jaspr serve
 ```
 
-  </TabItem>
-  <TabItem label="Dart SDK" value="dart-sdk">
+#### Dart SDK
 
 ```bash
 dartdoc_modern --sdk-docs --format jaspr --output docs-site
@@ -227,7 +193,29 @@ cd docs-site && dart pub get && jaspr serve
 ```
 
   </TabItem>
-</Tabs>
+  <TabItem label="VitePress" value="vitepress">
+
+#### Single package
+
+```bash
+dartdoc_modern --format vitepress --output docs-site
+cd docs-site && npm install && npx vitepress dev
+```
+
+#### Mono-repo
+
+```bash
+dartdoc_modern --format vitepress \\
+  --workspace-docs \\
+  --exclude-packages 'example,test_utils' \\
+  --output docs-site
+```
+
+#### Dart SDK
+
+```bash
+dartdoc_modern --sdk-docs --format vitepress --output docs-site
+```
 
   </TabItem>
 </Tabs>

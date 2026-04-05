@@ -56,19 +56,6 @@ dart pub global activate dartdoc_modern
 ## Usage
 
 ::: code-group
-```bash [VitePress]
-dartdoc_modern --format vitepress --output docs-site
-cd docs-site && npm install && npx vitepress dev
-
-# Mono-repo
-dartdoc_modern --format vitepress \
-  --workspace-docs \
-  --exclude-packages 'example,test_utils' \
-  --output docs-site
-
-# Dart SDK
-dartdoc_modern --sdk-docs --format vitepress --output docs-site
-```
 ```bash [Jaspr]
 dartdoc_modern --format jaspr --output docs-site
 cd docs-site && dart pub get && jaspr serve
@@ -83,6 +70,19 @@ cd docs-site && dart pub get && jaspr serve
 # Dart SDK
 dartdoc_modern --sdk-docs --format jaspr --output docs-site
 cd docs-site && dart pub get && jaspr serve
+```
+```bash [VitePress]
+dartdoc_modern --format vitepress --output docs-site
+cd docs-site && npm install && npx vitepress dev
+
+# Mono-repo
+dartdoc_modern --format vitepress \
+  --workspace-docs \
+  --exclude-packages 'example,test_utils' \
+  --output docs-site
+
+# Dart SDK
+dartdoc_modern --sdk-docs --format vitepress --output docs-site
 ```
 :::
 
