@@ -3,6 +3,7 @@ import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_content/theme.dart';
 
 import '../docs_base.dart';
+import '../project_version_routes.dart';
 import 'docs_nav_link.dart';
 import 'docs_sidebar_toggle.dart';
 import '../theme/docs_responsive.dart';
@@ -13,6 +14,8 @@ class DocsHeader extends StatelessComponent {
     required this.title,
     required this.homeHref,
     this.currentRoute,
+    this.jasprDocsUrl,
+    this.vitePressDocsUrl,
     this.navItems = const [],
     this.items = const [],
     super.key,
@@ -22,12 +25,15 @@ class DocsHeader extends StatelessComponent {
   final String title;
   final String homeHref;
   final String? currentRoute;
+  final String? jasprDocsUrl;
+  final String? vitePressDocsUrl;
   final List<DocsHeaderNavItem> navItems;
   final List<Component> items;
 
   @override
   Component build(BuildContext context) {
     final activeRoute = _normalizeRoute(currentRoute ?? homeHref);
+    final switchRoute = currentRoute ?? homeHref;
 
     return Component.fragment([
       Document.head(children: [Style(styles: _styles)]),
@@ -61,7 +67,24 @@ class DocsHeader extends StatelessComponent {
                   children: [Component.text(item.text)],
                 ),
             ]),
-          div(classes: 'header-items', items),
+          div(classes: 'header-items', [
+            if (jasprDocsUrl != null && vitePressDocsUrl != null)
+              div(classes: 'version-switch', [
+                DocsNavLink(
+                  to: projectJasprUrlForRoute(switchRoute),
+                  classes: 'version-switch-option is-active',
+                  attributes: {'data-version': 'jaspr'},
+                  children: [Component.text('Jaspr')],
+                ),
+                DocsNavLink(
+                  to: projectVitePressUrlForRoute(switchRoute),
+                  classes: 'version-switch-option',
+                  attributes: {'data-version': 'vitepress'},
+                  children: [Component.text('VitePress')],
+                ),
+              ]),
+            ...items,
+          ]),
         ]),
       ]),
     ]);
@@ -131,11 +154,9 @@ class DocsHeader extends StatelessComponent {
           minWidth: Unit.zero,
           raw: {'max-width': 'min(28rem, 100%)'},
         ),
-        css('img').styles(
-          height: 2.25.rem,
-          width: 2.25.rem,
-          raw: {'flex': '0 0 auto'},
-        ),
+        css(
+          'img',
+        ).styles(height: 2.25.rem, width: 2.25.rem, raw: {'flex': '0 0 auto'}),
         css('span').styles(
           fontWeight: FontWeight.w700,
           minWidth: Unit.zero,

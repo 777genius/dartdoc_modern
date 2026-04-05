@@ -6,8 +6,7 @@ import 'dart:io';
 import 'dart:io' as io;
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_modern/src/dartdoc.dart'
-    show Dartdoc, DartdocResults;
+import 'package:dartdoc_modern/src/dartdoc.dart' show Dartdoc, DartdocResults;
 import 'package:dartdoc_modern/src/dartdoc_options.dart';
 import 'package:dartdoc_modern/src/failure.dart';
 import 'package:dartdoc_modern/src/logging.dart';
@@ -422,6 +421,10 @@ void main() {
         final app = _readOutput(outDir, 'lib/app.dart');
         final client = _readOutput(outDir, 'lib/main.client.dart');
         final docsBase = _readOutput(outDir, 'lib/docs_base.dart');
+        final versionRoutes = _readOutput(
+          outDir,
+          'lib/project_version_routes.dart',
+        );
 
         expect(app, contains('Component buildDocsApp({'));
         expect(app, contains('ContentApp('));
@@ -443,6 +446,7 @@ void main() {
         expect(app, contains("import 'components/docs_sidebar.dart';"));
         expect(app, contains("import 'components/docs_theme_toggle.dart';"));
         expect(app, contains("import 'docs_base.dart';"));
+        expect(app, contains("import 'project_version_routes.dart';"));
         expect(app, contains("import 'generated/api_sidebar.dart' as api;"));
         expect(
           app,
@@ -458,6 +462,16 @@ void main() {
         expect(app, contains('DocsHomeLayout('));
         expect(app, contains('primaryActionHref: primaryHomeActionHref,'));
         expect(app, contains('hasGuideLinks: hasGuideLinks,'));
+        expect(
+          app,
+          contains('jasprDocsUrl: isProjectDocs ? projectJasprDocsUrl : null,'),
+        );
+        expect(
+          app,
+          contains(
+            'vitePressDocsUrl: isProjectDocs ? projectVitePressDocsUrl : null,',
+          ),
+        );
         expect(app, contains('const DocsSearchShell()'));
         expect(app, contains('const DocsThemeToggle()'));
         expect(
@@ -480,6 +494,26 @@ void main() {
         expect(docsBase, contains('bool get hasDocsBasePath =>'));
         expect(docsBase, contains('String withDocsBasePath(String path) {'));
         expect(docsBase, contains('String stripDocsBasePath(String path) {'));
+        expect(
+          versionRoutes,
+          contains(
+            "const projectVitePressDocsUrl = '\$projectSiteRootUrl/vitepress/';",
+          ),
+        );
+        expect(
+          versionRoutes,
+          contains(
+            "const projectJasprDocsUrl = '\$projectSiteRootUrl/jaspr/';",
+          ),
+        );
+        expect(
+          versionRoutes,
+          contains('String projectVitePressUrlForRoute(String currentRoute)'),
+        );
+        expect(
+          versionRoutes,
+          contains('String projectJasprUrlForRoute(String currentRoute)'),
+        );
       });
 
       test('home scaffold uses home layout frontmatter contract', () {
@@ -512,13 +546,13 @@ void main() {
           content,
           contains('dartdoc_modern --format jaspr \\\n  --workspace-docs \\'),
         );
-        expect(content, isNot(contains('<Tabs defaultValue="single-package">')));
+        expect(
+          content,
+          isNot(contains('<Tabs defaultValue="single-package">')),
+        );
         expect(content, contains('## Live Versions'));
         expect(homeLayout, contains("String get name => 'home';"));
-        expect(
-          homeLayout,
-          contains("import 'docs_header_shell_styles.dart';"),
-        );
+        expect(homeLayout, contains("import 'docs_header_shell_styles.dart';"));
         expect(homeLayout, contains('DocsHomeHero('));
         expect(
           homeLayout,
@@ -667,9 +701,16 @@ void main() {
         );
         expect(header, contains('class DocsHeader extends StatelessComponent'));
         expect(header, contains("import '../docs_base.dart';"));
+        expect(header, contains("import '../project_version_routes.dart';"));
         expect(header, contains('const DocsSidebarToggle()'));
         expect(header, contains("classes: 'header-title'"));
         expect(header, contains('DocsNavLink('));
+        expect(header, contains('projectJasprUrlForRoute(switchRoute)'));
+        expect(header, contains('projectVitePressUrlForRoute(switchRoute)'));
+        expect(
+          header,
+          contains('if (jasprDocsUrl != null && vitePressDocsUrl != null)'),
+        );
         expect(header, contains('stripDocsBasePath(withoutFragment)'));
         expect(
           header,
@@ -1071,10 +1112,7 @@ void main() {
           content,
           contains("if (page.data['toc'] case final TableOfContents toc"),
         );
-        expect(
-          content,
-          contains('when _hasVisibleTocEntries(toc.entries))'),
-        );
+        expect(content, contains('when _hasVisibleTocEntries(toc.entries))'));
         expect(
           content,
           contains("final isApiPage = pagePath.startsWith('api/');"),
@@ -1486,7 +1524,9 @@ void main() {
           expect(content, contains('<link rel="icon" href="favicon.svg"'));
           expect(
             content,
-            contains('<link rel="stylesheet" href="generated/api_styles.css?v='),
+            contains(
+              '<link rel="stylesheet" href="generated/api_styles.css?v=',
+            ),
           );
           expect(content, contains('Loading documentation...'));
           expect(_outputExists(outDir, 'web/404.html'), isTrue);

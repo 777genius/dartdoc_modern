@@ -73,6 +73,12 @@ class JasprInitGenerator {
     );
     _writeTemplateIfAbsent(
       templateDir: templateDir,
+      templateFile: p.join('lib', 'project_version_routes.dart'),
+      outputFile: 'lib/project_version_routes.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
       templateFile: p.join('lib', 'main.server.dart'),
       outputFile: 'lib/main.server.dart',
       placeholders: placeholders,

@@ -5,8 +5,7 @@
 import 'dart:io' as io;
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_modern/src/dartdoc.dart'
-    show Dartdoc, DartdocResults;
+import 'package:dartdoc_modern/src/dartdoc.dart' show Dartdoc, DartdocResults;
 import 'package:dartdoc_modern/src/dartdoc_options.dart';
 import 'package:dartdoc_modern/src/io_utils.dart';
 import 'package:dartdoc_modern/src/logging.dart';
@@ -224,10 +223,35 @@ void main() {
         );
       });
 
+      test('VersionSwitch component is scaffolded', () {
+        expect(
+          _outputExists(
+            outDir,
+            '.vitepress/theme/components/VersionSwitch.vue',
+          ),
+          isTrue,
+        );
+      });
+
       test('theme index.ts imports DartPad', () {
         var content = _readOutput(outDir, '.vitepress/theme/index.ts');
         expect(content, contains('DartPad'));
         expect(content, contains('enhanceApp'));
+      });
+
+      test('theme index.ts wires version switch into the navbar', () {
+        var content = _readOutput(outDir, '.vitepress/theme/index.ts');
+        expect(content, contains('VersionSwitch'));
+        expect(
+          content,
+          contains("'nav-bar-content-after': () => h(VersionSwitch)"),
+        );
+        expect(
+          content,
+          contains(
+            "'nav-screen-content-after': () => h(VersionSwitch, { mobile: true })",
+          ),
+        );
       });
 
       test('no member subdirectories (members are inline)', () {

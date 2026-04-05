@@ -34,8 +34,7 @@ class VitePressInitGenerator {
   final String outputPath;
 
   /// Package URI prefix for VitePress template files.
-  static const _templatePrefix =
-      'package:dartdoc_modern/resources/vitepress';
+  static const _templatePrefix = 'package:dartdoc_modern/resources/vitepress';
 
   VitePressInitGenerator({
     required this.writer,
@@ -184,6 +183,12 @@ class VitePressInitGenerator {
       templateDir: templateDir,
       templateFile: p.join('theme', 'components', 'ApiBreadcrumb.vue'),
       outputFile: '.vitepress/theme/components/ApiBreadcrumb.vue',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
+      templateFile: p.join('theme', 'components', 'VersionSwitch.vue'),
+      outputFile: '.vitepress/theme/components/VersionSwitch.vue',
       placeholders: placeholders,
     );
     _writeTemplateIfAbsent(

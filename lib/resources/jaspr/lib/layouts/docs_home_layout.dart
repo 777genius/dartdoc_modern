@@ -48,16 +48,20 @@ class DocsHomeLayout extends PageLayoutBase {
         :final logo,
         :final title,
         :final homeHref,
+        :final jasprDocsUrl,
         :final navItems,
         :final items,
+        :final vitePressDocsUrl,
       ) =>
         DocsHeader(
           logo: logo,
           title: title,
           homeHref: homeHref,
           currentRoute: page.url,
+          jasprDocsUrl: jasprDocsUrl,
           navItems: navItems,
           items: items,
+          vitePressDocsUrl: vitePressDocsUrl,
         ),
       final Component component? => component,
       _ => null,
@@ -375,9 +379,9 @@ class DocsHomeLayout extends PageLayoutBase {
       ),
       raw: {'letter-spacing': '-0.01em'},
     ),
-    css('.docs-home-version-btn:hover').styles(
-      raw: {'transform': 'translateY(-2px)'},
-    ),
+    css(
+      '.docs-home-version-btn:hover',
+    ).styles(raw: {'transform': 'translateY(-2px)'}),
     css('.docs-home-version-jaspr').styles(
       backgroundColor: Color('#1a73e8'),
       color: Color('white'),
@@ -404,10 +408,9 @@ class DocsHomeLayout extends PageLayoutBase {
         color: Color('var(--docs-shell-shadow)'),
       ),
     ),
-    css('.docs-home-version-vitepress:hover').styles(
-      backgroundColor: Color('#5c6bc0'),
-      color: Color('white'),
-    ),
+    css(
+      '.docs-home-version-vitepress:hover',
+    ).styles(backgroundColor: Color('#5c6bc0'), color: Color('white')),
     css('.docs-home-content-panel').styles(
       width: 100.percent,
       padding: Padding.only(top: 0.8.rem, bottom: 0.8.rem),
@@ -428,9 +431,7 @@ class DocsHomeLayout extends PageLayoutBase {
       '.docs-home-markdown > :first-child',
     ).styles(margin: Margin.only(top: Unit.zero)),
     css('.docs-home-markdown .tabs').styles(margin: Margin.only(top: 1.rem)),
-    css(
-      '.docs-home-markdown .tab-bar',
-    ).styles(
+    css('.docs-home-markdown .tab-bar').styles(
       display: Display.flex,
       alignItems: AlignItems.center,
       gap: Gap.column(1.25.rem),
@@ -446,9 +447,7 @@ class DocsHomeLayout extends PageLayoutBase {
       radius: BorderRadius.circular(Unit.zero),
       raw: {'overflow-x': 'auto', 'overflow-y': 'hidden'},
     ),
-    css(
-      '.docs-home-markdown .tab-bar button',
-    ).styles(
+    css('.docs-home-markdown .tab-bar button').styles(
       padding: Padding.only(bottom: 0.7.rem),
       raw: {'white-space': 'nowrap', 'border': 'none'},
       backgroundColor: Color('transparent'),

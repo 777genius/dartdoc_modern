@@ -39,16 +39,20 @@ class ApiDocsLayout extends DocsLayout {
         :final logo,
         :final title,
         :final homeHref,
+        :final jasprDocsUrl,
         :final navItems,
         :final items,
+        :final vitePressDocsUrl,
       ) =>
         DocsHeader(
           logo: logo,
           title: title,
           homeHref: homeHref,
           currentRoute: page.url,
+          jasprDocsUrl: jasprDocsUrl,
           navItems: navItems,
           items: items,
+          vitePressDocsUrl: vitePressDocsUrl,
         ),
       final Component component? => component,
       _ => null,
@@ -66,57 +70,66 @@ class ApiDocsLayout extends DocsLayout {
             (pageImage?.isNotEmpty ?? false));
 
     return Component.fragment([
-      Document.head(children: [
-        Style(styles: _styles),
-        script(src: 'docs_mermaid_runtime.js?v=5', defer: true),
-        script(src: 'docs_lightbox_runtime.js?v=3', defer: true),
-      ]),
-      div(classes: 'docs', attributes: {'data-docs-layout': 'docs'}, [
-        const DocsDartPadRuntime(),
-        const DocsPageActionsRuntime(),
-        if (headerComponent case final Component header)
-          div(
-            classes: 'header-container',
-            attributes: {if (this.sidebar != null) 'data-has-sidebar': ''},
-            [header],
-          ),
-        div(classes: 'main-container', [
-          div(
-            classes: 'sidebar-barrier',
-            attributes: {'role': 'button', 'data-docs-sidebar-barrier': 'true'},
-            [],
-          ),
-          if (this.sidebar case final Component sidebar)
-            div(classes: 'sidebar-container', [sidebar]),
-          main_([
-            div([
-              div(classes: 'content-container', [
-                if (breadcrumb != null) breadcrumb,
-                if (hasContentHeader)
-                  div(classes: 'content-header', [
-                    if (pageTitle != null && pageTitle.isNotEmpty)
-                      h1([Component.text(pageTitle)]),
-                    if (pageDescription != null && pageDescription.isNotEmpty)
-                      p([Component.text(pageDescription)]),
-                    if (pageImage != null && pageImage.isNotEmpty)
-                      img(src: pageImage, alt: pageImageAlt),
-                  ]),
-                child,
-                if (this.footer != null)
-                  div(classes: 'content-footer', [this.footer!]),
-              ]),
-              if (page.data['toc'] case final TableOfContents toc
-                  when _hasVisibleTocEntries(toc.entries))
-                aside(classes: 'toc', [
-                  div([
-                    h3([Component.text('On this page')]),
-                    _buildToc(toc, page.url, collapsibleOutline),
-                  ]),
+      Document.head(
+        children: [
+          Style(styles: _styles),
+          script(src: 'docs_mermaid_runtime.js?v=5', defer: true),
+          script(src: 'docs_lightbox_runtime.js?v=3', defer: true),
+        ],
+      ),
+      div(
+        classes: 'docs',
+        attributes: {'data-docs-layout': 'docs'},
+        [
+          const DocsDartPadRuntime(),
+          const DocsPageActionsRuntime(),
+          if (headerComponent case final Component header)
+            div(
+              classes: 'header-container',
+              attributes: {if (this.sidebar != null) 'data-has-sidebar': ''},
+              [header],
+            ),
+          div(classes: 'main-container', [
+            div(
+              classes: 'sidebar-barrier',
+              attributes: {
+                'role': 'button',
+                'data-docs-sidebar-barrier': 'true',
+              },
+              [],
+            ),
+            if (this.sidebar case final Component sidebar)
+              div(classes: 'sidebar-container', [sidebar]),
+            main_([
+              div([
+                div(classes: 'content-container', [
+                  if (breadcrumb != null) breadcrumb,
+                  if (hasContentHeader)
+                    div(classes: 'content-header', [
+                      if (pageTitle != null && pageTitle.isNotEmpty)
+                        h1([Component.text(pageTitle)]),
+                      if (pageDescription != null && pageDescription.isNotEmpty)
+                        p([Component.text(pageDescription)]),
+                      if (pageImage != null && pageImage.isNotEmpty)
+                        img(src: pageImage, alt: pageImageAlt),
+                    ]),
+                  child,
+                  if (this.footer != null)
+                    div(classes: 'content-footer', [this.footer!]),
                 ]),
+                if (page.data['toc'] case final TableOfContents toc
+                    when _hasVisibleTocEntries(toc.entries))
+                  aside(classes: 'toc', [
+                    div([
+                      h3([Component.text('On this page')]),
+                      _buildToc(toc, page.url, collapsibleOutline),
+                    ]),
+                  ]),
+              ]),
             ]),
           ]),
-        ]),
-      ]),
+        ],
+      ),
     ]);
   }
 
@@ -995,10 +1008,7 @@ class ApiDocsLayout extends DocsLayout {
     ]),
     downContent([
       css('.docs .main-container .sidebar-container').styles(
-        position: Position.fixed(
-          left: Unit.zero,
-          bottom: Unit.zero,
-        ),
+        position: Position.fixed(left: Unit.zero, bottom: Unit.zero),
         zIndex: ZIndex(55),
         padding: Padding.zero,
         raw: {
@@ -1018,9 +1028,7 @@ class ApiDocsLayout extends DocsLayout {
         },
       ),
     ]),
-    css('.docs .main-container .sidebar-barrier').styles(
-      display: Display.none,
-    ),
+    css('.docs .main-container .sidebar-barrier').styles(display: Display.none),
     downContent([
       css('.docs .main-container .sidebar-barrier').styles(
         display: Display.block,
@@ -1039,11 +1047,9 @@ class ApiDocsLayout extends DocsLayout {
         ),
         raw: {'pointer-events': 'none'},
       ),
-      css('.docs .main-container .sidebar-barrier:has(+ .sidebar-container.open)')
-          .styles(
-        opacity: 1,
-        raw: {'pointer-events': 'auto'},
-      ),
+      css(
+        '.docs .main-container .sidebar-barrier:has(+ .sidebar-container.open)',
+      ).styles(opacity: 1, raw: {'pointer-events': 'auto'}),
     ]),
     css('.content-container', [
       css('&').styles(
@@ -1286,9 +1292,7 @@ class ApiDocsLayout extends DocsLayout {
         },
       ),
       css('.toc-link:visited').styles(color: ContentColors.text),
-      css(
-        '.toc-link.active',
-      ).styles(
+      css('.toc-link.active').styles(
         color: Color('var(--docs-shell-accent)'),
         fontWeight: FontWeight.w600,
         raw: {'opacity': '1'},
@@ -1361,9 +1365,9 @@ class ApiDocsLayout extends DocsLayout {
           'user-select': 'none',
         },
       ),
-      css('summary:hover .outline-section-toggle').styles(
-        color: Color('var(--docs-shell-accent)'),
-      ),
+      css(
+        'summary:hover .outline-section-toggle',
+      ).styles(color: Color('var(--docs-shell-accent)')),
       css('&[open] .toc-summary-chevron').styles(
         color: Color('var(--docs-shell-accent)'),
         raw: {'transform': 'rotate(90deg)'},
@@ -1541,16 +1545,20 @@ class ApiDocsLayout extends DocsLayout {
     ),
     css(
       '.content pre .hljs-string, .content pre .hljs-regexp, .content pre .hljs-link, .content pre .hljs-symbol, .content pre .hljs-bullet',
-    ).styles(raw: {
-      'color':
-          'color-mix(in srgb, var(--docs-shell-accent-strong) 66%, currentColor)',
-    }),
+    ).styles(
+      raw: {
+        'color':
+            'color-mix(in srgb, var(--docs-shell-accent-strong) 66%, currentColor)',
+      },
+    ),
     css(
       '.content pre .hljs-number, .content pre .hljs-literal, .content pre .hljs-variable, .content pre .hljs-template-variable, .content pre .hljs-params, .content pre .hljs-attr, .content pre .hljs-operator, .content pre .hljs-punctuation',
-    ).styles(raw: {
-      'color':
-          'color-mix(in srgb, currentColor 72%, var(--docs-shell-accent) 28%)',
-    }),
+    ).styles(
+      raw: {
+        'color':
+            'color-mix(in srgb, currentColor 72%, var(--docs-shell-accent) 28%)',
+      },
+    ),
     css('.content pre .hljs-addition').styles(
       color: Color('var(--docs-shell-accent-strong)'),
       raw: {
