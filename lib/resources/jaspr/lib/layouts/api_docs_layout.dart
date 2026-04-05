@@ -867,6 +867,7 @@ class ApiDocsLayout extends DocsLayout {
       ),
       css('.main-container main > div').styles(
         raw: {
+          'padding-top': '0.75rem',
           'padding-left': '2.5rem !important',
           'padding-right': '0 !important',
           'gap': '2.5rem !important',
