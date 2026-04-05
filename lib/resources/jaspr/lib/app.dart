@@ -105,8 +105,8 @@ Component buildDocsApp({
         primaryActionHref: primaryHomeActionHref,
         apiHref: '/api',
         hasGuideLinks: hasGuideLinks,
-        jasprDocsUrl: isProjectDocs ? _projectJasprDocsUrl : null,
-        vitePressDocsUrl: isProjectDocs ? _projectVitePressDocsUrl : null,
+        jasprDocsUrl: isProjectDocs ? projectJasprDocsUrl : null,
+        vitePressDocsUrl: isProjectDocs ? projectVitePressDocsUrl : null,
         header: DocsHeader(
           title: packageName,
           logo: withDocsBasePath('/favicon.svg'),
