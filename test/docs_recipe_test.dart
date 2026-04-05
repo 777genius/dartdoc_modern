@@ -72,8 +72,18 @@ repository: https://github.com/777genius/dartdoc_modern
       expect(markdown, isNotNull);
       expect(markdown, contains('title: "dartdoc_modern"'));
       expect(markdown, contains('text: Quick Start'));
-      expect(markdown, contains('link: https://777genius.github.io/dartdoc_modern/vitepress/'));
-      expect(markdown, contains('link: https://777genius.github.io/dartdoc_modern/jaspr/'));
+      expect(
+        markdown,
+        contains(
+          '[VitePress version](https://777genius.github.io/dartdoc_modern/vitepress/)',
+        ),
+      );
+      expect(
+        markdown,
+        contains(
+          '[Jaspr version](https://777genius.github.io/dartdoc_modern/jaspr/)',
+        ),
+      );
       expect(
         markdown,
         contains('link: https://github.com/777genius/dartdoc_modern'),
