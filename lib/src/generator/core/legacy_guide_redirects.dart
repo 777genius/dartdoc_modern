@@ -32,6 +32,10 @@ LegacyGuideRedirect? legacyGuideRedirectFor(String guideRelativePath) {
     return null;
   }
 
+  if (guideRelativePath == 'guide/index.md') {
+    return null;
+  }
+
   final baseName = p.posix.basenameWithoutExtension(guideRelativePath);
   final redirectTarget = baseName == 'index' ? './' : baseName;
 

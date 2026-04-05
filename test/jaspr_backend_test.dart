@@ -1,6 +1,7 @@
 import 'package:dartdoc_modern/src/generator/core/docs_recipe.dart'
     as docs_recipe;
 import 'package:dartdoc_modern/src/generator/core/guide_collection.dart';
+import 'package:dartdoc_modern/src/generator/core/legacy_guide_redirects.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/backend.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/dart_string.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/paths.dart';
@@ -120,6 +121,20 @@ Paragraph with {{ value }}
       expect(markdown, contains('| Build speed / file count |'));
       expect(markdown, contains('### Why It Builds Much Faster'));
       expect(markdown, contains('## Live Example'));
+    });
+  });
+
+  group('legacyGuideRedirectFor', () {
+    test('does not generate a self-redirect for top-level guide index', () {
+      expect(legacyGuideRedirectFor('guide/index.md'), isNull);
+    });
+
+    test('still generates redirects for nested guide index pages', () {
+      final redirect = legacyGuideRedirectFor('guide/advanced/index.md');
+
+      expect(redirect, isNotNull);
+      expect(redirect!.outputPath, 'guide/advanced/index.html');
+      expect(redirect.redirectTarget, './');
     });
   });
 
