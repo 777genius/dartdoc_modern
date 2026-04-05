@@ -234,8 +234,9 @@
 .docs-version-switch {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px;
+  gap: 3px;
+  margin-left: 14px;
+  padding: 2px;
   border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 22%, var(--vp-c-divider));
   border-radius: 999px;
   background: color-mix(in srgb, var(--vp-c-bg-soft) 88%, transparent);
@@ -245,10 +246,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
-  padding: 0 16px;
+  min-height: 24px;
+  padding: 0 10px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--vp-c-text-2);
   text-decoration: none;
@@ -264,11 +265,12 @@
 .docs-version-switch__option.is-active {
   color: white;
   background: var(--vp-c-brand-1);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.24);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.18);
 }
 
 .docs-version-switch.is-mobile {
   margin-top: 12px;
+  margin-left: 0;
   width: 100%;
   justify-content: center;
 }
