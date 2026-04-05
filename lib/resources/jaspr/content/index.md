@@ -118,6 +118,19 @@ cd docs-site && dart pub get && jaspr serve
 - [VitePress version](https://777genius.github.io/dartdoc_modern/vitepress/)
 - [Jaspr version](https://777genius.github.io/dartdoc_modern/jaspr/)
 
+## dart doc vs dartdoc_modern
+
+| | dart doc | dartdoc_modern VitePress | dartdoc_modern Jaspr |
+|---|---|---|---|
+| Output | Static HTML | VitePress (Markdown + Vue) | Jaspr app (Dart + SSR/static build) |
+| Search | Basic | Full-text, offline | Full-text, offline |
+| Dark mode | No | Yes | Yes |
+| Guide docs | No | Auto from `doc/` | Auto from `doc/` |
+| Mono-repo | No | `--workspace-docs` | `--workspace-docs` |
+| DartPad embeds | No | Yes | Yes |
+| Mermaid diagrams | No | Yes, with zoom | Yes, with runtime rendering |
+| Customization | Templates | CSS, Vue components, plugins | Dart components, theme tokens, CSS |
+
 ## Generated With
 
 [dartdoc_modern](https://github.com/777genius/dartdoc_modern) can output both VitePress and Jaspr sites from the same documentation source.

@@ -165,6 +165,9 @@ dart pub global activate dartdoc_modern
 
 ## Usage
 
+<Tabs defaultValue="vitepress">
+  <TabItem label="VitePress" value="vitepress">
+
 <Tabs defaultValue="single-package">
   <TabItem label="Single package" value="single-package">
 
@@ -184,14 +187,6 @@ dartdoc_modern --format vitepress \\
 ```
 
   </TabItem>
-  <TabItem label="Jaspr output" value="jaspr-output">
-
-```bash
-dartdoc_modern --format jaspr --output docs-site
-cd docs-site && dart pub get && jaspr serve
-```
-
-  </TabItem>
   <TabItem label="Dart SDK" value="dart-sdk">
 
 ```bash
@@ -201,18 +196,54 @@ dartdoc_modern --sdk-docs --format vitepress --output docs-site
   </TabItem>
 </Tabs>
 
+  </TabItem>
+  <TabItem label="Jaspr" value="jaspr">
+
+<Tabs defaultValue="single-package">
+  <TabItem label="Single package" value="single-package">
+
+```bash
+dartdoc_modern --format jaspr --output docs-site
+cd docs-site && dart pub get && jaspr serve
+```
+
+  </TabItem>
+  <TabItem label="Mono-repo" value="mono-repo">
+
+```bash
+dartdoc_modern --format jaspr \\
+  --workspace-docs \\
+  --exclude-packages 'example,test_utils' \\
+  --output docs-site
+cd docs-site && dart pub get && jaspr serve
+```
+
+  </TabItem>
+  <TabItem label="Dart SDK" value="dart-sdk">
+
+```bash
+dartdoc_modern --sdk-docs --format jaspr --output docs-site
+cd docs-site && dart pub get && jaspr serve
+```
+
+  </TabItem>
+</Tabs>
+
+  </TabItem>
+</Tabs>
+
 ## dart doc vs dartdoc_modern
 
-| | dart doc | dartdoc_modern |
-|---|---|---|
-| Output | Static HTML | Jaspr or VitePress |
-| Search | Basic | Full-text, offline |
-| Dark mode | No | Yes |
-| Guide docs | No | Auto from `doc/` |
-| Mono-repo | No | `--workspace-docs` |
-| DartPad embeds | No | Yes |
-| Mermaid diagrams | No | Yes, with zoom |
-| Customization | Templates | Jaspr theme tokens, CSS, components |
+| | dart doc | dartdoc_modern VitePress | dartdoc_modern Jaspr |
+|---|---|---|---|
+| Output | Static HTML | VitePress (Markdown + Vue) | Jaspr app (Dart + SSR/static build) |
+| Search | Basic | Full-text, offline | Full-text, offline |
+| Dark mode | No | Yes | Yes |
+| Guide docs | No | Auto from `doc/` | Auto from `doc/` |
+| Mono-repo | No | `--workspace-docs` | `--workspace-docs` |
+| DartPad embeds | No | Yes | Yes |
+| Mermaid diagrams | No | Yes, with zoom | Yes, with runtime rendering |
+| Customization | Templates | CSS, Vue components, plugins | Dart components, theme tokens, CSS |
 
 ## Live Example
 

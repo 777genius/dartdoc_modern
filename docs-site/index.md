@@ -56,33 +56,48 @@ dart pub global activate dartdoc_modern
 ## Usage
 
 ::: code-group
-```bash [Single package]
+```bash [VitePress]
 dartdoc_modern --format vitepress --output docs-site
 cd docs-site && npm install && npx vitepress dev
-```
-```bash [Mono-repo]
+
+# Mono-repo
 dartdoc_modern --format vitepress \
   --workspace-docs \
   --exclude-packages 'example,test_utils' \
   --output docs-site
-```
-```bash [Dart SDK]
+
+# Dart SDK
 dartdoc_modern --sdk-docs --format vitepress --output docs-site
+```
+```bash [Jaspr]
+dartdoc_modern --format jaspr --output docs-site
+cd docs-site && dart pub get && jaspr serve
+
+# Mono-repo
+dartdoc_modern --format jaspr \
+  --workspace-docs \
+  --exclude-packages 'example,test_utils' \
+  --output docs-site
+cd docs-site && dart pub get && jaspr serve
+
+# Dart SDK
+dartdoc_modern --sdk-docs --format jaspr --output docs-site
+cd docs-site && dart pub get && jaspr serve
 ```
 :::
 
 ## dart doc vs dartdoc_modern
 
-| | dart doc | dartdoc_modern |
-|---|---|---|
-| Output | Static HTML | VitePress (Markdown + Vue) |
-| Search | Basic | Full-text, offline |
-| Dark mode | No | Yes |
-| Guide docs | No | Auto from doc/ |
-| Mono-repo | No | --workspace-docs |
-| DartPad embeds | No | Yes |
-| Mermaid diagrams | No | Yes, with zoom |
-| Customization | Templates | CSS, Vue components, plugins |
+| | dart doc | dartdoc_modern VitePress | dartdoc_modern Jaspr |
+|---|---|---|---|
+| Output | Static HTML | VitePress (Markdown + Vue) | Jaspr app (Dart + SSR/static build) |
+| Search | Basic | Full-text, offline | Full-text, offline |
+| Dark mode | No | Yes | Yes |
+| Guide docs | No | Auto from `doc/` | Auto from `doc/` |
+| Mono-repo | No | `--workspace-docs` | `--workspace-docs` |
+| DartPad embeds | No | Yes | Yes |
+| Mermaid diagrams | No | Yes, with zoom | Yes, with runtime rendering |
+| Customization | Templates | CSS, Vue components, plugins | Dart components, theme tokens, CSS |
 
 ## Live Example
 
