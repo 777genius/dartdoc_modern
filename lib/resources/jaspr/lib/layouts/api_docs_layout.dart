@@ -1005,9 +1005,10 @@ class ApiDocsLayout extends DocsLayout {
           raw: {'flex': '1 1 auto'},
         ),
         css('.sidebar .sidebar-close').styles(
-          position: Position.sticky(top: 0.1.rem),
+          position: Position.absolute(top: 0.6.rem, right: 0.6.rem),
           border: Border.none,
           backgroundColor: Color('transparent'),
+          zIndex: ZIndex(1),
           raw: {'margin-left': 'auto'},
         ),
       ]),
