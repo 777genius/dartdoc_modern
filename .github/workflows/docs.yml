@@ -52,7 +52,7 @@ jobs:
 
       # Use the local dartdoc (dogfooding!)
       - name: Generate VitePress docs
-        run: dart run bin/dartdoc_modern.dart --format vitepress --output docs-site
+        run: dart run bin/dartdoc_modern.dart --format vitepress --recipe self-docs --output docs-site
 
       - name: Install VitePress dependencies
         run: npm ci
