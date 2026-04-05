@@ -1,18 +1,18 @@
 # dartdoc_modern
 
-> Fork of [dart-lang/dartdoc](https://github.com/dart-lang/dartdoc) with modern docs backends for generating polished API documentation as either a VitePress site or a Jaspr content site instead of default HTML.
+> Fork of [dart-lang/dartdoc](https://github.com/dart-lang/dartdoc) with modern docs backends for generating polished API documentation as either a Jaspr docs app or a VitePress site instead of default HTML.
 
 ## Status
 
-- `vitepress`: mature backend for teams that want the strongest static-site ecosystem
-- `jaspr`: strong community preview for teams that want a Dart-native docs app scaffold
+- `jaspr`: default modern backend for teams that want a Dart-native docs app scaffold
+- `vitepress`: mature alternative for teams that want the strongest static-site ecosystem
 - `html`: original `dartdoc` output remains available for compatibility
 
 This project is already good enough to show publicly and collect feedback from real Dart and Flutter package maintainers.
 
 Live docs:
-- [VitePress version](https://777genius.github.io/dartdoc_modern/vitepress/)
 - [Jaspr version](https://777genius.github.io/dartdoc_modern/jaspr/)
+- [VitePress version](https://777genius.github.io/dartdoc_modern/vitepress/)
 
 ## Why This Exists
 
@@ -29,7 +29,7 @@ Default `dartdoc` HTML is useful, but many teams want a documentation site that 
 
 | Feature | dartdoc | dartdoc_modern |
 |---|---|---|
-| Output format | Static HTML | `--format html|vitepress|jaspr` |
+| Output format | Static HTML | `--format html|jaspr|vitepress` |
 | Search | Built-in (basic) | VitePress local search, Jaspr staged local search |
 | Guide docs | Not supported | Auto-discovers `doc/` and `docs/` |
 | Workspace mode | Not supported | `--workspace-docs` for mono-repos |
@@ -51,19 +51,20 @@ This is deliberate. It cuts file-system churn and I/O, which makes builds much f
 
 ## Which Backend Should You Choose?
 
+Choose `jaspr` when:
+- you want a Dart-native docs application
+- you want typed generated sidebar data and theming closer to the Dart toolchain
+- you want the default `dartdoc_modern` path today
+- you want to extend the docs shell without dropping into Vue or TypeScript
+
 Choose `vitepress` when:
 - you want the strongest static-site ecosystem
 - your team already works comfortably with Vue, VitePress, and Node tooling
 - you want the lowest-risk path to a polished docs site today
 
-Choose `jaspr` when:
-- you want a Dart-native docs application
-- you want typed generated sidebar data and theming closer to the Dart toolchain
-- you want to extend the docs shell without dropping into Vue or TypeScript
-
 The honest framing is:
-- `vitepress` is the ecosystem-first backend
 - `jaspr` is the Dart-first backend
+- `vitepress` is the ecosystem-first backend
 
 That message is stronger and more credible than pretending one output replaces the other for everyone.
 
@@ -84,19 +85,46 @@ For public examples and support requests, prefer `dartdoc_modern` in docs and sn
 
 ## Quick Start
 
+`Jaspr` is the default modern path. `VitePress` remains available when you specifically want the Vue/VitePress ecosystem.
+
 ### Using The Installed Package
 
 ```bash
-# Generate VitePress docs
-dartdoc_modern --format vitepress --output docs-site
+# One-time install for local Jaspr preview/build
+dart pub global activate jaspr_cli
 
-# Generate Jaspr docs
+# Default modern path: generate and preview Jaspr docs
 dartdoc_modern --format jaspr --output docs-site
+cd docs-site && dart pub get && jaspr serve
+
+# Alternative static-site path: generate and preview VitePress docs
+dartdoc_modern --format vitepress --output docs-site
+cd docs-site && npm install && npx vitepress dev
 ```
 
 ### Package Maintainer Recipes
 
-Choose one of these two practical flows.
+Start with the Jaspr recipe unless you specifically want the VitePress ecosystem.
+
+#### Jaspr Recipe (Default)
+
+```bash
+dart pub global activate jaspr_cli
+dartdoc_modern --format jaspr --output docs-site
+cd docs-site
+dart pub get
+jaspr serve
+```
+
+For deployment:
+
+```bash
+cd docs-site
+jaspr build --dart-define DOCS_THEME=ocean
+```
+
+Deploy:
+- `docs-site/build/jaspr`
 
 #### VitePress Recipe
 
@@ -110,19 +138,6 @@ npx vitepress build
 Deploy:
 - `docs-site/.vitepress/dist`
 
-#### Jaspr Recipe
-
-```bash
-dartdoc_modern --format jaspr --output docs-site
-cd docs-site
-dart pub get
-dart pub global activate jaspr_cli
-jaspr build --dart-define DOCS_THEME=ocean
-```
-
-Deploy:
-- `docs-site/build/jaspr`
-
 Run the strongest package-level release gate before posting or publishing:
 
 ```bash
@@ -134,18 +149,43 @@ dart run tool/task.dart validate package-release
 Use the local source while evaluating or developing the project:
 
 ```bash
-# Generate VitePress docs for a single package
-dart run ./bin/dartdoc_modern.dart \
-  --format vitepress \
-  --output docs-site
-
-# Generate Jaspr docs for a single package
+# Generate and preview Jaspr docs for a single package
 dart run ./bin/dartdoc_modern.dart \
   --format jaspr \
   --output docs-site
+cd docs-site && dart pub get && jaspr serve
+
+# Generate and preview VitePress docs for a single package
+dart run ./bin/dartdoc_modern.dart \
+  --format vitepress \
+  --output docs-site
+cd docs-site && npm install && npx vitepress dev
 ```
 
 ### Workspace Example
+
+```bash
+dart pub global activate jaspr_cli
+dart run /path/to/dartdoc_modern/bin/dartdoc_modern.dart \
+  --format jaspr \
+  --workspace-docs \
+  --exclude-packages 'package_a,package_b' \
+  --output docs-site
+```
+
+Preview Jaspr output:
+
+```bash
+cd docs-site && dart pub get && jaspr serve
+```
+
+Build Jaspr for deployment:
+
+```bash
+cd docs-site && jaspr build --dart-define DOCS_THEME=ocean
+```
+
+Preview VitePress instead:
 
 ```bash
 dart run /path/to/dartdoc_modern/bin/dartdoc_modern.dart \
@@ -153,18 +193,7 @@ dart run /path/to/dartdoc_modern/bin/dartdoc_modern.dart \
   --workspace-docs \
   --exclude-packages 'package_a,package_b' \
   --output docs-site
-```
-
-Preview VitePress:
-
-```bash
 cd docs-site && npm install && npx vitepress dev
-```
-
-Build Jaspr output:
-
-```bash
-cd docs-site && dart pub get && dart run build_runner build --delete-conflicting-outputs
 ```
 
 ## Fastest Way To Evaluate The Jaspr Backend
@@ -235,21 +264,6 @@ Dart source -> analyzer -> PackageGraph -> GeneratorBackend -> format-specific s
 
 ## Generated Structure
 
-### VitePress
-
-```text
-docs-site/
-├── .vitepress/
-│   ├── config.ts
-│   └── generated/
-│       ├── api-sidebar.ts
-│       └── guide-sidebar.ts
-├── api/
-├── guide/
-├── index.md
-└── package.json
-```
-
 ### Jaspr
 
 ```text
@@ -274,6 +288,21 @@ docs-site/
 └── pubspec.yaml
 ```
 
+### VitePress
+
+```text
+docs-site/
+├── .vitepress/
+│   ├── config.ts
+│   └── generated/
+│       ├── api-sidebar.ts
+│       └── guide-sidebar.ts
+├── api/
+├── guide/
+├── index.md
+└── package.json
+```
+
 ## Real Proof, Not Just Toy Screenshots
 
 The Jaspr backend has been verified on a real Flutter workspace:
@@ -283,67 +312,6 @@ The Jaspr backend has been verified on a real Flutter workspace:
 - `0` errors in the verified run
 
 That does not mean “done forever”, but it does mean this is well beyond a toy-package-only prototype.
-
-## CI/CD Example For VitePress
-
-A simple GitHub Pages flow can generate docs from the local source checkout instead of relying on a global install:
-
-```yaml
-name: Deploy Documentation
-
-on:
-  push:
-    branches: [main]
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: docs-site/package-lock.json
-
-      - name: Generate API docs
-        run: dart run ./bin/dartdoc_modern.dart --format vitepress --output docs-site
-
-      - run: npm ci
-        working-directory: docs-site
-
-      - run: npx vitepress build
-        working-directory: docs-site
-
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs-site/.vitepress/dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    permissions:
-      pages: write
-      id-token: write
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
-```
 
 ## CI/CD Example For Jaspr
 
@@ -450,12 +418,73 @@ If the site is hosted under a subpath, add:
 Use `DOCS_BASE_PATH` whenever the generated site is hosted under a subpath
 rather than the domain root.
 
+## CI/CD Example For VitePress
+
+A simple GitHub Pages flow can generate docs from the local source checkout instead of relying on a global install:
+
+```yaml
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: docs-site/package-lock.json
+
+      - name: Generate API docs
+        run: dart run ./bin/dartdoc_modern.dart --format vitepress --output docs-site
+
+      - run: npm ci
+        working-directory: docs-site
+
+      - run: npx vitepress build
+        working-directory: docs-site
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs-site/.vitepress/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+```
+
 ## Key CLI Options
 
 | Option | Description |
 |---|---|
-| `--format vitepress` | Generate VitePress markdown instead of HTML |
 | `--format jaspr` | Generate a Jaspr content site instead of HTML |
+| `--format vitepress` | Generate VitePress markdown instead of HTML |
 | `--workspace-docs` | Document all packages in a Dart workspace |
 | `--exclude-packages 'a,b,c'` | Skip specific packages |
 | `--output <dir>` | Output directory |
@@ -473,7 +502,7 @@ Those are real limitations, but none of them invalidate the current community-pr
 
 ## Upstream
 
-Based on [dart-lang/dartdoc v9.0.5-wip](https://github.com/dart-lang/dartdoc) and synced through commit `1c367092`.
+Based on [dart-lang/dartdoc v9.0.5-wip](https://github.com/dart-lang/dartdoc) and synced through commit `a57f497a`.
 
 The VitePress and Jaspr outputs are implemented as additional `GeneratorBackend` variants rather than replacing the original HTML generation.
 
