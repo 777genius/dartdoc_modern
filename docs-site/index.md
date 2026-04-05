@@ -12,12 +12,6 @@ hero:
       text: API Reference
       link: /api/
     - theme: alt
-      text: Jaspr Version
-      link: https://777genius.github.io/dartdoc_modern/jaspr/
-    - theme: alt
-      text: VitePress Version
-      link: https://777genius.github.io/dartdoc_modern/vitepress/
-    - theme: alt
       text: GitHub
       link: https://github.com/777genius/dartdoc_modern
 features:
