@@ -326,7 +326,7 @@ List<StyleRule> docsSearchStyles() => [
         backgroundColor: Color('var(--docs-shell-accent-soft)'),
         color: Color('var(--docs-shell-accent-strong)'),
         radius: BorderRadius.circular(0.35.rem),
-        padding: Padding.symmetric(vertical: 0.04.rem, horizontal: 0.16.rem),
+        padding: Padding.symmetric(vertical: 0.04.rem, horizontal: Unit.zero),
         raw: {
           'box-decoration-break': 'clone',
           '-webkit-box-decoration-break': 'clone',
