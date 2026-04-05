@@ -207,7 +207,7 @@ else
   (
     cd "$TEST_PACKAGE_DIR"
     generator_args=(
-      run "$ROOT/bin/dartdoc_vitepress.dart"
+      run "$ROOT/bin/dartdoc_modern.dart"
       --format jaspr
       --output "$OUTPUT_DIR"
     )

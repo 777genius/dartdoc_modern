@@ -7,20 +7,20 @@ import 'dart:convert';
 import 'dart:io' show Platform, exitCode, stderr;
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
-import 'package:dartdoc_vitepress/src/failure.dart';
-import 'package:dartdoc_vitepress/src/generator/generator.dart';
-import 'package:dartdoc_vitepress/src/logging.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
-import 'package:dartdoc_vitepress/src/package_meta.dart';
-import 'package:dartdoc_vitepress/src/runtime_stats.dart';
-import 'package:dartdoc_vitepress/src/utils.dart';
-import 'package:dartdoc_vitepress/src/version.dart';
-import 'package:dartdoc_vitepress/src/warnings.dart';
+import 'package:dartdoc_modern/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/failure.dart';
+import 'package:dartdoc_modern/src/generator/generator.dart';
+import 'package:dartdoc_modern/src/logging.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
+import 'package:dartdoc_modern/src/package_meta.dart';
+import 'package:dartdoc_modern/src/runtime_stats.dart';
+import 'package:dartdoc_modern/src/utils.dart';
+import 'package:dartdoc_modern/src/version.dart';
+import 'package:dartdoc_modern/src/warnings.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-const String programName = 'dartdoc_vitepress';
+const String programName = 'dartdoc_modern';
 // Update when pubspec version changes by running `dart run build_runner build`
 const String dartdocVersion = packageVersion;
 

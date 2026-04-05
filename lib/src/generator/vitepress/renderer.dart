@@ -11,17 +11,17 @@
 library;
 
 import 'package:dart_style/dart_style.dart';
-import 'package:dartdoc_vitepress/src/comment_references/parser.dart'
+import 'package:dartdoc_modern/src/comment_references/parser.dart'
     show operatorNames;
-import 'package:dartdoc_vitepress/src/element_type.dart';
-import 'package:dartdoc_vitepress/src/generator/vitepress/docs.dart';
-import 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart';
-import 'package:dartdoc_vitepress/src/model/attribute.dart' show Attribute;
-import 'package:dartdoc_vitepress/src/model/container_modifiers.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
+import 'package:dartdoc_modern/src/element_type.dart';
+import 'package:dartdoc_modern/src/generator/vitepress/docs.dart';
+import 'package:dartdoc_modern/src/generator/vitepress/paths.dart';
+import 'package:dartdoc_modern/src/model/attribute.dart' show Attribute;
+import 'package:dartdoc_modern/src/model/container_modifiers.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
 import 'package:meta/meta.dart';
 
-export 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart'
+export 'package:dartdoc_modern/src/generator/vitepress/paths.dart'
     show isDuplicateSdkLibrary, isInternalSdkLibrary;
 
 final _dartSignatureFormatter = DartFormatter(
@@ -1270,6 +1270,7 @@ String _buildLinkedConstructorSignature(
 
 bool _shouldKeepFormattedSignature(String formatted, String fallback) {
   if (formatted.contains('\n')) return true;
+  if (fallback.contains('\n')) return false;
   return _stripHtmlForLength(formatted) <= _stripHtmlForLength(fallback);
 }
 
@@ -3074,7 +3075,7 @@ String _stripLeadingH1(String text, String expectedTitle) {
   final title = match.group(1)!.trim();
   // Normalize hyphens/underscores for comparison, since VitePress treats
   // them identically when generating heading slugs. A README titled
-  // "dartdoc-vitepress" should match package name "dartdoc_vitepress".
+  // "dartdoc_modern" should match package name "dartdoc_modern".
   final normalizedTitle = title.toLowerCase().replaceAll('-', '_');
   final normalizedExpected = expectedTitle.toLowerCase().replaceAll('-', '_');
   if (normalizedTitle == normalizedExpected) {

@@ -5,11 +5,11 @@
 import 'package:analyzer/dart/analysis/features.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/scope.dart';
-import 'package:dartdoc_vitepress/src/model/kind.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
-import 'package:dartdoc_vitepress/src/model_utils.dart';
-import 'package:dartdoc_vitepress/src/package_meta.dart' show PackageMeta;
-import 'package:dartdoc_vitepress/src/warnings.dart';
+import 'package:dartdoc_modern/src/model/kind.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
+import 'package:dartdoc_modern/src/model_utils.dart';
+import 'package:dartdoc_modern/src/package_meta.dart' show PackageMeta;
+import 'package:dartdoc_modern/src/warnings.dart';
 
 class Library extends ModelElement with TopLevelContainer {
   @override

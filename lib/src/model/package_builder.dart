@@ -24,13 +24,13 @@ import 'package:analyzer/src/generated/engine.dart' show AnalysisOptionsImpl;
 // ignore: implementation_imports
 import 'package:analyzer/src/generated/sdk.dart' show DartSdk;
 import 'package:collection/collection.dart';
-import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
-import 'package:dartdoc_vitepress/src/logging.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart' hide Package;
-import 'package:dartdoc_vitepress/src/package_config_provider.dart';
-import 'package:dartdoc_vitepress/src/package_meta.dart'
+import 'package:dartdoc_modern/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/logging.dart';
+import 'package:dartdoc_modern/src/model/model.dart' hide Package;
+import 'package:dartdoc_modern/src/package_config_provider.dart';
+import 'package:dartdoc_modern/src/package_meta.dart'
     show PackageMeta, PackageMetaProvider;
-import 'package:dartdoc_vitepress/src/runtime_stats.dart';
+import 'package:dartdoc_modern/src/runtime_stats.dart';
 import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p show Context;

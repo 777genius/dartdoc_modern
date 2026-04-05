@@ -5,7 +5,7 @@ internal: true
 
 # DartPad Embeds
 
-dartdoc-vitepress turns code blocks into interactive [DartPad](https://dartpad.dev) playgrounds. Your readers can run and edit Dart code without leaving the docs page.
+dartdoc_modern turns code blocks into interactive [DartPad](https://dartpad.dev) playgrounds. Your readers can run and edit Dart code without leaving the docs page.
 
 ## Syntax
 
@@ -28,7 +28,7 @@ void main() {
   final items = ['Dart', 'Flutter', 'VitePress'];
 
   for (final item in items) {
-    print('dartdoc-vitepress supports $item');
+    print('dartdoc_modern supports $item');
   }
 
   // Try editing this code and clicking Run!

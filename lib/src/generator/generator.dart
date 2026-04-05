@@ -7,20 +7,20 @@ library;
 
 import 'dart:async';
 
-import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
-import 'package:dartdoc_vitepress/src/generator/core/docs_recipe.dart'
+import 'package:dartdoc_modern/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/generator/core/docs_recipe.dart'
     as docs_recipe;
-import 'package:dartdoc_vitepress/src/generator/generator_backend.dart';
-import 'package:dartdoc_vitepress/src/generator/html_generator_backend.dart';
-import 'package:dartdoc_vitepress/src/generator/jaspr/backend.dart';
-import 'package:dartdoc_vitepress/src/generator/templates.dart';
-import 'package:dartdoc_vitepress/src/generator/vitepress/backend.dart';
-import 'package:dartdoc_vitepress/src/logging.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
-import 'package:dartdoc_vitepress/src/model_utils.dart';
-import 'package:dartdoc_vitepress/src/package_meta.dart';
-import 'package:dartdoc_vitepress/src/runtime_stats.dart';
-import 'package:dartdoc_vitepress/src/warnings.dart';
+import 'package:dartdoc_modern/src/generator/generator_backend.dart';
+import 'package:dartdoc_modern/src/generator/html_generator_backend.dart';
+import 'package:dartdoc_modern/src/generator/jaspr/backend.dart';
+import 'package:dartdoc_modern/src/generator/templates.dart';
+import 'package:dartdoc_modern/src/generator/vitepress/backend.dart';
+import 'package:dartdoc_modern/src/logging.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
+import 'package:dartdoc_modern/src/model_utils.dart';
+import 'package:dartdoc_modern/src/package_meta.dart';
+import 'package:dartdoc_modern/src/runtime_stats.dart';
+import 'package:dartdoc_modern/src/warnings.dart';
 
 abstract class FileWriter {
   /// All filenames written by this generator.

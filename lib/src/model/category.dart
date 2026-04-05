@@ -4,10 +4,10 @@
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
-import 'package:dartdoc_vitepress/src/model/kind.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
-import 'package:dartdoc_vitepress/src/warnings.dart';
+import 'package:dartdoc_modern/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/model/kind.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
+import 'package:dartdoc_modern/src/warnings.dart';
 
 /// A subcategory of a package, containing elements tagged with `{@category}`.
 final class Category extends LibraryContainer

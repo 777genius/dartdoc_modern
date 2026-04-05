@@ -634,7 +634,7 @@ Example temporary compatibility export:
 
 ```dart
 // lib/src/generator/vitepress_paths.dart
-export 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart';
+export 'package:dartdoc_modern/src/generator/vitepress/paths.dart';
 ```
 
 This reduces churn while the refactor is in flight.
@@ -1122,7 +1122,7 @@ test/end2end/jaspr_generator_test.dart
 VitePress generation:
 
 ```bash
-dart run /Users/belief/dev/projects/dartdoc-vitepress/bin/dartdoc_vitepress.dart \
+dart run /Users/belief/dev/projects/dartdoc_modern/bin/dartdoc_modern.dart \
   --format vitepress \
   --output /tmp/test-vitepress
 ```
@@ -1130,7 +1130,7 @@ dart run /Users/belief/dev/projects/dartdoc-vitepress/bin/dartdoc_vitepress.dart
 Jaspr generation:
 
 ```bash
-dart run /Users/belief/dev/projects/dartdoc-vitepress/bin/dartdoc_vitepress.dart \
+dart run /Users/belief/dev/projects/dartdoc_modern/bin/dartdoc_modern.dart \
   --format jaspr \
   --output /tmp/test-jaspr
 ```
@@ -1139,7 +1139,7 @@ SDK-scale verification:
 
 ```bash
 cd /tmp/dart-sdk-vitepress && \
-dart run /Users/belief/dev/projects/dartdoc-vitepress/bin/dartdoc_vitepress.dart \
+dart run /Users/belief/dev/projects/dartdoc_modern/bin/dartdoc_modern.dart \
   --sdk-docs --format vitepress --output docs-site
 ```
 
@@ -1149,7 +1149,7 @@ Implemented Jaspr verification:
 
 ```bash
 tmpdir=$(mktemp -d /tmp/dart-sdk-jaspr.XXXXXX) && \
-dart run /Users/belief/dev/projects/dartdoc-vitepress/bin/dartdoc_vitepress.dart \
+dart run /Users/belief/dev/projects/dartdoc_modern/bin/dartdoc_modern.dart \
   --sdk-docs --format jaspr --output "$tmpdir"
 
 dart run tool/jaspr_search_benchmark.dart \

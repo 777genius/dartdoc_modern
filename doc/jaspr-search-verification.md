@@ -17,7 +17,7 @@ Generate SDK docs in `jaspr` format:
 
 ```bash
 tmpdir=$(mktemp -d /tmp/dart-sdk-jaspr.XXXXXX) && \
-dart run ./bin/dartdoc_vitepress.dart \
+dart run ./bin/dartdoc_modern.dart \
   --sdk-docs \
   --format jaspr \
   --output "$tmpdir"

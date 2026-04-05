@@ -9,7 +9,7 @@
 /// Must not contain any format-specific escaping (e.g. Vue template syntax).
 library;
 
-import 'package:dartdoc_vitepress/src/logging.dart';
+import 'package:dartdoc_modern/src/logging.dart';
 
 // ---------------------------------------------------------------------------
 // Pre-compiled patterns for sanitization.

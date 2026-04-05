@@ -4,12 +4,12 @@
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
-import 'package:dartdoc_vitepress/src/model/kind.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
-import 'package:dartdoc_vitepress/src/model_utils.dart';
-import 'package:dartdoc_vitepress/src/package_meta.dart';
-import 'package:dartdoc_vitepress/src/warnings.dart';
+import 'package:dartdoc_modern/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/model/kind.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
+import 'package:dartdoc_modern/src/model_utils.dart';
+import 'package:dartdoc_modern/src/package_meta.dart';
+import 'package:dartdoc_modern/src/warnings.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p show Context;
 import 'package:pub_semver/pub_semver.dart';

@@ -8,11 +8,11 @@ library;
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:dartdoc_vitepress/src/comment_references/model_comment_reference.dart';
-import 'package:dartdoc_vitepress/src/matching_link_result.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
-import 'package:dartdoc_vitepress/src/runtime_stats.dart';
-import 'package:dartdoc_vitepress/src/warnings.dart';
+import 'package:dartdoc_modern/src/comment_references/model_comment_reference.dart';
+import 'package:dartdoc_modern/src/matching_link_result.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
+import 'package:dartdoc_modern/src/runtime_stats.dart';
+import 'package:dartdoc_modern/src/warnings.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:meta/meta.dart';
 

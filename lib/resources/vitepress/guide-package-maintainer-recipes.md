@@ -33,7 +33,7 @@ Honest framing:
 Generate docs:
 
 ```bash
-dartdoc_vitepress --format vitepress --output docs-site
+dartdoc_modern --format vitepress --output docs-site
 ```
 
 Preview locally:
@@ -61,7 +61,7 @@ docs-site/.vitepress/dist
 Generate docs:
 
 ```bash
-dartdoc_vitepress --format jaspr --output docs-site
+dartdoc_modern --format jaspr --output docs-site
 ```
 
 Prepare and build:
@@ -108,8 +108,8 @@ If Playwright is installed outside `/tmp/pw-run`, set `PLAYWRIGHT_DIR` first.
 Use the local source instead of a global install:
 
 ```bash
-dart run ./bin/dartdoc_vitepress.dart --format vitepress --output docs-site
-dart run ./bin/dartdoc_vitepress.dart --format jaspr --output docs-site
+dart run ./bin/dartdoc_modern.dart --format vitepress --output docs-site
+dart run ./bin/dartdoc_modern.dart --format jaspr --output docs-site
 ```
 
 ## Related Docs

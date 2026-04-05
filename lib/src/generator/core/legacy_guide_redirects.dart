@@ -8,7 +8,7 @@ import 'package:path/path.dart' as p;
 
 /// Marker used to identify generated legacy guide redirect files.
 const legacyGuideRedirectMarker =
-    '<!-- dartdoc_vitepress:legacy-guide-redirect -->';
+    '<!-- dartdoc_modern:legacy-guide-redirect -->';
 
 /// Redirect metadata for a legacy `guide/*.html` path.
 class LegacyGuideRedirect {

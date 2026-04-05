@@ -2,15 +2,15 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'package:dartdoc_vitepress/src/comment_references/parser.dart' show operatorNames;
-import 'package:dartdoc_vitepress/src/generator/core/path_utils.dart' as path_utils;
-import 'package:dartdoc_vitepress/src/model/model.dart';
-import 'package:dartdoc_vitepress/src/model_utils.dart';
+import 'package:dartdoc_modern/src/comment_references/parser.dart' show operatorNames;
+import 'package:dartdoc_modern/src/generator/core/path_utils.dart' as path_utils;
+import 'package:dartdoc_modern/src/model/model.dart';
+import 'package:dartdoc_modern/src/model_utils.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
 // Re-export core path utilities so existing importers don't break.
-export 'package:dartdoc_vitepress/src/generator/core/path_utils.dart'
+export 'package:dartdoc_modern/src/generator/core/path_utils.dart'
     show isDuplicateSdkLibrary, isInternalSdkLibrary;
 
 /// Computes VitePress-compatible file paths and URLs for documentation elements.

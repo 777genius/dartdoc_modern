@@ -9,7 +9,7 @@ library;
 import 'package:analyzer/file_system/file_system.dart';
 // ignore: implementation_imports
 import 'package:analyzer/src/dart/analysis/experiments.dart';
-import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/dartdoc_options.dart';
 
 mixin DartdocExperimentOptionContext implements DartdocOptionContextBase {
   List<String> get enableExperiment =>

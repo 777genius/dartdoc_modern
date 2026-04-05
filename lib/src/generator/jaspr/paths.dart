@@ -2,12 +2,12 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'package:dartdoc_vitepress/src/generator/core/path_utils.dart'
+import 'package:dartdoc_modern/src/generator/core/path_utils.dart'
     as path_utils;
-import 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
+import 'package:dartdoc_modern/src/generator/vitepress/paths.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
 
-export 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart'
+export 'package:dartdoc_modern/src/generator/vitepress/paths.dart'
     show VitePressPathResolver, isDuplicateSdkLibrary, isInternalSdkLibrary;
 
 /// Jaspr uses the same public URL structure as VitePress, but stores markdown

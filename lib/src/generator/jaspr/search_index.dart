@@ -5,7 +5,7 @@
 import 'dart:convert';
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_vitepress/src/generator/core/path_utils.dart'
+import 'package:dartdoc_modern/src/generator/core/path_utils.dart'
     show sanitizeAnchor;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;

@@ -4,9 +4,9 @@
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:dartdoc_vitepress/src/element_type.dart';
-import 'package:dartdoc_vitepress/src/model/kind.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
+import 'package:dartdoc_modern/src/element_type.dart';
+import 'package:dartdoc_modern/src/model/kind.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
 
 abstract class Typedef extends ModelElement with TypeParameters, HasLibrary {
   @override

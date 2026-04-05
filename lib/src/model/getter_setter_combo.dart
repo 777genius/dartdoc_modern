@@ -9,17 +9,17 @@ import 'package:analyzer/dart/ast/ast.dart'
 // ignore: implementation_imports
 import 'package:analyzer/src/dart/element/element.dart'
     show VariableFragmentImpl;
-import 'package:dartdoc_vitepress/src/element_type.dart';
-import 'package:dartdoc_vitepress/src/model/accessor.dart';
-import 'package:dartdoc_vitepress/src/model/annotation.dart';
-import 'package:dartdoc_vitepress/src/model/attribute.dart';
-import 'package:dartdoc_vitepress/src/model/class.dart';
-import 'package:dartdoc_vitepress/src/model/constructor.dart';
-import 'package:dartdoc_vitepress/src/model/enum.dart';
-import 'package:dartdoc_vitepress/src/model/model_element.dart';
-import 'package:dartdoc_vitepress/src/model/parameter.dart';
-import 'package:dartdoc_vitepress/src/model/referable.dart';
-import 'package:dartdoc_vitepress/src/utils.dart';
+import 'package:dartdoc_modern/src/element_type.dart';
+import 'package:dartdoc_modern/src/model/accessor.dart';
+import 'package:dartdoc_modern/src/model/annotation.dart';
+import 'package:dartdoc_modern/src/model/attribute.dart';
+import 'package:dartdoc_modern/src/model/class.dart';
+import 'package:dartdoc_modern/src/model/constructor.dart';
+import 'package:dartdoc_modern/src/model/enum.dart';
+import 'package:dartdoc_modern/src/model/model_element.dart';
+import 'package:dartdoc_modern/src/model/parameter.dart';
+import 'package:dartdoc_modern/src/model/referable.dart';
+import 'package:dartdoc_modern/src/utils.dart';
 import 'package:meta/meta.dart';
 
 /// Mixin for top-level variables and fields (aka properties).

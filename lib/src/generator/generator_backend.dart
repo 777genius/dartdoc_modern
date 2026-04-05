@@ -5,17 +5,17 @@
 import 'dart:async';
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
-import 'package:dartdoc_vitepress/src/generator/generator.dart';
-import 'package:dartdoc_vitepress/src/generator/generator_utils.dart'
+import 'package:dartdoc_modern/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/generator/generator.dart';
+import 'package:dartdoc_modern/src/generator/generator_utils.dart'
     as generator_util;
-import 'package:dartdoc_vitepress/src/generator/template_data.dart';
-import 'package:dartdoc_vitepress/src/generator/templates.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
-import 'package:dartdoc_vitepress/src/runtime_stats.dart';
-import 'package:dartdoc_vitepress/src/validator.dart';
-import 'package:dartdoc_vitepress/src/version.dart';
-import 'package:dartdoc_vitepress/src/warnings.dart';
+import 'package:dartdoc_modern/src/generator/template_data.dart';
+import 'package:dartdoc_modern/src/generator/templates.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
+import 'package:dartdoc_modern/src/runtime_stats.dart';
+import 'package:dartdoc_modern/src/validator.dart';
+import 'package:dartdoc_modern/src/version.dart';
+import 'package:dartdoc_modern/src/warnings.dart';
 import 'package:path/path.dart' as p show Context;
 
 /// Configuration options for Dartdoc's default backend.

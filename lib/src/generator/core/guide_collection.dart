@@ -10,8 +10,8 @@
 library;
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_vitepress/src/logging.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
+import 'package:dartdoc_modern/src/logging.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
 import 'package:path/path.dart' as p;
 
 /// Matches a markdown level-1 heading (e.g. `# My Title`).

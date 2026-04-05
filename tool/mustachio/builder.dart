@@ -11,7 +11,7 @@ import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:analyzer/src/dart/analysis/analysis_context_collection.dart'
     show AnalysisContextCollectionImpl;
 import 'package:dart_style/dart_style.dart';
-import 'package:dartdoc_vitepress/src/mustachio/annotations.dart';
+import 'package:dartdoc_modern/src/mustachio/annotations.dart';
 import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
 

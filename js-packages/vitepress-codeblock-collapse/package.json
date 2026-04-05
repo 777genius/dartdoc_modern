@@ -26,13 +26,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/777genius/dartdoc_vitepress.git",
+    "url": "https://github.com/777genius/dartdoc_modern.git",
     "directory": "js-packages/vitepress-codeblock-collapse"
   },
   "bugs": {
-    "url": "https://github.com/777genius/dartdoc_vitepress/issues"
+    "url": "https://github.com/777genius/dartdoc_modern/issues"
   },
-  "homepage": "https://github.com/777genius/dartdoc_vitepress/tree/main/js-packages/vitepress-codeblock-collapse#readme",
+  "homepage": "https://github.com/777genius/dartdoc_modern/tree/main/js-packages/vitepress-codeblock-collapse#readme",
   "keywords": [
     "vitepress",
     "codeblock",

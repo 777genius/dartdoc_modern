@@ -9,7 +9,7 @@ import 'package:analyzer/file_system/physical_file_system.dart';
 import 'package:args/args.dart';
 import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart' as crypto;
-import 'package:dartdoc_vitepress/src/package_meta.dart';
+import 'package:dartdoc_modern/src/package_meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:sass/sass.dart' as sass;
 
@@ -181,7 +181,7 @@ Future<void> buildDartdocOptions() async {
   await dartdocOptions.writeAsString('''dartdoc:
   linkToSource:
     root: '.'
-    uriTemplate: 'https://github.com/777genius/dartdoc_vitepress/blob/main/%f%#L%l%'
+    uriTemplate: 'https://github.com/777genius/dartdoc_modern/blob/main/%f%#L%l%'
 ''');
 }
 
@@ -432,7 +432,7 @@ Future<Iterable<Map<String, Object?>>> _docFlutter({
     '-spath',
     '.',
     '-x',
-    'dartdoc_vitepress',
+    'dartdoc_modern',
   ], workingDirectory: cwd);
   await flutterRepo.launcher.runStreamed(flutterRepo.flutterCmd, [
     'pub',
@@ -461,11 +461,11 @@ Future<void> _patchFlutterApiDocsRunner(String flutterPath) async {
     r"r'^(?<name>dartdoc) (?<version>[^\s]+)'",
     r"r'^(?<name>dartdoc(?:_vitepress)?) (?<version>[^\s]+)'",
   );
-  patched = patched.replaceFirst("'dartdoc',", "'dartdoc_vitepress',");
+  patched = patched.replaceFirst("'dartdoc',", "'dartdoc_modern',");
 
   if (patched == contents) {
     throw StateError(
-      'Failed to patch Flutter API docs runner for dartdoc_vitepress.',
+      'Failed to patch Flutter API docs runner for dartdoc_modern.',
     );
   }
 
@@ -519,7 +519,7 @@ Future<String> docPackage({
   var executable = Platform.executable;
   var arguments = [
     '--enable-asserts',
-    path.join(Directory.current.absolute.path, 'bin', 'dartdoc_vitepress.dart'),
+    path.join(Directory.current.absolute.path, 'bin', 'dartdoc_modern.dart'),
     '--link-to-remote',
     '--show-progress',
     '--show-stats',
@@ -604,7 +604,7 @@ Future<String> docTestingPackage({bool withStats = false}) async {
       path.join(
         Directory.current.absolute.path,
         'bin',
-        'dartdoc_vitepress.dart',
+        'dartdoc_modern.dart',
       ),
       '--output',
       outputPath,
@@ -687,7 +687,7 @@ Future<Iterable<Map<String, Object?>>> _docSdk({
   var output = await launcher.runStreamedDartCommand(
     [
       '--enable-asserts',
-      path.join('bin', 'dartdoc_vitepress.dart'),
+      path.join('bin', 'dartdoc_modern.dart'),
       '--output',
       sdkDocsPath,
       '--sdk-docs',
@@ -1089,7 +1089,7 @@ Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
 
     await SubprocessLauncher('generate-$labelPrefix').runStreamedDartCommand([
       'run',
-      path.join(Directory.current.path, 'bin', 'dartdoc_vitepress.dart'),
+      path.join(Directory.current.path, 'bin', 'dartdoc_modern.dart'),
       '--format',
       'jaspr',
       '--output',
@@ -1713,14 +1713,14 @@ Future<void> validateDartdocDocs() async {
   var launcher = SubprocessLauncher('test-dartdoc');
   await launcher.runStreamedDartCommand([
     '--enable-asserts',
-    path.join('bin', 'dartdoc_vitepress.dart'),
+    path.join('bin', 'dartdoc_modern.dart'),
     '--output',
     _dartdocDocsPath,
     '--no-link-to-remote',
   ]);
   _expectFileContains(
     path.join(_dartdocDocsPath, 'index.html'),
-    '<title>dartdoc_vitepress - Dart API docs</title>',
+    '<title>dartdoc_modern - Dart API docs</title>',
   );
   var objectText = RegExp('<li>Object</li>', multiLine: true);
   _expectFileContains(

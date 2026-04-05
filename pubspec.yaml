@@ -1,7 +1,7 @@
-name: dartdoc_vitepress
+name: dartdoc_modern
 version: 1.2.1
 description: Fork of dartdoc with VitePress and Jaspr backends for generating modern API and guide documentation sites.
-repository: https://github.com/777genius/dartdoc_vitepress
+repository: https://github.com/777genius/dartdoc_modern
 
 environment:
   sdk: ^3.8.0
@@ -42,5 +42,6 @@ dev_dependencies:
   test_reflective_loader: ">=0.2.2 <0.5.0"
 
 executables:
-  dartdoc: dartdoc_vitepress
-  dartdoc_vitepress: null
+  dartdoc: dartdoc_modern
+  dartdoc_modern: null
+  dartdoc_vitepress: dartdoc_vitepress

@@ -4,8 +4,8 @@
 
 import 'dart:convert';
 
-import 'package:dartdoc_vitepress/src/element_type.dart';
-import 'package:dartdoc_vitepress/src/model/parameter.dart';
+import 'package:dartdoc_modern/src/element_type.dart';
+import 'package:dartdoc_modern/src/model/parameter.dart';
 
 /// Render HTML in an extended vertical format using an `<ol>` tag.
 class ParameterRendererHtmlList extends ParameterRendererHtml {

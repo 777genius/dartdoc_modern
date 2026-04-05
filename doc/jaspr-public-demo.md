@@ -44,7 +44,7 @@ Generate docs:
 
 ```bash
 tmpdir=$(mktemp -d /tmp/dartdoc-jaspr-demo.XXXXXX) && \
-dart run ./bin/dartdoc_vitepress.dart \
+dart run ./bin/dartdoc_modern.dart \
   --format jaspr \
   --input ./testing/test_package_with_docs \
   --output "$tmpdir"
@@ -86,7 +86,7 @@ Verified large-project run:
 Verified on a large real Flutter workspace (`headless`) with the same pattern:
 
 ```bash
-dart run ./bin/dartdoc_vitepress.dart \
+dart run ./bin/dartdoc_modern.dart \
   --format jaspr \
   --auto-include-dependencies \
   --output /tmp/headless-jaspr-docs-demo

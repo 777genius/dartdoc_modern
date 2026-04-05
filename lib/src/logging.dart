@@ -6,9 +6,9 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
-import 'package:dartdoc_vitepress/src/package_meta.dart';
-import 'package:dartdoc_vitepress/src/progress_bar.dart';
+import 'package:dartdoc_modern/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/package_meta.dart';
+import 'package:dartdoc_modern/src/progress_bar.dart';
 import 'package:logging/logging.dart';
 
 final _logger = Logger('dartdoc');

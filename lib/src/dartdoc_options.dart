@@ -17,20 +17,20 @@ import 'dart:io' show exitCode, stderr, stdout;
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:args/args.dart';
-import 'package:dartdoc_vitepress/src/dartdoc.dart'
+import 'package:dartdoc_modern/src/dartdoc.dart'
     show dartdocVersion, programName;
-import 'package:dartdoc_vitepress/src/experiment_options.dart';
-import 'package:dartdoc_vitepress/src/failure.dart';
-import 'package:dartdoc_vitepress/src/generator/core/docs_recipe.dart'
+import 'package:dartdoc_modern/src/experiment_options.dart';
+import 'package:dartdoc_modern/src/failure.dart';
+import 'package:dartdoc_modern/src/generator/core/docs_recipe.dart'
     as docs_recipe;
-import 'package:dartdoc_vitepress/src/generator/generator.dart';
-import 'package:dartdoc_vitepress/src/io_utils.dart';
-import 'package:dartdoc_vitepress/src/logging.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
-import 'package:dartdoc_vitepress/src/package_meta.dart';
-import 'package:dartdoc_vitepress/src/source_linker.dart';
-import 'package:dartdoc_vitepress/src/tool_configuration.dart';
-import 'package:dartdoc_vitepress/src/warnings.dart';
+import 'package:dartdoc_modern/src/generator/generator.dart';
+import 'package:dartdoc_modern/src/io_utils.dart';
+import 'package:dartdoc_modern/src/logging.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
+import 'package:dartdoc_modern/src/package_meta.dart';
+import 'package:dartdoc_modern/src/source_linker.dart';
+import 'package:dartdoc_modern/src/tool_configuration.dart';
+import 'package:dartdoc_modern/src/warnings.dart';
 import 'package:path/path.dart' as p show Context, canonicalize;
 import 'package:yaml/yaml.dart';
 

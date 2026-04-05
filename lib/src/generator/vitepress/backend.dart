@@ -5,25 +5,25 @@
 import 'dart:async';
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
-import 'package:dartdoc_vitepress/src/generator/core/legacy_guide_redirects.dart';
-import 'package:dartdoc_vitepress/src/generator/generator.dart';
-import 'package:dartdoc_vitepress/src/generator/generator_backend.dart';
-import 'package:dartdoc_vitepress/src/generator/template_data.dart';
-import 'package:dartdoc_vitepress/src/generator/templates.dart';
-import 'package:dartdoc_vitepress/src/generator/vitepress/docs.dart';
-import 'package:dartdoc_vitepress/src/generator/vitepress/paths.dart'
+import 'package:dartdoc_modern/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/generator/core/legacy_guide_redirects.dart';
+import 'package:dartdoc_modern/src/generator/generator.dart';
+import 'package:dartdoc_modern/src/generator/generator_backend.dart';
+import 'package:dartdoc_modern/src/generator/template_data.dart';
+import 'package:dartdoc_modern/src/generator/templates.dart';
+import 'package:dartdoc_modern/src/generator/vitepress/docs.dart';
+import 'package:dartdoc_modern/src/generator/vitepress/paths.dart'
     show VitePressPathResolver, isDuplicateSdkLibrary, isInternalSdkLibrary;
-import 'package:dartdoc_vitepress/src/generator/vitepress/renderer.dart'
+import 'package:dartdoc_modern/src/generator/vitepress/renderer.dart'
     as renderer;
-import 'package:dartdoc_vitepress/src/generator/vitepress/scaffold.dart';
-import 'package:dartdoc_vitepress/src/generator/vitepress/sidebar.dart'
+import 'package:dartdoc_modern/src/generator/vitepress/scaffold.dart';
+import 'package:dartdoc_modern/src/generator/vitepress/sidebar.dart'
     show VitePressSidebarGenerator;
-import 'package:dartdoc_vitepress/src/generator/vitepress_guide_generator.dart';
-import 'package:dartdoc_vitepress/src/logging.dart';
-import 'package:dartdoc_vitepress/src/markdown_validator.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
-import 'package:dartdoc_vitepress/src/runtime_stats.dart';
+import 'package:dartdoc_modern/src/generator/vitepress_guide_generator.dart';
+import 'package:dartdoc_modern/src/logging.dart';
+import 'package:dartdoc_modern/src/markdown_validator.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
+import 'package:dartdoc_modern/src/runtime_stats.dart';
 import 'package:path/path.dart' as p;
 
 /// Essential CSS for API documentation pages.

@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:dartdoc_vitepress/src/model/kind.dart';
+import 'package:dartdoc_modern/src/model/kind.dart';
 import 'package:meta/meta.dart';
 
 enum _MatchPosition {

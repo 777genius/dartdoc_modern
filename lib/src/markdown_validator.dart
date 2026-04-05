@@ -5,14 +5,14 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
-import 'package:dartdoc_vitepress/src/generator/core/path_utils.dart'
+import 'package:dartdoc_modern/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/generator/core/path_utils.dart'
     show sanitizeAnchor;
-import 'package:dartdoc_vitepress/src/logging.dart';
-import 'package:dartdoc_vitepress/src/model/model_element.dart';
-import 'package:dartdoc_vitepress/src/model/package_graph.dart';
-import 'package:dartdoc_vitepress/src/runtime_stats.dart';
-import 'package:dartdoc_vitepress/src/warnings.dart';
+import 'package:dartdoc_modern/src/logging.dart';
+import 'package:dartdoc_modern/src/model/model_element.dart';
+import 'package:dartdoc_modern/src/model/package_graph.dart';
+import 'package:dartdoc_modern/src/runtime_stats.dart';
+import 'package:dartdoc_modern/src/warnings.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:path/path.dart' as path;
 

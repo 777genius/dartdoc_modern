@@ -126,7 +126,7 @@ jobs:
       - run: dart pub global activate jaspr_cli
 
       - name: Generate Jaspr docs
-        run: dart run ./bin/dartdoc_vitepress.dart --format jaspr --output docs-site
+        run: dart run ./bin/dartdoc_modern.dart --format jaspr --output docs-site
 
       - name: Build static Jaspr site
         run: |
@@ -171,7 +171,7 @@ Only add `DOCS_BASE_PATH` when your deployed URL is not at `/`.
 For a package team that wants repeatable docs deploys:
 
 ```bash
-dartdoc_vitepress --format jaspr --output docs-site
+dartdoc_modern --format jaspr --output docs-site
 cd docs-site
 dart pub get
 dart pub global activate jaspr_cli

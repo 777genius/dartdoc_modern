@@ -2,20 +2,20 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-/// @docImport 'package:dartdoc_vitepress/src/model/package_graph.dart';
+/// @docImport 'package:dartdoc_modern/src/model/package_graph.dart';
 library;
 
 import 'dart:convert';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:args/args.dart';
 import 'package:crypto/crypto.dart' as crypto;
-import 'package:dartdoc_vitepress/src/model/category.dart';
-import 'package:dartdoc_vitepress/src/model/documentation.dart';
-import 'package:dartdoc_vitepress/src/model/library.dart';
-import 'package:dartdoc_vitepress/src/model/model_element.dart';
-import 'package:dartdoc_vitepress/src/model/source_code_mixin.dart';
-import 'package:dartdoc_vitepress/src/utils.dart';
-import 'package:dartdoc_vitepress/src/warnings.dart';
+import 'package:dartdoc_modern/src/model/category.dart';
+import 'package:dartdoc_modern/src/model/documentation.dart';
+import 'package:dartdoc_modern/src/model/library.dart';
+import 'package:dartdoc_modern/src/model/model_element.dart';
+import 'package:dartdoc_modern/src/model/source_code_mixin.dart';
+import 'package:dartdoc_modern/src/utils.dart';
+import 'package:dartdoc_modern/src/warnings.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p show Context;
 

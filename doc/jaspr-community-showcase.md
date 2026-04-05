@@ -10,7 +10,7 @@ evidence-based.
 
 ## One-Sentence Pitch
 
-`dartdoc-vitepress` adds a Jaspr backend to `dartdoc`, so Dart and Flutter packages can ship a Dart-native docs site with search, guides, theming, breadcrumbs, Mermaid, DartPad, and typed generated scaffold data instead of plain generated HTML.
+`dartdoc_modern` adds a Jaspr backend to `dartdoc`, so Dart and Flutter packages can ship a Dart-native docs site with search, guides, theming, breadcrumbs, Mermaid, DartPad, and typed generated scaffold data instead of plain generated HTML.
 
 ## Why Flutter And Dart People Should Care
 

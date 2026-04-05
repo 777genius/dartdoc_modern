@@ -6,8 +6,8 @@
 library;
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_vitepress/src/dartdoc_options.dart';
-import 'package:dartdoc_vitepress/src/model/model.dart';
+import 'package:dartdoc_modern/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
 import 'package:path/path.dart' as path;
 
 final _uriTemplateRegExp = RegExp(r'(%[frl]%)');

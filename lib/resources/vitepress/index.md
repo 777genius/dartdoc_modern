@@ -3,7 +3,7 @@ layout: home
 hero:
   name: "{{packageName}}"
   text: API Documentation
-  tagline: Generated with dartdoc-vitepress
+  tagline: Generated with dartdoc_modern
   actions:
     - theme: brand
       text: Get Started

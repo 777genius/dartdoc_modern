@@ -14,27 +14,27 @@
 
 import 'dart:convert';
 
-import 'package:dartdoc_vitepress/src/generator/template_data.dart';
-import 'package:dartdoc_vitepress/src/model/accessor.dart';
-import 'package:dartdoc_vitepress/src/model/category.dart';
-import 'package:dartdoc_vitepress/src/model/class.dart';
-import 'package:dartdoc_vitepress/src/model/constructor.dart';
-import 'package:dartdoc_vitepress/src/model/container.dart';
-import 'package:dartdoc_vitepress/src/model/documentable.dart';
-import 'package:dartdoc_vitepress/src/model/enum.dart';
-import 'package:dartdoc_vitepress/src/model/extension.dart';
-import 'package:dartdoc_vitepress/src/model/extension_type.dart';
-import 'package:dartdoc_vitepress/src/model/field.dart';
-import 'package:dartdoc_vitepress/src/model/inheriting_container.dart';
-import 'package:dartdoc_vitepress/src/model/library.dart';
-import 'package:dartdoc_vitepress/src/model/method.dart';
-import 'package:dartdoc_vitepress/src/model/mixin.dart';
-import 'package:dartdoc_vitepress/src/model/model_element.dart';
-import 'package:dartdoc_vitepress/src/model/model_function.dart';
-import 'package:dartdoc_vitepress/src/model/package.dart';
-import 'package:dartdoc_vitepress/src/model/top_level_variable.dart';
-import 'package:dartdoc_vitepress/src/model/typedef.dart';
-import 'package:dartdoc_vitepress/src/warnings.dart';
+import 'package:dartdoc_modern/src/generator/template_data.dart';
+import 'package:dartdoc_modern/src/model/accessor.dart';
+import 'package:dartdoc_modern/src/model/category.dart';
+import 'package:dartdoc_modern/src/model/class.dart';
+import 'package:dartdoc_modern/src/model/constructor.dart';
+import 'package:dartdoc_modern/src/model/container.dart';
+import 'package:dartdoc_modern/src/model/documentable.dart';
+import 'package:dartdoc_modern/src/model/enum.dart';
+import 'package:dartdoc_modern/src/model/extension.dart';
+import 'package:dartdoc_modern/src/model/extension_type.dart';
+import 'package:dartdoc_modern/src/model/field.dart';
+import 'package:dartdoc_modern/src/model/inheriting_container.dart';
+import 'package:dartdoc_modern/src/model/library.dart';
+import 'package:dartdoc_modern/src/model/method.dart';
+import 'package:dartdoc_modern/src/model/mixin.dart';
+import 'package:dartdoc_modern/src/model/model_element.dart';
+import 'package:dartdoc_modern/src/model/model_function.dart';
+import 'package:dartdoc_modern/src/model/package.dart';
+import 'package:dartdoc_modern/src/model/top_level_variable.dart';
+import 'package:dartdoc_modern/src/model/typedef.dart';
+import 'package:dartdoc_modern/src/warnings.dart';
 
 String renderCategory(CategoryTemplateData context0) {
   final buffer = StringBuffer();

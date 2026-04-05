@@ -8,7 +8,7 @@
 /// Jaspr, etc.). They must not emit any format-specific syntax.
 library;
 
-import 'package:dartdoc_vitepress/src/model/model.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
 
 /// Matches characters not allowed in file names across common file systems.
 final unsafeFileChars = RegExp(r'[:<>|?*"/\\]');

@@ -3,18 +3,18 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_vitepress/src/generator/core/guide_collection.dart'
+import 'package:dartdoc_modern/src/generator/core/guide_collection.dart'
     as guide_core;
-import 'package:dartdoc_vitepress/src/generator/core/guide_collection.dart'
+import 'package:dartdoc_modern/src/generator/core/guide_collection.dart'
     show GuideEntry;
-import 'package:dartdoc_vitepress/src/generator/vitepress_doc_processor.dart';
-import 'package:dartdoc_vitepress/src/generator/vitepress_sidebar_generator.dart'
+import 'package:dartdoc_modern/src/generator/vitepress_doc_processor.dart';
+import 'package:dartdoc_modern/src/generator/vitepress_sidebar_generator.dart'
     show escapeForTs;
-import 'package:dartdoc_vitepress/src/model/model.dart';
+import 'package:dartdoc_modern/src/model/model.dart';
 import 'package:meta/meta.dart';
 
 // Re-export GuideEntry so existing importers don't break.
-export 'package:dartdoc_vitepress/src/generator/core/guide_collection.dart'
+export 'package:dartdoc_modern/src/generator/core/guide_collection.dart'
     show GuideEntry;
 
 /// Generates guide pages from `doc/` and `docs/` directories of packages.

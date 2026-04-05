@@ -7,15 +7,15 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/scope.dart';
 import 'package:analyzer/dart/element/type.dart' show DartType;
 import 'package:collection/collection.dart';
-import 'package:dartdoc_vitepress/src/element_type.dart';
-import 'package:dartdoc_vitepress/src/model/accessor.dart';
-import 'package:dartdoc_vitepress/src/model/constructor.dart';
-import 'package:dartdoc_vitepress/src/model/container.dart';
-import 'package:dartdoc_vitepress/src/model/library.dart';
-import 'package:dartdoc_vitepress/src/model/model_element.dart';
-import 'package:dartdoc_vitepress/src/model/package_graph.dart';
-import 'package:dartdoc_vitepress/src/model/prefix.dart';
-import 'package:dartdoc_vitepress/src/warnings.dart';
+import 'package:dartdoc_modern/src/element_type.dart';
+import 'package:dartdoc_modern/src/model/accessor.dart';
+import 'package:dartdoc_modern/src/model/constructor.dart';
+import 'package:dartdoc_modern/src/model/container.dart';
+import 'package:dartdoc_modern/src/model/library.dart';
+import 'package:dartdoc_modern/src/model/model_element.dart';
+import 'package:dartdoc_modern/src/model/package_graph.dart';
+import 'package:dartdoc_modern/src/model/prefix.dart';
+import 'package:dartdoc_modern/src/warnings.dart';
 import 'package:meta/meta.dart';
 
 /// Something that has a name, and can be referenced in a doc comment.
