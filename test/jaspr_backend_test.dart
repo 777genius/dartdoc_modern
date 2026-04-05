@@ -114,9 +114,11 @@ Paragraph with {{ value }}
       expect(markdown, contains('features:'));
       expect(markdown, contains('text: Quick Start'));
       expect(markdown, contains('text: GitHub'));
-      expect(markdown, contains('<Tabs defaultValue="single-package">'));
-      expect(markdown, contains('label="Mono-repo"'));
+      expect(markdown, contains('<Tabs defaultValue="jaspr">'));
+      expect(markdown, contains('#### Mono-repo'));
       expect(markdown, contains('## dart doc vs dartdoc_modern'));
+      expect(markdown, contains('| Build speed / file count |'));
+      expect(markdown, contains('### Why It Builds Much Faster'));
       expect(markdown, contains('## Live Example'));
     });
   });

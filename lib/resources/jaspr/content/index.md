@@ -115,9 +115,22 @@ dartdoc_modern --sdk-docs --format vitepress --output docs-site
 | Dark mode | No | Yes | Yes |
 | Guide docs | No | Auto from `doc/` | Auto from `doc/` |
 | Mono-repo | No | `--workspace-docs` | `--workspace-docs` |
+| Build speed / file count | Many HTML pages | Much faster, far fewer files | Much faster, far fewer files |
 | DartPad embeds | No | Yes | Yes |
 | Mermaid diagrams | No | Yes, with zoom | Yes, with runtime rendering |
 | Customization | Templates | CSS, Vue components, plugins | Dart components, theme tokens, CSS |
+
+### Why It Builds Much Faster
+
+`dartdoc_modern` is dramatically faster largely because it writes dramatically fewer files.
+
+Standard `dartdoc` creates a separate HTML page for every member. Every method, property, constructor, and constant gets its own full HTML page with head, navigation, sidebar, and footer. `dartdoc_modern` keeps members inline on the library or type page instead.
+
+- The Flutter `Icons` class has about 2,000 static constants. `dartdoc` turns that into about 2,001 pages for one class. `dartdoc_modern` keeps it on one page.
+- For the full Dart SDK, `dartdoc` generates roughly 15,000+ HTML files. `dartdoc_modern` generates about 1,800 markdown files, around 52 MB of source markdown.
+- For icon packages like `material_design_icons_flutter` with 7,000+ static const icons, `dartdoc` would emit 7,000+ individual pages. `dartdoc_modern` keeps that as one page.
+
+This is a deliberate architectural choice, not a limitation. It reduces file-system churn, cuts I/O, speeds up builds, and makes browsing APIs better: you can `Ctrl+F` through the whole class, jump with the outline, and use search without opening dozens of member pages.
 
 ## Generated With
 

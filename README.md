@@ -33,9 +33,21 @@ Default `dartdoc` HTML is useful, but many teams want a documentation site that 
 | Search | Built-in (basic) | VitePress local search, Jaspr staged local search |
 | Guide docs | Not supported | Auto-discovers `doc/` and `docs/` |
 | Workspace mode | Not supported | `--workspace-docs` for mono-repos |
+| Build speed / file count | Many HTML pages | Much faster, far fewer generated files |
 | Sidebar data | HTML nav | Generated TS or typed Dart data |
 | Theming | CSS customization | VitePress theme or Jaspr `ContentTheme` presets |
 | Extensibility | HTML templates | Open markdown output plus scaffold you can extend |
+
+The speedup comes from page strategy, not from cutting features.
+
+Standard `dartdoc` creates a separate HTML page for every single member. Every method, property, constructor, and constant gets its own page with full HTML chrome around it. `dartdoc_modern` keeps members inline on the type or library page instead.
+
+To put that in perspective:
+- Flutter `Icons` has roughly 2,000 static constants. `dartdoc` turns that into about 2,001 pages for one class. `dartdoc_modern` keeps it on one page.
+- The full Dart SDK with `dartdoc` is roughly 15,000+ HTML files. `dartdoc_modern` is about 1,800 markdown files, around 52 MB of source markdown.
+- Packages like `material_design_icons_flutter` with 7,000+ static const icons become 7,000+ pages in standard `dartdoc`, but a single page in `dartdoc_modern`.
+
+This is deliberate. It cuts file-system churn and I/O, which makes builds much faster, and it is also a better browsing model for developers: you can search within the whole class, jump with the outline, and use full-text search without opening dozens of tiny member pages.
 
 ## Which Backend Should You Choose?
 
