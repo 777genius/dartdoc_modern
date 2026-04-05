@@ -456,23 +456,7 @@ class DocsHomeLayout extends PageLayoutBase {
       fontWeight: FontWeight.w800,
       fontSize: 1.02.rem,
     ),
-    css('.docs-home-markdown .tab-bar .tab-item').styles(
-      minHeight: Unit.zero,
-      padding: Padding.only(bottom: 0.7.rem),
-      border: Border.only(
-        bottom: BorderSide(width: 3.px, color: Color('transparent')),
-      ),
-      radius: BorderRadius.circular(Unit.zero),
-      color: Color('var(--docs-shell-muted)'),
-      fontWeight: FontWeight.w800,
-      fontSize: 1.02.rem,
-      backgroundColor: Color('transparent'),
-      transition: Transition(
-        'color, border-color',
-        duration: Duration(milliseconds: 150),
-      ),
-    ),
-    css('.docs-home-markdown .tab-bar .tab-item[active]').styles(
+    css('.docs-home-markdown .tab-bar button[active]').styles(
       color: Color('var(--docs-shell-accent-strong)'),
       border: Border.only(
         bottom: BorderSide(
