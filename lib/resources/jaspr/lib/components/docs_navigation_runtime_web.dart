@@ -8,6 +8,7 @@ import 'package:jaspr/jaspr.dart';
 import 'package:web/web.dart' as web;
 
 import '../docs_base.dart';
+import '../project_version_routes.dart';
 
 @client
 class DocsNavigationRuntime extends StatefulComponent {
@@ -69,6 +70,7 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
     web.document.addEventListener('click', _clickListener);
     _normalizeDocumentAnchors();
     _syncHeaderNavActive();
+    _syncVersionSwitchRoutes();
 
     _popStateListener = ((web.Event _) {
       unawaited(
@@ -216,6 +218,7 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
 
       _closeSidebar();
       _syncHeaderNavActive();
+      _syncVersionSwitchRoutes();
       _notifyNavigation();
       _syncScroll(targetUri, restoreScroll: restoreScroll);
     } catch (_) {
@@ -306,6 +309,36 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
         node.removeAttribute('aria-current');
       }
     }
+  }
+
+  void _syncVersionSwitchRoutes() {
+    final currentRoute = _currentRouteForVersionSwitch();
+    final versionLinks = web.document.querySelectorAll(
+      '.version-switch a[data-version]',
+    );
+
+    for (var index = 0; index < versionLinks.length; index++) {
+      final node = versionLinks.item(index);
+      if (node is! web.HTMLAnchorElement) continue;
+
+      final version = node.getAttribute('data-version');
+      final href = switch (version) {
+        'jaspr' => projectJasprUrlForRoute(currentRoute),
+        'vitepress' => projectVitePressUrlForRoute(currentRoute),
+        _ => null,
+      };
+      if (href == null || href.isEmpty) continue;
+      node.setAttribute('href', href);
+    }
+  }
+
+  String _currentRouteForVersionSwitch() {
+    final location = web.window.location;
+    final path = _normalizeRoute(location.pathname);
+    final search = location.search;
+    final hash = location.hash;
+
+    return '$path$search$hash';
   }
 
   String _normalizeRoute(String route) {

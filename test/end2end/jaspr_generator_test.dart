@@ -880,9 +880,22 @@ void main() {
           contains("export 'docs_navigation_runtime_stub.dart'"),
         );
         expect(navigationRuntimeWeb, contains('_syncHeaderNavActive();'));
+        expect(navigationRuntimeWeb, contains('_syncVersionSwitchRoutes();'));
         expect(
           navigationRuntimeWeb,
           contains('.header-nav a[data-docs-header-nav-link]'),
+        );
+        expect(
+          navigationRuntimeWeb,
+          contains(".version-switch a[data-version]"),
+        );
+        expect(
+          navigationRuntimeWeb,
+          contains("projectVitePressUrlForRoute(currentRoute)"),
+        );
+        expect(
+          navigationRuntimeWeb,
+          contains("projectJasprUrlForRoute(currentRoute)"),
         );
         expect(
           navigationRuntimeWeb,
