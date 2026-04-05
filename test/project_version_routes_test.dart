@@ -51,5 +51,20 @@ void main() {
         'https://777genius.github.io/dartdoc_modern/jaspr/api',
       );
     });
+
+    test('falls back to shared API root for VitePress-only library pages', () {
+      expect(
+        projectJasprUrlForRoute(
+          '/api/resources_jaspr_lib_components_docs_disclosure_runtime/',
+        ),
+        'https://777genius.github.io/dartdoc_modern/jaspr/api',
+      );
+      expect(
+        projectJasprUrlForRoute(
+          '/api/resources_jaspr_lib_components_docs_disclosure_runtime/DocsDisclosureRuntime',
+        ),
+        'https://777genius.github.io/dartdoc_modern/jaspr/api',
+      );
+    });
   });
 }

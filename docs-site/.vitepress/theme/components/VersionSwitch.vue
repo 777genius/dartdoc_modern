@@ -14,6 +14,7 @@ const route = useRoute()
 
 const jasprHref = ref(PROJECT_JASPR_DOCS_URL)
 const vitepressHref = ref(PROJECT_VITEPRESS_DOCS_URL)
+const SHARED_API_LIBRARY_DIRS = new Set(['dartdoc', 'options'])
 
 const isProjectDocs = computed(() => {
   const title = site.value.title?.trim() ?? ''
@@ -73,8 +74,23 @@ function resolveRelativeRoute(pathname: string): string {
   return normalizedPath
 }
 
+function sharedApiFallback(target: 'jaspr' | 'vitepress'): string {
+  return target === 'jaspr' ? '/api' : '/api/'
+}
+
+function sharedApiLibraryDir(pathname: string): string | null {
+  const segments = normalizeRoutePath(pathname).split('/').filter(Boolean)
+  if (segments.length < 2 || segments[0] !== 'api') {
+    return null
+  }
+
+  const libraryDir = segments[1]
+  return SHARED_API_LIBRARY_DIRS.has(libraryDir) ? libraryDir : null
+}
+
 function routeForTarget(pathname: string, target: 'jaspr' | 'vitepress'): string {
   const currentPath = resolveRelativeRoute(pathname)
+  const sharedLibraryDir = sharedApiLibraryDir(currentPath)
 
   if (target === 'vitepress') {
     if (currentPath === '/api') {
@@ -83,7 +99,14 @@ function routeForTarget(pathname: string, target: 'jaspr' | 'vitepress'): string
 
     const libraryMatch = currentPath.match(/^\/api\/([^/]+)\/library$/)
     if (libraryMatch) {
-      return `/api/${libraryMatch[1]}/`
+      const libraryDir = libraryMatch[1]
+      return SHARED_API_LIBRARY_DIRS.has(libraryDir)
+        ? `/api/${libraryDir}/`
+        : sharedApiFallback(target)
+    }
+
+    if (currentPath.startsWith('/api/') && sharedLibraryDir == null) {
+      return sharedApiFallback(target)
     }
 
     return currentPath
@@ -95,7 +118,13 @@ function routeForTarget(pathname: string, target: 'jaspr' | 'vitepress'): string
 
   const segments = normalizeRoutePath(currentPath).split('/').filter(Boolean)
   if (segments.length === 2 && segments[0] === 'api') {
-    return `/api/${segments[1]}/library`
+    return sharedLibraryDir == null
+      ? sharedApiFallback(target)
+      : `/api/${sharedLibraryDir}/library`
+  }
+
+  if (currentPath.startsWith('/api/') && sharedLibraryDir == null) {
+    return sharedApiFallback(target)
   }
 
   return normalizeRoutePath(currentPath)

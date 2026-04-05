@@ -1,6 +1,7 @@
 const projectSiteRootUrl = 'https://777genius.github.io/dartdoc_modern';
 const projectVitePressDocsUrl = '$projectSiteRootUrl/vitepress/';
 const projectJasprDocsUrl = '$projectSiteRootUrl/jaspr/';
+const _sharedApiLibraryDirs = {'dartdoc', 'options'};
 
 String projectVitePressUrlForRoute(String currentRoute) {
   return _buildProjectDocsVersionUrl(
@@ -43,6 +44,7 @@ String _buildProjectDocsVersionUrl({
 String _routeForVitePress(String currentRoute) {
   final routeUri = Uri.parse(currentRoute.isEmpty ? '/' : currentRoute);
   final path = _normalizeRoutePath(routeUri.path);
+  final sharedLibraryDir = _sharedApiLibraryDir(path);
 
   if (path == '/api') {
     return _replaceRoutePath(routeUri, '/api/').toString();
@@ -50,10 +52,15 @@ String _routeForVitePress(String currentRoute) {
 
   final libraryMatch = RegExp(r'^/api/([^/]+)/library$').firstMatch(path);
   if (libraryMatch != null) {
+    final libraryDir = libraryMatch.group(1)!;
     return _replaceRoutePath(
       routeUri,
-      '/api/${libraryMatch.group(1)!}/',
+      _sharedApiLibraryDirs.contains(libraryDir) ? '/api/$libraryDir/' : '/api/',
     ).toString();
+  }
+
+  if (path.startsWith('/api/') && sharedLibraryDir == null) {
+    return _replaceRoutePath(routeUri, '/api/').toString();
   }
 
   return _replaceRoutePath(routeUri, path).toString();
@@ -62,6 +69,7 @@ String _routeForVitePress(String currentRoute) {
 String _routeForJaspr(String currentRoute) {
   final routeUri = Uri.parse(currentRoute.isEmpty ? '/' : currentRoute);
   final path = _normalizeRoutePath(routeUri.path);
+  final sharedLibraryDir = _sharedApiLibraryDir(path);
 
   if (path == '/api') {
     return _replaceRoutePath(routeUri, '/api').toString();
@@ -74,11 +82,28 @@ String _routeForJaspr(String currentRoute) {
   if (segments.length == 2 && segments.first == 'api') {
     return _replaceRoutePath(
       routeUri,
-      '/api/${segments[1]}/library',
+      sharedLibraryDir == null ? '/api' : '/api/$sharedLibraryDir/library',
     ).toString();
   }
 
+  if (path.startsWith('/api/') && sharedLibraryDir == null) {
+    return _replaceRoutePath(routeUri, '/api').toString();
+  }
+
   return _replaceRoutePath(routeUri, path).toString();
+}
+
+String? _sharedApiLibraryDir(String path) {
+  final segments = _normalizeRoutePath(path)
+      .split('/')
+      .where((segment) => segment.isNotEmpty)
+      .toList();
+  if (segments.length < 2 || segments.first != 'api') {
+    return null;
+  }
+
+  final libraryDir = segments[1];
+  return _sharedApiLibraryDirs.contains(libraryDir) ? libraryDir : null;
 }
 
 Uri _replaceRoutePath(Uri uri, String path) {
