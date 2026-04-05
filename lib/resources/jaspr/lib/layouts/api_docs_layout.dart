@@ -1022,10 +1022,8 @@ class ApiDocsLayout extends DocsLayout {
         display: Display.flex,
         flexDirection: FlexDirection.column,
         raw: {
-          'top': '0',
-          'padding-top': 'calc(var(--docs-shell-header-height) + 0.5rem)',
-          'height': '100vh',
-          'box-sizing': 'border-box',
+          'top': 'calc(var(--docs-shell-header-height) + 0.5rem)',
+          'height': 'calc(100vh - var(--docs-shell-header-height) - 0.5rem)',
           'width': 'min(var(--docs-shell-drawer-width), 85vw)',
           'transform': 'translateX(-100%)',
           'opacity': '0',
