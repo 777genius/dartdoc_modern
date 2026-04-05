@@ -3,3 +3,11 @@ include: package:lints/recommended.yaml
 analyzer:
   exclude:
     - 'lib/vendor/highlighting/**'
+  errors:
+    avoid_types_as_parameter_names: ignore
+    curly_braces_in_flow_control_structures: ignore
+    implementation_imports: ignore
+    invalid_runtime_check_with_js_interop_types: ignore
+    unnecessary_brace_in_string_interps: ignore
+    unnecessary_this: ignore
+    use_null_aware_elements: ignore

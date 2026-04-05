@@ -184,23 +184,6 @@ List<Component> _buildHeaderItems({
   ];
 }
 
-Component _buildExternalHeaderLink({
-  required String text,
-  required String href,
-  required String ariaLabel,
-}) {
-  return DocsNavLink(
-    to: href,
-    target: Target.blank,
-    attributes: {
-      'rel': 'noopener',
-      'aria-label': ariaLabel,
-    },
-    classes: 'header-repo-link',
-    children: [Component.text(text)],
-  );
-}
-
 DocsSidebarGroup _mapGuideGroup(guide.SidebarGroup group) {
   return DocsSidebarGroup(
     title: group.title,
