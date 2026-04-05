@@ -887,15 +887,15 @@ void main() {
         );
         expect(
           navigationRuntimeWeb,
-          contains(".version-switch a[data-version]"),
+          contains('.version-switch a[data-version]'),
         );
         expect(
           navigationRuntimeWeb,
-          contains("projectVitePressUrlForRoute(currentRoute)"),
+          contains('projectVitePressUrlForRoute(currentRoute)'),
         );
         expect(
           navigationRuntimeWeb,
-          contains("projectJasprUrlForRoute(currentRoute)"),
+          contains('projectJasprUrlForRoute(currentRoute)'),
         );
         expect(
           navigationRuntimeWeb,
