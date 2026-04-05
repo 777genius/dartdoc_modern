@@ -151,7 +151,7 @@ class VitePressInitGenerator {
     // .gitignore for node_modules, dist and cache
     _writeTemplateIfAbsent(
       templateDir: templateDir,
-      templateFile: '.gitignore',
+      templateFile: 'gitignore.template',
       outputFile: '.gitignore',
       placeholders: placeholders,
     );

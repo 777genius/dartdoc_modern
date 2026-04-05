@@ -1,7 +1,8 @@
-## 1.0.1
+## 1.0.2
 
-* Fix published VitePress scaffold resources so `CLAUDE.md` and `AGENTS.md`
-  templates are bundled correctly on `pub.dev`.
+* Fix published VitePress scaffold resources so hidden/scaffold templates are
+  bundled correctly on `pub.dev`, including `.gitignore`, `CLAUDE.md`, and
+  `AGENTS.md` outputs.
 
 ## 1.2.0
 

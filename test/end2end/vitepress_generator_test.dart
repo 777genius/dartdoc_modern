@@ -192,6 +192,7 @@ void main() {
 
       test('scaffold files are generated', () {
         expect(_outputExists(outDir, 'package.json'), isTrue);
+        expect(_outputExists(outDir, '.gitignore'), isTrue);
         expect(_outputExists(outDir, '.vitepress/config.ts'), isTrue);
         expect(_outputExists(outDir, 'index.md'), isTrue);
         expect(_outputExists(outDir, 'CLAUDE.md'), isTrue);
