@@ -1,6 +1,7 @@
-## 1.0.0
+## 1.0.1
 
-* Fix scaffold generation to include `useOutlineCollapse` composable for new projects.
+* Fix published VitePress scaffold resources so `CLAUDE.md` and `AGENTS.md`
+  templates are bundled correctly on `pub.dev`.
 
 ## 1.2.0
 

@@ -137,13 +137,13 @@ class VitePressInitGenerator {
     // LLM instructions (so AI tools know what's generated vs editable)
     _writeTemplateIfAbsent(
       templateDir: templateDir,
-      templateFile: 'CLAUDE.md',
+      templateFile: 'llm-claude-template.md',
       outputFile: 'CLAUDE.md',
       placeholders: placeholders,
     );
     _writeTemplateIfAbsent(
       templateDir: templateDir,
-      templateFile: 'AGENTS.md',
+      templateFile: 'llm-agents-template.md',
       outputFile: 'AGENTS.md',
       placeholders: placeholders,
     );
