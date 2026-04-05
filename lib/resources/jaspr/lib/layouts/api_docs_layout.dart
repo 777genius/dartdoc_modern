@@ -1014,13 +1014,14 @@ class ApiDocsLayout extends DocsLayout {
     ]),
     downContent([
       css('.docs .main-container .sidebar-container').styles(
-        position: Position.fixed(left: Unit.zero, bottom: Unit.zero),
+        position: Position.fixed(left: Unit.zero),
         zIndex: ZIndex(55),
         padding: Padding.zero,
         display: Display.flex,
         flexDirection: FlexDirection.column,
         raw: {
           'top': 'var(--docs-shell-header-height)',
+          'height': 'calc(100vh - var(--docs-shell-header-height))',
           'width': 'min(var(--docs-shell-drawer-width), 85vw)',
           'transform': 'translateX(-100%)',
           'opacity': '0',
