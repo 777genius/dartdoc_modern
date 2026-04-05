@@ -102,6 +102,17 @@ function guideRouteForTarget(pathname: string, target: 'jaspr' | 'vitepress'): s
   return normalizedPath
 }
 
+function apiRouteForJaspr(pathname: string, sharedLibraryDir: string | null): string {
+  const normalizedPath = normalizeRoutePath(pathname)
+  if (!normalizedPath.startsWith('/api/') || sharedLibraryDir == null) {
+    return normalizedPath
+  }
+
+  return normalizedPath.endsWith('.html')
+    ? normalizedPath.slice(0, -'.html'.length)
+    : normalizedPath
+}
+
 function routeForTarget(pathname: string, target: 'jaspr' | 'vitepress'): string {
   const currentPath = resolveRelativeRoute(pathname)
   const sharedLibraryDir = sharedApiLibraryDir(currentPath)
@@ -145,7 +156,7 @@ function routeForTarget(pathname: string, target: 'jaspr' | 'vitepress'): string
     return sharedApiFallback(target)
   }
 
-  return normalizeRoutePath(currentPath)
+  return apiRouteForJaspr(currentPath, sharedLibraryDir)
 }
 
 function buildTargetUrl(target: 'jaspr' | 'vitepress'): string {

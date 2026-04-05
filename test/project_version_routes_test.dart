@@ -26,6 +26,10 @@ void main() {
         projectJasprUrlForRoute('/api/dartdoc/initJasprGenerator'),
         'https://777genius.github.io/dartdoc_modern/jaspr/api/dartdoc/initJasprGenerator',
       );
+      expect(
+        projectJasprUrlForRoute('/api/dartdoc/CategoryDefinition.html'),
+        'https://777genius.github.io/dartdoc_modern/jaspr/api/dartdoc/CategoryDefinition',
+      );
     });
 
     test('preserves guide routes with query and hash', () {

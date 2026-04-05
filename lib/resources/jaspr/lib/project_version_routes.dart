@@ -100,7 +100,10 @@ String _routeForJaspr(String currentRoute) {
     return _replaceRoutePath(routeUri, '/api').toString();
   }
 
-  return _replaceRoutePath(routeUri, path).toString();
+  return _replaceRoutePath(
+    routeUri,
+    _apiRouteForJaspr(path, sharedLibraryDir),
+  ).toString();
 }
 
 String? _sharedApiLibraryDir(String path) {
@@ -127,6 +130,19 @@ String _guideRouteForTarget(String path, String target) {
   if (target == 'jaspr' && !normalizedPath.endsWith('.html')) {
     return '$normalizedPath.html';
   }
+  return normalizedPath;
+}
+
+String _apiRouteForJaspr(String path, String? sharedLibraryDir) {
+  final normalizedPath = _normalizeRoutePath(path);
+  if (!normalizedPath.startsWith('/api/') || sharedLibraryDir == null) {
+    return normalizedPath;
+  }
+
+  if (normalizedPath.endsWith('.html')) {
+    return normalizedPath.substring(0, normalizedPath.length - '.html'.length);
+  }
+
   return normalizedPath;
 }
 
