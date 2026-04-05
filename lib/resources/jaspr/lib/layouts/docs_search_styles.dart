@@ -13,7 +13,7 @@ List<StyleRule> docsSearchStyles() => [
           bottom: Unit.zero,
         ),
         zIndex: ZIndex(90),
-        raw: {'pointer-events': 'none'},
+        raw: {'pointer-events': 'none', 'padding': '0 1rem'},
       ),
       css('&[hidden]').styles(display: Display.none),
       css('.docs-search-backdrop').styles(

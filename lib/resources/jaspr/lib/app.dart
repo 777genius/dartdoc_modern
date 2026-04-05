@@ -110,6 +110,8 @@ Component buildDocsApp({
         primaryActionHref: primaryHomeActionHref,
         apiHref: '/api',
         hasGuideLinks: hasGuideLinks,
+        jasprDocsUrl: isProjectDocs ? _projectJasprDocsUrl : null,
+        vitePressDocsUrl: isProjectDocs ? _projectVitePressDocsUrl : null,
         header: DocsHeader(
           title: packageName,
           logo: withDocsBasePath('/favicon.svg'),
@@ -144,18 +146,6 @@ List<Component> _buildHeaderItems({
   required String repositoryUrl,
 }) {
   return [
-    if (isProjectDocs)
-      _buildExternalHeaderLink(
-        text: 'Jaspr',
-        href: _projectJasprDocsUrl,
-        ariaLabel: 'Jaspr docs version',
-      ),
-    if (isProjectDocs)
-      _buildExternalHeaderLink(
-        text: 'VitePress',
-        href: _projectVitePressDocsUrl,
-        ariaLabel: 'VitePress docs version',
-      ),
     const DocsSearchShell(),
     const DocsThemeToggle(),
     if (repositoryUrl.isNotEmpty)

@@ -14,6 +14,8 @@ class DocsHomeLayout extends PageLayoutBase {
     required this.primaryActionHref,
     required this.apiHref,
     required this.hasGuideLinks,
+    this.jasprDocsUrl,
+    this.vitePressDocsUrl,
     this.header,
     this.footer,
   });
@@ -22,6 +24,8 @@ class DocsHomeLayout extends PageLayoutBase {
   final String primaryActionHref;
   final String apiHref;
   final bool hasGuideLinks;
+  final String? jasprDocsUrl;
+  final String? vitePressDocsUrl;
   final Component? header;
   final Component? footer;
 
@@ -77,6 +81,23 @@ class DocsHomeLayout extends PageLayoutBase {
                     tagline: hero.tagline,
                     actions: hero.actions,
                   ),
+                  if (jasprDocsUrl != null || vitePressDocsUrl != null)
+                    div(classes: 'docs-home-version-switch', [
+                      if (jasprDocsUrl case final url?)
+                        a(
+                          href: url,
+                          classes: 'docs-home-version-btn docs-home-version-jaspr',
+                          attributes: {'target': '_blank', 'rel': 'noopener'},
+                          [Component.text('Jaspr')],
+                        ),
+                      if (vitePressDocsUrl case final url?)
+                        a(
+                          href: url,
+                          classes: 'docs-home-version-btn docs-home-version-vitepress',
+                          attributes: {'target': '_blank', 'rel': 'noopener'},
+                          [Component.text('VitePress')],
+                        ),
+                    ]),
                   if (features.isNotEmpty)
                     section(classes: 'docs-home-features', [
                       div(classes: 'docs-home-section-heading', [
@@ -350,6 +371,59 @@ class DocsHomeLayout extends PageLayoutBase {
       color: Color('var(--docs-shell-muted)'),
       fontSize: 0.95.rem,
       raw: {'line-height': '1.65'},
+    ),
+    css('.docs-home-version-switch').styles(
+      display: Display.flex,
+      gap: Gap.all(0.85.rem),
+      flexWrap: FlexWrap.wrap,
+    ),
+    css('.docs-home-version-btn').styles(
+      display: Display.inlineFlex,
+      alignItems: AlignItems.center,
+      justifyContent: JustifyContent.center,
+      padding: Padding.symmetric(vertical: 0.7.rem, horizontal: 1.6.rem),
+      fontSize: 0.95.rem,
+      fontWeight: FontWeight.w700,
+      radius: BorderRadius.circular(999.px),
+      textDecoration: TextDecoration.none,
+      transition: Transition(
+        'background-color, border-color, transform, box-shadow',
+        duration: Duration(milliseconds: 150),
+      ),
+      raw: {'letter-spacing': '-0.01em'},
+    ),
+    css('.docs-home-version-btn:hover').styles(
+      raw: {'transform': 'translateY(-2px)'},
+    ),
+    css('.docs-home-version-jaspr').styles(
+      backgroundColor: Color('#1a73e8'),
+      color: Color('white'),
+      border: Border.all(width: 1.px, color: Color('#1a73e8')),
+      shadow: BoxShadow(
+        offsetX: Unit.zero,
+        offsetY: 8.px,
+        blur: 24.px,
+        color: Color('rgba(26, 115, 232, 0.35)'),
+      ),
+    ),
+    css('.docs-home-version-jaspr:hover').styles(
+      backgroundColor: Color('#1565c0'),
+      border: Border.all(width: 1.px, color: Color('#1565c0')),
+    ),
+    css('.docs-home-version-vitepress').styles(
+      backgroundColor: Color('var(--docs-shell-surface-elevated)'),
+      color: Color('#5c6bc0'),
+      border: Border.all(width: 1.5.px, color: Color('#5c6bc0')),
+      shadow: BoxShadow(
+        offsetX: Unit.zero,
+        offsetY: 8.px,
+        blur: 24.px,
+        color: Color('var(--docs-shell-shadow)'),
+      ),
+    ),
+    css('.docs-home-version-vitepress:hover').styles(
+      backgroundColor: Color('#5c6bc0'),
+      color: Color('white'),
     ),
     css('.docs-home-content-panel').styles(
       width: 100.percent,
