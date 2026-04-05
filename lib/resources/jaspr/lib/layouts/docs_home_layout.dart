@@ -386,7 +386,7 @@ class DocsHomeLayout extends PageLayoutBase {
         ),
       ),
       backgroundColor: Color('transparent'),
-      radius: BorderRadius.circular(0.px),
+      radius: BorderRadius.circular(Unit.zero),
       raw: {'overflow-x': 'auto', 'overflow-y': 'hidden'},
     ),
     css(
@@ -395,7 +395,7 @@ class DocsHomeLayout extends PageLayoutBase {
       padding: Padding.only(bottom: 0.7.rem),
       raw: {'white-space': 'nowrap', 'border': 'none'},
       backgroundColor: Color('transparent'),
-      radius: BorderRadius.circular(0.px),
+      radius: BorderRadius.circular(Unit.zero),
       color: Color('var(--docs-shell-muted)'),
       fontWeight: FontWeight.w800,
       fontSize: 1.02.rem,
@@ -406,7 +406,7 @@ class DocsHomeLayout extends PageLayoutBase {
       border: Border.only(
         bottom: BorderSide(width: 3.px, color: Color('transparent')),
       ),
-      radius: BorderRadius.circular(0.px),
+      radius: BorderRadius.circular(Unit.zero),
       color: Color('var(--docs-shell-muted)'),
       fontWeight: FontWeight.w800,
       fontSize: 1.02.rem,

@@ -973,16 +973,16 @@ class ApiDocsLayout extends DocsLayout {
           ),
           overflow: Overflow.hidden,
           padding: Padding.zero,
-          raw: {'border-radius': '0 1.25rem 1.25rem 0', 'top': 'auto'},
+          raw: {'border-radius': '0 0 1.25rem 0', 'top': 'auto'},
         ),
         css('.sidebar > div').styles(
           maxHeight: 100.percent,
           overflow: Overflow.auto,
           padding: Padding.only(
-            top: 0.75.rem,
+            top: Unit.zero,
             right: 0.6.rem,
             bottom: 1.rem,
-            left: 4.rem,
+            left: 2.5.rem,
           ),
         ),
         css('.sidebar .sidebar-close').styles(
