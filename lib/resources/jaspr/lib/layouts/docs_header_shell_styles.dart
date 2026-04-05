@@ -226,4 +226,45 @@ List<StyleRule> docsHeaderShellStyles() => [
       ),
     ),
   ),
+  css('.version-switch').styles(
+    display: Display.flex,
+    alignItems: AlignItems.center,
+    border: Border.all(
+      width: 1.px,
+      color: Color('var(--docs-shell-border-strong)'),
+    ),
+    radius: BorderRadius.circular(999.px),
+    backgroundColor: Color('var(--docs-shell-surface-soft)'),
+    padding: Padding.all(0.2.rem),
+    gap: Gap.column(Unit.zero),
+  ),
+  css('.version-switch-option').styles(
+    display: Display.inlineFlex,
+    alignItems: AlignItems.center,
+    justifyContent: JustifyContent.center,
+    padding: Padding.symmetric(vertical: 0.32.rem, horizontal: 0.85.rem),
+    fontSize: 0.82.rem,
+    fontWeight: FontWeight.w700,
+    radius: BorderRadius.circular(999.px),
+    textDecoration: TextDecoration.none,
+    color: Color('var(--docs-shell-muted)'),
+    transition: Transition(
+      'background-color, color',
+      duration: Duration(milliseconds: 150),
+    ),
+    raw: {'white-space': 'nowrap'},
+  ),
+  css('.version-switch-option:hover').styles(
+    color: ContentColors.text,
+  ),
+  css('.version-switch-option.is-active').styles(
+    backgroundColor: Color('var(--docs-shell-accent)'),
+    color: Color('white'),
+    shadow: BoxShadow(
+      offsetX: Unit.zero,
+      offsetY: 2.px,
+      blur: 8.px,
+      color: Color('var(--docs-shell-shadow)'),
+    ),
+  ),
 ];

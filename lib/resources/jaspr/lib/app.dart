@@ -146,6 +146,24 @@ List<Component> _buildHeaderItems({
   required String repositoryUrl,
 }) {
   return [
+    if (isProjectDocs)
+      div(
+        classes: 'version-switch',
+        [
+          a(
+            href: _projectJasprDocsUrl,
+            classes: 'version-switch-option is-active',
+            attributes: {'data-version': 'jaspr'},
+            [Component.text('Jaspr')],
+          ),
+          a(
+            href: _projectVitePressDocsUrl,
+            classes: 'version-switch-option',
+            attributes: {'data-version': 'vitepress'},
+            [Component.text('VitePress')],
+          ),
+        ],
+      ),
     const DocsSearchShell(),
     const DocsThemeToggle(),
     if (repositoryUrl.isNotEmpty)

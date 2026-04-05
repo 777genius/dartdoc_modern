@@ -81,23 +81,6 @@ class DocsHomeLayout extends PageLayoutBase {
                     tagline: hero.tagline,
                     actions: hero.actions,
                   ),
-                  if (jasprDocsUrl != null || vitePressDocsUrl != null)
-                    div(classes: 'docs-home-version-switch', [
-                      if (jasprDocsUrl case final url?)
-                        a(
-                          href: url,
-                          classes: 'docs-home-version-btn docs-home-version-jaspr',
-                          attributes: {'target': '_blank', 'rel': 'noopener'},
-                          [Component.text('Jaspr')],
-                        ),
-                      if (vitePressDocsUrl case final url?)
-                        a(
-                          href: url,
-                          classes: 'docs-home-version-btn docs-home-version-vitepress',
-                          attributes: {'target': '_blank', 'rel': 'noopener'},
-                          [Component.text('VitePress')],
-                        ),
-                    ]),
                   if (features.isNotEmpty)
                     section(classes: 'docs-home-features', [
                       div(classes: 'docs-home-section-heading', [

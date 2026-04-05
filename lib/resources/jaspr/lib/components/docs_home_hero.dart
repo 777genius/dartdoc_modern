@@ -39,9 +39,6 @@ class DocsHomeHero extends StatelessComponent {
       Document.head(children: [Style(styles: _styles)]),
       section(classes: 'docs-home-hero', [
         div(classes: 'docs-home-hero-copy', [
-          div(classes: 'docs-home-hero-eyebrow', [
-            Component.text('Jaspr Documentation'),
-          ]),
           h1(classes: 'docs-home-hero-name', [Component.text(name)]),
           p(classes: 'docs-home-hero-text', [Component.text(text)]),
           p(classes: 'docs-home-hero-tagline', [Component.text(tagline)]),
