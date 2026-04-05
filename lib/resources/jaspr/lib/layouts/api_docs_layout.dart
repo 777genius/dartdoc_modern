@@ -853,6 +853,9 @@ class ApiDocsLayout extends DocsLayout {
         raw: {'overflow': 'visible'},
       ),
       css('main').styles(width: 100.percent, raw: {'overflow': 'visible'}),
+      css('.main-container main').styles(
+        padding: Padding.only(top: Unit.zero),
+      ),
       css('main > div').styles(
         display: Display.grid,
         raw: {
@@ -969,7 +972,6 @@ class ApiDocsLayout extends DocsLayout {
       downContent([
         css('.sidebar').styles(
           position: Position.relative(),
-          maxHeight: 100.percent,
           height: 100.percent,
           radius: BorderRadius.circular(Unit.zero),
           border: Border.only(
@@ -987,10 +989,11 @@ class ApiDocsLayout extends DocsLayout {
           ),
           overflow: Overflow.hidden,
           padding: Padding.zero,
-          raw: {'border-radius': '0 0 1.25rem 0', 'top': 'auto'},
+          display: Display.flex,
+          flexDirection: FlexDirection.column,
+          raw: {'border-radius': '0', 'top': 'auto'},
         ),
         css('.sidebar > div').styles(
-          maxHeight: 100.percent,
           overflow: Overflow.auto,
           padding: Padding.only(
             top: Unit.zero,
@@ -998,6 +1001,7 @@ class ApiDocsLayout extends DocsLayout {
             bottom: 1.rem,
             left: 2.5.rem,
           ),
+          raw: {'flex': '1 1 auto'},
         ),
         css('.sidebar .sidebar-close').styles(
           position: Position.sticky(top: 0.1.rem),
@@ -1012,6 +1016,8 @@ class ApiDocsLayout extends DocsLayout {
         position: Position.fixed(left: Unit.zero, bottom: Unit.zero),
         zIndex: ZIndex(55),
         padding: Padding.zero,
+        display: Display.flex,
+        flexDirection: FlexDirection.column,
         raw: {
           'top': 'var(--docs-shell-sticky-top)',
           'width': 'min(var(--docs-shell-drawer-width), 85vw)',
