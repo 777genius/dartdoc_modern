@@ -207,6 +207,7 @@ class JasprGeneratorBackend extends GeneratorBackend {
   final List<String> _guideExclude;
   final Set<String> _allowedIframeHosts;
   final String? _homePageMarkdown;
+  final bool _sdkDocs;
 
   /// Tracks all file paths written during this generation run.
   ///
@@ -233,9 +234,11 @@ class JasprGeneratorBackend extends GeneratorBackend {
     List<String> guideExclude = const [],
     List<String> allowedIframeHosts = const [],
     String? homePageMarkdown,
+    bool sdkDocs = false,
   }) : _paths = JasprPathResolver(),
        _outputPath = outputPath,
        _packageName = packageName,
+       _sdkDocs = sdkDocs,
        _repositoryUrl = repositoryUrl,
        _guideDirs = guideDirs,
        _guideInclude = guideInclude,
@@ -330,53 +333,56 @@ class JasprGeneratorBackend extends GeneratorBackend {
       _writeMarkdown(filePath, content);
     }
 
-    // Write essential API styles (always overwritten, not a scaffold file).
-    _writeMarkdown('web/generated/api_styles.css', _apiStylesCss);
-
     // Generate sidebar from the full PackageGraph.
     var sidebarContent = _sidebar.generateApi(packageGraph);
     _writeMarkdown('lib/generated/api_sidebar.dart', sidebarContent);
 
-    // Generate guide files from doc/docs directories.
-    final guideCollector = guide_core.GuideCollector(
-      resourceProvider: resourceProvider,
-      scanDirs: _guideDirs,
-      include: _guideInclude,
-      exclude: _guideExclude,
-    );
-    final guideEntries = guideCollector.collectGuideEntries(
-      packageGraph: packageGraph,
-      isMultiPackage: isMultiPackage,
-      transformContent: (content, _, sourcePath) {
-        final expandedImports = _expandCodeImports(content, sourcePath);
-        final withoutTocDirective = expandedImports.replaceAll(
-          RegExp(r'^\[TOC\]\s*$', multiLine: true),
-          '',
-        );
-        return sanitizeHtml(
-          withoutTocDirective,
-          extraAllowedHosts: _allowedIframeHosts,
-        );
-      },
-    );
-    final rewrittenGuideEntries = rewriteGuideLinksForJaspr(guideEntries);
+    // SDK docs only need API pages -- skip scaffold assets and guides.
+    if (!_sdkDocs) {
+      // Write essential API styles (always overwritten, not a scaffold file).
+      _writeMarkdown('web/generated/api_styles.css', _apiStylesCss);
 
-    // Write guide files through _writeMarkdown for incremental checks.
-    for (final entry in rewrittenGuideEntries) {
-      _writeMarkdown(entry.relativePath, entry.content);
-    }
+      // Generate guide files from doc/docs directories.
+      final guideCollector = guide_core.GuideCollector(
+        resourceProvider: resourceProvider,
+        scanDirs: _guideDirs,
+        include: _guideInclude,
+        exclude: _guideExclude,
+      );
+      final guideEntries = guideCollector.collectGuideEntries(
+        packageGraph: packageGraph,
+        isMultiPackage: isMultiPackage,
+        transformContent: (content, _, sourcePath) {
+          final expandedImports = _expandCodeImports(content, sourcePath);
+          final withoutTocDirective = expandedImports.replaceAll(
+            RegExp(r'^\[TOC\]\s*$', multiLine: true),
+            '',
+          );
+          return sanitizeHtml(
+            withoutTocDirective,
+            extraAllowedHosts: _allowedIframeHosts,
+          );
+        },
+      );
+      final rewrittenGuideEntries = rewriteGuideLinksForJaspr(guideEntries);
 
-    _writeMarkdown('web/index.html', _buildRootIndexHtml());
-    _writeMarkdown('web/404.html', _buildRootIndexHtml());
+      // Write guide files through _writeMarkdown for incremental checks.
+      for (final entry in rewrittenGuideEntries) {
+        _writeMarkdown(entry.relativePath, entry.content);
+      }
 
-    var guideSidebarContent = _sidebar.generateGuide(
-      rewrittenGuideEntries,
-      isMultiPackage: isMultiPackage,
-    );
-    _writeMarkdown('lib/generated/guide_sidebar.dart', guideSidebarContent);
+      _writeMarkdown('web/index.html', _buildRootIndexHtml());
+      _writeMarkdown('web/404.html', _buildRootIndexHtml());
 
-    if (_homePageMarkdown case final homePageMarkdown?) {
-      _writeMarkdown('content/index.md', homePageMarkdown);
+      var guideSidebarContent = _sidebar.generateGuide(
+        rewrittenGuideEntries,
+        isMultiPackage: isMultiPackage,
+      );
+      _writeMarkdown('lib/generated/guide_sidebar.dart', guideSidebarContent);
+
+      if (_homePageMarkdown case final homePageMarkdown?) {
+        _writeMarkdown('content/index.md', homePageMarkdown);
+      }
     }
 
     runtimeStats.incrementAccumulator('writtenPackageFileCount');
@@ -748,6 +754,10 @@ class JasprGeneratorBackend extends GeneratorBackend {
   /// These are one-time setup files that the user may customize afterwards.
   @override
   Future<void> generateAdditionalFiles() async {
+    // SDK docs don't need Jaspr scaffold files (pubspec.yaml, app.dart, etc.)
+    // -- the output is pure content, not a standalone Jaspr project.
+    if (_sdkDocs) return;
+
     var initGenerator = JasprInitGenerator(
       writer: writer,
       resourceProvider: resourceProvider,

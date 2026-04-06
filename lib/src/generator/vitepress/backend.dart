@@ -163,6 +163,7 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   final List<String> _guideExclude;
   final Set<String> _allowedIframeHosts;
   final String? _homePageMarkdown;
+  final bool _sdkDocs;
 
   /// Tracks all file paths written during this generation run.
   ///
@@ -189,10 +190,12 @@ class VitePressGeneratorBackend extends GeneratorBackend {
     List<String> guideExclude = const [],
     List<String> allowedIframeHosts = const [],
     String? homePageMarkdown,
+    bool sdkDocs = false,
   }) : _paths = VitePressPathResolver(),
        _outputPath = outputPath,
        _packageName = packageName,
        _repositoryUrl = repositoryUrl,
+       _sdkDocs = sdkDocs,
        _guideDirs = guideDirs,
        _guideInclude = guideInclude,
        _guideExclude = guideExclude,
@@ -646,6 +649,8 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   /// that the user may customize afterwards.
   @override
   Future<void> generateAdditionalFiles() async {
+    if (_sdkDocs) return;
+
     var initGenerator = VitePressInitGenerator(
       writer: writer,
       resourceProvider: resourceProvider,

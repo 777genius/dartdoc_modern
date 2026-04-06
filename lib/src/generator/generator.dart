@@ -455,6 +455,7 @@ Generator initVitePressGenerator(
     guideInclude: context.guideInclude,
     guideExclude: context.guideExclude,
     allowedIframeHosts: context.allowedIframeHosts,
+    sdkDocs: context.sdkDocs,
     homePageMarkdown: docs_recipe.buildRecipeHomePageMarkdown(
       context.recipe,
       packageName: meta.name,
@@ -487,6 +488,7 @@ Generator initJasprGenerator(
     guideInclude: context.guideInclude,
     guideExclude: context.guideExclude,
     allowedIframeHosts: context.allowedIframeHosts,
+    sdkDocs: context.sdkDocs,
     homePageMarkdown: docs_recipe.buildRecipeHomePageMarkdown(
       context.recipe,
       packageName: meta.name,
