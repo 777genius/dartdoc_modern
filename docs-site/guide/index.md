@@ -11,6 +11,6 @@ This is a fork of [dart-lang/dartdoc](https://github.com/dart-lang/dartdoc) that
 
 ## Topics
 
-- [DartPad Embeds](/guide/dartpad-embeds)
-- [Dart Documentation Comment Specification](/guide/dart_documentation_comment_specification)
-- [Directives](/guide/directives)
+- [DartPad Embeds](./dartpad-embeds.md)
+- [Dart Documentation Comment Specification](./dart_documentation_comment_specification.md)
+- [Directives](./directives.md)
