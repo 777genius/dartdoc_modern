@@ -7,6 +7,7 @@ import 'package:jaspr/jaspr.dart';
 import 'package:universal_web/web.dart' as web;
 
 import '../docs_base.dart';
+import 'docs_dartpad_runtime.dart';
 import 'docs_navigation_runtime.dart';
 import 'docs_nav_link.dart';
 import 'docs_disclosure_runtime.dart';
@@ -77,6 +78,7 @@ class _DocsSearchShellState extends State<DocsSearchShell> {
     };
 
     return Component.fragment([
+      const DocsDartPadRuntime(),
       const DocsNavigationRuntime(),
       const DocsDisclosureRuntime(),
       const DocsLightboxRuntime(),

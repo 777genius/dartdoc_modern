@@ -757,6 +757,7 @@ void main() {
         expect(themeToggle, contains("'data-docs-theme-toggle': ''"));
         expect(content, contains("import '../components/docs_nav_link.dart';"));
         expect(search, contains("import 'docs_navigation_runtime.dart';"));
+        expect(search, contains("import 'docs_dartpad_runtime.dart';"));
         expect(search, contains("import 'docs_sidebar_toggle_runtime.dart';"));
         expect(search, contains("import 'docs_disclosure_runtime.dart';"));
         expect(
@@ -764,7 +765,7 @@ void main() {
           isNot(contains("import '../components/docs_search.dart';")),
         );
         expect(content, isNot(contains('const DocsSearchShell()')));
-        expect(content, contains('const DocsDartPadRuntime()'));
+        expect(content, isNot(contains('const DocsDartPadRuntime()')));
         expect(content, isNot(contains('const DocsMermaidRuntime()')));
         expect(content, contains('DocsNavLink('));
         expect(content, isNot(contains('case final Header header')));
@@ -774,6 +775,7 @@ void main() {
           search,
           contains('class DocsSearchShell extends StatefulComponent'),
         );
+        expect(search, contains('const DocsDartPadRuntime()'));
         expect(search, contains('const DocsNavigationRuntime()'));
         expect(search, contains('const DocsSidebarToggleRuntime()'));
         expect(search, contains('const DocsDisclosureRuntime()'));

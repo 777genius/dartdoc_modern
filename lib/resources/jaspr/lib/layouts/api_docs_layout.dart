@@ -3,7 +3,6 @@ import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_content/jaspr_content.dart';
 import 'package:jaspr_content/theme.dart';
 
-import '../components/docs_dartpad_runtime.dart';
 import '../components/docs_header.dart';
 import '../components/docs_nav_link.dart';
 import '../components/docs_page_actions_runtime.dart';
@@ -213,7 +212,6 @@ class ApiDocsLayout extends DocsLayout {
         classes: 'docs',
         attributes: {'data-docs-layout': 'docs'},
         [
-          const DocsDartPadRuntime(),
           const DocsPageActionsRuntime(),
           if (headerComponent case final Component header)
             div(
