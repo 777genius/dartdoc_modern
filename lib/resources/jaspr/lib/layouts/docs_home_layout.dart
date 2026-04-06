@@ -51,26 +51,51 @@ const _hljsInitScript = '''
     var walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
     var nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
+    var _ops = {'&&':1,'||':1,'|':1,';':1,'>':1,'>>':1,'2>&1':1};
+    var _tok = /(2>&1|>>|&&|\|\||[|;>]|--[a-zA-Z][a-zA-Z0-9_-]*|\s-[a-zA-Z0-9]\b|\\\\|[a-zA-Z_][a-zA-Z0-9_.\/-]*|\n)/g;
     nodes.forEach(function(textNode) {
       var p = textNode.parentNode;
       while (p && p !== block) {
         if (p.className && _skip.test(p.className)) return;
         p = p.parentNode;
       }
-      var parts = textNode.textContent.split(/(--[a-zA-Z][a-zA-Z0-9-]*|&&|\\|\\||\\\\\\n)/);
+      var text = textNode.textContent;
+      var parts = [];
+      var last = 0;
+      _tok.lastIndex = 0;
+      var m;
+      while ((m = _tok.exec(text)) !== null) {
+        if (m.index > last) parts.push(text.slice(last, m.index));
+        parts.push(m[0]);
+        last = m.index + m[0].length;
+      }
+      if (last < text.length) parts.push(text.slice(last));
       if (parts.length <= 1) return;
+      var cmdNext = true;
       var frag = document.createDocumentFragment();
       for (var i = 0; i < parts.length; i++) {
         var t = parts[i];
         if (!t) continue;
-        if (t.match(/^--/)) {
+        var cls = null;
+        if (t === '\\n') { cmdNext = true; frag.appendChild(document.createTextNode(t)); continue; }
+        if (/^\\s+\$/.test(t)) { frag.appendChild(document.createTextNode(t)); continue; }
+        if (/^--/.test(t)) { cls = 'hljs-attribute'; cmdNext = false; }
+        else if (/^\\s-[a-zA-Z0-9]\$/.test(t)) {
+          frag.appendChild(document.createTextNode(t.charAt(0)));
           var s = document.createElement('span');
           s.className = 'hljs-attribute';
-          s.textContent = t;
+          s.textContent = t.slice(1);
           frag.appendChild(s);
-        } else if (t === '&&' || t === '||') {
+          cmdNext = false;
+          continue;
+        }
+        else if (_ops[t]) { cls = 'hljs-keyword'; cmdNext = true; }
+        else if (t === '\\\\') { cls = 'hljs-comment'; }
+        else if (cmdNext && /^[a-zA-Z_]/.test(t)) { cls = 'hljs-built_in'; cmdNext = false; }
+        else { cmdNext = false; }
+        if (cls) {
           var s = document.createElement('span');
-          s.className = 'hljs-keyword';
+          s.className = cls;
           s.textContent = t;
           frag.appendChild(s);
         } else {
