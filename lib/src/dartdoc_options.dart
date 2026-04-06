@@ -1377,7 +1377,9 @@ class DartdocOptionContext extends DartdocOptionContextBase
   bool get excludeFooterVersion =>
       optionSet['excludeFooterVersion'].valueAt(context);
 
-  ToolConfiguration get tools => optionSet['tools'].valueAt(context);
+  ToolConfiguration get tools => allowTools
+      ? optionSet['tools'].valueAt(context)
+      : ToolConfiguration.empty(resourceProvider);
 
   /// _input is only used to construct synthetic options.
   // ignore: unused_element

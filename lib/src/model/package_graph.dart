@@ -189,8 +189,12 @@ class PackageGraph with Referable {
       }
     }
     progressBarComplete();
-    // Now wait for any of the tasks still running to complete.
-    futures.add(config.tools.runner.wait());
+    // Tool processing is fully disabled unless explicitly enabled, so avoid
+    // resolving tool configuration in code paths that never execute tools.
+    if (config.allowTools) {
+      // Now wait for any of the tasks still running to complete.
+      futures.add(config.tools.runner.wait());
+    }
     return futures;
   }
 
