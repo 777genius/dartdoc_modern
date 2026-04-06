@@ -46,16 +46,58 @@ const _hljsInitScript = '''
       textNode.parentNode.replaceChild(frag, textNode);
     });
   }
+  function enhanceBash(block) {
+    if (!block.className.match(/language-bash|language-sh|language-shell/)) return;
+    var walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+    var nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(function(textNode) {
+      var p = textNode.parentNode;
+      while (p && p !== block) {
+        if (p.className && _skip.test(p.className)) return;
+        p = p.parentNode;
+      }
+      var parts = textNode.textContent.split(/(--[a-zA-Z][a-zA-Z0-9-]*|&&|\\|\\||\\\\\\n)/);
+      if (parts.length <= 1) return;
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < parts.length; i++) {
+        var t = parts[i];
+        if (!t) continue;
+        if (t.match(/^--/)) {
+          var s = document.createElement('span');
+          s.className = 'hljs-attribute';
+          s.textContent = t;
+          frag.appendChild(s);
+        } else if (t === '&&' || t === '||') {
+          var s = document.createElement('span');
+          s.className = 'hljs-keyword';
+          s.textContent = t;
+          frag.appendChild(s);
+        } else {
+          frag.appendChild(document.createTextNode(t));
+        }
+      }
+      textNode.parentNode.replaceChild(frag, textNode);
+    });
+  }
   function highlightCode() {
-    if (!window.hljs) return;
+    if (!window.hljs) {
+      setTimeout(highlightCode, 100);
+      return;
+    }
     document.querySelectorAll('pre code:not(.hljs)').forEach(function(block) {
       hljs.highlightElement(block);
       enhanceDart(block);
+      enhanceBash(block);
     });
   }
   syncTheme();
   new MutationObserver(syncTheme).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
-  document.addEventListener('DOMContentLoaded', highlightCode);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', highlightCode);
+  } else {
+    highlightCode();
+  }
   window.addEventListener('docs:navigation', function() { setTimeout(highlightCode, 50); });
 })();
 ''';

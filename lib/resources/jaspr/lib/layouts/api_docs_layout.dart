@@ -11,6 +11,100 @@ import 'docs_header_shell_styles.dart';
 import 'docs_search_styles.dart';
 import '../theme/docs_responsive.dart';
 
+const _hljsInitScript = '''
+(function() {
+  var light = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css';
+  var dark = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css';
+  function syncTheme() {
+    var el = document.getElementById('hljs-theme');
+    if (!el) return;
+    var theme = document.documentElement.getAttribute('data-theme');
+    el.href = theme === 'dark' ? dark : light;
+  }
+  var _skip = /hljs-comment|hljs-string|hljs-keyword|hljs-meta|hljs-number|hljs-literal|hljs-built_in/;
+  function enhanceDart(block) {
+    if (!block.className.match(/language-dart/)) return;
+    var walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+    var nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(function(textNode) {
+      var p = textNode.parentNode;
+      while (p && p !== block) {
+        if (p.className && _skip.test(p.className)) return;
+        p = p.parentNode;
+      }
+      var parts = textNode.textContent.split(/\\b([A-Z][a-zA-Z][a-zA-Z0-9]*[a-z][a-zA-Z0-9]*)\\b/);
+      if (parts.length <= 1) return;
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < parts.length; i++) {
+        if (i % 2 === 1) {
+          var s = document.createElement('span');
+          s.className = 'hljs-title class_';
+          s.textContent = parts[i];
+          frag.appendChild(s);
+        } else if (parts[i]) {
+          frag.appendChild(document.createTextNode(parts[i]));
+        }
+      }
+      textNode.parentNode.replaceChild(frag, textNode);
+    });
+  }
+  function enhanceBash(block) {
+    if (!block.className.match(/language-bash|language-sh|language-shell/)) return;
+    var walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+    var nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(function(textNode) {
+      var p = textNode.parentNode;
+      while (p && p !== block) {
+        if (p.className && _skip.test(p.className)) return;
+        p = p.parentNode;
+      }
+      var parts = textNode.textContent.split(/(--[a-zA-Z][a-zA-Z0-9-]*|&&|\\|\\||\\\\\\n)/);
+      if (parts.length <= 1) return;
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < parts.length; i++) {
+        var t = parts[i];
+        if (!t) continue;
+        if (t.match(/^--/)) {
+          var s = document.createElement('span');
+          s.className = 'hljs-attribute';
+          s.textContent = t;
+          frag.appendChild(s);
+        } else if (t === '&&' || t === '||') {
+          var s = document.createElement('span');
+          s.className = 'hljs-keyword';
+          s.textContent = t;
+          frag.appendChild(s);
+        } else {
+          frag.appendChild(document.createTextNode(t));
+        }
+      }
+      textNode.parentNode.replaceChild(frag, textNode);
+    });
+  }
+  function highlightCode() {
+    if (!window.hljs) {
+      setTimeout(highlightCode, 100);
+      return;
+    }
+    document.querySelectorAll('pre code:not(.hljs)').forEach(function(block) {
+      hljs.highlightElement(block);
+      enhanceDart(block);
+      enhanceBash(block);
+    });
+  }
+  syncTheme();
+  new MutationObserver(syncTheme).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', highlightCode);
+  } else {
+    highlightCode();
+  }
+  window.addEventListener('docs:navigation', function() { setTimeout(highlightCode, 50); });
+})();
+''';
+
 class ApiDocsLayout extends DocsLayout {
   const ApiDocsLayout({
     required this.packageName,
@@ -27,6 +121,21 @@ class ApiDocsLayout extends DocsLayout {
     yield Style(styles: _styles);
     yield script(src: 'docs_mermaid_runtime.js?v=5', defer: true);
     yield script(src: 'docs_lightbox_runtime.js?v=3', defer: true);
+    // highlight.js CDN
+    yield link(
+      id: 'hljs-theme',
+      href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css',
+      rel: 'stylesheet',
+    );
+    yield script(
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js',
+      defer: true,
+    );
+    yield script(
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/dart.min.js',
+      defer: true,
+    );
+    yield script(content: _hljsInitScript);
   }
 
   @override
@@ -1533,59 +1642,9 @@ class ApiDocsLayout extends DocsLayout {
     ),
     css('.content pre code.hljs').styles(
       raw: {
-        'display': 'block',
         'background': 'transparent',
-        'color': 'inherit',
       },
     ),
-    css('.content pre .hljs-comment, .content pre .hljs-quote').styles(
-      color: Color('var(--docs-shell-muted)'),
-      fontStyle: FontStyle.italic,
-    ),
-    css(
-      '.content pre .hljs-keyword, .content pre .hljs-selector-tag, .content pre .hljs-meta, .content pre .hljs-subst',
-    ).styles(
-      color: Color('var(--docs-shell-accent-strong)'),
-      fontWeight: FontWeight.w600,
-    ),
-    css(
-      '.content pre .hljs-built_in, .content pre .hljs-type, .content pre .hljs-title, .content pre .hljs-section, .content pre .hljs-name, .content pre .hljs-tag, .content pre .hljs-attribute, .content pre .hljs-selector-id, .content pre .hljs-selector-class, .content pre .hljs-selector-attr, .content pre .hljs-selector-pseudo, .content pre .function_, .content pre .class_',
-    ).styles(
-      color: Color('var(--docs-shell-accent)'),
-      fontWeight: FontWeight.w500,
-    ),
-    css(
-      '.content pre .hljs-string, .content pre .hljs-regexp, .content pre .hljs-link, .content pre .hljs-symbol, .content pre .hljs-bullet',
-    ).styles(
-      raw: {
-        'color':
-            'color-mix(in srgb, var(--docs-shell-accent-strong) 66%, currentColor)',
-      },
-    ),
-    css(
-      '.content pre .hljs-number, .content pre .hljs-literal, .content pre .hljs-variable, .content pre .hljs-template-variable, .content pre .hljs-params, .content pre .hljs-attr, .content pre .hljs-operator, .content pre .hljs-punctuation',
-    ).styles(
-      raw: {
-        'color':
-            'color-mix(in srgb, currentColor 72%, var(--docs-shell-accent) 28%)',
-      },
-    ),
-    css('.content pre .hljs-addition').styles(
-      color: Color('var(--docs-shell-accent-strong)'),
-      raw: {
-        'background':
-            'color-mix(in srgb, var(--docs-shell-accent-soft) 72%, transparent)',
-      },
-    ),
-    css('.content pre .hljs-deletion').styles(
-      color: Color('var(--docs-shell-shadow)'),
-      raw: {
-        'background':
-            'color-mix(in srgb, var(--docs-shell-border) 38%, transparent)',
-      },
-    ),
-    css('.content pre .hljs-emphasis').styles(fontStyle: FontStyle.italic),
-    css('.content pre .hljs-strong').styles(fontWeight: FontWeight.w700),
     css('.content .member-signature').styles(
       margin: Margin.only(top: 0.32.rem, bottom: 0.72.rem),
     ),
