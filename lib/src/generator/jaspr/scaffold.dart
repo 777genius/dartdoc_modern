@@ -546,7 +546,9 @@ class JasprInitGenerator {
     if (existingFile.exists) return;
 
     final templatePath = p.join(templateDir, templateFile);
-    var content = resourceProvider.getFile(templatePath).readAsStringSync();
+    final templateResource = resourceProvider.getFile(templatePath);
+    if (!templateResource.exists) return; // Dotfiles may be excluded by pub.dev
+    var content = templateResource.readAsStringSync();
 
     for (final entry in placeholders.entries) {
       content = content.replaceAll(entry.key, entry.value);

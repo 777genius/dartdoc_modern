@@ -1,3 +1,8 @@
+## 1.1.3
+
+* Fix scaffold crash when installed from pub.dev - skip missing dotfiles
+  (`.gitignore`) that pub excludes from the package archive.
+
 ## 1.1.2
 
 * Fix `--sdk-docs` crash in Jaspr and VitePress backends - skip scaffold and

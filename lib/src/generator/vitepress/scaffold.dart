@@ -326,7 +326,9 @@ class VitePressInitGenerator {
 
     // Read template from package resources.
     final templatePath = p.join(templateDir, templateFile);
-    var content = resourceProvider.getFile(templatePath).readAsStringSync();
+    final templateResource = resourceProvider.getFile(templatePath);
+    if (!templateResource.exists) return; // Dotfiles may be excluded by pub.dev
+    var content = templateResource.readAsStringSync();
 
     // Apply placeholder substitution.
     for (final entry in placeholders.entries) {
