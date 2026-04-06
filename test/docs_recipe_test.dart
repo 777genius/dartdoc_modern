@@ -47,7 +47,7 @@ repository: https://github.com/777genius/dartdoc_modern
       ], packageMetaProvider);
 
       expect(context.recipe, selfDocsRecipeName);
-      expect(context.guideDirs, ['docs-site/guide']);
+      expect(context.guideDirs, ['doc', 'docs-site/guide']);
       expect(context.guideExclude, ['api/static-assets/.*']);
       expect(context.exclude, contains('api_symbols'));
       expect(context.exclude, contains('api_sidebar'));

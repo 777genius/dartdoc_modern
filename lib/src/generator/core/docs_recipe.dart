@@ -25,7 +25,7 @@ List<String> resolveGuideDirsForRecipe(
   if (!isSelfDocsRecipe(recipe)) {
     return fallback;
   }
-  return const ['docs-site/guide'];
+  return const ['doc', 'docs-site/guide'];
 }
 
 List<String> resolveGuideExcludeForRecipe(
