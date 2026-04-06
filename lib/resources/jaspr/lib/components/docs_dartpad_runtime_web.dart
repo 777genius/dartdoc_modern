@@ -53,6 +53,16 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
         if (root is web.HTMLElement && copyButton is web.HTMLElement) {
           unawaited(_copyDartPad(root, copyButton));
         }
+        return;
+      }
+
+      final closeButton = target.closest('.dartpad-close');
+      if (closeButton != null) {
+        event.preventDefault();
+        final root = closeButton.closest('[data-dartpad]');
+        if (root is web.HTMLElement) {
+          _closeDartPad(root);
+        }
       }
     }).toJS;
     web.document.addEventListener('click', _clickListener);
@@ -71,6 +81,7 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
         final root = candidate.closest('[data-dartpad]');
         if (root is! web.HTMLElement) return;
 
+        _setLoading(root, false);
         contentWindow?.postMessage({
           'type': 'sourceCode',
           'sourceCode': _decodeBase64(root.dataset['sourceBase64']),
@@ -146,9 +157,46 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
       ..style.height = '${height.isEmpty ? '400' : height}px'
       ..src = _buildDartPadUrl(root);
 
+    _setLoading(root, true);
     stage.innerHTML = ''.toJS;
     stage.appendChild(iframe);
+    final idle = root.querySelector('.dartpad-idle');
+    final active = root.querySelector('.dartpad-active');
+    idle?.setAttribute('hidden', 'hidden');
+    active?.removeAttribute('hidden');
     root.dataset['active'] = 'true';
+  }
+
+  void _closeDartPad(web.HTMLElement root) {
+    final stage = root.querySelector('.dartpad-stage');
+    final idle = root.querySelector('.dartpad-idle');
+    final active = root.querySelector('.dartpad-active');
+
+    if (stage is web.HTMLElement) {
+      stage.innerHTML = ''.toJS;
+    }
+
+    _setLoading(root, false);
+    active?.setAttribute('hidden', 'hidden');
+    idle?.removeAttribute('hidden');
+    root.dataset.remove('active');
+  }
+
+  void _setLoading(web.HTMLElement root, bool isLoading) {
+    final loader = root.querySelector('.dartpad-loader');
+    final label = root.querySelector('.dartpad-label');
+
+    if (loader is web.HTMLElement) {
+      if (isLoading) {
+        loader.removeAttribute('hidden');
+      } else {
+        loader.setAttribute('hidden', 'hidden');
+      }
+    }
+
+    if (label is web.HTMLElement) {
+      label.textContent = isLoading ? 'Loading DartPad…' : 'DartPad';
+    }
   }
 
   Future<void> _copyDartPad(
@@ -159,10 +207,14 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
       await web.window.navigator.clipboard
           .writeText(_decodeBase64(root.dataset['sourceBase64']))
           .toDart;
-      final original = button.textContent;
-      button.textContent = 'Copied';
+      final labelNode = button.querySelector('.dartpad-btn-label');
+      final label = labelNode is web.HTMLElement ? labelNode : button;
+      final original = label.textContent;
+      button.dataset['copyState'] = 'copied';
+      label.textContent = 'Copied';
       Timer(const Duration(milliseconds: 1500), () {
-        button.textContent = original;
+        button.removeAttribute('data-copy-state');
+        label.textContent = original;
       });
     } catch (_) {}
   }
@@ -174,6 +226,7 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
       if (root is! web.HTMLElement) continue;
       final iframe = root.querySelector('.dartpad-iframe');
       if (iframe is web.HTMLIFrameElement) {
+        _setLoading(root, true);
         iframe.src = _buildDartPadUrl(root);
       }
     }

@@ -813,6 +813,7 @@ class ApiDocsLayout extends DocsLayout {
         overflow: Overflow.hidden,
         backgroundColor: Color('var(--docs-shell-surface-soft)'),
       ),
+      css('.dartpad-idle').styles(display: Display.block),
       css('.dartpad-preview pre').styles(
         margin: Margin.zero,
         padding: Padding.all(1.rem),
@@ -879,21 +880,74 @@ class ApiDocsLayout extends DocsLayout {
       css(
         '.dartpad-run .dartpad-btn-icon, .dartpad-copy .dartpad-btn-icon',
       ).styles(color: Color('var(--docs-shell-accent-strong)')),
-      css('.dartpad-open').styles(
-        backgroundColor: Color('var(--docs-shell-surface-elevated)'),
-        color: ContentColors.text,
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-border-strong)'),
+      css('.dartpad-active').styles(
+        display: Display.flex,
+        flexDirection: FlexDirection.column,
+      ),
+      css('.dartpad-active-toolbar').styles(
+        display: Display.flex,
+        alignItems: AlignItems.center,
+        justifyContent: JustifyContent.spaceBetween,
+        gap: Gap.column(0.5.rem),
+        padding: Padding.all(0.65.rem),
+        backgroundColor: Color('var(--docs-shell-surface)'),
+        border: Border.only(
+          bottom: BorderSide(
+            width: 1.px,
+            color: Color('var(--docs-shell-border)'),
+          ),
         ),
+      ),
+      css('.dartpad-label').styles(
+        fontWeight: FontWeight.w700,
+        fontSize: 0.88.rem,
+        color: ContentColors.text,
+      ),
+      css('.dartpad-iframe-container').styles(
+        position: Position.relative(),
       ),
       css(
         '.dartpad-stage',
-      ).styles(backgroundColor: Color('var(--docs-shell-dartpad-stage)')),
+      ).styles(
+        backgroundColor: Color('var(--docs-shell-dartpad-stage)'),
+        minHeight: 25.rem,
+      ),
       css('.dartpad-iframe').styles(
         width: 100.percent,
         border: Border.unset,
         display: Display.block,
+      ),
+      css('.dartpad-loader').styles(
+        position: Position.absolute(),
+        top: 0.px,
+        right: 0.px,
+        bottom: 0.px,
+        left: 0.px,
+        display: Display.flex,
+        flexDirection: FlexDirection.column,
+        alignItems: AlignItems.center,
+        justifyContent: JustifyContent.center,
+        gap: Gap.row(0.75.rem),
+        backgroundColor: Color('var(--docs-shell-surface)'),
+        raw: {'z-index': '1'},
+      ),
+      css('.dartpad-spinner').styles(
+        width: 1.75.rem,
+        height: 1.75.rem,
+        radius: BorderRadius.circular(999.px),
+        border: Border.all(
+          width: 3.px,
+          color: Color('var(--docs-shell-border)'),
+        ),
+        borderTop: BorderSide(
+          width: 3.px,
+          color: Color('var(--docs-shell-accent)'),
+        ),
+        raw: {'animation': 'dartpad-spin 0.8s linear infinite'},
+      ),
+      css('.dartpad-loader-text').styles(
+        fontSize: 0.86.rem,
+        color: Color('var(--docs-shell-text-muted)'),
       ),
     ]),
     css('.mermaid-diagram', [
@@ -1805,9 +1859,6 @@ class ApiDocsLayout extends DocsLayout {
       ),
     ),
     css('.dartpad-btn:hover').styles(raw: {'transform': 'translateY(-1px)'}),
-    css(
-      '.dartpad-open:hover',
-    ).styles(backgroundColor: Color('var(--docs-shell-surface-soft)')),
     css('.mermaid-diagram').styles(
       padding: Padding.all(1.rem),
       border: Border.all(width: 1.px, color: Color('var(--docs-shell-border)')),
@@ -1820,6 +1871,9 @@ class ApiDocsLayout extends DocsLayout {
         color: Color('var(--docs-shell-shadow)'),
       ),
     ),
+    css.keyframes('dartpad-spin', {
+      'to': const Styles(raw: {'transform': 'rotate(360deg)'}),
+    }),
     css(
       '.mermaid-diagram[data-mermaid-state="rendered"] .mermaid-host',
     ).styles(display: Display.block, raw: {'opacity': '1'}),

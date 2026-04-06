@@ -89,52 +89,74 @@ class _DartPadBlock extends StatelessComponent {
         'data-height': '$height',
       },
       [
-        div(classes: 'dartpad-preview', [
-          AsyncBuilder(
-            builder: (_) async {
-              final highlighter = Highlighter(
-                language: 'dart',
-                theme: _darkTheme ??= await HighlighterTheme.loadDarkTheme(),
-              );
+        div(classes: 'dartpad-idle', [
+          div(classes: 'dartpad-preview', [
+            AsyncBuilder(
+              builder: (_) async {
+                final highlighter = Highlighter(
+                  language: 'dart',
+                  theme: _darkTheme ??= await HighlighterTheme.loadDarkTheme(),
+                );
 
-              return pre([
-                code(
-                  attributes: {'class': 'language-dart'},
-                  [_buildSpan(highlighter.highlight(source))],
-                ),
-              ]);
-            },
-          ),
+                return pre([
+                  code(
+                    attributes: {'class': 'language-dart'},
+                    [_buildSpan(highlighter.highlight(source))],
+                  ),
+                ]);
+              },
+            ),
+          ]),
+          div(classes: 'dartpad-toolbar', [
+            button(
+              classes: 'dartpad-btn dartpad-run',
+              attributes: {'type': 'button'},
+              [
+                span(classes: 'dartpad-btn-icon', [Component.text('▶')]),
+                span(classes: 'dartpad-btn-label', [Component.text('Run')]),
+              ],
+            ),
+            button(
+              classes: 'dartpad-btn dartpad-copy',
+              attributes: {'type': 'button'},
+              [
+                span(classes: 'dartpad-btn-icon', [Component.text('⧉')]),
+                span(classes: 'dartpad-btn-label', [Component.text('Copy')]),
+              ],
+            ),
+          ]),
         ]),
-        div(classes: 'dartpad-toolbar', [
-          button(
-            classes: 'dartpad-btn dartpad-run',
-            attributes: {'type': 'button'},
-            [
-              span(classes: 'dartpad-btn-icon', [Component.text('▶')]),
-              span(classes: 'dartpad-btn-label', [Component.text('Run')]),
-            ],
-          ),
-          button(
-            classes: 'dartpad-btn dartpad-copy',
-            attributes: {'type': 'button'},
-            [
-              span(classes: 'dartpad-btn-icon', [Component.text('⧉')]),
-              span(classes: 'dartpad-btn-label', [Component.text('Copy')]),
-            ],
-          ),
-          a(
-            href: 'https://dartpad.dev',
-            target: Target.blank,
-            attributes: {'rel': 'noopener'},
-            classes: 'dartpad-btn dartpad-open',
-            [
-              span(classes: 'dartpad-btn-icon', [Component.text('↗')]),
-              span(classes: 'dartpad-btn-label', [Component.text('Open')]),
-            ],
-          ),
-        ]),
-        div(classes: 'dartpad-stage', []),
+        div(
+          classes: 'dartpad-active',
+          attributes: {'hidden': 'hidden'},
+          [
+            div(classes: 'dartpad-active-toolbar', [
+              span(classes: 'dartpad-label', [Component.text('DartPad')]),
+              button(
+                classes: 'dartpad-btn dartpad-close',
+                attributes: {'type': 'button', 'aria-label': 'Close playground'},
+                [
+                  span(classes: 'dartpad-btn-icon', [Component.text('×')]),
+                  span(classes: 'dartpad-btn-label', [Component.text('Close')]),
+                ],
+              ),
+            ]),
+            div(classes: 'dartpad-iframe-container', [
+              div(
+                classes: 'dartpad-loader',
+                attributes: {'hidden': 'hidden'},
+                [
+                  span(classes: 'dartpad-spinner', []),
+                  span(
+                    classes: 'dartpad-loader-text',
+                    [Component.text('Loading DartPad…')],
+                  ),
+                ],
+              ),
+              div(classes: 'dartpad-stage', []),
+            ]),
+          ],
+        ),
       ],
     );
   }

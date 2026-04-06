@@ -1069,6 +1069,10 @@ void main() {
         );
         expect(dartPadRuntimeWeb, contains('candidate.contentWindow'));
         expect(dartPadRuntimeWeb, contains('navigator.clipboard'));
+        expect(dartPadRuntimeWeb, contains("target.closest('.dartpad-close')"));
+        expect(dartPadRuntimeWeb, contains("label.textContent = 'Copied'"));
+        expect(dartPadRuntimeWeb, contains("_setLoading(root, true)"));
+        expect(dartPadRuntimeWeb, contains("_closeDartPad(root)"));
         expect(dartPadRuntimeWeb, contains('https://dartpad.dev'));
         expect(
           mermaidRuntime,
