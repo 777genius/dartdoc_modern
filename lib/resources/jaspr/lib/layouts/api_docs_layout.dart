@@ -1642,9 +1642,59 @@ class ApiDocsLayout extends DocsLayout {
     ),
     css('.content pre code.hljs').styles(
       raw: {
+        'display': 'block',
         'background': 'transparent',
+        'color': 'inherit',
       },
     ),
+    css('.content pre .hljs-comment, .content pre .hljs-quote').styles(
+      color: Color('var(--docs-shell-muted)'),
+      fontStyle: FontStyle.italic,
+    ),
+    css(
+      '.content pre .hljs-keyword, .content pre .hljs-selector-tag, .content pre .hljs-meta, .content pre .hljs-subst',
+    ).styles(
+      color: Color('var(--docs-shell-accent-strong)'),
+      fontWeight: FontWeight.w600,
+    ),
+    css(
+      '.content pre .hljs-built_in, .content pre .hljs-type, .content pre .hljs-title, .content pre .hljs-section, .content pre .hljs-name, .content pre .hljs-tag, .content pre .hljs-attribute, .content pre .hljs-selector-id, .content pre .hljs-selector-class, .content pre .hljs-selector-attr, .content pre .hljs-selector-pseudo, .content pre .function_, .content pre .class_',
+    ).styles(
+      color: Color('var(--docs-shell-accent)'),
+      fontWeight: FontWeight.w500,
+    ),
+    css(
+      '.content pre .hljs-string, .content pre .hljs-regexp, .content pre .hljs-link, .content pre .hljs-symbol, .content pre .hljs-bullet',
+    ).styles(
+      raw: {
+        'color':
+            'color-mix(in srgb, var(--docs-shell-accent-strong) 66%, currentColor)',
+      },
+    ),
+    css(
+      '.content pre .hljs-number, .content pre .hljs-literal, .content pre .hljs-variable, .content pre .hljs-template-variable, .content pre .hljs-params, .content pre .hljs-attr, .content pre .hljs-operator, .content pre .hljs-punctuation',
+    ).styles(
+      raw: {
+        'color':
+            'color-mix(in srgb, currentColor 72%, var(--docs-shell-accent) 28%)',
+      },
+    ),
+    css('.content pre .hljs-addition').styles(
+      color: Color('var(--docs-shell-accent-strong)'),
+      raw: {
+        'background':
+            'color-mix(in srgb, var(--docs-shell-accent-soft) 72%, transparent)',
+      },
+    ),
+    css('.content pre .hljs-deletion').styles(
+      color: Color('var(--docs-shell-shadow)'),
+      raw: {
+        'background':
+            'color-mix(in srgb, var(--docs-shell-border) 38%, transparent)',
+      },
+    ),
+    css('.content pre .hljs-emphasis').styles(fontStyle: FontStyle.italic),
+    css('.content pre .hljs-strong').styles(fontWeight: FontWeight.w700),
     css('.content .member-signature').styles(
       margin: Margin.only(top: 0.32.rem, bottom: 0.72.rem),
     ),
