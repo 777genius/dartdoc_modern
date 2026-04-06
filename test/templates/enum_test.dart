@@ -105,6 +105,8 @@ extension Ext<T> on E<T> {}
         path.join(packagePath, 'doc'),
         '--sdk-dir',
         packageMetaProvider.defaultSdkDir.path,
+        '--format',
+        'html',
       ], packageMetaProvider);
 
       final packageBuilder = PubPackageBuilder(

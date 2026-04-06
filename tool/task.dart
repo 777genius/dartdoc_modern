@@ -1766,39 +1766,23 @@ Not all files are formatted:
 
 Future<void> validateSdkDocs() async {
   await docSdk();
-  const expectedLibCount = 0;
-  const expectedSubLibCount = 20;
   const expectedTotalCount = 20;
-  var indexHtml = File(path.join(_sdkDocsDir.path, 'index.html'));
-  if (!indexHtml.existsSync()) {
-    throw StateError("No 'index.html' found for the SDK docs");
-  }
-  print("Found 'index.html'");
-  var indexContents = indexHtml.readAsStringSync();
-  var foundLibCount = _findCount(indexContents, '  <li><a href="dart-');
-  if (expectedLibCount != foundLibCount) {
-    throw StateError(
-      "Expected $expectedLibCount 'dart:' entries in 'index.html', but "
-      'found $foundLibCount',
-    );
-  }
-  print("Found $foundLibCount 'dart:' entries in 'index.html'");
 
-  var libLinkPattern = RegExp(
-    '<li class="section-subitem"><a [^>]*href="dart-',
-  );
-  var foundSubLibCount = _findCount(indexContents, libLinkPattern);
-  if (expectedSubLibCount != foundSubLibCount) {
-    throw StateError(
-      "Expected $expectedSubLibCount 'dart:' entries in "
-      "'index.html' to be in categories, but found $foundSubLibCount",
-    );
+  // Jaspr format outputs API files under content/api/.
+  var apiDir = Directory(path.join(_sdkDocsDir.path, 'content', 'api'));
+  if (!apiDir.existsSync()) {
+    throw StateError("No 'content/api/' directory found for the SDK docs");
   }
-  print('$foundSubLibCount index.html dart: entries in categories found');
 
-  // Check for the existence of certain files and directories.
-  var libraries = _sdkDocsDir.listSync().where(
-    (fs) => fs.path.contains('dart-'),
+  var indexMd = File(path.join(apiDir.path, 'index.md'));
+  if (!indexMd.existsSync()) {
+    throw StateError("No 'content/api/index.md' found for the SDK docs");
+  }
+  print("Found 'content/api/index.md'");
+
+  // Check for the existence of dart-* library directories.
+  var libraries = apiDir.listSync().where(
+    (fs) => path.basename(fs.path).startsWith('dart-'),
   );
   var libraryCount = libraries.length;
   if (expectedTotalCount != libraryCount) {
@@ -1813,30 +1797,19 @@ Future<void> validateSdkDocs() async {
   }
   print("Found $libraryCount 'dart:' libraries");
 
-  var futureConstructorFile = File(
-    path.join(_sdkDocsDir.path, 'dart-async', 'Future', 'Future.html'),
+  var futureFile = File(
+    path.join(apiDir.path, 'dart-async', 'Future.md'),
   );
-  if (!futureConstructorFile.existsSync()) {
-    throw StateError('No Future.html found for dart:async Future constructor');
+  if (!futureFile.existsSync()) {
+    throw StateError('No Future.md found for dart:async Future class');
   }
-  print('Found Future.async constructor');
+  print('Found Future class page');
 }
 
 /// A temporary directory into which the SDK can be documented.
 final Directory _sdkDocsDir = Directory.systemTemp
     .createTempSync('sdkdocs')
     .absolute;
-
-/// Returns the number of (perhaps overlapping) occurrences of [str] in [match].
-int _findCount(String str, Pattern match) {
-  var count = 0;
-  var index = str.indexOf(match);
-  while (index != -1) {
-    count++;
-    index = str.indexOf(match, index + 1);
-  }
-  return count;
-}
 
 Future<String> _calcFilesSig(
   Directory dir, {

@@ -1,4 +1,4 @@
-# A CI configuration to auto-publish pub packages.
+# Publish to pub.dev when a version tag is pushed.
 
 name: Publish
 permissions: read-all
@@ -12,9 +12,34 @@ on:
 
 jobs:
   publish:
-    uses: dart-lang/ecosystem/.github/workflows/publish.yaml@main
-    with:
-      write-comments: false
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
-      pull-requests: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
+        with:
+          sdk: stable
+      - name: Publish to pub.dev
+        run: |
+          dart pub publish --force 2>&1 | tee /tmp/pub_output
+          result=${PIPESTATUS[0]}
+          if [ $result -ne 0 ]; then
+            if grep -q "already exists" /tmp/pub_output; then
+              echo "Version already published, skipping."
+            else
+              exit $result
+            fi
+          fi
+
+  validate:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
+        with:
+          sdk: stable
+      - name: Validate package
+        run: dart pub publish --dry-run

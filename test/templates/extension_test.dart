@@ -30,6 +30,8 @@ void main() async {
       '--sdk-dir',
       packageMetaProvider.defaultSdkDir.path,
       '--no-link-to-remote',
+      '--format',
+      'html',
     ], packageMetaProvider);
 
     var packageBuilder = PubPackageBuilder(

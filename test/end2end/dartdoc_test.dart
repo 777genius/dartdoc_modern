@@ -88,6 +88,19 @@ void main() {
           contains('Tool "drill" returned non-zero exit code'));
     });
 
+    test('missing tool executables are ignored when tools are disabled',
+        () async {
+      var dartdoc = buildDartdoc([], testPackageToolError, tempDir);
+      var results = await dartdoc.generateDocsBase();
+      var p = results.packageGraph;
+      var unresolvedToolErrors = p.packageWarningCounter.countedWarnings.values
+          .map((e) => e[PackageWarning.toolError] ?? {})
+          .expand((element) => element);
+
+      expect(p.packageWarningCounter.errorCount, equals(0));
+      expect(unresolvedToolErrors, isEmpty);
+    });
+
     test('basic interlinking test', () async {
       var dartdoc =
           buildDartdoc(['--exclude-packages=args'], _testPackageDir, tempDir);
@@ -185,7 +198,7 @@ void main() {
     test('rel canonical prefix does not include base href', () async {
       final prefix = 'foo.bar/baz';
       var dartdoc = buildDartdoc(
-          ['--rel-canonical-prefix', prefix], _testPackageDir, tempDir);
+          ['--rel-canonical-prefix', prefix, '--format', 'html'], _testPackageDir, tempDir);
       await dartdoc.generateDocsBase();
 
       // Verify files at different levels have correct <link> content.

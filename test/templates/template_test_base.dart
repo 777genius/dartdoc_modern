@@ -31,7 +31,7 @@ environment:
     );
     await writeDartdocResources(resourceProvider);
 
-    await buildDartdoc().generateDocs();
+    await buildDartdoc(additionalArguments: ['--format', 'html']).generateDocs();
   }
 
   List<String> readLines(List<String> filePath) =>
