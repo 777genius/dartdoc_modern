@@ -120,15 +120,26 @@ jobs:
               create_redirect "$clean_output" "${VITEPRESS_BASE_PATH}guide/$relative_path"
             fi
 
+            jaspr_route_input="$JASPR_OUTPUT_DIR/build/jaspr/guide/$clean_path/index.html"
             jaspr_html_output="publish/jaspr/guide/$relative_path"
-            if [ ! -f "$jaspr_html_output" ] && [ -f "$JASPR_OUTPUT_DIR/web/guide/$relative_path" ]; then
-              mkdir -p "$(dirname "$jaspr_html_output")"
-              cp "$JASPR_OUTPUT_DIR/web/guide/$relative_path" "$jaspr_html_output"
+            if [ ! -f "$jaspr_html_output" ]; then
+              if [ -f "$jaspr_route_input" ]; then
+                mkdir -p "$(dirname "$jaspr_html_output")"
+                cp "$jaspr_route_input" "$jaspr_html_output"
+              elif [ -f "$JASPR_OUTPUT_DIR/web/guide/$relative_path" ]; then
+                mkdir -p "$(dirname "$jaspr_html_output")"
+                cp "$JASPR_OUTPUT_DIR/web/guide/$relative_path" "$jaspr_html_output"
+              fi
             fi
 
             jaspr_clean_output="publish/jaspr/guide/$clean_path/index.html"
-            if [ ! -f "$jaspr_clean_output" ] && [ -f "$JASPR_OUTPUT_DIR/web/guide/$relative_path" ]; then
-              create_redirect "$jaspr_clean_output" "${JASPR_BASE_PATH}guide/$relative_path"
+            if [ ! -f "$jaspr_clean_output" ]; then
+              if [ -f "$jaspr_route_input" ]; then
+                mkdir -p "$(dirname "$jaspr_clean_output")"
+                cp "$jaspr_route_input" "$jaspr_clean_output"
+              else
+                create_redirect "$jaspr_clean_output" "${VITEPRESS_BASE_PATH}guide/$relative_path"
+              fi
             fi
           done < <(
             cd docs-site/.vitepress/dist/guide
