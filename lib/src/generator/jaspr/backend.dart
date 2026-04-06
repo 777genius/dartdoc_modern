@@ -364,13 +364,6 @@ class JasprGeneratorBackend extends GeneratorBackend {
     // Write guide files through _writeMarkdown for incremental checks.
     for (final entry in rewrittenGuideEntries) {
       _writeMarkdown(entry.relativePath, entry.content);
-      final legacyRedirect = legacyGuideRedirectFor(entry.relativePath);
-      if (legacyRedirect != null) {
-        _writeGeneratedFile(
-          p.posix.join('web', legacyRedirect.outputPath),
-          renderLegacyGuideRedirectHtml(legacyRedirect.redirectTarget),
-        );
-      }
     }
 
     _writeMarkdown('web/index.html', _buildRootIndexHtml());
