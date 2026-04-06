@@ -1,3 +1,7 @@
+## 1.1.4
+
+* Change default output format from `html` to `jaspr`.
+
 ## 1.1.3
 
 * Fix scaffold crash when installed from pub.dev - skip missing dotfiles

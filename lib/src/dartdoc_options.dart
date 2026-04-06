@@ -1601,9 +1601,9 @@ List<DartdocOption> createDartdocOptions(
   return [
     DartdocOptionArgFile<String>(
       'format',
-      'html',
+      'jaspr',
       resourceProvider,
-      help: 'Output format: html, vitepress, or jaspr.',
+      help: 'Output format: jaspr, vitepress, or html.',
     ),
     DartdocOptionArgFile<String?>(
       'recipe',
