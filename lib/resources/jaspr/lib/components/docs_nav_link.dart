@@ -56,11 +56,12 @@ class DocsNavLink extends StatelessComponent {
           }
         },
       if (onMouseEnter != null) 'mouseenter': onMouseEnter!,
-      if (!isPlainAnchorOnly)
+      if (onNavigate != null || !isPlainAnchorOnly)
         'click': (event) {
           if (_isModifiedClick(event)) return;
 
           onNavigate?.call();
+          if (isPlainAnchorOnly) return;
 
           final router = Router.maybeOf(context);
           if (router == null) return;
