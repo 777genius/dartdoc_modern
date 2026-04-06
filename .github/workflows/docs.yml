@@ -98,7 +98,6 @@ jobs:
             (
               cd "$JASPR_OUTPUT_DIR/web"
               find guide -name '*.html' -type f -exec cp --parents {} "$GITHUB_WORKSPACE/publish" \;
-              find guide -name '*.html' -type f -exec cp --parents {} "$GITHUB_WORKSPACE/publish/jaspr" \;
             )
           fi
 
