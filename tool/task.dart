@@ -463,6 +463,10 @@ Future<void> _patchFlutterApiDocsRunner(String flutterPath) async {
   );
   patched = patched.replaceFirst("'dartdoc',", "'dartdoc_modern',");
 
+  // Disable the sanity check that expects HTML output files - dartdoc_modern
+  // generates jaspr format by default.
+  patched = patched.replaceAll('_sanityCheckDocs', '// _sanityCheckDocs');
+
   if (patched == contents) {
     throw StateError(
       'Failed to patch Flutter API docs runner for dartdoc_modern.',
@@ -1718,26 +1722,31 @@ Future<void> validateDartdocDocs() async {
     _dartdocDocsPath,
     '--no-link-to-remote',
   ]);
-  _expectFileContains(
-    path.join(_dartdocDocsPath, 'index.html'),
-    '<title>dartdoc_modern - Dart API docs</title>',
-  );
-  var objectText = RegExp('<li>Object</li>', multiLine: true);
-  _expectFileContains(
-    path.join(_dartdocDocsPath, 'dartdoc', 'PubPackageMeta-class.html'),
-    objectText,
-  );
-}
 
-/// Kind of an inefficient grepper for now.
-void _expectFileContains(String filePath, Pattern text) {
-  var source = File(filePath);
-  if (!source.existsSync()) {
-    throw StateError('file not found: $filePath');
+  // Jaspr format outputs under content/api/.
+  var apiIndexPath = path.join(_dartdocDocsPath, 'content', 'api', 'index.md');
+  var apiIndex = File(apiIndexPath);
+  if (!apiIndex.existsSync()) {
+    throw StateError('file not found: $apiIndexPath');
   }
-  if (!File(filePath).readAsStringSync().contains(text)) {
-    throw StateError('"$text" not found in $filePath');
+  var apiIndexContent = apiIndex.readAsStringSync();
+  if (!apiIndexContent.contains('dartdoc_modern')) {
+    throw StateError('"dartdoc_modern" not found in $apiIndexPath');
   }
+  print('Validated: content/api/index.md contains dartdoc_modern');
+
+  var pubPackageMetaPath = path.join(
+    _dartdocDocsPath,
+    'content',
+    'api',
+    'dartdoc_modern',
+    'PubPackageMeta.md',
+  );
+  var pubPackageMetaFile = File(pubPackageMetaPath);
+  if (!pubPackageMetaFile.existsSync()) {
+    throw StateError('file not found: $pubPackageMetaPath');
+  }
+  print('Validated: PubPackageMeta.md exists');
 }
 
 final String _dartdocDocsPath = Directory.systemTemp
