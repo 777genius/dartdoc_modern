@@ -337,11 +337,14 @@ class JasprGeneratorBackend extends GeneratorBackend {
     var sidebarContent = _sidebar.generateApi(packageGraph);
     _writeMarkdown('lib/generated/api_sidebar.dart', sidebarContent);
 
-    // SDK docs only need API pages -- skip scaffold assets and guides.
-    if (!_sdkDocs) {
-      // Write essential API styles (always overwritten, not a scaffold file).
-      _writeMarkdown('web/generated/api_styles.css', _apiStylesCss);
+    // Write essential API styles (always overwritten, not a scaffold file).
+    _writeMarkdown('web/generated/api_styles.css', _apiStylesCss);
+    _writeMarkdown('web/index.html', _buildRootIndexHtml());
+    _writeMarkdown('web/404.html', _buildRootIndexHtml());
 
+    // SDK docs skip guide generation, but still need the Jaspr app scaffold
+    // and runtime assets so `dart pub get` and `jaspr build` work.
+    if (!_sdkDocs) {
       // Generate guide files from doc/docs directories.
       final guideCollector = guide_core.GuideCollector(
         resourceProvider: resourceProvider,
@@ -370,9 +373,6 @@ class JasprGeneratorBackend extends GeneratorBackend {
       for (final entry in rewrittenGuideEntries) {
         _writeMarkdown(entry.relativePath, entry.content);
       }
-
-      _writeMarkdown('web/index.html', _buildRootIndexHtml());
-      _writeMarkdown('web/404.html', _buildRootIndexHtml());
 
       var guideSidebarContent = _sidebar.generateGuide(
         rewrittenGuideEntries,
@@ -754,10 +754,6 @@ class JasprGeneratorBackend extends GeneratorBackend {
   /// These are one-time setup files that the user may customize afterwards.
   @override
   Future<void> generateAdditionalFiles() async {
-    // SDK docs don't need Jaspr scaffold files (pubspec.yaml, app.dart, etc.)
-    // -- the output is pure content, not a standalone Jaspr project.
-    if (_sdkDocs) return;
-
     var initGenerator = JasprInitGenerator(
       writer: writer,
       resourceProvider: resourceProvider,

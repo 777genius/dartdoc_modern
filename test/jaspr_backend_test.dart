@@ -1,12 +1,17 @@
+import 'dart:io';
+
+import 'package:dartdoc_modern/src/dartdoc.dart';
 import 'package:dartdoc_modern/src/generator/core/docs_recipe.dart'
     as docs_recipe;
 import 'package:dartdoc_modern/src/generator/core/guide_collection.dart';
 import 'package:dartdoc_modern/src/generator/core/legacy_guide_redirects.dart';
+import 'package:dartdoc_modern/src/generator/generator_backend.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/backend.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/dart_string.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/paths.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/sidebar.dart';
 import 'package:dartdoc_modern/src/package_meta.dart';
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import 'src/utils.dart';
@@ -309,6 +314,58 @@ See [Section 6.2.2](#_6-2-2-getters-and-setters).
         rewritten.single.content,
         contains('[Section 6.2.2](/guide/spec#622-getters-and-setters)'),
       );
+    });
+  });
+
+  group('JasprGeneratorBackend sdk docs scaffold', () {
+    test('still writes scaffold and runtime assets for sdk docs', () async {
+      final outDir = Directory.systemTemp.createTempSync('jaspr_sdk_docs.');
+      addTearDown(() => outDir.deleteSync(recursive: true));
+
+      final context = generatorContextFromArgv([
+        '--format',
+        'jaspr',
+        '--sdk-docs',
+        '--output',
+        outDir.path,
+      ], pubPackageMetaProvider);
+      final options = DartdocGeneratorBackendOptions.fromContext(context);
+      final writer = DartdocFileWriter(
+        outDir.path,
+        pubPackageMetaProvider.resourceProvider,
+      );
+      final backend = JasprGeneratorBackend(
+        options,
+        writer,
+        pubPackageMetaProvider.resourceProvider,
+        outputPath: outDir.path,
+        packageName: 'Dart',
+        sdkDocs: true,
+      );
+
+      await backend.generateAdditionalFiles();
+
+      final packageGraph = await bootBasicPackage(
+        'testing/test_package',
+        pubPackageMetaProvider,
+      );
+      backend.beforeGenerate(packageGraph);
+      backend.generatePackage(packageGraph, packageGraph.defaultPackage);
+
+      bool exists(String relativePath) => pubPackageMetaProvider.resourceProvider
+          .getResource(p.join(outDir.path, relativePath))
+          .exists;
+
+      expect(exists('pubspec.yaml'), isTrue);
+      expect(exists('lib/app.dart'), isTrue);
+      expect(exists('lib/main.server.dart'), isTrue);
+      expect(exists('web/index.html'), isTrue);
+      expect(exists('web/404.html'), isTrue);
+      expect(exists('web/generated/api_styles.css'), isTrue);
+      expect(exists('content/index.md'), isTrue);
+      expect(exists('content/guide/index.md'), isTrue);
+      expect(exists('lib/generated/api_sidebar.dart'), isTrue);
+      expect(exists('lib/generated/guide_sidebar.dart'), isTrue);
     });
   });
 }
