@@ -3079,9 +3079,17 @@ String _stripLeadingH1(String text, String expectedTitle) {
   final normalizedTitle = title.toLowerCase().replaceAll('-', '_');
   final normalizedExpected = expectedTitle.toLowerCase().replaceAll('-', '_');
   if (normalizedTitle == normalizedExpected) {
-    // Duplicate (modulo hyphen/underscore/case) — strip entirely.
-    return text.substring(match.end).trimLeft();
+    // Duplicate (modulo hyphen/underscore/case) -- strip entirely.
+    var result = text.substring(match.end).trimLeft();
+    // Also strip leading badge lines (e.g. shields.io) that commonly
+    // follow the package H1 in READMEs. These are redundant on API pages.
+    result = result.replaceAll(
+      RegExp(r'^\[!\[[^\]]*\]\(https://img\.shields\.io/[^)]*\)\]\([^)]*\)\s*',
+          multiLine: true),
+      '',
+    );
+    return result.trimLeft();
   }
-  // Different H1 from user content — downshift to H2.
+  // Different H1 from user content -- downshift to H2.
   return '## ${match.group(1)}${text.substring(match.end)}';
 }
