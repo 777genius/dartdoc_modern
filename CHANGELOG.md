@@ -1,3 +1,7 @@
+## 1.1.1
+
+* Strip shields.io badges from generated API overview pages to prevent duplicates.
+
 ## 1.1.0
 
 * **Jaspr guide pages:**
