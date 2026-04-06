@@ -1,5 +1,5 @@
 ---
-internal: true
+sidebar_position: 4
 ---
 
 # Jaspr Deployment

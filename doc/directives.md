@@ -1,5 +1,5 @@
 ---
-internal: true
+sidebar_position: 5
 ---
 
 Dartdoc supports several **directives** within Dart doc comments. Each directive

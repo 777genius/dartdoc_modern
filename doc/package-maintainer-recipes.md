@@ -1,5 +1,5 @@
 ---
-internal: true
+sidebar_position: 1
 ---
 
 # Package Maintainer Recipes

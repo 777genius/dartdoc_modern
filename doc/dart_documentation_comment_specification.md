@@ -1,5 +1,5 @@
 ---
-internal: true
+sidebar_position: 6
 ---
 
 # **Dart Documentation Comments Specification**
