@@ -32,6 +32,12 @@ final _sidebarPositionPattern = RegExp(
   multiLine: true,
 );
 
+/// Matches `sidebar_label: <text>` in frontmatter (quoted or unquoted).
+final _sidebarLabelPattern = RegExp(
+  r'^sidebar_label:\s*["\u0027]?(.+?)["\u0027]?\s*$',
+  multiLine: true,
+);
+
 /// Matches `internal: true` in frontmatter.
 final _internalGuidePattern = RegExp(
   r'^internal:\s*true\s*$',
@@ -150,7 +156,9 @@ class GuideCollector {
             relativeToDocs,
             mdFile.path,
           );
-          final title = extractTitle(originalContent, relativeToDocs);
+          final title =
+              extractSidebarLabel(originalContent) ??
+              extractTitle(originalContent, relativeToDocs);
 
           final outputRelative = isMultiPackage
               ? p.posix.join('guide', package.name, relativeToDocs)
@@ -255,6 +263,18 @@ int? extractSidebarPosition(String content) {
   final posMatch = _sidebarPositionPattern.firstMatch(fmMatch.group(1)!);
   if (posMatch == null) return null;
   return int.tryParse(posMatch.group(1)!);
+}
+
+/// Extracts `sidebar_label` from YAML frontmatter if present.
+///
+/// When set, the label overrides the default title (derived from the first
+/// `# heading` or file name) in sidebar navigation.
+String? extractSidebarLabel(String content) {
+  final fmMatch = frontmatterPattern.firstMatch(content);
+  if (fmMatch == null) return null;
+  final labelMatch = _sidebarLabelPattern.firstMatch(fmMatch.group(1)!);
+  if (labelMatch == null) return null;
+  return labelMatch.group(1)!.trim();
 }
 
 /// Whether the guide should be exposed in generated user-facing docs.

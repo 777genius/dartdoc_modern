@@ -85,7 +85,12 @@ List<StyleRule> docsSearchStyles() => [
         raw: {'grid-area': 'heading', 'letter-spacing': '0.12em'},
       ),
       css('.docs-search-input').styles(
-        raw: {'grid-area': 'input'},
+        raw: {
+          'grid-area': 'input',
+          '-webkit-appearance': 'none',
+          '-moz-appearance': 'none',
+          'appearance': 'none',
+        },
         width: 100.percent,
         padding: Padding.symmetric(vertical: 0.84.rem, horizontal: 0.98.rem),
         border: Border.all(
@@ -102,6 +107,9 @@ List<StyleRule> docsSearchStyles() => [
           color: Color('var(--docs-shell-shadow)'),
         ),
       ),
+      css('.docs-search-input::-webkit-search-cancel-button').styles(
+        raw: {'-webkit-appearance': 'none', 'appearance': 'none', 'display': 'none'},
+      ),
       css('.docs-search-input:focus-visible').styles(
         outline: Outline(
           width: OutlineWidth(3.px),
@@ -111,24 +119,27 @@ List<StyleRule> docsSearchStyles() => [
         ),
       ),
       css('.docs-search-close').styles(
-        raw: {'grid-area': 'close'},
         alignSelf: AlignSelf.center,
-        padding: Padding.symmetric(vertical: 0.48.rem, horizontal: 0.74.rem),
+        padding: Padding.symmetric(vertical: 0.32.rem, horizontal: 0.58.rem),
+        border: Border.all(
+          width: 1.px,
+          color: Color('var(--docs-shell-border)'),
+        ),
+        radius: BorderRadius.circular(0.5.rem),
+        backgroundColor: Color('transparent'),
+        cursor: Cursor.pointer,
+        color: Color('var(--docs-shell-muted)'),
+        fontSize: 0.78.rem,
+        fontWeight: FontWeight.w600,
+        raw: {'grid-area': 'close', 'letter-spacing': '0.02em'},
+      ),
+      css('.docs-search-close:hover').styles(
+        backgroundColor: Color('var(--docs-shell-surface-soft)'),
         border: Border.all(
           width: 1.px,
           color: Color('var(--docs-shell-border-strong)'),
         ),
-        radius: BorderRadius.circular(0.82.rem),
-        backgroundColor: Color('var(--docs-shell-surface-soft)'),
-        cursor: Cursor.pointer,
         color: ContentColors.text,
-      ),
-      css('.docs-search-close:hover').styles(
-        backgroundColor: Color('var(--docs-shell-accent-soft)'),
-        border: Border.all(
-          width: 1.px,
-          color: Color('var(--docs-shell-accent)'),
-        ),
       ),
       css('.docs-search-status').styles(
         padding: Padding.symmetric(vertical: 0.72.rem, horizontal: 1.05.rem),

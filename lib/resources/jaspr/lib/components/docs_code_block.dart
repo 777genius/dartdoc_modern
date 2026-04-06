@@ -44,7 +44,7 @@ class DocsCodeBlock extends CustomComponent {
       );
 
       // Post-process bash blocks with richer token detection.
-      if (result != null && _bashLanguages.contains(normalizedLanguage)) {
+      if (_bashLanguages.contains(normalizedLanguage)) {
         _enhanceBashNodes(result.rootNode);
       }
 

@@ -111,6 +111,60 @@ void main() {
     });
   });
 
+  group('extractSidebarLabel', () {
+    test('returns null when no frontmatter', () {
+      expect(
+        guide_core.extractSidebarLabel('# Title\n\nContent.'),
+        isNull,
+      );
+    });
+
+    test('returns null when frontmatter has no sidebar_label', () {
+      expect(
+        guide_core.extractSidebarLabel(
+          '---\nsidebar_position: 1\n---\n\n# Title',
+        ),
+        isNull,
+      );
+    });
+
+    test('extracts unquoted sidebar_label', () {
+      expect(
+        guide_core.extractSidebarLabel(
+          '---\nsidebar_label: Getting Started\n---\n\n# Users Guide',
+        ),
+        equals('Getting Started'),
+      );
+    });
+
+    test('extracts double-quoted sidebar_label', () {
+      expect(
+        guide_core.extractSidebarLabel(
+          '---\nsidebar_label: "Why Headless?"\n---\n\n# Title',
+        ),
+        equals('Why Headless?'),
+      );
+    });
+
+    test('extracts single-quoted sidebar_label', () {
+      expect(
+        guide_core.extractSidebarLabel(
+          "---\nsidebar_label: 'Common Recipes'\n---\n\n# Title",
+        ),
+        equals('Common Recipes'),
+      );
+    });
+
+    test('works alongside other frontmatter fields', () {
+      expect(
+        guide_core.extractSidebarLabel(
+          '---\nsidebar_position: 2\nsidebar_label: Custom Title\ninternal: false\n---\n\n# Original',
+        ),
+        equals('Custom Title'),
+      );
+    });
+  });
+
   group('VitePressGuideGenerator.matchesFilters', () {
     VitePressGuideGenerator makeGenerator({
       List<String> include = const [],

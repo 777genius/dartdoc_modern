@@ -46,7 +46,7 @@ List<StyleRule> docsResponsiveRootStyles() => [
           '--docs-shell-content-pad-bottom': '3rem',
           '--docs-shell-sticky-top': '4.7rem',
           '--docs-shell-anchor-offset': '6.45rem',
-          '--docs-shell-search-panel-width': '46rem',
+          '--docs-shell-search-panel-width': '38rem',
           '--docs-shell-search-launcher-min': '8.5rem',
           '--docs-shell-content-header-pad-y': '1.75rem',
           '--docs-shell-content-header-pad-x': '1.8rem',

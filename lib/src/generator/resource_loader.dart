@@ -119,8 +119,6 @@ String? _findPackageRoot(io.File configFile, String packageName) {
     if (packages == null) return null;
 
     final configDir = _parentDir(configFile.path);
-    // package_config.json is in .dart_tool/, so project root is parent
-    final projectDir = _parentDir(configDir);
 
     for (final pkg in packages) {
       if (pkg is! Map<String, dynamic>) continue;

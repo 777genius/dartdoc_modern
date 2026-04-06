@@ -55,7 +55,7 @@ const _hljsInitScript = '''
     var nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
     var _ops = {'&&':1,'||':1,'|':1,';':1,'>':1,'>>':1,'2>&1':1};
-    var _tok = /(2>&1|>>|&&|\|\||[|;>]|--[a-zA-Z][a-zA-Z0-9_-]*|\s-[a-zA-Z0-9]\b|\\\\|[a-zA-Z_][a-zA-Z0-9_.-]*|\n)/g;
+    var _tok = /(2>&1|>>|&&|\\|\\||[|;>]|--[a-zA-Z][a-zA-Z0-9_-]*|\\s-[a-zA-Z0-9]\\b|\\\\|[a-zA-Z_][a-zA-Z0-9_.-]*|\\n)/g;
     nodes.forEach(function(textNode) {
       var p = textNode.parentNode;
       while (p && p !== block) {
