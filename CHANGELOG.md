@@ -1,3 +1,24 @@
+## 1.1.0
+
+* **Jaspr guide pages:**
+  * Getting Started guide with usage examples for all formats.
+  * Guide discovery from `doc/` and `docs/` directories.
+  * Fix infinite redirect loop on guide pages (GitHub Pages file priority).
+
+* **Improved bash syntax highlighting:**
+  * Highlight commands, flags (`--long`, `-s`), operators (`&&`, `||`, `|`), and line continuation.
+  * Both SSR (Dart-side) and client-side (JS) post-processors.
+  * Dark mode contrast boost for code blocks.
+
+* **AOT compilation support:**
+  * `dart compile exe` now works via `DARTDOC_MODERN_ROOT` env var fallback.
+  * ~2.5x faster generation compared to JIT `dart run`.
+
+* **Bug fixes:**
+  * Fix double lightbox opening on diagram click (duplicate script tag).
+  * Fix JS regex SyntaxError in bash highlighter.
+  * Style Install code block as card on home page.
+
 ## 1.0.2
 
 * Fix published VitePress scaffold resources so hidden/scaffold templates are

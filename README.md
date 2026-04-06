@@ -1,5 +1,7 @@
 # dartdoc_modern
 
+[![pub package](https://img.shields.io/pub/v/dartdoc_modern.svg)](https://pub.dev/packages/dartdoc_modern)
+
 > Fork of [dart-lang/dartdoc](https://github.com/dart-lang/dartdoc) with modern docs backends for generating polished API documentation as either a Jaspr docs app or a VitePress site instead of default HTML.
 
 ## Status
