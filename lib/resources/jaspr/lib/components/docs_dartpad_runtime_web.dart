@@ -84,7 +84,7 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
         _setLoading(root, false);
         contentWindow?.postMessage({
           'type': 'sourceCode',
-          'sourceCode': _decodeBase64(root.dataset['sourceBase64']),
+          'sourceCode': _decodeBase64(root.getAttribute('data-source-base64')),
         }.jsify(), event.origin.toJS);
         return;
       }
@@ -126,7 +126,7 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
       queryParameters: {
         'embed': 'true',
         'theme': _currentTheme(),
-        if (root.dataset['run'] == 'true') 'run': 'true',
+        if (root.getAttribute('data-run') == 'true') 'run': 'true',
       },
     ).query;
     return 'https://dartpad.dev/?$params';
@@ -141,12 +141,12 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
   }
 
   void _activateDartPad(web.HTMLElement root) {
-    if (root.dataset['active'] == 'true') return;
+    if (root.getAttribute('data-active') == 'true') return;
 
     final stage = root.querySelector('.dartpad-stage');
     if (stage is! web.HTMLElement) return;
 
-    final height = root.dataset['height'];
+    final height = root.getAttribute('data-height') ?? '';
     final iframe = web.HTMLIFrameElement()
       ..className = 'dartpad-iframe'
       ..setAttribute(
@@ -205,7 +205,7 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
   ) async {
     try {
       await web.window.navigator.clipboard
-          .writeText(_decodeBase64(root.dataset['sourceBase64']))
+          .writeText(_decodeBase64(root.getAttribute('data-source-base64')))
           .toDart;
       final labelNode = button.querySelector('.dartpad-btn-label');
       final label = labelNode is web.HTMLElement ? labelNode : button;

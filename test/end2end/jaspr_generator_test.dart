@@ -706,7 +706,7 @@ void main() {
         );
         expect(
           content,
-          contains("import '../components/docs_dartpad_runtime.dart';"),
+          isNot(contains("import '../components/docs_dartpad_runtime.dart';")),
         );
         expect(
           content,
@@ -1060,6 +1060,10 @@ void main() {
           contains("web.document.body?.style.overflow = 'hidden'"),
         );
         expect(
+          content,
+          contains("css('[hidden]').styles(raw: {'display': 'none !important'})"),
+        );
+        expect(
           dartPadRuntime,
           contains("export 'docs_dartpad_runtime_stub.dart'"),
         );
@@ -1073,6 +1077,14 @@ void main() {
         expect(dartPadRuntimeWeb, contains("label.textContent = 'Copied'"));
         expect(dartPadRuntimeWeb, contains("_setLoading(root, true)"));
         expect(dartPadRuntimeWeb, contains("_closeDartPad(root)"));
+        expect(
+          dartPadRuntimeWeb,
+          contains("root.getAttribute('data-active') == 'true'"),
+        );
+        expect(
+          dartPadRuntimeWeb,
+          contains("root.getAttribute('data-source-base64')"),
+        );
         expect(dartPadRuntimeWeb, contains('https://dartpad.dev'));
         expect(
           mermaidRuntime,

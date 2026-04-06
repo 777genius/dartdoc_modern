@@ -918,11 +918,12 @@ class ApiDocsLayout extends DocsLayout {
         display: Display.block,
       ),
       css('.dartpad-loader').styles(
-        position: Position.absolute(),
-        top: 0.px,
-        right: 0.px,
-        bottom: 0.px,
-        left: 0.px,
+        position: Position.absolute(
+          top: Unit.zero,
+          right: Unit.zero,
+          bottom: Unit.zero,
+          left: Unit.zero,
+        ),
         display: Display.flex,
         flexDirection: FlexDirection.column,
         alignItems: AlignItems.center,
@@ -939,11 +940,10 @@ class ApiDocsLayout extends DocsLayout {
           width: 3.px,
           color: Color('var(--docs-shell-border)'),
         ),
-        borderTop: BorderSide(
-          width: 3.px,
-          color: Color('var(--docs-shell-accent)'),
-        ),
-        raw: {'animation': 'dartpad-spin 0.8s linear infinite'},
+        raw: {
+          'border-top-color': 'var(--docs-shell-accent)',
+          'animation': 'dartpad-spin 0.8s linear infinite',
+        },
       ),
       css('.dartpad-loader-text').styles(
         fontSize: 0.86.rem,
@@ -1916,6 +1916,7 @@ class ApiDocsLayout extends DocsLayout {
     css(
       '.content h2[id], .content h3[id], .content h4[id], .content h5[id], .content h6[id]',
     ).styles(raw: {'scroll-margin-top': 'var(--docs-shell-anchor-offset)'}),
+    css('[hidden]').styles(raw: {'display': 'none !important'}),
     downMobile([
       css(
         '.content p, .content li',
