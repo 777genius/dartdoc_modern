@@ -1,3 +1,9 @@
+## 1.1.2
+
+* Fix `--sdk-docs` crash in Jaspr and VitePress backends - skip scaffold and
+  guide generation in SDK mode.
+* Strip shields.io badges from API overview pages to prevent duplicates.
+
 ## 1.1.1
 
 * Strip shields.io badges from generated API overview pages to prevent duplicates.
