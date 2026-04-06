@@ -179,7 +179,7 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
     _setLoading(root, false);
     active?.setAttribute('hidden', 'hidden');
     idle?.removeAttribute('hidden');
-    root.dataset.remove('active');
+    root.removeAttribute('data-active');
   }
 
   void _setLoading(web.HTMLElement root, bool isLoading) {
