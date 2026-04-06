@@ -207,8 +207,6 @@ class ApiDocsLayout extends DocsLayout {
       Document.head(
         children: [
           Style(styles: _styles),
-          script(src: 'docs_mermaid_runtime.js?v=5', defer: true),
-          script(src: 'docs_lightbox_runtime.js?v=3', defer: true),
         ],
       ),
       div(
