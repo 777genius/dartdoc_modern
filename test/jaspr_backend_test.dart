@@ -328,6 +328,8 @@ See [Section 6.2.2](#_6-2-2-getters-and-setters).
         ..writeAsStringSync('<div>header</div>');
       final footerFile = File(p.join(assetsDir.path, 'footer.html'))
         ..writeAsStringSync('<div>footer</div>');
+      final footerTextFile = File(p.join(assetsDir.path, 'footer_text.html'))
+        ..writeAsStringSync('<span>footer text</span>');
       addTearDown(() => assetsDir.deleteSync(recursive: true));
       addTearDown(() => outDir.deleteSync(recursive: true));
 
@@ -339,6 +341,8 @@ See [Section 6.2.2](#_6-2-2-getters-and-setters).
         headerFile.path,
         '--footer',
         footerFile.path,
+        '--footer-text',
+        footerTextFile.path,
         '--output',
         outDir.path,
       ], pubPackageMetaProvider);
