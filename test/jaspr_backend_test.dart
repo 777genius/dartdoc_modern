@@ -11,6 +11,7 @@ import 'package:dartdoc_modern/src/generator/jaspr/dart_string.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/paths.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/sidebar.dart';
 import 'package:dartdoc_modern/src/package_meta.dart';
+import 'package:dartdoc_modern/src/runtime_stats.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -319,13 +320,25 @@ See [Section 6.2.2](#_6-2-2-getters-and-setters).
 
   group('JasprGeneratorBackend sdk docs scaffold', () {
     test('still writes scaffold and runtime assets for sdk docs', () async {
+      final assetsDir = Directory.systemTemp.createTempSync(
+        'jaspr_sdk_docs_assets.',
+      );
       final outDir = Directory.systemTemp.createTempSync('jaspr_sdk_docs.');
+      final headerFile = File(p.join(assetsDir.path, 'header.html'))
+        ..writeAsStringSync('<div>header</div>');
+      final footerFile = File(p.join(assetsDir.path, 'footer.html'))
+        ..writeAsStringSync('<div>footer</div>');
+      addTearDown(() => assetsDir.deleteSync(recursive: true));
       addTearDown(() => outDir.deleteSync(recursive: true));
 
       final context = generatorContextFromArgv([
         '--format',
         'jaspr',
         '--sdk-docs',
+        '--header',
+        headerFile.path,
+        '--footer',
+        footerFile.path,
         '--output',
         outDir.path,
       ], pubPackageMetaProvider);
@@ -349,6 +362,7 @@ See [Section 6.2.2](#_6-2-2-getters-and-setters).
         'testing/test_package',
         pubPackageMetaProvider,
       );
+      runtimeStats.resetAccumulators({'writtenPackageFileCount'});
       backend.beforeGenerate(packageGraph);
       backend.generatePackage(packageGraph, packageGraph.defaultPackage);
 
