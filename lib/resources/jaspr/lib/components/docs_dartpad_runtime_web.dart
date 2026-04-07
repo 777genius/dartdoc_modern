@@ -25,6 +25,7 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
   JSFunction? _messageListener;
   Timer? _themeTimer;
   String _theme = 'light';
+  final Expando<_ScrollPosition> _lockedScrollPositions = Expando();
 
   @override
   void initState() {
@@ -81,11 +82,13 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
         final root = candidate.closest('[data-dartpad]');
         if (root is! web.HTMLElement) return;
 
+        _restoreLockedScroll(root);
         _setLoading(root, false);
         contentWindow?.postMessage({
           'type': 'sourceCode',
           'sourceCode': _decodeBase64(root.getAttribute('data-source-base64')),
         }.jsify(), event.origin.toJS);
+        _scheduleScrollRestore(root);
         return;
       }
     }).toJS;
@@ -143,6 +146,7 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
   void _activateDartPad(web.HTMLElement root) {
     if (root.getAttribute('data-active') == 'true') return;
 
+    _lockScrollPosition(root);
     final stage = root.querySelector('.dartpad-stage');
     if (stage is! web.HTMLElement) return;
 
@@ -165,6 +169,8 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
     idle?.setAttribute('hidden', 'hidden');
     active?.removeAttribute('hidden');
     root.dataset['active'] = 'true';
+    _restoreLockedScroll(root);
+    _scheduleScrollRestore(root);
   }
 
   void _closeDartPad(web.HTMLElement root) {
@@ -180,6 +186,7 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
     active?.setAttribute('hidden', 'hidden');
     idle?.removeAttribute('hidden');
     root.removeAttribute('data-active');
+    _lockedScrollPositions[root] = null;
   }
 
   void _setLoading(web.HTMLElement root, bool isLoading) {
@@ -231,4 +238,38 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
       }
     }
   }
+
+  void _lockScrollPosition(web.HTMLElement root) {
+    _lockedScrollPositions[root] = _ScrollPosition(
+      web.window.scrollX,
+      web.window.scrollY,
+    );
+  }
+
+  void _restoreLockedScroll(web.HTMLElement root) {
+    final position = _lockedScrollPositions[root];
+    if (position == null) return;
+    web.window.scrollTo(position.x.toJS, position.y);
+  }
+
+  void _scheduleScrollRestore(web.HTMLElement root) {
+    for (final delay in const [
+      Duration.zero,
+      Duration(milliseconds: 32),
+      Duration(milliseconds: 120),
+      Duration(milliseconds: 260),
+    ]) {
+      Timer(delay, () {
+        if (root.getAttribute('data-active') != 'true') return;
+        _restoreLockedScroll(root);
+      });
+    }
+  }
+}
+
+class _ScrollPosition {
+  const _ScrollPosition(this.x, this.y);
+
+  final num x;
+  final num y;
 }

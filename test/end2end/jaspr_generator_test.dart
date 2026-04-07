@@ -1079,6 +1079,8 @@ void main() {
         expect(dartPadRuntimeWeb, contains("label.textContent = 'Copied'"));
         expect(dartPadRuntimeWeb, contains('_setLoading(root, true)'));
         expect(dartPadRuntimeWeb, contains('_closeDartPad(root)'));
+        expect(dartPadRuntimeWeb, contains('_scheduleScrollRestore(root)'));
+        expect(dartPadRuntimeWeb, contains('web.window.scrollTo'));
         expect(
           dartPadRuntimeWeb,
           contains("root.getAttribute('data-active') == 'true'"),
