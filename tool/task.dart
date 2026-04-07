@@ -1716,18 +1716,18 @@ Future<void> validateDartdocDocs() async {
   }
   print('Validated: content/api/index.md contains dartdoc_modern');
 
-  var pubPackageMetaPath = path.join(
-    _dartdocDocsPath,
-    'content',
-    'api',
-    'dartdoc_modern',
-    'PubPackageMeta.md',
-  );
-  var pubPackageMetaFile = File(pubPackageMetaPath);
-  if (!pubPackageMetaFile.existsSync()) {
-    throw StateError('file not found: $pubPackageMetaPath');
+  var apiRoot = Directory(path.join(_dartdocDocsPath, 'content', 'api'));
+  var pubPackageMetaFile = apiRoot
+      .listSync(recursive: true)
+      .whereType<File>()
+      .firstWhere(
+        (file) => path.basename(file.path) == 'PubPackageMeta.md',
+        orElse: () => File(''),
+      );
+  if (pubPackageMetaFile.path.isEmpty || !pubPackageMetaFile.existsSync()) {
+    throw StateError('PubPackageMeta.md not found under ${apiRoot.path}');
   }
-  print('Validated: PubPackageMeta.md exists');
+  print('Validated: ${pubPackageMetaFile.path} exists');
 }
 
 final String _dartdocDocsPath = Directory.systemTemp

@@ -324,11 +324,13 @@ See [Section 6.2.2](#_6-2-2-getters-and-setters).
         'jaspr_sdk_docs_assets.',
       );
       final outDir = Directory.systemTemp.createTempSync('jaspr_sdk_docs.');
-      final headerFile = File(p.join(assetsDir.path, 'header.html'))
+      final assetsPath = p.normalize(assetsDir.absolute.path);
+      final outPath = p.normalize(outDir.absolute.path);
+      final headerFile = File(p.join(assetsPath, 'header.html'))
         ..writeAsStringSync('<div>header</div>');
-      final footerFile = File(p.join(assetsDir.path, 'footer.html'))
+      final footerFile = File(p.join(assetsPath, 'footer.html'))
         ..writeAsStringSync('<div>footer</div>');
-      final footerTextFile = File(p.join(assetsDir.path, 'footer_text.html'))
+      final footerTextFile = File(p.join(assetsPath, 'footer_text.html'))
         ..writeAsStringSync('<span>footer text</span>');
       addTearDown(() => assetsDir.deleteSync(recursive: true));
       addTearDown(() => outDir.deleteSync(recursive: true));
@@ -344,18 +346,18 @@ See [Section 6.2.2](#_6-2-2-getters-and-setters).
         '--footer-text',
         footerTextFile.path,
         '--output',
-        outDir.path,
+        outPath,
       ], pubPackageMetaProvider);
       final options = DartdocGeneratorBackendOptions.fromContext(context);
       final writer = DartdocFileWriter(
-        outDir.path,
+        outPath,
         pubPackageMetaProvider.resourceProvider,
       );
       final backend = JasprGeneratorBackend(
         options,
         writer,
         pubPackageMetaProvider.resourceProvider,
-        outputPath: outDir.path,
+        outputPath: outPath,
         packageName: 'Dart',
         sdkDocs: true,
       );
@@ -371,7 +373,7 @@ See [Section 6.2.2](#_6-2-2-getters-and-setters).
       backend.generatePackage(packageGraph, packageGraph.defaultPackage);
 
       bool exists(String relativePath) => pubPackageMetaProvider.resourceProvider
-          .getResource(p.join(outDir.path, relativePath))
+          .getResource(p.normalize(p.join(outPath, relativePath)))
           .exists;
 
       expect(exists('pubspec.yaml'), isTrue);
