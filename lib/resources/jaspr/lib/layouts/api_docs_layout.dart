@@ -3,6 +3,8 @@ import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_content/jaspr_content.dart';
 import 'package:jaspr_content/theme.dart';
 
+import '../components/docs_dartpad_runtime.dart';
+import '../components/dartdoc_modern_footer.dart';
 import '../components/docs_header.dart';
 import '../components/docs_nav_link.dart';
 import '../components/docs_page_actions_runtime.dart';
@@ -148,18 +150,15 @@ class ApiDocsLayout extends DocsLayout {
     // highlight.js CDN
     yield link(
       id: 'hljs-theme',
-      href:
-          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css',
+      href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css',
       rel: 'stylesheet',
     );
     yield script(
-      src:
-          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js',
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js',
       defer: true,
     );
     yield script(
-      src:
-          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/dart.min.js',
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/dart.min.js',
       defer: true,
     );
     yield script(content: _hljsInitScript);
@@ -206,11 +205,16 @@ class ApiDocsLayout extends DocsLayout {
             (pageImage?.isNotEmpty ?? false));
 
     return Component.fragment([
-      Document.head(children: [Style(styles: _styles)]),
+      Document.head(
+        children: [
+          Style(styles: _styles),
+        ],
+      ),
       div(
         classes: 'docs',
         attributes: {'data-docs-layout': 'docs'},
         [
+          const DocsDartPadRuntime(),
           const DocsPageActionsRuntime(),
           if (headerComponent case final Component header)
             div(
@@ -243,8 +247,9 @@ class ApiDocsLayout extends DocsLayout {
                         img(src: pageImage, alt: pageImageAlt),
                     ]),
                   child,
-                  if (this.footer != null)
-                    div(classes: 'content-footer', [this.footer!]),
+                  div(classes: 'content-footer', [
+                    this.footer ?? const DartdocModernFooter(),
+                  ]),
                 ]),
                 if (page.data['toc'] case final TableOfContents toc
                     when _hasVisibleTocEntries(toc.entries))
@@ -812,7 +817,6 @@ class ApiDocsLayout extends DocsLayout {
         overflow: Overflow.hidden,
         backgroundColor: Color('var(--docs-shell-surface-soft)'),
       ),
-      css('.dartpad-idle').styles(display: Display.block),
       css('.dartpad-preview pre').styles(
         margin: Margin.zero,
         padding: Padding.all(1.rem),
@@ -879,69 +883,21 @@ class ApiDocsLayout extends DocsLayout {
       css(
         '.dartpad-run .dartpad-btn-icon, .dartpad-copy .dartpad-btn-icon',
       ).styles(color: Color('var(--docs-shell-accent-strong)')),
-      css(
-        '.dartpad-active',
-      ).styles(display: Display.flex, flexDirection: FlexDirection.column),
-      css('.dartpad-active-toolbar').styles(
-        display: Display.flex,
-        alignItems: AlignItems.center,
-        justifyContent: JustifyContent.spaceBetween,
-        gap: Gap.column(0.5.rem),
-        padding: Padding.all(0.65.rem),
-        backgroundColor: Color('var(--docs-shell-surface)'),
-        border: Border.only(
-          bottom: BorderSide(
-            width: 1.px,
-            color: Color('var(--docs-shell-border)'),
-          ),
+      css('.dartpad-open').styles(
+        backgroundColor: Color('var(--docs-shell-surface-elevated)'),
+        color: ContentColors.text,
+        border: Border.all(
+          width: 1.px,
+          color: Color('var(--docs-shell-border-strong)'),
         ),
       ),
-      css('.dartpad-label').styles(
-        fontWeight: FontWeight.w700,
-        fontSize: 0.88.rem,
-        color: ContentColors.text,
-      ),
-      css('.dartpad-iframe-container').styles(position: Position.relative()),
-      css('.dartpad-stage').styles(
-        backgroundColor: Color('var(--docs-shell-dartpad-stage)'),
-        minHeight: 25.rem,
-      ),
+      css(
+        '.dartpad-stage',
+      ).styles(backgroundColor: Color('var(--docs-shell-dartpad-stage)')),
       css('.dartpad-iframe').styles(
         width: 100.percent,
         border: Border.unset,
         display: Display.block,
-      ),
-      css('.dartpad-loader').styles(
-        position: Position.absolute(
-          top: Unit.zero,
-          right: Unit.zero,
-          bottom: Unit.zero,
-          left: Unit.zero,
-        ),
-        display: Display.flex,
-        flexDirection: FlexDirection.column,
-        alignItems: AlignItems.center,
-        justifyContent: JustifyContent.center,
-        gap: Gap.row(0.75.rem),
-        backgroundColor: Color('var(--docs-shell-surface)'),
-        raw: {'z-index': '1'},
-      ),
-      css('.dartpad-spinner').styles(
-        width: 1.75.rem,
-        height: 1.75.rem,
-        radius: BorderRadius.circular(999.px),
-        border: Border.all(
-          width: 3.px,
-          color: Color('var(--docs-shell-border)'),
-        ),
-        raw: {
-          'border-top-color': 'var(--docs-shell-accent)',
-          'animation': 'dartpad-spin 0.8s linear infinite',
-        },
-      ),
-      css('.dartpad-loader-text').styles(
-        fontSize: 0.86.rem,
-        color: Color('var(--docs-shell-text-muted)'),
       ),
     ]),
     css('.mermaid-diagram', [
@@ -1031,7 +987,9 @@ class ApiDocsLayout extends DocsLayout {
         raw: {'overflow': 'visible'},
       ),
       css('main').styles(width: 100.percent, raw: {'overflow': 'visible'}),
-      css('.main-container main').styles(padding: Padding.only(top: Unit.zero)),
+      css('.main-container main').styles(
+        padding: Padding.only(top: Unit.zero),
+      ),
       css('main > div').styles(
         display: Display.grid,
         raw: {
@@ -1719,9 +1677,9 @@ class ApiDocsLayout extends DocsLayout {
       fontStyle: FontStyle.italic,
     ),
     // Dark mode: boost plain text contrast in code blocks.
-    css(
-      '[data-theme="dark"] .content pre code.hljs',
-    ).styles(raw: {'color': '#d4d4d8'}),
+    css('[data-theme="dark"] .content pre code.hljs').styles(
+      raw: {'color': '#d4d4d8'},
+    ),
     css(
       '.content pre .hljs-keyword, .content pre .hljs-selector-tag, .content pre .hljs-meta, .content pre .hljs-subst',
     ).styles(
@@ -1779,7 +1737,7 @@ class ApiDocsLayout extends DocsLayout {
         color: Color('var(--docs-shell-shadow)'),
       ),
       raw: {
-        'white-space': 'normal',
+        'white-space': 'pre-wrap',
         'overflow-wrap': 'break-word',
         'font-family': 'var(--content-code-font)',
         'font-size': '0.92rem',
@@ -1790,20 +1748,7 @@ class ApiDocsLayout extends DocsLayout {
     ),
     css(
       '.content .member-signature .member-signature-line',
-    ).styles(display: Display.block, raw: {'font-size': '0'}),
-    css(
-      '.content .member-signature .member-signature-token, '
-      '.content .member-signature .member-signature-space',
-    ).styles(
-      raw: {
-        'font-family': 'inherit',
-        'font-size': '0.92rem',
-        'line-height': '1.08',
-      },
-    ),
-    css(
-      '.content .member-signature .member-signature-space',
-    ).styles(raw: {'white-space': 'pre'}),
+    ).styles(display: Display.block),
     css('.content .member-signature a').styles(
       fontWeight: FontWeight.w400,
       textDecoration: TextDecoration.none,
@@ -1864,6 +1809,9 @@ class ApiDocsLayout extends DocsLayout {
       ),
     ),
     css('.dartpad-btn:hover').styles(raw: {'transform': 'translateY(-1px)'}),
+    css(
+      '.dartpad-open:hover',
+    ).styles(backgroundColor: Color('var(--docs-shell-surface-soft)')),
     css('.mermaid-diagram').styles(
       padding: Padding.all(1.rem),
       border: Border.all(width: 1.px, color: Color('var(--docs-shell-border)')),
@@ -1876,9 +1824,6 @@ class ApiDocsLayout extends DocsLayout {
         color: Color('var(--docs-shell-shadow)'),
       ),
     ),
-    css.keyframes('dartpad-spin', {
-      'to': const Styles(raw: {'transform': 'rotate(360deg)'}),
-    }),
     css(
       '.mermaid-diagram[data-mermaid-state="rendered"] .mermaid-host',
     ).styles(display: Display.block, raw: {'opacity': '1'}),
@@ -1921,7 +1866,6 @@ class ApiDocsLayout extends DocsLayout {
     css(
       '.content h2[id], .content h3[id], .content h4[id], .content h5[id], .content h6[id]',
     ).styles(raw: {'scroll-margin-top': 'var(--docs-shell-anchor-offset)'}),
-    css('[hidden]').styles(raw: {'display': 'none !important'}),
     downMobile([
       css(
         '.content p, .content li',

@@ -16,6 +16,7 @@ import 'components/docs_search.dart';
 import 'components/docs_sidebar.dart';
 import 'components/docs_theme_toggle.dart';
 import 'components/dart_pad.dart';
+import 'components/dartdoc_modern_footer.dart';
 import 'docs_base.dart';
 import 'project_version_routes.dart';
 import 'components/mermaid_diagram.dart';
@@ -68,6 +69,7 @@ Component buildDocsApp({
     layouts: [
       ApiDocsLayout(
         packageName: packageName,
+        footer: const DartdocModernFooter(),
         header: DocsHeader(
           title: packageName,
           logo: withDocsBasePath('/favicon.svg'),
@@ -107,6 +109,7 @@ Component buildDocsApp({
         hasGuideLinks: hasGuideLinks,
         jasprDocsUrl: isProjectDocs ? projectJasprDocsUrl : null,
         vitePressDocsUrl: isProjectDocs ? projectVitePressDocsUrl : null,
+        footer: const DartdocModernFooter(),
         header: DocsHeader(
           title: packageName,
           logo: withDocsBasePath('/favicon.svg'),

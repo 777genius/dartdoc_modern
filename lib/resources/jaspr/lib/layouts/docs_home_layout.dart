@@ -2,6 +2,7 @@ import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_content/jaspr_content.dart';
 
+import '../components/dartdoc_modern_footer.dart';
 import '../components/docs_header.dart';
 import '../components/docs_home_hero.dart';
 import 'docs_header_shell_styles.dart';
@@ -245,8 +246,9 @@ class DocsHomeLayout extends PageLayoutBase {
                   section(classes: 'docs-home-content-panel', [
                     div(classes: 'docs-home-markdown content', [child]),
                   ]),
-                  if (footer case final footer?)
-                    div(classes: 'docs-home-footer', [footer]),
+                  div(classes: 'docs-home-footer', [
+                    footer ?? const DartdocModernFooter(),
+                  ]),
                 ]),
               ]),
             ]),
