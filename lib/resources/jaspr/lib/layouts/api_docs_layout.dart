@@ -148,15 +148,18 @@ class ApiDocsLayout extends DocsLayout {
     // highlight.js CDN
     yield link(
       id: 'hljs-theme',
-      href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css',
+      href:
+          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css',
       rel: 'stylesheet',
     );
     yield script(
-      src: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js',
+      src:
+          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js',
       defer: true,
     );
     yield script(
-      src: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/dart.min.js',
+      src:
+          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/dart.min.js',
       defer: true,
     );
     yield script(content: _hljsInitScript);
@@ -203,11 +206,7 @@ class ApiDocsLayout extends DocsLayout {
             (pageImage?.isNotEmpty ?? false));
 
     return Component.fragment([
-      Document.head(
-        children: [
-          Style(styles: _styles),
-        ],
-      ),
+      Document.head(children: [Style(styles: _styles)]),
       div(
         classes: 'docs',
         attributes: {'data-docs-layout': 'docs'},
@@ -880,10 +879,9 @@ class ApiDocsLayout extends DocsLayout {
       css(
         '.dartpad-run .dartpad-btn-icon, .dartpad-copy .dartpad-btn-icon',
       ).styles(color: Color('var(--docs-shell-accent-strong)')),
-      css('.dartpad-active').styles(
-        display: Display.flex,
-        flexDirection: FlexDirection.column,
-      ),
+      css(
+        '.dartpad-active',
+      ).styles(display: Display.flex, flexDirection: FlexDirection.column),
       css('.dartpad-active-toolbar').styles(
         display: Display.flex,
         alignItems: AlignItems.center,
@@ -903,12 +901,8 @@ class ApiDocsLayout extends DocsLayout {
         fontSize: 0.88.rem,
         color: ContentColors.text,
       ),
-      css('.dartpad-iframe-container').styles(
-        position: Position.relative(),
-      ),
-      css(
-        '.dartpad-stage',
-      ).styles(
+      css('.dartpad-iframe-container').styles(position: Position.relative()),
+      css('.dartpad-stage').styles(
         backgroundColor: Color('var(--docs-shell-dartpad-stage)'),
         minHeight: 25.rem,
       ),
@@ -1037,9 +1031,7 @@ class ApiDocsLayout extends DocsLayout {
         raw: {'overflow': 'visible'},
       ),
       css('main').styles(width: 100.percent, raw: {'overflow': 'visible'}),
-      css('.main-container main').styles(
-        padding: Padding.only(top: Unit.zero),
-      ),
+      css('.main-container main').styles(padding: Padding.only(top: Unit.zero)),
       css('main > div').styles(
         display: Display.grid,
         raw: {
@@ -1727,9 +1719,9 @@ class ApiDocsLayout extends DocsLayout {
       fontStyle: FontStyle.italic,
     ),
     // Dark mode: boost plain text contrast in code blocks.
-    css('[data-theme="dark"] .content pre code.hljs').styles(
-      raw: {'color': '#d4d4d8'},
-    ),
+    css(
+      '[data-theme="dark"] .content pre code.hljs',
+    ).styles(raw: {'color': '#d4d4d8'}),
     css(
       '.content pre .hljs-keyword, .content pre .hljs-selector-tag, .content pre .hljs-meta, .content pre .hljs-subst',
     ).styles(
@@ -1787,7 +1779,7 @@ class ApiDocsLayout extends DocsLayout {
         color: Color('var(--docs-shell-shadow)'),
       ),
       raw: {
-        'white-space': 'pre-wrap',
+        'white-space': 'normal',
         'overflow-wrap': 'break-word',
         'font-family': 'var(--content-code-font)',
         'font-size': '0.92rem',
@@ -1798,7 +1790,20 @@ class ApiDocsLayout extends DocsLayout {
     ),
     css(
       '.content .member-signature .member-signature-line',
-    ).styles(display: Display.block),
+    ).styles(display: Display.block, raw: {'font-size': '0'}),
+    css(
+      '.content .member-signature .member-signature-token, '
+      '.content .member-signature .member-signature-space',
+    ).styles(
+      raw: {
+        'font-family': 'inherit',
+        'font-size': '0.92rem',
+        'line-height': '1.08',
+      },
+    ),
+    css(
+      '.content .member-signature .member-signature-space',
+    ).styles(raw: {'white-space': 'pre'}),
     css('.content .member-signature a').styles(
       fontWeight: FontWeight.w400,
       textDecoration: TextDecoration.none,

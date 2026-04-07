@@ -42,7 +42,7 @@ const _apiStylesCss = '''
   border-radius: 8px;
   padding: 5px 14px;
   overflow-x: auto;
-  white-space: pre-wrap;
+  white-space: normal;
   overflow-wrap: break-word;
   margin: 0;
   font-family: var(--vp-font-family-mono);
@@ -52,6 +52,16 @@ const _apiStylesCss = '''
 }
 .member-signature .member-signature-line {
   display: block;
+  font-size: 0;
+}
+.member-signature .member-signature-token,
+.member-signature .member-signature-space {
+  font-family: inherit;
+  font-size: var(--vp-code-font-size);
+  line-height: 1.08;
+}
+.member-signature .member-signature-space {
+  white-space: pre;
 }
 .dark .member-signature .member-signature-code {
   color: #E1E4E8;

@@ -48,7 +48,7 @@ const _apiStylesCss = '''
   border-radius: 10px;
   padding: 4px 12px;
   overflow-x: auto;
-  white-space: pre-wrap;
+  white-space: normal;
   overflow-wrap: break-word;
   margin: 0;
   font-family: var(--content-code-font);
@@ -58,6 +58,16 @@ const _apiStylesCss = '''
 }
 .member-signature .member-signature-line {
   display: block;
+  font-size: 0;
+}
+.member-signature .member-signature-token,
+.member-signature .member-signature-space {
+  font-family: inherit;
+  font-size: 0.92rem;
+  line-height: 1.08;
+}
+.member-signature .member-signature-space {
+  white-space: pre;
 }
 /* Shiki-matched syntax highlighting for member signatures.
    Colors from --shiki-light / --shiki-dark CSS variables. */

@@ -186,9 +186,11 @@ String _normalizeSignatureLine(String line) {
   var previousText = '';
   for (final part in parts) {
     if (_shouldInsertSignatureSpace(previousText, part.text)) {
-      normalized.write(' ');
+      normalized.write('<span class="member-signature-space"> </span>');
     }
-    normalized.write(part.html);
+    normalized.write(
+      '<span class="member-signature-token">${part.html}</span>',
+    );
     previousText = part.text;
   }
   return normalized.toString();
@@ -196,6 +198,14 @@ String _normalizeSignatureLine(String line) {
 
 bool _shouldInsertSignatureSpace(String previousText, String nextText) {
   if (previousText.isEmpty || nextText.isEmpty) return false;
+
+  if (nextText == '<') {
+    return previousText == 'operator';
+  }
+
+  if (nextText.startsWith('<') || nextText.startsWith('?')) {
+    return false;
+  }
 
   if (previousText == '.' || previousText == '?.' || previousText == '..') {
     return false;
@@ -347,12 +357,10 @@ class _MarkdownPageBuilder {
   /// Writes a member signature as raw HTML with clickable type links.
   void writeSignature(String htmlSignature) {
     final normalizedSignature = _normalizeSignatureHtml(htmlSignature);
-    final renderedSignature = normalizedSignature.contains('\n')
-        ? normalizedSignature
-              .split('\n')
-              .map((line) => '<span class="member-signature-line">$line</span>')
-              .join()
-        : normalizedSignature;
+    final renderedSignature = normalizedSignature
+        .split('\n')
+        .map((line) => '<span class="member-signature-line">$line</span>')
+        .join();
     _buffer.writeln(
       '<div class="member-signature"><div class="member-signature-code" data-signature-normalized="true">$renderedSignature</div></div>',
     );

@@ -1439,6 +1439,48 @@ void main() {
         expect(content, contains('href="/api/fake/Cool" class="type-link"'));
       });
 
+      test('Jaspr API signatures keep generic type arguments attached', () {
+        final content = _readOutput(outDir, 'content/api/ex/FancyList.md');
+        expect(
+          content,
+          contains(
+            '<span class="member-signature-token"><span class="fn">FancyList</span></span><span class="member-signature-token">&lt;Z&gt;</span>',
+          ),
+        );
+        expect(
+          content,
+          contains(
+            '<span class="member-signature-token"><span class="type">List</span></span><span class="member-signature-token">&lt;</span><span class="member-signature-token"><span class="type">Z</span></span><span class="member-signature-token">&gt;</span>',
+          ),
+        );
+        expect(
+          content,
+          isNot(
+            contains(
+              'member-signature-space"> </span><span class="member-signature-token">&lt;',
+            ),
+          ),
+        );
+      });
+
+      test('Jaspr nullable generic signatures keep the ? attached', () {
+        final content = _readOutput(outDir, 'content/api/fake/HasGenerics.md');
+        expect(
+          content,
+          contains(
+            '<span class="member-signature-token"><span class="type">Map</span></span><span class="member-signature-token">&lt;</span><span class="member-signature-token"><span class="type">X</span></span><span class="member-signature-token">,</span><span class="member-signature-space"> </span><span class="member-signature-token"><span class="type">Y</span></span><span class="member-signature-token">&gt;?</span><span class="member-signature-space"> </span><span class="member-signature-token"><span class="fn">convertToMap</span></span><span class="member-signature-token">()</span>',
+          ),
+        );
+        expect(
+          content,
+          isNot(
+            contains(
+              '&gt;</span><span class="member-signature-space"> </span>',
+            ),
+          ),
+        );
+      });
+
       test('members stay inline and no member subdirectory is created', () {
         expect(_dirExists(outDir, 'content/api/ex/Apple'), isFalse);
       });

@@ -772,6 +772,48 @@ void main() {
         expect(content, contains('<span class="kw">on</span>'));
       });
 
+      test('generic signatures do not add spaces before type arguments', () {
+        var content = _readOutput(outDir, 'api/ex/FancyList.md');
+        expect(
+          content,
+          contains(
+            '<span class="member-signature-token"><span class="fn">FancyList</span></span><span class="member-signature-token">&lt;Z&gt;</span>',
+          ),
+        );
+        expect(
+          content,
+          contains(
+            '<span class="member-signature-token"><span class="type">List</span></span><span class="member-signature-token">&lt;</span><span class="member-signature-token"><span class="type">Z</span></span><span class="member-signature-token">&gt;</span>',
+          ),
+        );
+        expect(
+          content,
+          isNot(
+            contains(
+              'member-signature-space"> </span><span class="member-signature-token">&lt;',
+            ),
+          ),
+        );
+      });
+
+      test('nullable generic signatures keep the ? attached', () {
+        var content = _readOutput(outDir, 'api/fake/HasGenerics.md');
+        expect(
+          content,
+          contains(
+            '<span class="member-signature-token"><span class="type">Map</span></span><span class="member-signature-token">&lt;</span><span class="member-signature-token"><span class="type">X</span></span><span class="member-signature-token">,</span><span class="member-signature-space"> </span><span class="member-signature-token"><span class="type">Y</span></span><span class="member-signature-token">&gt;?</span><span class="member-signature-space"> </span><span class="member-signature-token"><span class="fn">convertToMap</span></span><span class="member-signature-token">()</span>',
+          ),
+        );
+        expect(
+          content,
+          isNot(
+            contains(
+              '&gt;</span><span class="member-signature-space"> </span>',
+            ),
+          ),
+        );
+      });
+
       test('extension with static methods has Static Methods section', () {
         var content = _readOutput(outDir, 'api/ex/FancyList.md');
         expect(content, contains('## Static Methods'));
@@ -1259,10 +1301,25 @@ void main() {
         var content = _readOutput(outDir, 'api/fake/paintImage1.md');
         expect(content, contains('member-signature'));
         expect(content, contains('member-signature-line'));
-        expect(content, contains('<span class="member-signature-line">  '));
+        expect(
+          content,
+          contains(
+            '</span><span class="member-signature-line"><span class="member-signature-token">',
+          ),
+        );
         // Each param on its own line with 2-space indent and trailing comma
-        expect(content, contains('>canvas</span>,'));
-        expect(content, contains('>rect</span>,'));
+        expect(
+          content,
+          contains(
+            '><span class="param">canvas</span></span><span class="member-signature-token">,</span>',
+          ),
+        );
+        expect(
+          content,
+          contains(
+            '><span class="param">rect</span></span><span class="member-signature-token">,</span>',
+          ),
+        );
       });
 
       test('long optional-positional signature uses tall style', () {
