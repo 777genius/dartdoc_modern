@@ -47,7 +47,7 @@ jobs:
         if: matrix.job == 'flutter'
         env:
           # Increment version to invalidate bad/obsolete caches.
-          cache-name: cache-grinder-flutter-v1
+          cache-name: cache-grinder-flutter-v2
         with:
           path: ~/.dartdoc_grinder
           key: ${{ runner.os }}-test-${{ env.cache-name }}-${{ steps.date.outputs.today }}

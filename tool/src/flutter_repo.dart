@@ -27,52 +27,84 @@ class FlutterRepo {
 
   Future<void> init() async {
     Directory(repoPath).createSync(recursive: true);
-    await launcher.runStreamed(
-        'git', ['clone', 'https://github.com/flutter/flutter.git', '.'],
-        workingDirectory: repoPath);
-    await launcher.runStreamed(
-      flutterCmd,
-      ['--version'],
-      workingDirectory: repoPath,
-    );
-    await launcher.runStreamed(
-      flutterCmd,
-      ['update-packages'],
-      workingDirectory: repoPath,
-    );
+    await launcher.runStreamed('git', [
+      'clone',
+      'https://github.com/flutter/flutter.git',
+      '.',
+    ], workingDirectory: repoPath);
+    await launcher.runStreamed(flutterCmd, [
+      '--version',
+    ], workingDirectory: repoPath);
+    await launcher.runStreamed(flutterCmd, [
+      'update-packages',
+    ], workingDirectory: repoPath);
   }
 
-  factory FlutterRepo.fromPath(String flutterPath, Map<String, String> env,
-      [String? label]) {
-    var cacheDart =
-        path.join(flutterPath, 'bin', 'cache', 'dart-sdk', 'bin', 'dart');
+  factory FlutterRepo.fromPath(
+    String flutterPath,
+    Map<String, String> env, [
+    String? label,
+  ]) {
+    var cacheDart = path.join(
+      flutterPath,
+      'bin',
+      'cache',
+      'dart-sdk',
+      'bin',
+      'dart',
+    );
     var flutterBinPath = path.join(path.canonicalize(flutterPath), 'bin');
     var existingPathVariable = env['PATH'] ?? Platform.environment['PATH'];
     env['PATH'] = '$flutterBinPath:$existingPathVariable';
     env['FLUTTER_ROOT'] = flutterPath;
-    var launcher =
-        SubprocessLauncher('flutter${label == null ? "" : "-$label"}', env);
+    var launcher = SubprocessLauncher(
+      'flutter${label == null ? "" : "-$label"}',
+      env,
+    );
     return FlutterRepo._(flutterPath, env, cacheDart, launcher);
   }
 
   /// Copies an existing, initialized flutter repo to [flutterPath].
   static Future<FlutterRepo> copyFromExistingFlutterRepo(
-      FlutterRepo originalRepo, String flutterPath, Map<String, String> env,
-      [String? label]) async {
+    FlutterRepo originalRepo,
+    String flutterPath,
+    Map<String, String> env, [
+    String? label,
+  ]) async {
     io_utils.copy(Directory(originalRepo.repoPath), Directory(flutterPath));
     return FlutterRepo.fromPath(flutterPath, env, label);
   }
 
   /// Doesn't actually copy the existing repo; use for read-only operations
   /// only.
-  static Future<FlutterRepo> fromExistingFlutterRepo(FlutterRepo originalRepo,
-      [String? label]) async {
+  static Future<FlutterRepo> fromExistingFlutterRepo(
+    FlutterRepo originalRepo, [
+    String? label,
+  ]) async {
     return FlutterRepo.fromPath(originalRepo.repoPath, {}, label);
   }
 }
 
-Directory cleanFlutterDir = Directory(path.join(
-    path.context.resolveTildePath('~/.dartdoc_grinder'), 'cleanFlutter'));
+Directory cleanFlutterDir = Directory(
+  path.join(
+    path.context.resolveTildePath('~/.dartdoc_grinder'),
+    'cleanFlutter',
+  ),
+);
+
+bool _isUsableFlutterRepo(Directory repoDir) {
+  bool hasPath(List<String> segments, {required bool directory}) {
+    final target = path.joinAll([repoDir.path, ...segments]);
+    return directory
+        ? Directory(target).existsSync()
+        : File(target).existsSync();
+  }
+
+  return hasPath(['.git'], directory: true) &&
+      hasPath(['bin', 'flutter'], directory: false) &&
+      hasPath(['dev', 'tools', 'create_api_docs.dart'], directory: false) &&
+      hasPath(['dev', 'snippets', 'bin', 'snippets.dart'], directory: false);
+}
 
 /// Global so that the lock is retained for the life of the process.
 Future<void>? _lockFuture;
@@ -96,9 +128,9 @@ Future<FlutterRepo> get cleanFlutterRepo async {
   // Figure out where the repository is supposed to be and lock updates for it.
   await cleanFlutterDir.parent.create(recursive: true);
   assert(_lockFuture == null);
-  _lockFuture = File(path.join(cleanFlutterDir.parent.path, 'lock'))
-      .openSync(mode: FileMode.write)
-      .lock();
+  _lockFuture = File(
+    path.join(cleanFlutterDir.parent.path, 'lock'),
+  ).openSync(mode: FileMode.write).lock();
   await _lockFuture;
   var lastSynced = File(path.join(cleanFlutterDir.parent.path, 'lastSynced'));
   var newRepo = FlutterRepo.fromPath(cleanFlutterDir.path, {}, 'clean');
@@ -107,9 +139,11 @@ Future<FlutterRepo> get cleanFlutterRepo async {
   DateTime? lastSyncedTime;
   if (lastSynced.existsSync()) {
     lastSyncedTime = DateTime.fromMillisecondsSinceEpoch(
-        int.parse(lastSynced.readAsStringSync()));
+      int.parse(lastSynced.readAsStringSync()),
+    );
   }
-  if (lastSyncedTime == null ||
+  if (!_isUsableFlutterRepo(cleanFlutterDir) ||
+      lastSyncedTime == null ||
       DateTime.now().difference(lastSyncedTime) > Duration(hours: 24)) {
     // Rebuild the repository.
     if (cleanFlutterDir.existsSync()) {
@@ -117,8 +151,9 @@ Future<FlutterRepo> get cleanFlutterRepo async {
     }
     cleanFlutterDir.createSync(recursive: true);
     await newRepo.init();
-    await lastSynced
-        .writeAsString(DateTime.now().millisecondsSinceEpoch.toString());
+    await lastSynced.writeAsString(
+      DateTime.now().millisecondsSinceEpoch.toString(),
+    );
   }
   repoCompleter.complete(newRepo);
   _cleanFlutterRepo = repoCompleter;

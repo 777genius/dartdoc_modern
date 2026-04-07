@@ -1061,7 +1061,9 @@ void main() {
         );
         expect(
           content,
-          contains("css('[hidden]').styles(raw: {'display': 'none !important'})"),
+          contains(
+            "css('[hidden]').styles(raw: {'display': 'none !important'})",
+          ),
         );
         expect(
           dartPadRuntime,
@@ -1075,8 +1077,8 @@ void main() {
         expect(dartPadRuntimeWeb, contains('navigator.clipboard'));
         expect(dartPadRuntimeWeb, contains("target.closest('.dartpad-close')"));
         expect(dartPadRuntimeWeb, contains("label.textContent = 'Copied'"));
-        expect(dartPadRuntimeWeb, contains("_setLoading(root, true)"));
-        expect(dartPadRuntimeWeb, contains("_closeDartPad(root)"));
+        expect(dartPadRuntimeWeb, contains('_setLoading(root, true)'));
+        expect(dartPadRuntimeWeb, contains('_closeDartPad(root)'));
         expect(
           dartPadRuntimeWeb,
           contains("root.getAttribute('data-active') == 'true'"),
