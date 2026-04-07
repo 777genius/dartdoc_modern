@@ -108,6 +108,26 @@ bool _hasWarning(DartdocResults results, PackageWarning warning) {
   );
 }
 
+String _extractMemberSignatureBlock(String content, String marker) {
+  final markerIndex = content.indexOf(marker);
+  expect(markerIndex, isNonNegative, reason: 'Expected marker: $marker');
+  final signatureStart = content.indexOf(
+    '<div class="member-signature">',
+    markerIndex,
+  );
+  expect(signatureStart, isNonNegative, reason: 'Expected member signature');
+  final signatureEnd = content.indexOf('</div></div>', signatureStart);
+  expect(signatureEnd, isNonNegative, reason: 'Expected signature closing tag');
+  return content.substring(signatureStart, signatureEnd + '</div></div>'.length);
+}
+
+int _countMatches(String content, Pattern pattern) {
+  if (pattern is RegExp) {
+    return pattern.allMatches(content).length;
+  }
+  return RegExp(RegExp.escape(pattern.toString())).allMatches(content).length;
+}
+
 void main() {
   group('VitePress generator e2e', () {
     setUpAll(() async {
@@ -181,7 +201,9 @@ void main() {
         );
         expect(content, contains('.member-signature'));
         expect(content, contains('.kw'));
-        expect(content, contains('pre-wrap'));
+        expect(content, contains('white-space: normal;'));
+        expect(content, contains('.member-signature-line'));
+        expect(content, contains('white-space: pre;'));
         expect(content, contains('a.api-link'));
       });
 
@@ -833,11 +855,9 @@ void main() {
         () {
           var content = _readOutput(outDir, 'api/ex/genericFunction.md');
           expect(content, contains(r'# genericFunction\<T\>'));
-          // Signature uses HTML with fn span: genericFunction&lt;T&gt;(T arg)
-          expect(
-            content,
-            contains('<span class="fn">genericFunction&lt;T&gt;</span>('),
-          );
+          expect(content, contains('<span class="fn">genericFunction&lt;T&gt;</span>'));
+          expect(content, contains('<span class="type">T</span>'));
+          expect(content, contains('data-signature-normalized="true"'));
           expect(content, contains('member-signature'));
         },
       );
@@ -1288,12 +1308,13 @@ void main() {
       test('short signature stays single-line', () {
         // Apple.fromString(String s) — well under 80 chars
         var content = _readOutput(outDir, 'api/ex/Apple.md');
-        var sigMatch = RegExp(
-          r'Apple\.fromString[^<]*</span>\([^)]*\)',
-        ).firstMatch(content);
-        expect(sigMatch, isNotNull);
-        // Should NOT contain newlines inside the signature parentheses
-        expect(sigMatch!.group(0), isNot(contains('\n')));
+        final signature = _extractMemberSignatureBlock(
+          content,
+          '### Apple.fromString()',
+        );
+        expect(_countMatches(signature, '<span class="member-signature-line">'), 1);
+        expect(signature, contains('<span class="fn">Apple.fromString</span>'));
+        expect(signature, contains('<span class="param">s</span>'));
       });
 
       test('long named-param signature uses tall style', () {
@@ -1326,9 +1347,18 @@ void main() {
         // topLevelFunction(int param1, bool param2, Cool coolBeans,
         //     [double optionalPositional = 0.0]) — over 80 chars
         var content = _readOutput(outDir, 'api/fake/topLevelFunction.md');
-        expect(content, contains('member-signature-line'));
+        final signature = _extractMemberSignatureBlock(
+          content,
+          '# <Badge type="warning" text="deprecated" /> ~~topLevelFunction~~',
+        );
+        expect(_countMatches(signature, '<span class="member-signature-line">'), greaterThan(1));
         // Should have trailing commas on parameter lines
-        expect(content, contains('>param1</span>,'));
+        expect(
+          signature,
+          contains(
+            '<span class="param">param1</span></span><span class="member-signature-token">,</span>',
+          ),
+        );
       });
 
       test('short mixed-param signature stays single-line', () {

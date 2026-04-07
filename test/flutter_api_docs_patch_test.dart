@@ -21,9 +21,15 @@ void _sanityCheckDocs([Platform platform = const LocalPlatform()]) {
   print('checking');
 }
 
+void checkForUnresolvedDirectives(Directory dartDocDir) {
+  print(dartDocDir);
+}
+
 /// A subset of all generated doc files for [_sanityCheckDocs].
 Future<void> generateDartdoc() async {
     _sanityCheckDocs();
+    checkForUnresolvedDirectives(publishRoot.childDirectory('flutter'));
+    _createIndexAndCleanup();
 }
 ''';
 
@@ -40,8 +46,19 @@ Future<void> generateDartdoc() async {
     expect(
       patched,
       contains(
+        "// checkForUnresolvedDirectives(publishRoot.childDirectory('flutter'));",
+      ),
+    );
+    expect(patched, contains('// _createIndexAndCleanup();'));
+    expect(
+      patched,
+      contains(
         'void _sanityCheckDocs([Platform platform = const LocalPlatform()]) {',
       ),
+    );
+    expect(
+      patched,
+      contains('void checkForUnresolvedDirectives(Directory dartDocDir) {'),
     );
     expect(
       patched,
@@ -54,6 +71,14 @@ Future<void> generateDartdoc() async {
       isNot(
         contains(
           'void // _sanityCheckDocs([Platform platform = const LocalPlatform()]) {',
+        ),
+      ),
+    );
+    expect(
+      patched,
+      isNot(
+        contains(
+          'void // checkForUnresolvedDirectives(Directory dartDocDir) {',
         ),
       ),
     );

@@ -22,6 +22,20 @@ String patchFlutterApiDocsRunnerSource(String contents) {
         '    // _sanityCheckDocs();',
     description: 'sanity check invocation',
   );
+  patched = _replaceRequired(
+    patched,
+    "    checkForUnresolvedDirectives(publishRoot.childDirectory('flutter'));",
+    '    // Disabled for dartdoc_modern: this checker expects upstream HTML.\n'
+        "    // checkForUnresolvedDirectives(publishRoot.childDirectory('flutter'));",
+    description: 'unresolved directives check invocation',
+  );
+  patched = _replaceRequired(
+    patched,
+    '    _createIndexAndCleanup();',
+    '    // Disabled for dartdoc_modern: this post-processing expects HTML output.\n'
+        '    // _createIndexAndCleanup();',
+    description: 'index and cleanup invocation',
+  );
   return patched;
 }
 

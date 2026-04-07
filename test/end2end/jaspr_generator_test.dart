@@ -1175,7 +1175,9 @@ void main() {
         expect(content, contains("classes: 'toc-link'"));
         expect(content, contains('yield* children;'));
         expect(content, contains('..._buildCollapsibleToc(entry, baseUrl)'));
-        expect(content, contains("'white-space': 'pre-wrap'"));
+        expect(content, contains("'white-space': 'normal'"));
+        expect(content, contains("'white-space': 'pre'"));
+        expect(content, contains('.member-signature-line'));
         expect(
           content,
           contains("'border-left': '1px solid var(--docs-shell-border)'"),
