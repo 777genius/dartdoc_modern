@@ -144,7 +144,7 @@ class ApiDocsLayout extends DocsLayout {
   Iterable<Component> buildHead(Page page) sync* {
     yield* super.buildHead(page);
     yield Style(styles: _styles);
-    yield script(src: 'docs_mermaid_runtime.js?v=5', defer: true);
+    yield script(src: 'docs_mermaid_runtime.js?v=6', defer: true);
     yield script(src: 'docs_lightbox_runtime.js?v=3', defer: true);
     // highlight.js CDN
     yield link(

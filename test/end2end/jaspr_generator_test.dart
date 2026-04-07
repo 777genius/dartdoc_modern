@@ -1119,7 +1119,7 @@ void main() {
         );
         expect(
           mermaidRuntimeHelper,
-          contains("addEventListener('docs:navigation'"),
+          contains("window.addEventListener('docs:navigation'"),
         );
         expect(
           mermaidDiagram,
