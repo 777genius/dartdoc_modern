@@ -16,26 +16,81 @@ void copy(FileSystemEntity entity, Directory destinationDir) {
 }
 
 void _copyImpl(FileSystemEntity? entity, Directory destDir) {
-  if (entity is Directory) {
-    for (final entity in entity.listSync()) {
-      final name = fileName(entity);
-
-      if (entity is File) {
-        _copyImpl(entity, destDir);
-      } else {
-        _copyImpl(entity, joinDir(destDir, [name]));
+  final type = FileSystemEntity.typeSync(
+    entity?.path ?? '',
+    followLinks: false,
+  );
+  switch (type) {
+    case FileSystemEntityType.directory:
+      final directory = Directory(entity!.path);
+      for (final child in directory.listSync(followLinks: false)) {
+        final name = fileName(child);
+        final childType = FileSystemEntity.typeSync(
+          child.path,
+          followLinks: false,
+        );
+        if (childType == FileSystemEntityType.directory) {
+          _copyImpl(child, joinDir(destDir, [name]));
+        } else {
+          _copyImpl(child, destDir);
+        }
       }
-    }
-  } else if (entity is File) {
-    final destFile = joinFile(destDir, [fileName(entity)]);
+      return;
+    case FileSystemEntityType.file:
+      final file = File(entity!.path);
+      final destFile = joinFile(destDir, [fileName(file)]);
 
-    if (!destFile.existsSync() ||
-        entity.lastModifiedSync() != destFile.lastModifiedSync()) {
+      if (!destFile.existsSync() ||
+          file.lastModifiedSync() != destFile.lastModifiedSync()) {
+        destDir.createSync(recursive: true);
+        file.copySync(destFile.path);
+        _copyMetadata(file, destFile.path);
+      }
+      return;
+    case FileSystemEntityType.link:
+      final link = Link(entity!.path);
+      final destLink = Link(joinFile(destDir, [fileName(link)]).path);
       destDir.createSync(recursive: true);
-      entity.copySync(destFile.path);
-    }
-  } else {
-    throw StateError('unexpected type: ${entity.runtimeType}');
+      if (destLink.existsSync()) {
+        destLink.deleteSync();
+      }
+      if (Platform.isWindows) {
+        _copyImpl(
+          FileSystemEntity.typeSync(link.path) == FileSystemEntityType.directory
+              ? Directory(link.resolveSymbolicLinksSync())
+              : File(link.resolveSymbolicLinksSync()),
+          destDir,
+        );
+      } else {
+        destLink.createSync(link.targetSync());
+      }
+      return;
+    case FileSystemEntityType.notFound:
+      throw StateError('unexpected type: ${entity.runtimeType}');
+    case FileSystemEntityType.pipe:
+    case FileSystemEntityType.unixDomainSock:
+      throw StateError('unsupported filesystem entity type: $type');
+  }
+}
+
+void _copyMetadata(File source, String destinationPath) {
+  final destination = File(destinationPath);
+  destination.setLastModifiedSync(source.lastModifiedSync());
+  if (Platform.isWindows) return;
+  final sourceMode = source.statSync().mode & 0x1FF;
+  final destinationMode = destination.statSync().mode & 0x1FF;
+  if (sourceMode == destinationMode) {
+    return;
+  }
+  final modeString = sourceMode.toRadixString(8).padLeft(3, '0');
+  final result = Process.runSync('chmod', [modeString, destination.path]);
+  if (result.exitCode != 0) {
+    throw ProcessException(
+      'chmod',
+      [modeString, destination.path],
+      result.stderr?.toString() ?? '',
+      result.exitCode,
+    );
   }
 }
 
