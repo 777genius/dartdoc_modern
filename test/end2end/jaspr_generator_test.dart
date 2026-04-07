@@ -1066,9 +1066,10 @@ void main() {
         expect(
           content,
           contains(
-            "css('[hidden]').styles(raw: {'display': 'none !important'})",
+            '.mermaid-placeholder[hidden], .mermaid-host[hidden], .mermaid-fallback[hidden]',
           ),
         );
+        expect(content, contains("'display': 'none !important'"));
         expect(
           dartPadRuntime,
           contains("export 'docs_dartpad_runtime_stub.dart'"),
@@ -1181,8 +1182,8 @@ void main() {
         expect(content, contains("classes: 'toc-link'"));
         expect(content, contains('yield* children;'));
         expect(content, contains('..._buildCollapsibleToc(entry, baseUrl)'));
-        expect(content, contains("'white-space': 'normal'"));
-        expect(content, contains("'white-space': 'pre'"));
+        expect(content, contains("'white-space': 'pre-wrap'"));
+        expect(content, contains("'overflow-wrap': 'break-word'"));
         expect(content, contains('.member-signature-line'));
         expect(
           content,
