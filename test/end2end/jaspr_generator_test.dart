@@ -232,6 +232,10 @@ void main() {
           isTrue,
         );
         expect(
+          _outputExists(outDir, 'lib/components/dartdoc_modern_footer.dart'),
+          isTrue,
+        );
+        expect(
           _outputExists(outDir, 'lib/components/docs_theme_toggle.dart'),
           isTrue,
         );

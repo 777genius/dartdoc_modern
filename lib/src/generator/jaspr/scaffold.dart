@@ -241,6 +241,16 @@ class JasprInitGenerator {
     );
     _writeTemplateIfAbsent(
       templateDir: templateDir,
+      templateFile: p.join(
+        'lib',
+        'components',
+        'dartdoc_modern_footer.dart',
+      ),
+      outputFile: 'lib/components/dartdoc_modern_footer.dart',
+      placeholders: placeholders,
+    );
+    _writeTemplateIfAbsent(
+      templateDir: templateDir,
       templateFile: p.join('lib', 'components', 'docs_theme_toggle.dart'),
       outputFile: 'lib/components/docs_theme_toggle.dart',
       placeholders: placeholders,
