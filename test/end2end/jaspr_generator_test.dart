@@ -1401,6 +1401,7 @@ void main() {
         final content = _readOutput(outDir, 'content/api/ex/Apple.md');
         expect(content, contains('# Apple'));
         expect(content, contains('member-signature'));
+        expect(content, contains('data-signature-normalized="true"'));
         expect(content, isNot(contains('<ApiBreadcrumb')));
         expect(content, isNot(contains('[[toc]]')));
       });

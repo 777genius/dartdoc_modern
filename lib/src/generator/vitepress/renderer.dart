@@ -19,6 +19,8 @@ import 'package:dartdoc_modern/src/generator/vitepress/paths.dart';
 import 'package:dartdoc_modern/src/model/attribute.dart' show Attribute;
 import 'package:dartdoc_modern/src/model/container_modifiers.dart';
 import 'package:dartdoc_modern/src/model/model.dart';
+import 'package:html/dom.dart' as html;
+import 'package:html/parser.dart' show parseFragment;
 import 'package:meta/meta.dart';
 
 export 'package:dartdoc_modern/src/generator/vitepress/paths.dart'
@@ -149,7 +151,67 @@ String _normalizeSignatureHtml(String html) {
   while (lines.isNotEmpty && lines.last.trim().isEmpty) {
     lines.removeLast();
   }
-  return lines.where((line) => line.trim().isNotEmpty).join('\n');
+  return lines
+      .where((line) => line.trim().isNotEmpty)
+      .map(_normalizeSignatureLine)
+      .join('\n');
+}
+
+String _normalizeSignatureLine(String line) {
+  final fragment = parseFragment(line);
+  final parts = <({String html, String text})>[];
+
+  for (final node in fragment.nodes) {
+    if (node is html.Text) {
+      final text = node.text.replaceAll(RegExp(r'\s+'), ' ').trim();
+      if (text.isNotEmpty) {
+        parts.add((html: _htmlEsc(text), text: text));
+      }
+      continue;
+    }
+
+    if (node is html.Element) {
+      final text = node.text.replaceAll(RegExp(r'\s+'), ' ').trim();
+      if (text.isNotEmpty) {
+        parts.add((html: node.outerHtml, text: text));
+      }
+    }
+  }
+
+  if (parts.isEmpty) {
+    return '';
+  }
+
+  final normalized = StringBuffer();
+  var previousText = '';
+  for (final part in parts) {
+    if (_shouldInsertSignatureSpace(previousText, part.text)) {
+      normalized.write(' ');
+    }
+    normalized.write(part.html);
+    previousText = part.text;
+  }
+  return normalized.toString();
+}
+
+bool _shouldInsertSignatureSpace(String previousText, String nextText) {
+  if (previousText.isEmpty || nextText.isEmpty) return false;
+
+  if (previousText == '.' || previousText == '?.' || previousText == '..') {
+    return false;
+  }
+
+  if (nextText.startsWith('(') ||
+      nextText.startsWith('[') ||
+      RegExp(r'^[,.;:)\]}>]').hasMatch(nextText)) {
+    return false;
+  }
+
+  if (RegExp(r'^(?:\(|\[|\{|<)$').hasMatch(previousText)) {
+    return false;
+  }
+
+  return true;
 }
 
 /// Escapes characters that are special in YAML double-quoted string values.
@@ -292,7 +354,7 @@ class _MarkdownPageBuilder {
               .join()
         : normalizedSignature;
     _buffer.writeln(
-      '<div class="member-signature"><div class="member-signature-code">$renderedSignature</div></div>',
+      '<div class="member-signature"><div class="member-signature-code" data-signature-normalized="true">$renderedSignature</div></div>',
     );
     _buffer.writeln();
   }
@@ -3084,8 +3146,10 @@ String _stripLeadingH1(String text, String expectedTitle) {
     // Also strip leading badge lines (e.g. shields.io) that commonly
     // follow the package H1 in READMEs. These are redundant on API pages.
     result = result.replaceAll(
-      RegExp(r'^\[!\[[^\]]*\]\(https://img\.shields\.io/[^)]*\)\]\([^)]*\)\s*',
-          multiLine: true),
+      RegExp(
+        r'^\[!\[[^\]]*\]\(https://img\.shields\.io/[^)]*\)\]\([^)]*\)\s*',
+        multiLine: true,
+      ),
       '',
     );
     return result.trimLeft();
