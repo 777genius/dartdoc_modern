@@ -24,25 +24,39 @@ import '../src/utils.dart';
 
 final _testPackageGraphGinormousMemo = AsyncMemoizer<PackageGraph>();
 Future<PackageGraph> get _testPackageGraphGinormous =>
-    _testPackageGraphGinormousMemo.runOnce(() => utils.bootBasicPackage(
-          'testing/test_package',
-          pubPackageMetaProvider,
-          excludeLibraries: ['css', 'code_in_commnets', 'excluded'],
-          additionalArguments: [
-            '--auto-include-dependencies',
-            '--no-link-to-remote'
-          ],
-        ));
+    _testPackageGraphGinormousMemo.runOnce(
+      () => utils.bootBasicPackage(
+        'testing/test_package',
+        pubPackageMetaProvider,
+        excludeLibraries: ['css', 'code_in_commnets', 'excluded'],
+        additionalArguments: [
+          '--auto-include-dependencies',
+          '--no-link-to-remote',
+        ],
+      ),
+    );
 
 final _testPackageGraphSdkMemo = AsyncMemoizer<PackageGraph>();
 Future<PackageGraph> get _testPackageGraphSdk =>
     _testPackageGraphSdkMemo.runOnce(_bootSdkPackage);
 
+final _testPackageGraphSdkDocsMemo = AsyncMemoizer<PackageGraph>();
+Future<PackageGraph> get _testPackageGraphSdkDocs =>
+    _testPackageGraphSdkDocsMemo.runOnce(_bootSdkDocsPackage);
+
 Future<PackageGraph> _bootSdkPackage() async {
   return PubPackageBuilder(
-    await utils.contextFromArgv(
-        ['--input', pubPackageMetaProvider.defaultSdkDir.path],
-        pubPackageMetaProvider),
+    await utils.contextFromArgv([
+      '--input',
+      pubPackageMetaProvider.defaultSdkDir.path,
+    ], pubPackageMetaProvider),
+    pubPackageMetaProvider,
+  ).buildPackageGraph();
+}
+
+Future<PackageGraph> _bootSdkDocsPackage() async {
+  return PubPackageBuilder(
+    await utils.contextFromArgv(['--sdk-docs'], pubPackageMetaProvider),
     pubPackageMetaProvider,
   ).buildPackageGraph();
 }
@@ -60,9 +74,9 @@ void main() {
     late final Constructor Anew, Bnew, Cnew, Dnew, Enew, Fnew;
 
     setUpAll(() async {
-      constructorTearoffs = (await _testPackageGraphGinormous)
-          .libraries
-          .named('constructor_tearoffs');
+      constructorTearoffs = (await _testPackageGraphGinormous).libraries.named(
+        'constructor_tearoffs',
+      );
       A = constructorTearoffs.classes.named('A');
       B = constructorTearoffs.classes.named('B');
       C = constructorTearoffs.classes.named('C');
@@ -107,70 +121,119 @@ void main() {
     });
 
     test('reference regression', () {
-      expect(referenceLookup(constructorTearoffs, 'A()'),
-          equals(MatchingLinkResult(Anew)));
-      expect(referenceLookup(constructorTearoffs, 'B()'),
-          equals(MatchingLinkResult(Bnew)));
-      expect(referenceLookup(constructorTearoffs, 'C()'),
-          equals(MatchingLinkResult(Cnew)));
-      expect(referenceLookup(constructorTearoffs, 'D()'),
-          equals(MatchingLinkResult(Dnew)));
-      expect(referenceLookup(constructorTearoffs, 'E()'),
-          equals(MatchingLinkResult(Enew)));
-      expect(referenceLookup(constructorTearoffs, 'F()'),
-          equals(MatchingLinkResult(Fnew)));
+      expect(
+        referenceLookup(constructorTearoffs, 'A()'),
+        equals(MatchingLinkResult(Anew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'B()'),
+        equals(MatchingLinkResult(Bnew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'C()'),
+        equals(MatchingLinkResult(Cnew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'D()'),
+        equals(MatchingLinkResult(Dnew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'E()'),
+        equals(MatchingLinkResult(Enew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'F()'),
+        equals(MatchingLinkResult(Fnew)),
+      );
     });
 
     test('.new works on classes', () {
-      expect(referenceLookup(constructorTearoffs, 'A.new'),
-          equals(MatchingLinkResult(Anew)));
-      expect(referenceLookup(constructorTearoffs, 'B.new'),
-          equals(MatchingLinkResult(Bnew)));
-      expect(referenceLookup(constructorTearoffs, 'C.new'),
-          equals(MatchingLinkResult(Cnew)));
-      expect(referenceLookup(constructorTearoffs, 'D.new'),
-          equals(MatchingLinkResult(Dnew)));
-      expect(referenceLookup(constructorTearoffs, 'E.new'),
-          equals(MatchingLinkResult(Enew)));
-      expect(referenceLookup(constructorTearoffs, 'F.new'),
-          equals(MatchingLinkResult(Fnew)));
+      expect(
+        referenceLookup(constructorTearoffs, 'A.new'),
+        equals(MatchingLinkResult(Anew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'B.new'),
+        equals(MatchingLinkResult(Bnew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'C.new'),
+        equals(MatchingLinkResult(Cnew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'D.new'),
+        equals(MatchingLinkResult(Dnew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'E.new'),
+        equals(MatchingLinkResult(Enew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'F.new'),
+        equals(MatchingLinkResult(Fnew)),
+      );
     });
 
     test('.new works on typedefs', () {
-      expect(referenceLookup(constructorTearoffs, 'At.new'),
-          equals(MatchingLinkResult(Anew)));
-      expect(referenceLookup(constructorTearoffs, 'Bt.new'),
-          equals(MatchingLinkResult(Bnew)));
-      expect(referenceLookup(constructorTearoffs, 'Ct.new'),
-          equals(MatchingLinkResult(Cnew)));
-      expect(referenceLookup(constructorTearoffs, 'Dt.new'),
-          equals(MatchingLinkResult(Dnew)));
-      expect(referenceLookup(constructorTearoffs, 'Et.new'),
-          equals(MatchingLinkResult(Enew)));
-      expect(referenceLookup(constructorTearoffs, 'Fstring.new'),
-          equals(MatchingLinkResult(Fnew)));
-      expect(referenceLookup(constructorTearoffs, 'Ft.new'),
-          equals(MatchingLinkResult(Fnew)));
+      expect(
+        referenceLookup(constructorTearoffs, 'At.new'),
+        equals(MatchingLinkResult(Anew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'Bt.new'),
+        equals(MatchingLinkResult(Bnew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'Ct.new'),
+        equals(MatchingLinkResult(Cnew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'Dt.new'),
+        equals(MatchingLinkResult(Dnew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'Et.new'),
+        equals(MatchingLinkResult(Enew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'Fstring.new'),
+        equals(MatchingLinkResult(Fnew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'Ft.new'),
+        equals(MatchingLinkResult(Fnew)),
+      );
     });
 
     test('we can use (ignored) type parameters in references', () {
-      expect(referenceLookup(E, 'D<String>.new'),
-          equals(MatchingLinkResult(Dnew)));
-      expect(referenceLookup(constructorTearoffs, 'F<T>.new'),
-          equals(MatchingLinkResult(Fnew)));
       expect(
-          referenceLookup(
-              constructorTearoffs, 'F<InvalidThings, DoNotMatterHere>.new'),
-          equals(MatchingLinkResult(Fnew)));
+        referenceLookup(E, 'D<String>.new'),
+        equals(MatchingLinkResult(Dnew)),
+      );
+      expect(
+        referenceLookup(constructorTearoffs, 'F<T>.new'),
+        equals(MatchingLinkResult(Fnew)),
+      );
+      expect(
+        referenceLookup(
+          constructorTearoffs,
+          'F<InvalidThings, DoNotMatterHere>.new',
+        ),
+        equals(MatchingLinkResult(Fnew)),
+      );
     });
 
     test('negative tests', () {
       // Mixins do not have constructors.
-      expect(referenceLookup(constructorTearoffs, 'M.new'),
-          equals(MatchingLinkResult(null)));
+      expect(
+        referenceLookup(constructorTearoffs, 'M.new'),
+        equals(MatchingLinkResult(null)),
+      );
       // These things aren't expressions, parentheses are still illegal.
-      expect(referenceLookup(constructorTearoffs, '(C).new'),
-          equals(MatchingLinkResult(null)));
+      expect(
+        referenceLookup(constructorTearoffs, '(C).new'),
+        equals(MatchingLinkResult(null)),
+      );
 
       // A bare new will still not work to reference constructors.
       // TODO(jcollins-g): reconsider this if we remove "new" as a hint.
@@ -199,8 +262,9 @@ void main() {
       classWithHtml = exLibrary.classes.named('SanitizableHtml');
       blockHtml = classWithHtml.instanceMethods.named('blockHtml');
       inlineHtml = classWithHtml.instanceMethods.named('inlineHtml');
-      for (var modelElement in packageGraph.localPublicLibraries
-          .expand((l) => l.allModelElements)) {
+      for (var modelElement in packageGraph.localPublicLibraries.expand(
+        (l) => l.allModelElements,
+      )) {
         // Accessing this getter triggers documentation-processing.
         modelElement.documentation;
       }
@@ -230,8 +294,10 @@ void main() {
     });
 
     test('will add rel=ugc for outgoing links', () {
-      expect(inlineHtml.documentationAsHtml,
-          contains('<a href="https://example.com" rel="ugc">'));
+      expect(
+        inlineHtml.documentationAsHtml,
+        contains('<a href="https://example.com" rel="ugc">'),
+      );
     });
 
     test('removes bad inline HTML', () {
@@ -253,57 +319,83 @@ void main() {
 
     setUpAll(() async {
       injectionPackageGraph = await utils.bootBasicPackage(
-          'testing/test_package', pubPackageMetaProvider,
-          excludeLibraries: ['css', 'code_in_comments', 'excluded'],
-          additionalArguments: ['--inject-html']);
+        'testing/test_package',
+        pubPackageMetaProvider,
+        excludeLibraries: ['css', 'code_in_comments', 'excluded'],
+        additionalArguments: ['--inject-html'],
+      );
 
       injectionExLibrary = injectionPackageGraph.libraries.named('ex');
 
       htmlInjection = injectionExLibrary.classes.named('HtmlInjection');
-      injectSimpleHtml =
-          htmlInjection.instanceMethods.named('injectSimpleHtml');
-      injectHtmlFromTool =
-          htmlInjection.instanceMethods.named('injectHtmlFromTool');
-      for (var modelElement in injectionPackageGraph.localPublicLibraries
-          .expand((l) => l.allModelElements)) {
+      injectSimpleHtml = htmlInjection.instanceMethods.named(
+        'injectSimpleHtml',
+      );
+      injectHtmlFromTool = htmlInjection.instanceMethods.named(
+        'injectHtmlFromTool',
+      );
+      for (var modelElement
+          in injectionPackageGraph.localPublicLibraries.expand(
+            (l) => l.allModelElements,
+          )) {
         // Accessing this getter triggers documentation-processing.
         modelElement.documentation;
       }
     });
 
     test('can inject HTML', () {
-      expect(injectSimpleHtml.documentationAsHtml,
-          contains('   <div style="opacity: 0.5;">[HtmlInjection]</div>'));
+      expect(
+        injectSimpleHtml.documentationAsHtml,
+        contains('   <div style="opacity: 0.5;">[HtmlInjection]</div>'),
+      );
     });
 
     test('can inject HTML from tool', () {
       var envLine = RegExp(r'^Env: \{', multiLine: true);
-      expect(envLine.allMatches(injectHtmlFromTool.documentation), hasLength(2),
-          reason:
-              '"${injectHtmlFromTool.documentation}" has wrong number of instances of "Env: {"');
+      expect(
+        envLine.allMatches(injectHtmlFromTool.documentation),
+        hasLength(2),
+        reason:
+            '"${injectHtmlFromTool.documentation}" has wrong number of instances of "Env: {"',
+      );
       var argLine = RegExp(r'^Args: \[', multiLine: true);
       expect(
-          argLine.allMatches(injectHtmlFromTool.documentation), hasLength(2));
+        argLine.allMatches(injectHtmlFromTool.documentation),
+        hasLength(2),
+      );
       expect(
-          injectHtmlFromTool.documentation,
-          contains(
-              'Invokes more than one tool in the same comment block, and injects HTML.'));
-      expect(injectHtmlFromTool.documentationAsHtml,
-          contains('<div class="title">Title</div>'));
-      expect(injectHtmlFromTool.documentationAsHtml,
-          isNot(contains('{@inject-html}')));
-      expect(injectHtmlFromTool.documentationAsHtml,
-          isNot(contains('{@end-inject-html}')));
+        injectHtmlFromTool.documentation,
+        contains(
+          'Invokes more than one tool in the same comment block, and injects HTML.',
+        ),
+      );
+      expect(
+        injectHtmlFromTool.documentationAsHtml,
+        contains('<div class="title">Title</div>'),
+      );
+      expect(
+        injectHtmlFromTool.documentationAsHtml,
+        isNot(contains('{@inject-html}')),
+      );
+      expect(
+        injectHtmlFromTool.documentationAsHtml,
+        isNot(contains('{@end-inject-html}')),
+      );
     });
     test('tool outputs a macro which outputs injected HTML', () {
-      var ToolPrintingMacroWhichInjectsHtml =
-          injectionExLibrary.classes.named('ToolPrintingMacroWhichInjectsHtml');
+      var ToolPrintingMacroWhichInjectsHtml = injectionExLibrary.classes.named(
+        'ToolPrintingMacroWhichInjectsHtml',
+      );
       var a = ToolPrintingMacroWhichInjectsHtml.instanceFields.named('a');
-      expect(a.documentationAsHtml,
-          contains('<p>Text.</p>\n<p><div class="title">Title</div></p>'));
+      expect(
+        a.documentationAsHtml,
+        contains('<p>Text.</p>\n<p><div class="title">Title</div></p>'),
+      );
       var b = ToolPrintingMacroWhichInjectsHtml.instanceFields.named('b');
-      expect(b.documentationAsHtml,
-          contains('<p>Text.</p>\n<p><div class="title">Title</div></p>'));
+      expect(
+        b.documentationAsHtml,
+        contains('<p>Text.</p>\n<p><div class="title">Title</div></p>'),
+      );
     });
   });
 
@@ -319,44 +411,49 @@ void main() {
     });
 
     test(
-        'Verify that autoIncludeDependencies makes everything document locally',
-        () {
-      expect(ginormousPackageGraph.packages.map((p) => p.documentedWhere),
-          everyElement((DocumentLocation x) => x == DocumentLocation.local));
-    });
+      'Verify that autoIncludeDependencies makes everything document locally',
+      () {
+        expect(
+          ginormousPackageGraph.packages.map((p) => p.documentedWhere),
+          everyElement((DocumentLocation x) => x == DocumentLocation.local),
+        );
+      },
+    );
 
     test(
-        'Verify that auto-included dependency package doc warnings are downgraded to warnings',
-        () {
-      final dependencyPackage = ginormousPackageGraph.localPackages.firstWhere(
-        (package) => package.isAutoIncludedDependencyPackage,
-      );
-      final undocumentedLibrary = dependencyPackage.libraries.firstWhere(
-        (library) => !library.hasDocumentation,
-      );
+      'Verify that auto-included dependency package doc warnings are downgraded to warnings',
+      () {
+        final dependencyPackage = ginormousPackageGraph.localPackages
+            .firstWhere((package) => package.isAutoIncludedDependencyPackage);
+        final undocumentedLibrary = dependencyPackage.libraries.firstWhere(
+          (library) => !library.hasDocumentation,
+        );
 
-      final warningCounter = ginormousPackageGraph.packageWarningCounter;
-      final errorCountBefore = warningCounter.errorCount;
-      final warningCountBefore = warningCounter.warningCount;
+        final warningCounter = ginormousPackageGraph.packageWarningCounter;
+        final errorCountBefore = warningCounter.errorCount;
+        final warningCountBefore = warningCounter.warningCount;
 
-      ginormousPackageGraph.warnOnElement(
-        undocumentedLibrary,
-        PackageWarning.noLibraryLevelDocs,
-      );
+        ginormousPackageGraph.warnOnElement(
+          undocumentedLibrary,
+          PackageWarning.noLibraryLevelDocs,
+        );
 
-      expect(warningCounter.errorCount, errorCountBefore);
-      expect(warningCounter.warningCount, warningCountBefore + 1);
-    });
+        expect(warningCounter.errorCount, errorCountBefore);
+        expect(warningCounter.warningCount, warningCountBefore + 1);
+      },
+    );
 
     test('Verify that ginormousPackageGraph takes in the SDK', () {
       expect(
-          ginormousPackageGraph.packages.firstWhere((p) => p.isSdk).libraries,
-          hasLength(greaterThan(1)));
+        ginormousPackageGraph.packages.firstWhere((p) => p.isSdk).libraries,
+        hasLength(greaterThan(1)),
+      );
       expect(
-          ginormousPackageGraph.packages
-              .firstWhere((p) => p.isSdk)
-              .documentedWhere,
-          equals(DocumentLocation.local));
+        ginormousPackageGraph.packages
+            .firstWhere((p) => p.isSdk)
+            .documentedWhere,
+        equals(DocumentLocation.local),
+      );
     });
   });
 
@@ -368,22 +465,25 @@ void main() {
     });
 
     test(
-        'Verify auto-included dependencies do not use default package category definitions',
-        () {
-      var IAmAClassWithCategories = ginormousPackageGraph.localPackages
-          .firstWhere((p) => p.name == 'test_package_imported')
-          .libraries
-          .wherePublic
-          .named('categoriesExported')
-          .classes
-          .wherePublic
-          .named('IAmAClassWithCategories');
-      expect(IAmAClassWithCategories.hasCategoryNames, isTrue);
-      expect(IAmAClassWithCategories.categories, hasLength(1));
-      expect(
-          IAmAClassWithCategories.categories.first.name, equals('Excellent'));
-      expect(IAmAClassWithCategories.displayedCategories, isEmpty);
-    });
+      'Verify auto-included dependencies do not use default package category definitions',
+      () {
+        var IAmAClassWithCategories = ginormousPackageGraph.localPackages
+            .firstWhere((p) => p.name == 'test_package_imported')
+            .libraries
+            .wherePublic
+            .named('categoriesExported')
+            .classes
+            .wherePublic
+            .named('IAmAClassWithCategories');
+        expect(IAmAClassWithCategories.hasCategoryNames, isTrue);
+        expect(IAmAClassWithCategories.categories, hasLength(1));
+        expect(
+          IAmAClassWithCategories.categories.first.name,
+          equals('Excellent'),
+        );
+        expect(IAmAClassWithCategories.displayedCategories, isEmpty);
+      },
+    );
 
     test('Verify that multiple categories work correctly', () {
       var fakeLibrary = ginormousPackageGraph.localPackages
@@ -391,17 +491,23 @@ void main() {
           .libraries
           .wherePublic
           .named('fake');
-      var BaseForDocComments =
-          fakeLibrary.classes.wherePublic.named('BaseForDocComments');
-      var SubForDocComments =
-          fakeLibrary.classes.wherePublic.named('SubForDocComments');
+      var BaseForDocComments = fakeLibrary.classes.wherePublic.named(
+        'BaseForDocComments',
+      );
+      var SubForDocComments = fakeLibrary.classes.wherePublic.named(
+        'SubForDocComments',
+      );
       expect(BaseForDocComments.hasCategoryNames, isTrue);
       // Display both, with the correct order and display name.
       expect(BaseForDocComments.displayedCategories, hasLength(2));
       expect(
-          BaseForDocComments.displayedCategories.first.name, equals('Superb'));
+        BaseForDocComments.displayedCategories.first.name,
+        equals('Superb'),
+      );
       expect(
-          BaseForDocComments.displayedCategories.last.name, equals('Unreal'));
+        BaseForDocComments.displayedCategories.last.name,
+        equals('Unreal'),
+      );
       // Subclasses do not inherit category information.
       expect(SubForDocComments.hasCategoryNames, isTrue);
       expect(SubForDocComments.categories, hasLength(1));
@@ -418,7 +524,9 @@ void main() {
         expect(c.exceptions.length, equals(c.exceptions.toSet().length));
         expect(c.extensions.length, equals(c.extensions.toSet().length));
         expect(
-            c.extensionTypes.length, equals(c.extensionTypes.toSet().length));
+          c.extensionTypes.length,
+          equals(c.extensionTypes.toSet().length),
+        );
         expect(c.enums.length, equals(c.enums.toSet().length));
         expect(c.mixins.length, equals(c.mixins.toSet().length));
         expect(c.constants.length, equals(c.constants.toSet().length));
@@ -431,25 +539,36 @@ void main() {
 
   group('Package', () {
     late final PackageGraph sdkAsPackageGraph;
+    late final PackageGraph sdkDocsPackageGraph;
 
     setUpAll(() async {
       sdkAsPackageGraph = await _testPackageGraphSdk;
+      sdkDocsPackageGraph = await _testPackageGraphSdkDocs;
     });
 
     // Analyzer's MockSdk's html library doesn't conform to the expectations
     // of this test.
     test('Verify Interceptor is hidden from inheritance in docs', () {
-      var htmlLibrary =
-          sdkAsPackageGraph.libraries.singleWhere((l) => l.name == 'dart:html');
-      var eventTarget =
-          htmlLibrary.classes.singleWhere((c) => c.name == 'EventTarget');
-      var hashCode = eventTarget.instanceFields.wherePublic
-          .singleWhere((f) => f.name == 'hashCode');
+      var htmlLibrary = sdkAsPackageGraph.libraries.singleWhere(
+        (l) => l.name == 'dart:html',
+      );
+      var eventTarget = htmlLibrary.classes.singleWhere(
+        (c) => c.name == 'EventTarget',
+      );
+      var hashCode = eventTarget.instanceFields.wherePublic.singleWhere(
+        (f) => f.name == 'hashCode',
+      );
       expect(
         eventTarget.superChain,
-        contains(isA<ParameterizedElementType>()
-            .having((t) => t.name, 'name', 'Interceptor')),
-        reason: 'EventTarget appears to no longer subtype Interceptor, which '
+        contains(
+          isA<ParameterizedElementType>().having(
+            (t) => t.name,
+            'name',
+            'Interceptor',
+          ),
+        ),
+        reason:
+            'EventTarget appears to no longer subtype Interceptor, which '
             'makes the premise of this test invalid. To keep the test case '
             'valid, we need to use a class that subclasses Interceptor.',
       );
@@ -462,9 +581,29 @@ void main() {
       );
       expect(hashCode.canonicalEnclosingContainer!.isDartCoreObject, isTrue);
       expect(
-          eventTarget.publicSuperChainReversed
-              .any((et) => et.name == 'Interceptor'),
-          isFalse);
+        eventTarget.publicSuperChainReversed.any(
+          (et) => et.name == 'Interceptor',
+        ),
+        isFalse,
+      );
     });
+
+    test(
+      'Verify that sdk docs downgrade no-library-level-docs to warnings',
+      () {
+        final sdkLibrary = sdkDocsPackageGraph.defaultPackage.libraries.first;
+        final warningCounter = sdkDocsPackageGraph.packageWarningCounter;
+        final errorCountBefore = warningCounter.errorCount;
+        final warningCountBefore = warningCounter.warningCount;
+
+        sdkDocsPackageGraph.warnOnElement(
+          sdkLibrary,
+          PackageWarning.noLibraryLevelDocs,
+        );
+
+        expect(warningCounter.errorCount, errorCountBefore);
+        expect(warningCounter.warningCount, warningCountBefore + 1);
+      },
+    );
   });
 }
