@@ -13,6 +13,7 @@ import 'package:dartdoc_modern/src/package_meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:sass/sass.dart' as sass;
 
+import 'src/flutter_api_docs_patch.dart';
 import 'src/flutter_repo.dart';
 import 'src/io_utils.dart' as io_utils;
 import 'src/subprocess_launcher.dart';
@@ -456,23 +457,7 @@ Future<void> _patchFlutterApiDocsRunner(String flutterPath) async {
     path.join(flutterPath, 'dev', 'tools', 'create_api_docs.dart'),
   );
   final contents = await createApiDocs.readAsString();
-
-  var patched = contents.replaceFirst(
-    r"r'^(?<name>dartdoc) (?<version>[^\s]+)'",
-    r"r'^(?<name>dartdoc(?:_vitepress)?) (?<version>[^\s]+)'",
-  );
-  patched = patched.replaceFirst("'dartdoc',", "'dartdoc_modern',");
-
-  // Disable the sanity check that expects HTML output files - dartdoc_modern
-  // generates jaspr format by default.
-  patched = patched.replaceAll('_sanityCheckDocs', '// _sanityCheckDocs');
-
-  if (patched == contents) {
-    throw StateError(
-      'Failed to patch Flutter API docs runner for dartdoc_modern.',
-    );
-  }
-
+  final patched = patchFlutterApiDocsRunnerSource(contents);
   await createApiDocs.writeAsString(patched);
 }
 
@@ -605,11 +590,7 @@ Future<String> docTestingPackage({bool withStats = false}) async {
   await launcher.runStreamedDartCommand(
     [
       '--enable-asserts',
-      path.join(
-        Directory.current.absolute.path,
-        'bin',
-        'dartdoc_modern.dart',
-      ),
+      path.join(Directory.current.absolute.path, 'bin', 'dartdoc_modern.dart'),
       '--output',
       outputPath,
       '--include-source',
@@ -1806,9 +1787,7 @@ Future<void> validateSdkDocs() async {
   }
   print("Found $libraryCount 'dart:' libraries");
 
-  var futureFile = File(
-    path.join(apiDir.path, 'dart-async', 'Future.md'),
-  );
+  var futureFile = File(path.join(apiDir.path, 'dart-async', 'Future.md'));
   if (!futureFile.existsSync()) {
     throw StateError('No Future.md found for dart:async Future class');
   }
