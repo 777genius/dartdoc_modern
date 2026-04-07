@@ -1,3 +1,14 @@
+## 1.1.5
+
+* Fix Jaspr `--sdk-docs` generation under Flutter SDK, including scaffold
+  output, SDK warning handling, and missing tool resolution when tools are
+  disabled.
+* Fix multiple Jaspr runtime regressions: DartPad activation on guide pages,
+  search close-on-navigation, Mermaid rerendering after SPA transitions, and
+  scroll preservation.
+* Stabilize generated member signature rendering and Jaspr scaffold/runtime
+  coverage across Linux, macOS, and Windows CI.
+
 ## 1.1.4
 
 * Change default output format from `html` to `jaspr`.
