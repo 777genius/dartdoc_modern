@@ -16,6 +16,10 @@ Live docs:
 - [Jaspr version](https://777genius.github.io/dartdoc_modern/jaspr/)
 - [VitePress version](https://777genius.github.io/dartdoc_modern/vitepress/)
 
+Projects using generated docs:
+- [flutter_headless](https://777genius.github.io/flutter_headless/)
+- [modularity_dart](https://cherrypick-agency.github.io/modularity_dart/)
+
 ## Why This Exists
 
 Default `dartdoc` HTML is useful, but many teams want a documentation site that feels more like a modern product docs experience:

@@ -14,13 +14,14 @@ import 'package:meta/meta.dart';
 abstract base class LibraryContainer implements Comparable<LibraryContainer> {
   final List<Library> libraries = [];
 
-  late final List<Library> publicLibrariesSorted =
-      libraries.wherePublic.sorted(byName);
+  late final List<Library> publicLibrariesSorted = libraries.wherePublic.sorted(
+    byName,
+  );
 
   bool get hasPublicLibraries => libraries.any((e) => e.isPublic);
 
   LibraryContainer({required this.isSdk, required String enclosingName})
-      : _enclosingName = enclosingName;
+    : _enclosingName = enclosingName;
 
   /// The name of the container or object that this LibraryContainer is a part
   /// of.
@@ -61,8 +62,10 @@ abstract base class LibraryContainer implements Comparable<LibraryContainer> {
   int compareTo(LibraryContainer other) {
     if (_group == other._group) {
       if (_group == -1) {
-        return Comparable.compare(containerOrder.indexOf(sortKey),
-            containerOrder.indexOf(other.sortKey));
+        return Comparable.compare(
+          containerOrder.indexOf(sortKey),
+          containerOrder.indexOf(other.sortKey),
+        );
       } else {
         return sortKey.toLowerCase().compareTo(other.sortKey.toLowerCase());
       }

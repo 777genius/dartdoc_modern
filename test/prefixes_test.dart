@@ -50,4 +50,19 @@ int x = 0;
     // There is no link, but also no wrong link or crash.
     expect(x.documentationAsHtml, '<p>Text <code>_</code>.</p>');
   }
+
+  void test_referenced_unresolvedImportedLibrary() async {
+    var library = await bootPackageWithLibrary(
+      '''
+import 'dart:ui' as ui;
+
+/// Text [ui].
+int x = 0;
+''',
+      additionalArguments: ['--link-to-remote'],
+    );
+    var x = library.properties.named('x');
+    // There is no link, but also no wrong link or crash.
+    expect(x.documentationAsHtml, '<p>Text <code>ui</code>.</p>');
+  }
 }

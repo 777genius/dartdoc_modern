@@ -9,17 +9,16 @@ class MermaidDiagramComponent extends CustomComponent {
 
   @override
   Component? create(Node node, NodesBuilder builder) {
-    if (node
-        case ElementNode(
-          tag: 'pre',
-          children: [
-            ElementNode(
-              tag: 'code',
-              attributes: final codeAttributes,
-              children: final children,
-            ),
-          ],
-        )) {
+    if (node case ElementNode(
+      tag: 'pre',
+      children: [
+        ElementNode(
+          tag: 'code',
+          attributes: final codeAttributes,
+          children: final children,
+        ),
+      ],
+    )) {
       if (codeAttributes['class'] != 'language-mermaid') return null;
 
       final source = children?.map((child) => child.innerText).join('') ?? '';
@@ -42,10 +41,9 @@ class MermaidDiagramComponent extends CustomComponent {
               },
               [
                 div(classes: 'mermaid-placeholder-inner', [
-                  span(
-                    classes: 'mermaid-placeholder-badge',
-                    [Component.text('Mermaid')],
-                  ),
+                  span(classes: 'mermaid-placeholder-badge', [
+                    Component.text('Mermaid'),
+                  ]),
                   span(classes: 'mermaid-placeholder-label', [
                     Component.text('Loading diagram preview'),
                   ]),
@@ -68,19 +66,15 @@ class MermaidDiagramComponent extends CustomComponent {
             ),
             div(
               classes: 'mermaid-fallback',
-              attributes: {
-                'data-mermaid-fallback': '',
-                'hidden': 'hidden',
-              },
+              attributes: {'data-mermaid-fallback': '', 'hidden': 'hidden'},
               [
                 div(
                   classes: 'mermaid-fallback-message',
-                  attributes: {
-                    'data-mermaid-fallback-message': '',
-                  },
+                  attributes: {'data-mermaid-fallback-message': ''},
                   [
                     Component.text(
-                        'Unable to render diagram. Showing Mermaid source instead.'),
+                      'Unable to render diagram. Showing Mermaid source instead.',
+                    ),
                   ],
                 ),
                 pre([

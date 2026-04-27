@@ -79,7 +79,8 @@ void _loadSidebar(
     if (fetchResponse.status != HttpStatus.ok) {
       final errorAnchor = HTMLAnchorElement()
         ..href = 'https://dart.dev/tools/dart-doc#troubleshoot'
-        ..text = 'Failed to load sidebar. '
+        ..text =
+            'Failed to load sidebar. '
             'Visit dart.dev for help troubleshooting.';
       sidebarElement.appendChild(errorAnchor);
       return;
@@ -97,8 +98,9 @@ void _loadSidebar(
 /// if "base href" is not being used.
 void _updateLinks(String baseHref, Node node) {
   if (node.isA<HTMLAnchorElement>()) {
-    final hrefValue =
-        (node as HTMLAnchorElement).attributes.getNamedItem('href')?.value;
+    final hrefValue = (node as HTMLAnchorElement).attributes
+        .getNamedItem('href')
+        ?.value;
     if (hrefValue == null) {
       return;
     }

@@ -131,9 +131,10 @@ class IndexItem {
     if (data['enclosedBy'] != null) {
       final map = data['enclosedBy'] as Map<String, dynamic>;
       enclosedBy = EnclosedBy._(
-          name: map['name'] as String,
-          kind: Kind.values[map['kind'] as int],
-          href: map['href'] as String);
+        name: map['name'] as String,
+        kind: Kind.values[map['kind'] as int],
+        href: map['href'] as String,
+      );
     }
 
     return IndexItem._(
@@ -153,37 +154,37 @@ class IndexItem {
   /// This is not the lexical scope of identifiers in Dart code, but similar in
   /// a very loose sense.
   int get _scope => switch (kind) {
-        // Library members.
-        Kind.class_ => 0,
-        Kind.enum_ => 0,
-        Kind.extension => 0,
-        Kind.extensionType => 0,
-        Kind.mixin => 0,
-        Kind.topLevelConstant => 0,
-        Kind.topLevelProperty => 0,
-        Kind.typedef => 0,
+    // Library members.
+    Kind.class_ => 0,
+    Kind.enum_ => 0,
+    Kind.extension => 0,
+    Kind.extensionType => 0,
+    Kind.mixin => 0,
+    Kind.topLevelConstant => 0,
+    Kind.topLevelProperty => 0,
+    Kind.typedef => 0,
 
-        // Container members.
-        Kind.accessor => 1,
-        Kind.constant => 1,
-        Kind.constructor => 1,
-        Kind.function => 1,
-        Kind.method => 1,
-        Kind.property => 1,
+    // Container members.
+    Kind.accessor => 1,
+    Kind.constant => 1,
+    Kind.constructor => 1,
+    Kind.function => 1,
+    Kind.method => 1,
+    Kind.property => 1,
 
-        // Root- and package-level items.
-        Kind.library => 2,
-        Kind.package => 2,
-        Kind.topic => 2,
+    // Root- and package-level items.
+    Kind.library => 2,
+    Kind.package => 2,
+    Kind.topic => 2,
 
-        // Others.
-        Kind.dynamic => 3,
-        Kind.never => 3,
-        Kind.parameter => 3,
-        Kind.prefix => 3,
-        Kind.sdk => 3,
-        Kind.typeParameter => 3,
-      };
+    // Others.
+    Kind.dynamic => 3,
+    Kind.never => 3,
+    Kind.parameter => 3,
+    Kind.prefix => 3,
+    Kind.sdk => 3,
+    Kind.typeParameter => 3,
+  };
 }
 
 class EnclosedBy {

@@ -6,10 +6,7 @@ class DocsSidebarToggleRuntime extends StatelessComponent {
 
   @override
   Component build(BuildContext context) => span(
-        attributes: {
-          'hidden': 'hidden',
-          'data-docs-sidebar-toggle-runtime': '',
-        },
-        const [],
-      );
+    attributes: {'hidden': 'hidden', 'data-docs-sidebar-toggle-runtime': ''},
+    const [],
+  );
 }

@@ -200,8 +200,7 @@ class _DocsNavigationRuntimeState extends State<DocsNavigationRuntime> {
       currentMain.replaceWith(nextMain);
 
       // Restore sidebar scroll position after the new DOM is in place.
-      final newSidebarScrollable =
-          web.document.querySelector('.sidebar > div');
+      final newSidebarScrollable = web.document.querySelector('.sidebar > div');
       if (newSidebarScrollable != null && sidebarScrollTop > 0) {
         newSidebarScrollable.scrollTop = sidebarScrollTop;
       }

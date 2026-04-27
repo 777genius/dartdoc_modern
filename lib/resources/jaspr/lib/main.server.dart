@@ -18,7 +18,8 @@ void main() {
       base: hasDocsBasePath ? '$docsBasePath/' : '/',
       head: [
         link(
-          href: '${withDocsBasePath('/generated/api_styles.css')}?v=$assetVersion',
+          href:
+              '${withDocsBasePath('/generated/api_styles.css')}?v=$assetVersion',
           rel: 'stylesheet',
         ),
         link(
@@ -27,16 +28,14 @@ void main() {
           attributes: {'type': 'image/svg+xml'},
         ),
       ],
-      body: div(
-        [
-          buildDocsApp(
-            packageName: '{{packageName}}',
-            themePreset: themePreset,
-            repositoryUrl: '{{repositoryUrl}}',
-            templateEngine: DocsTemplateEngine(),
-          ),
-        ],
-      ),
+      body: div([
+        buildDocsApp(
+          packageName: '{{packageName}}',
+          themePreset: themePreset,
+          repositoryUrl: '{{repositoryUrl}}',
+          templateEngine: DocsTemplateEngine(),
+        ),
+      ]),
     ),
   );
 }

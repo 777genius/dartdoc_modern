@@ -7,11 +7,11 @@ class DocsMermaidRuntime extends StatelessComponent {
 
   @override
   Component build(BuildContext context) => span(
-        attributes: {
-          'data-docs-mermaid-runtime': '',
-          'hidden': 'hidden',
-          'aria-hidden': 'true',
-        },
-        const [],
-      );
+    attributes: {
+      'data-docs-mermaid-runtime': '',
+      'hidden': 'hidden',
+      'aria-hidden': 'true',
+    },
+    const [],
+  );
 }

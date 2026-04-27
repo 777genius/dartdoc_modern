@@ -32,11 +32,11 @@ class Field extends ModelElement
     super.packageGraph,
     this.getter,
     this.setter,
-  )   : isInherited = false,
-        enclosingElement =
-            ModelElement.for_(element.enclosingElement, library, packageGraph)
-                as Container,
-        assert(getter != null || setter != null) {
+  ) : isInherited = false,
+      enclosingElement =
+          ModelElement.for_(element.enclosingElement, library, packageGraph)
+              as Container,
+      assert(getter != null || setter != null) {
     getter?.enclosingCombo = this;
     setter?.enclosingCombo = this;
   }
@@ -48,8 +48,8 @@ class Field extends ModelElement
     super.packageGraph,
     this.getter,
     this.setter,
-  )   : isInherited = false,
-        assert(getter != null || setter != null) {
+  ) : isInherited = false,
+      assert(getter != null || setter != null) {
     getter?.enclosingCombo = this;
     setter?.enclosingCombo = this;
   }
@@ -61,8 +61,8 @@ class Field extends ModelElement
     super.packageGraph,
     this.getter,
     this.setter,
-  )   : isInherited = true,
-        assert(getter != null || setter != null) {
+  ) : isInherited = true,
+      assert(getter != null || setter != null) {
     // Can't set `isInherited` to true if this is the defining element, because
     // that would mean it isn't inherited.
     assert(enclosingElement != definingEnclosingContainer);
@@ -72,8 +72,10 @@ class Field extends ModelElement
 
   @override
   String? get href {
-    assert(!identical(canonicalModelElement, this) ||
-        canonicalEnclosingContainer == enclosingElement);
+    assert(
+      !identical(canonicalModelElement, this) ||
+          canonicalEnclosingContainer == enclosingElement,
+    );
     return super.href;
   }
 
@@ -118,8 +120,10 @@ class Field extends ModelElement
     // Combo attributes can indicate 'inherited' and 'override' if either the
     // getter or setter has one of those properties, but that's not really
     // specific enough for [Field]s that have public getter/setters.
-    if ((getter, setter) case (var getter?, var setter?)
-        when getter.isPublic && setter.isPublic) {
+    if ((getter, setter) case (
+      var getter?,
+      var setter?,
+    ) when getter.isPublic && setter.isPublic) {
       if (getter.isInherited && setter.isInherited) {
         allAttributes.add(Attribute.inherited);
       } else {

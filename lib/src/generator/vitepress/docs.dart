@@ -33,8 +33,10 @@ final _htmlInjectPattern = RegExp(r'<dartdoc-html>([a-f0-9]+)</dartdoc-html>');
 /// Regular expression matching the `htmlBasePlaceholder` that may appear in
 /// documentation strings. This is dartdoc's internal placeholder for the
 /// HTML base path, which is irrelevant for VitePress output.
-final _htmlBasePlaceholder =
-    RegExp(r'%%__HTMLBASE_dartdoc_internal__%%', multiLine: true);
+final _htmlBasePlaceholder = RegExp(
+  r'%%__HTMLBASE_dartdoc_internal__%%',
+  multiLine: true,
+);
 
 /// Inline syntaxes used for parsing documentation markdown.
 ///
@@ -63,8 +65,10 @@ final List<md.BlockSyntax> _blockSyntaxes = [
 bool _rejectUnnamedAndShadowingConstructors(Referable? referable) {
   if (referable is Constructor) {
     if (referable.isUnnamedConstructor) return false;
-    if (referable.enclosingElement
-        .referenceChildren[referable.name.split('.').last] is! Constructor) {
+    if (referable.enclosingElement.referenceChildren[referable.name
+            .split('.')
+            .last]
+        is! Constructor) {
       return false;
     }
   }
@@ -82,15 +86,19 @@ bool _requireCallable(Referable? referable) =>
 /// annotated function directly. Uses the same comment reference parsing and
 /// lookup mechanism.
 MatchingLinkResult _resolveReference(
-    String referenceText, ModelElement element) {
+  String referenceText,
+  ModelElement element,
+) {
   var commentReference = ModelCommentReference(referenceText);
 
   var filter = commentReference.hasCallableHint
       ? _requireCallable
       : _rejectUnnamedAndShadowingConstructors;
 
-  var lookupResult =
-      element.referenceBy(commentReference.referenceBy, filter: filter);
+  var lookupResult = element.referenceBy(
+    commentReference.referenceBy,
+    filter: filter,
+  );
 
   var result = MatchingLinkResult(lookupResult);
   runtimeStats.totalReferences++;
@@ -135,8 +143,11 @@ class VitePressDocProcessor {
   /// [sanitizeHtml]. YouTube and DartPad hosts are always allowed.
   final Set<String> allowedIframeHosts;
 
-  VitePressDocProcessor(this.packageGraph, this.paths,
-      {this.allowedIframeHosts = const {}});
+  VitePressDocProcessor(
+    this.packageGraph,
+    this.paths, {
+    this.allowedIframeHosts = const {},
+  });
 
   // Pre-compiled pattern for extractOneLineDoc.
   static final _blankLine = RegExp(r'\n\s*\n');
@@ -146,8 +157,9 @@ class VitePressDocProcessor {
   /// These come from SDK source doc comments that contain explicit markdown
   /// links like `[text](dart-developer/foo.html)`. The pattern matches
   /// `[text](relative-path.html)` but NOT `[text](https://...)`.
-  static final _hardcodedHtmlLink =
-      RegExp(r'\[([^\]]+)\]\((?!https?://)([^)]+\.html)\)');
+  static final _hardcodedHtmlLink = RegExp(
+    r'\[([^\]]+)\]\((?!https?://)([^)]+\.html)\)',
+  );
 
   /// Matches Flutter platform-embedder paths (`/javadoc/...`,
   /// `/ios-embedder/...`) that should be absolute URLs on api.flutter.dev.
@@ -207,17 +219,14 @@ class VitePressDocProcessor {
     if (text == null || text.isEmpty) return '';
     var result = _preprocess(text);
     // Rewrite hardcoded relative .html links (same as in _resolveReferences).
-    result = result.replaceAllMapped(
-      _hardcodedHtmlLink,
-      (m) {
-        final linkText = m[1]!;
-        final path = _convertHtmlPathToVitePress(m[2]!);
-        // Empty path means the target has no generated page (e.g. private
-        // SDK libraries like dart._http). Render as inline code.
-        if (path.isEmpty) return '`$linkText`';
-        return '[$linkText]($path)';
-      },
-    );
+    result = result.replaceAllMapped(_hardcodedHtmlLink, (m) {
+      final linkText = m[1]!;
+      final path = _convertHtmlPathToVitePress(m[2]!);
+      // Empty path means the target has no generated page (e.g. private
+      // SDK libraries like dart._http). Render as inline code.
+      if (path.isEmpty) return '`$linkText`';
+      return '[$linkText]($path)';
+    });
     // Run through the markdown parser + renderer to escape angle brackets
     // in non-code contexts. Without this, raw documentation text containing
     // generic type parameters (e.g. `List<E>` in package READMEs or category
@@ -324,8 +333,10 @@ class VitePressDocProcessor {
   /// that were not processed into `<dartdoc-html>` placeholders (because
   /// the `--inject-html` flag was not enabled). The HTML content between the
   /// tags is preserved; only the directive markers are stripped.
-  static final _rawInjectHtmlDirective =
-      RegExp(r'\{@inject-html\s*\}(.*?)\{@end-inject-html\}', dotAll: true);
+  static final _rawInjectHtmlDirective = RegExp(
+    r'\{@inject-html\s*\}(.*?)\{@end-inject-html\}',
+    dotAll: true,
+  );
 
   /// Pattern matching `{@tool ...}...{@end-tool}` directive blocks.
   ///
@@ -333,8 +344,9 @@ class VitePressDocProcessor {
   /// When the tool infrastructure is not available (e.g. non-Flutter packages),
   /// these directives pass through unresolved. We strip them to avoid raw
   /// directive text in the output.
-  static final _toolDirective =
-      RegExp(r'[ ]*\{@tool\s+[^\}]*\}\n?[\s\S]*?\n?\{@end-tool\}[ ]*\n?');
+  static final _toolDirective = RegExp(
+    r'[ ]*\{@tool\s+[^\}]*\}\n?[\s\S]*?\n?\{@end-tool\}[ ]*\n?',
+  );
 
   /// Pre-processes raw documentation text before markdown parsing.
   ///
@@ -377,10 +389,7 @@ class VitePressDocProcessor {
     // directives with `<dartdoc-html>` placeholders, so they pass through
     // as raw text. Extract the HTML content between the tags and include
     // it as-is (the user intended it to be HTML output).
-    text = text.replaceAllMapped(
-      _rawInjectHtmlDirective,
-      (m) => m[1]!,
-    );
+    text = text.replaceAllMapped(_rawInjectHtmlDirective, (m) => m[1]!);
 
     return text;
   }
@@ -429,17 +438,14 @@ class VitePressDocProcessor {
     // SDK source code sometimes contains explicit markdown links like
     // `[text](dart-developer/extensionStreamHasListener.html)` that bypass
     // the bracket reference resolution. Convert these to VitePress paths.
-    rendered = rendered.replaceAllMapped(
-      _hardcodedHtmlLink,
-      (m) {
-        final linkText = m[1]!;
-        final path = _convertHtmlPathToVitePress(m[2]!);
-        // Empty path means the target has no generated page (e.g. private
-        // SDK libraries like dart._http). Render as inline code.
-        if (path.isEmpty) return '`$linkText`';
-        return '[$linkText]($path)';
-      },
-    );
+    rendered = rendered.replaceAllMapped(_hardcodedHtmlLink, (m) {
+      final linkText = m[1]!;
+      final path = _convertHtmlPathToVitePress(m[2]!);
+      // Empty path means the target has no generated page (e.g. private
+      // SDK libraries like dart._http). Render as inline code.
+      if (path.isEmpty) return '`$linkText`';
+      return '[$linkText]($path)';
+    });
 
     // Rewrite Flutter platform-embedder paths to absolute URLs.
     // SDK doc comments contain links like `[text](/javadoc/...)` and
@@ -460,11 +466,15 @@ class VitePressDocProcessor {
   /// [extraAllowedHosts] adds hostnames to the built-in whitelist
   /// (YouTube, DartPad). Configured via `allowedIframeHosts` in
   /// `dartdoc_options.yaml`.
-  static String sanitizeHtml(String html,
-      {Set<String> extraAllowedHosts = const {}}) {
+  static String sanitizeHtml(
+    String html, {
+    Set<String> extraAllowedHosts = const {},
+  }) {
     // Delegate to format-agnostic core sanitizer.
-    html = core_sanitize.sanitizeHtml(html,
-        extraAllowedHosts: extraAllowedHosts);
+    html = core_sanitize.sanitizeHtml(
+      html,
+      extraAllowedHosts: extraAllowedHosts,
+    );
 
     // VitePress-specific: escape Vue template interpolation
     // (VitePress renders markdown as Vue SFC).
@@ -713,14 +723,15 @@ class MarkdownRenderer implements md.NodeVisitor {
         if (tagMatch != null) {
           // Extract the tag name, stripping leading `/` for closing tags.
           final rawTag = tagMatch[1]!;
-          final tagName =
-              rawTag.startsWith('/') ? rawTag.substring(1) : rawTag;
+          final tagName = rawTag.startsWith('/') ? rawTag.substring(1) : rawTag;
           if (_safeHtmlTags.contains(tagName.toLowerCase())) {
             final isClosing = rawTag.startsWith('/');
-            final isSelfClosing = tagMatch[3] == '/' ||
+            final isSelfClosing =
+                tagMatch[3] == '/' ||
                 _voidHtmlTags.contains(tagName.toLowerCase());
             // Vue components (PascalCase like <Badge>) always pass through.
-            final isVueComponent = tagName.isNotEmpty &&
+            final isVueComponent =
+                tagName.isNotEmpty &&
                 tagName[0] == tagName[0].toUpperCase() &&
                 tagName[0] != tagName[0].toLowerCase();
             if (isSelfClosing || isVueComponent) {
@@ -1006,8 +1017,9 @@ class MarkdownRenderer implements md.NodeVisitor {
         final classAttr = element.attributes['class'] ?? '';
         if (classAttr.contains('markdown-alert')) {
           _ensureBlankLine();
-          final typeMatch =
-              RegExp(r'markdown-alert-(\w+)').firstMatch(classAttr);
+          final typeMatch = RegExp(
+            r'markdown-alert-(\w+)',
+          ).firstMatch(classAttr);
           final alertType = typeMatch?.group(1) ?? 'note';
           const typeMap = {
             'note': 'info',
@@ -1214,8 +1226,20 @@ class MarkdownRenderer implements md.NodeVisitor {
 
   /// HTML void elements (self-closing, never have content or closing tags).
   static const _voidHtmlTags = {
-    'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
-    'link', 'meta', 'param', 'source', 'track', 'wbr',
+    'area',
+    'base',
+    'br',
+    'col',
+    'embed',
+    'hr',
+    'img',
+    'input',
+    'link',
+    'meta',
+    'param',
+    'source',
+    'track',
+    'wbr',
   };
 
   /// Whether [tag] is safe to pass through as raw HTML in VitePress.
@@ -1437,8 +1461,9 @@ class MarkdownRenderer implements md.NodeVisitor {
     // Render separator row with alignment.
     _writeToBuffer('|');
     for (var i = 0; i < columnCount; i++) {
-      final alignment =
-          i < _tableAlignments.length ? _tableAlignments[i] : null;
+      final alignment = i < _tableAlignments.length
+          ? _tableAlignments[i]
+          : null;
       if (alignment != null && alignment.contains('text-align: center')) {
         _writeToBuffer(':---:|');
       } else if (alignment != null && alignment.contains('text-align: right')) {

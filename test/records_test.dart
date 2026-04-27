@@ -37,7 +37,9 @@ void f(() r) {}
 ''');
     var fFunction = library.functions.named('f');
     var recordType = fFunction.modelType.returnType;
-    expect(recordType.linkedName, matchesCompressed(r'''
+    expect(
+      recordType.linkedName,
+      matchesCompressed(r'''
         \(
           <span class="field">
             <span class="type-annotation">
@@ -45,7 +47,8 @@ void f(() r) {}
             </span>
           </span>
         \)?
-      '''));
+      '''),
+    );
     expect(recordType.nameWithGenerics, equals('Record?'));
   }
 
@@ -55,7 +58,9 @@ void f((int) r) {}
 ''');
     var fFunction = library.functions.named('f');
     var recordType = fFunction.modelType.parameters.first.modelType;
-    expect(recordType.linkedName, matchesCompressed(r'''
+    expect(
+      recordType.linkedName,
+      matchesCompressed(r'''
         \(
           <span class="field">
             <span class="type-annotation">
@@ -63,7 +68,8 @@ void f((int) r) {}
             </span>
           </span>
         \)
-      '''));
+      '''),
+    );
     expect(recordType.nameWithGenerics, equals('Record'));
   }
 
@@ -73,7 +79,9 @@ void f((int, String) r) {}
 ''');
     var fFunction = library.functions.named('f');
     var recordType = fFunction.modelType.parameters.first.modelType;
-    expect(recordType.linkedName, matchesCompressed(r'''
+    expect(
+      recordType.linkedName,
+      matchesCompressed(r'''
         \(
           <span class="field">
             <span class="type-annotation">
@@ -86,7 +94,8 @@ void f((int, String) r) {}
             </span>
           </span>
         \)
-      '''));
+      '''),
+    );
     expect(recordType.nameWithGenerics, equals('Record'));
   }
 
@@ -96,7 +105,9 @@ void f(({int bbb, String aaa}) record) {}
 ''');
     var fFunction = library.functions.named('f');
     var recordType = fFunction.modelType.parameters.first.modelType;
-    expect(recordType.linkedName, matchesCompressed(r'''
+    expect(
+      recordType.linkedName,
+      matchesCompressed(r'''
         \(
           <span class="field">
             \{
@@ -113,7 +124,8 @@ void f(({int bbb, String aaa}) record) {}
             \}
           </span>
         \)
-      '''));
+      '''),
+    );
     expect(recordType.nameWithGenerics, equals('Record'));
   }
 
@@ -123,7 +135,9 @@ void f((int one, String two, {int ccc, String aaa, int bbb}) record) {}
 ''');
     var fFunction = library.functions.named('f');
     var recordType = fFunction.modelType.parameters.first.modelType;
-    expect(recordType.linkedName, matchesCompressed(r'''
+    expect(
+      recordType.linkedName,
+      matchesCompressed(r'''
         \(
           <span class="field">
             <span class="type-annotation">
@@ -156,7 +170,8 @@ void f((int one, String two, {int ccc, String aaa, int bbb}) record) {}
             \}
           </span>
         \)
-      '''));
+      '''),
+    );
     expect(recordType.nameWithGenerics, equals('Record'));
   }
 }

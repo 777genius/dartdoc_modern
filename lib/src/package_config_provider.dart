@@ -39,8 +39,10 @@ package_config.PackageConfig? findPackageConfigInDirectory(Folder folder) {
   if (!packageConfigFile.exists) return null;
 
   var bytes = packageConfigFile.readAsBytesSync();
-  var config =
-      package_config.PackageConfig.parseBytes(bytes, packageConfigFile.toUri());
+  var config = package_config.PackageConfig.parseBytes(
+    bytes,
+    packageConfigFile.toUri(),
+  );
   if (config.version < _minVersion) return null;
   return config;
 }

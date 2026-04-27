@@ -73,13 +73,13 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
 
   @override
   Component build(BuildContext context) => span(
-        attributes: {
-          'data-docs-toc-runtime': '',
-          'hidden': 'hidden',
-          'aria-hidden': 'true',
-        },
-        const [],
-      );
+    attributes: {
+      'data-docs-toc-runtime': '',
+      'hidden': 'hidden',
+      'aria-hidden': 'true',
+    },
+    const [],
+  );
 
   void _scheduleUpdate() {
     _queueUpdate();
@@ -132,14 +132,15 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
   double _offsetForViewport() {
     final width = web.window.innerWidth.toDouble();
     final header = web.document.querySelector('.header-container');
-    final headerHeight =
-        header is web.HTMLElement ? header.getBoundingClientRect().height : 0.0;
+    final headerHeight = header is web.HTMLElement
+        ? header.getBoundingClientRect().height
+        : 0.0;
 
     final breathingRoom = width < 960
         ? 20.0
         : width < 1280
-            ? 28.0
-            : 36.0;
+        ? 28.0
+        : 36.0;
     return headerHeight + breathingRoom;
   }
 
@@ -162,8 +163,10 @@ class _DocsTocRuntimeState extends State<DocsTocRuntime> {
 
     final targetScroll =
         link.offsetTop - ((container.clientHeight - link.clientHeight) / 2);
-    final clampedScroll =
-        targetScroll.clamp(0, container.scrollHeight.toDouble());
+    final clampedScroll = targetScroll.clamp(
+      0,
+      container.scrollHeight.toDouble(),
+    );
     if ((container.scrollTop - clampedScroll).abs() < 8) return;
     container.scrollTop = clampedScroll;
   }

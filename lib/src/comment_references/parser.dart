@@ -26,7 +26,7 @@ const Map<String, String> operatorNames = {
   '|': 'bitwise_or',
   '&': 'bitwise_and',
   '~/': 'truncate_divide',
-  '%': 'modulo'
+  '%': 'modulo',
 };
 
 class StringTrie {
@@ -132,8 +132,10 @@ class CommentReferenceParser {
             _TypeVariablesResultType.parsedTypeVariables) {
           children.add(typeVariablesResult.node!);
         } else {
-          assert(typeVariablesResult.type ==
-              _TypeVariablesResultType.notTypeVariables);
+          assert(
+            typeVariablesResult.type ==
+                _TypeVariablesResultType.notTypeVariables,
+          );
         }
       }
       if (_atEnd || _thisChar != $dot) {
@@ -169,8 +171,9 @@ class CommentReferenceParser {
       return _PrefixParseResult.endOfFile;
     }
     _walkPastWhitespace();
-    if (_ignorePrefixes
-        .any((p) => _tryMatchLiteral(p, requireTrailingNonidentifier: true))) {
+    if (_ignorePrefixes.any(
+      (p) => _tryMatchLiteral(p, requireTrailingNonidentifier: true),
+    )) {
       return _PrefixParseResult.junk;
     }
 
@@ -239,7 +242,8 @@ class CommentReferenceParser {
       _index++;
     }
     return _IdentifierParseResult.ok(
-        IdentifierNode(_codeRef.substring(startIndex, _index)));
+      IdentifierNode(_codeRef.substring(startIndex, _index)),
+    );
   }
 
   /// Parses a list of type variables (arguments or parameters).
@@ -253,7 +257,8 @@ class CommentReferenceParser {
     var startIndex = _index;
     if (_matchBraces($lt, $gt)) {
       return _TypeVariablesParseResult.ok(
-          TypeVariablesNode(_codeRef.substring(startIndex + 1, _index - 1)));
+        TypeVariablesNode(_codeRef.substring(startIndex + 1, _index - 1)),
+      );
     }
     return _TypeVariablesParseResult.notIdentifier;
   }
@@ -281,7 +286,8 @@ class CommentReferenceParser {
     if (_tryMatchLiteral(_callableHintSuffix)) {
       if (_atEnd) {
         return _SuffixParseResult.ok(
-            CallableHintEndNode(_codeRef.substring(startIndex, _index)));
+          CallableHintEndNode(_codeRef.substring(startIndex, _index)),
+        );
       }
       return _SuffixParseResult.notSuffix;
     }
@@ -301,14 +307,18 @@ class CommentReferenceParser {
   int get _thisChar => _codeRef.codeUnitAt(_index);
 
   /// Advances [_index] on match, preserves on non-match.
-  bool _tryMatchLiteral(String characters,
-      {bool acceptTrailingWhitespace = true,
-      bool requireTrailingNonidentifier = false}) {
+  bool _tryMatchLiteral(
+    String characters, {
+    bool acceptTrailingWhitespace = true,
+    bool requireTrailingNonidentifier = false,
+  }) {
     if (characters.length + _index > _referenceLength) return false;
     int startIndex;
-    for (startIndex = _index;
-        _index - startIndex < characters.length;
-        _index++) {
+    for (
+      startIndex = _index;
+      _index - startIndex < characters.length;
+      _index++
+    ) {
       if (_codeRef.codeUnitAt(_index) !=
           characters.codeUnitAt(_index - startIndex)) {
         _index = startIndex;
@@ -377,14 +387,20 @@ class _PrefixParseResult {
 
   const _PrefixParseResult._(this.type, this.node);
 
-  static const _PrefixParseResult endOfFile =
-      _PrefixParseResult._(_PrefixResultType.endOfFile, null);
+  static const _PrefixParseResult endOfFile = _PrefixParseResult._(
+    _PrefixResultType.endOfFile,
+    null,
+  );
 
-  static const _PrefixParseResult junk =
-      _PrefixParseResult._(_PrefixResultType.junk, null);
+  static const _PrefixParseResult junk = _PrefixParseResult._(
+    _PrefixResultType.junk,
+    null,
+  );
 
-  static const _PrefixParseResult missing =
-      _PrefixParseResult._(_PrefixResultType.missing, null);
+  static const _PrefixParseResult missing = _PrefixParseResult._(
+    _PrefixResultType.missing,
+    null,
+  );
 }
 
 enum _IdentifierResultType {
@@ -405,11 +421,15 @@ class _IdentifierParseResult {
   factory _IdentifierParseResult.ok(IdentifierNode node) =>
       _IdentifierParseResult._(_IdentifierResultType.parsedIdentifier, node);
 
-  static const _IdentifierParseResult endOfFile =
-      _IdentifierParseResult._(_IdentifierResultType.endOfFile, null);
+  static const _IdentifierParseResult endOfFile = _IdentifierParseResult._(
+    _IdentifierResultType.endOfFile,
+    null,
+  );
 
-  static const _IdentifierParseResult notIdentifier =
-      _IdentifierParseResult._(_IdentifierResultType.notIdentifier, null);
+  static const _IdentifierParseResult notIdentifier = _IdentifierParseResult._(
+    _IdentifierResultType.notIdentifier,
+    null,
+  );
 }
 
 enum _TypeVariablesResultType {
@@ -432,14 +452,18 @@ class _TypeVariablesParseResult {
 
   factory _TypeVariablesParseResult.ok(TypeVariablesNode node) =>
       _TypeVariablesParseResult._(
-          _TypeVariablesResultType.parsedTypeVariables, node);
+        _TypeVariablesResultType.parsedTypeVariables,
+        node,
+      );
 
   static const _TypeVariablesParseResult endOfFile =
       _TypeVariablesParseResult._(_TypeVariablesResultType.endOfFile, null);
 
   static const _TypeVariablesParseResult notIdentifier =
       _TypeVariablesParseResult._(
-          _TypeVariablesResultType.notTypeVariables, null);
+        _TypeVariablesResultType.notTypeVariables,
+        null,
+      );
 }
 
 enum _SuffixResultType {
@@ -460,14 +484,20 @@ class _SuffixParseResult {
   factory _SuffixParseResult.ok(CommentReferenceNode node) =>
       _SuffixParseResult._(_SuffixResultType.parsedCallableHint, node);
 
-  static const _SuffixParseResult junk =
-      _SuffixParseResult._(_SuffixResultType.junk, null);
+  static const _SuffixParseResult junk = _SuffixParseResult._(
+    _SuffixResultType.junk,
+    null,
+  );
 
-  static const _SuffixParseResult missing =
-      _SuffixParseResult._(_SuffixResultType.missing, null);
+  static const _SuffixParseResult missing = _SuffixParseResult._(
+    _SuffixResultType.missing,
+    null,
+  );
 
-  static const _SuffixParseResult notSuffix =
-      _SuffixParseResult._(_SuffixResultType.notSuffix, null);
+  static const _SuffixParseResult notSuffix = _SuffixParseResult._(
+    _SuffixResultType.notSuffix,
+    null,
+  );
 }
 
 // TODO(jcollins-g): add SourceSpans?
@@ -500,7 +530,6 @@ class IdentifierNode extends CommentReferenceNode {
 /// comma separated.
 class TypeVariablesNode extends CommentReferenceNode {
   @override
-
   /// Note that this will contain commas, spaces, and other text, as
   /// generally type variables are a form of junk that comment references
   /// should ignore.

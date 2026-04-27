@@ -78,8 +78,11 @@ class _DartdocLogger {
   /// By default, we use a quiet logger.
   ///
   /// This field can be re-set, with [startLogging].
-  static _DartdocLogger instance =
-      _DartdocLogger._(isJson: false, isQuiet: true, showProgress: false);
+  static _DartdocLogger instance = _DartdocLogger._(
+    isJson: false,
+    isQuiet: true,
+    showProgress: false,
+  );
 
   final StringSink _outSink;
   final StringSink _errSink;
@@ -94,9 +97,9 @@ class _DartdocLogger {
     required bool showProgress,
     StringSink? outSink,
     StringSink? errSink,
-  })  : _outSink = outSink ?? io.stdout,
-        _errSink = errSink ?? io.stderr,
-        _showProgressBar = showProgress && !isJson && !isQuiet {
+  }) : _outSink = outSink ?? io.stdout,
+       _errSink = errSink ?? io.stderr,
+       _showProgressBar = showProgress && !isJson && !isQuiet {
     // By default, get all log output at `progressLevel` or greater.
     // This allows us to capture progress events and print `...`.
     // Change this to `Level.FINE` for debug logging.
@@ -236,7 +239,8 @@ mixin LoggingContext on DartdocOptionContextBase {
 }
 
 List<DartdocOption<Object>> createLoggingOptions(
-    PackageMetaProvider packageMetaProvider) {
+  PackageMetaProvider packageMetaProvider,
+) {
   var resourceProvider = packageMetaProvider.resourceProvider;
   return [
     DartdocOptionArgOnly<bool>(

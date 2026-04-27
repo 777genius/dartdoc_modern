@@ -60,9 +60,12 @@ class PubPackageBuilder implements PackageBuilder {
     @visibleForTesting bool skipUnreachableSdkLibraries = false,
   }) {
     var resourceProvider = packageMetaProvider.resourceProvider;
-    var sdk = packageMetaProvider.defaultSdk ??
+    var sdk =
+        packageMetaProvider.defaultSdk ??
         FolderBasedDartSdk(
-            resourceProvider, resourceProvider.getFolder(config.sdkDir));
+          resourceProvider,
+          resourceProvider.getFolder(config.sdkDir),
+        );
 
     var contextCollection = AnalysisContextCollectionImpl(
       includedPaths: [config.inputDir],
@@ -70,9 +73,7 @@ class PubPackageBuilder implements PackageBuilder {
       // of handling it ourselves?
       resourceProvider: packageMetaProvider.resourceProvider,
       sdkPath: config.sdkDir,
-      updateAnalysisOptions4: ({
-        required AnalysisOptionsImpl analysisOptions,
-      }) {
+      updateAnalysisOptions4: ({required AnalysisOptionsImpl analysisOptions}) {
         analysisOptions
           ..warning = false
           ..lint = false;
@@ -105,37 +106,46 @@ class PubPackageBuilder implements PackageBuilder {
     required List<String> embedderSdkFiles,
     required AnalysisContext analysisContext,
     required bool skipUnreachableSdkLibraries,
-  })  : _sdk = sdk,
-        _embedderSdkFiles = embedderSdkFiles,
-        _analysisContext = analysisContext,
-        _skipUnreachableSdkLibraries = skipUnreachableSdkLibraries;
+  }) : _sdk = sdk,
+       _embedderSdkFiles = embedderSdkFiles,
+       _analysisContext = analysisContext,
+       _skipUnreachableSdkLibraries = skipUnreachableSdkLibraries;
 
   static List<String> _findEmbedderSdkFiles(
-      DartdocOptionContext config, ResourceProvider resourceProvider) {
+    DartdocOptionContext config,
+    ResourceProvider resourceProvider,
+  ) {
     if (config.topLevelPackageMeta.isSdk) return const [];
 
     var cwd = resourceProvider.getResource(config.inputDir) as Folder;
     var info = findPackageConfig(resourceProvider.getFolder(cwd.path));
     if (info == null) return const [];
 
-    var skyEngine =
-        info.packages.firstWhereOrNull((p) => p.name == 'sky_engine');
+    var skyEngine = info.packages.firstWhereOrNull(
+      (p) => p.name == 'sky_engine',
+    );
     if (skyEngine == null) return const [];
 
     var packagePath = resourceProvider.pathContext.normalize(
-        resourceProvider.pathContext.fromUri(skyEngine.packageUriRoot));
+      resourceProvider.pathContext.fromUri(skyEngine.packageUriRoot),
+    );
     var skyEngineLibFolder =
         resourceProvider.getResource(packagePath) as Folder;
     var embedderYaml = locateEmbedderYamlFor(skyEngineLibFolder);
     var embedderSdk = EmbedderSdk.new2(
-        resourceProvider, skyEngineLibFolder, embedderYaml,
-        languageVersion: languageVersionFromSdkVersion(io.Platform.version));
+      resourceProvider,
+      skyEngineLibFolder,
+      embedderYaml,
+      languageVersion: languageVersionFromSdkVersion(io.Platform.version),
+    );
 
     return [
       for (var dartUri in embedderSdk.urlMappings.keys)
-        resourceProvider.pathContext.absolute(resourceProvider
-            .getFile(embedderSdk.mapDartUri(dartUri)!.fullName)
-            .path),
+        resourceProvider.pathContext.absolute(
+          resourceProvider
+              .getFile(embedderSdk.mapDartUri(dartUri)!.fullName)
+              .path,
+        ),
     ];
   }
 
@@ -183,13 +193,13 @@ class PubPackageBuilder implements PackageBuilder {
   p.Context get _pathContext => _resourceProvider.pathContext;
 
   List<String> get _sdkFilesToDocument => [
-        for (var sdkLib in _sdk.sdkLibraries)
-          // TODO(srawlins): This bit is temporary, here in order to unblock some
-          // unfortunate CI in the Dart SDK which is not designed well for when
-          // SDK libraries are _removed_.
-          if (!sdkLib.shortName.contains('macros'))
-            _sdk.mapDartUri(sdkLib.shortName)!.fullName,
-      ];
+    for (var sdkLib in _sdk.sdkLibraries)
+      // TODO(srawlins): This bit is temporary, here in order to unblock some
+      // unfortunate CI in the Dart SDK which is not designed well for when
+      // SDK libraries are _removed_.
+      if (!sdkLib.shortName.contains('macros'))
+        _sdk.mapDartUri(sdkLib.shortName)!.fullName,
+  ];
 
   /// Resolves a single library at [filePath] using the current analysis driver.
   ///
@@ -198,8 +208,9 @@ class PubPackageBuilder implements PackageBuilder {
     logDebug('Resolving $filePath...');
 
     // Allow dart source files with inappropriate suffixes (#1897).
-    final library =
-        await _analysisContext.currentSession.getResolvedLibrary(filePath);
+    final library = await _analysisContext.currentSession.getResolvedLibrary(
+      filePath,
+    );
     if (library is ResolvedLibraryResult) {
       return DartDocResolvedLibrary(library);
     }
@@ -207,10 +218,10 @@ class PubPackageBuilder implements PackageBuilder {
   }
 
   Set<PackageMeta> _packageMetasForFiles(Iterable<String> files) => {
-        for (var filename in files)
-          if (_resourceProvider.getFile(filename).exists)
-            ?_packageMetaProvider.fromFilename(filename),
-      };
+    for (var filename in files)
+      if (_resourceProvider.getFile(filename).exists)
+        ?_packageMetaProvider.fromFilename(filename),
+  };
 
   /// Names of packages discovered as workspace members during
   /// [_findWorkspacePackages]. Populated when `workspaceDocs` is enabled.
@@ -237,8 +248,11 @@ class PubPackageBuilder implements PackageBuilder {
   /// Uses [processedLibraries] to prevent calling [addLibrary] more than once
   /// with the same [LibraryElement]. Adds each [LibraryElement] found to
   /// [processedLibraries].
-  Future<void> _discoverLibraries(PackageGraph uninitializedPackageGraph,
-      Set<LibraryElement> processedLibraries, Set<String> files) async {
+  Future<void> _discoverLibraries(
+    PackageGraph uninitializedPackageGraph,
+    Set<LibraryElement> processedLibraries,
+    Set<String> files,
+  ) async {
     files = {...files};
     // Discover Dart libraries in a loop. In each iteration of the loop, we take
     // a set of files (starting with the ones passed into the function), resolve
@@ -328,8 +342,9 @@ class PubPackageBuilder implements PackageBuilder {
     for (var packageRoot in packageRoots) {
       var packageLibDir = _pathContext.join(packageRoot, 'lib');
       var packageLibSrcDir = _pathContext.join(packageLibDir, 'src');
-      var packageDirContainsPackages =
-          packageRoot.contains(packagesWithSeparators);
+      var packageDirContainsPackages = packageRoot.contains(
+        packagesWithSeparators,
+      );
       // To avoid analyzing package files twice, only files with paths not
       // containing '/packages/' will be added. The only exception is if the
       // file to analyze already has a '/packages/' in its path.
@@ -361,21 +376,21 @@ class PubPackageBuilder implements PackageBuilder {
   /// The returned paths are guaranteed to begin with [directory].
   List<String> _listDir(String directory, Set<String> listedDirectories) {
     // Avoid recursive symlinks.
-    var resolvedPath =
-        _resourceProvider.getFolder(directory).resolveSymbolicLinksSync().path;
+    var resolvedPath = _resourceProvider
+        .getFolder(directory)
+        .resolveSymbolicLinksSync()
+        .path;
     if (listedDirectories.contains(resolvedPath)) {
       return const [];
     }
 
-    listedDirectories = {
-      ...listedDirectories,
-      resolvedPath,
-    };
+    listedDirectories = {...listedDirectories, resolvedPath};
 
     var dirs = <String>[];
 
-    for (var resource
-        in _packageDirList(_resourceProvider.getFolder(directory))) {
+    for (var resource in _packageDirList(
+      _resourceProvider.getFolder(directory),
+    )) {
       // Skip hidden files and directories.
       if (_pathContext.basename(resource.path).startsWith('.')) {
         continue;
@@ -404,13 +419,12 @@ class PubPackageBuilder implements PackageBuilder {
           .map((s) => _pathContext.absolute(_resourceProvider.getFile(s).path))
           .toSet();
     } else {
-      var packagesToDocument = await _findPackagesToDocument(
-        _config.inputDir,
-      );
+      var packagesToDocument = await _findPackagesToDocument(_config.inputDir);
       var files = _findFilesToDocumentInPackage(packagesToDocument);
       return {
         ...files.map(
-            (s) => _pathContext.absolute(_resourceProvider.getFile(s).path)),
+          (s) => _pathContext.absolute(_resourceProvider.getFile(s).path),
+        ),
         ..._embedderSdkFiles,
       };
     }
@@ -440,14 +454,16 @@ class PubPackageBuilder implements PackageBuilder {
       return {basePackageRoot};
     }
 
-    var packageConfig =
-        findPackageConfig(_resourceProvider.getFolder(basePackageRoot))!;
+    var packageConfig = findPackageConfig(
+      _resourceProvider.getFolder(basePackageRoot),
+    )!;
     return {
       basePackageRoot,
       for (var package in packageConfig.packages)
         if (!_config.exclude.contains(package.name))
-          _pathContext.dirname(_pathContext
-              .fromUri(packageConfig[package.name]!.packageUriRoot)),
+          _pathContext.dirname(
+            _pathContext.fromUri(packageConfig[package.name]!.packageUriRoot),
+          ),
     };
   }
 
@@ -456,11 +472,14 @@ class PubPackageBuilder implements PackageBuilder {
   ///
   /// Returns the set of package root paths for all workspace members.
   Set<String> _findWorkspacePackages(String basePackageRoot) {
-    var pubspecFile = _resourceProvider
-        .getFile(_pathContext.join(basePackageRoot, 'pubspec.yaml'));
+    var pubspecFile = _resourceProvider.getFile(
+      _pathContext.join(basePackageRoot, 'pubspec.yaml'),
+    );
     if (!pubspecFile.exists) {
-      logWarning('workspaceDocs enabled but no pubspec.yaml found at '
-          '$basePackageRoot');
+      logWarning(
+        'workspaceDocs enabled but no pubspec.yaml found at '
+        '$basePackageRoot',
+      );
       return {basePackageRoot};
     }
 
@@ -468,21 +487,27 @@ class PubPackageBuilder implements PackageBuilder {
     try {
       var loaded = loadYaml(pubspecFile.readAsStringSync());
       if (loaded is! YamlMap) {
-        logWarning('workspaceDocs enabled but pubspec.yaml is not a valid '
-            'YAML map at $basePackageRoot');
+        logWarning(
+          'workspaceDocs enabled but pubspec.yaml is not a valid '
+          'YAML map at $basePackageRoot',
+        );
         return {basePackageRoot};
       }
       pubspecYaml = loaded;
     } on YamlException {
-      logWarning('workspaceDocs enabled but pubspec.yaml could not be parsed '
-          'at $basePackageRoot');
+      logWarning(
+        'workspaceDocs enabled but pubspec.yaml could not be parsed '
+        'at $basePackageRoot',
+      );
       return {basePackageRoot};
     }
 
     var workspaceEntries = pubspecYaml['workspace'];
     if (workspaceEntries is! YamlList) {
-      logWarning("workspaceDocs enabled but no 'workspace:' key found in "
-          'pubspec.yaml at $basePackageRoot');
+      logWarning(
+        "workspaceDocs enabled but no 'workspace:' key found in "
+        'pubspec.yaml at $basePackageRoot',
+      );
       return {basePackageRoot};
     }
 
@@ -493,24 +518,31 @@ class PubPackageBuilder implements PackageBuilder {
       var resolvedDirs = _resolveWorkspaceEntry(basePackageRoot, pattern);
 
       for (var dir in resolvedDirs) {
-        var dirPubspec =
-            _resourceProvider.getFile(_pathContext.join(dir, 'pubspec.yaml'));
+        var dirPubspec = _resourceProvider.getFile(
+          _pathContext.join(dir, 'pubspec.yaml'),
+        );
         if (!dirPubspec.exists) {
-          logDebug('Workspace entry "$pattern" resolved to "$dir" but no '
-              'pubspec.yaml found, skipping.');
+          logDebug(
+            'Workspace entry "$pattern" resolved to "$dir" but no '
+            'pubspec.yaml found, skipping.',
+          );
           continue;
         }
 
         var dirName = _readPackageName(dirPubspec);
         if (dirName == null) {
-          logDebug('Workspace entry "$pattern" resolved to "$dir" but '
-              "pubspec.yaml has no 'name' field, skipping.");
+          logDebug(
+            'Workspace entry "$pattern" resolved to "$dir" but '
+            "pubspec.yaml has no 'name' field, skipping.",
+          );
           continue;
         }
 
         if (_config.isPackageExcluded(dirName)) {
-          logDebug('Workspace package "$dirName" excluded by '
-              'excludePackages option.');
+          logDebug(
+            'Workspace package "$dirName" excluded by '
+            'excludePackages option.',
+          );
           continue;
         }
 
@@ -528,20 +560,24 @@ class PubPackageBuilder implements PackageBuilder {
   /// treated as a glob and matched against the filesystem. Otherwise, it is
   /// treated as a literal relative path.
   List<String> _resolveWorkspaceEntry(String baseRoot, String pattern) {
-    var isGlob = pattern.contains('*') ||
+    var isGlob =
+        pattern.contains('*') ||
         pattern.contains('?') ||
         pattern.contains('[') ||
         pattern.contains('{');
 
     if (!isGlob) {
-      var resolved =
-          _pathContext.normalize(_pathContext.join(baseRoot, pattern));
+      var resolved = _pathContext.normalize(
+        _pathContext.join(baseRoot, pattern),
+      );
       var folder = _resourceProvider.getFolder(resolved);
       if (folder.exists) {
         return [resolved];
       }
-      logDebug('Workspace entry "$pattern" resolved to non-existent '
-          'directory "$resolved".');
+      logDebug(
+        'Workspace entry "$pattern" resolved to non-existent '
+        'directory "$resolved".',
+      );
       return [];
     }
 
@@ -558,8 +594,13 @@ class PubPackageBuilder implements PackageBuilder {
   /// Recursively matches [glob] against directories starting from [folder].
   ///
   /// Tracks [visited] resolved paths to prevent infinite loops from symlinks.
-  void _matchGlob(Folder folder, Glob glob, String baseRoot,
-      List<String> results, Set<String> visited) {
+  void _matchGlob(
+    Folder folder,
+    Glob glob,
+    String baseRoot,
+    List<String> results,
+    Set<String> visited,
+  ) {
     var resolvedPath = folder.resolveSymbolicLinksSync().path;
     if (!visited.add(resolvedPath)) return;
 
@@ -594,16 +635,20 @@ class PubPackageBuilder implements PackageBuilder {
   /// Returns package roots for packages whose names are in
   /// `_config.includePackages`.
   Set<String> _findIncludedPackages(String basePackageRoot) {
-    var packageConfig =
-        findPackageConfig(_resourceProvider.getFolder(basePackageRoot))!;
+    var packageConfig = findPackageConfig(
+      _resourceProvider.getFolder(basePackageRoot),
+    )!;
     var includeSet = _config.includePackages.toSet();
 
     var packageRoots = <String>{basePackageRoot};
     for (var package in packageConfig.packages) {
       if (includeSet.contains(package.name) &&
           !_config.isPackageExcluded(package.name)) {
-        packageRoots.add(_pathContext.dirname(
-            _pathContext.fromUri(packageConfig[package.name]!.packageUriRoot)));
+        packageRoots.add(
+          _pathContext.dirname(
+            _pathContext.fromUri(packageConfig[package.name]!.packageUriRoot),
+          ),
+        );
       }
     }
 
@@ -617,18 +662,16 @@ class PubPackageBuilder implements PackageBuilder {
 
     // Propagate discovered workspace package names and includePackages
     // to the PackageGraph so Package.isLocal can use them.
-    uninitializedPackageGraph.workspacePackageNames
-        .addAll(_workspacePackageNames);
-    uninitializedPackageGraph.workspacePackageNames
-        .addAll(_config.includePackages);
+    uninitializedPackageGraph.workspacePackageNames.addAll(
+      _workspacePackageNames,
+    );
+    uninitializedPackageGraph.workspacePackageNames.addAll(
+      _config.includePackages,
+    );
 
     logInfo('Discovering libraries...');
     var foundLibraries = <LibraryElement>{};
-    await _discoverLibraries(
-      uninitializedPackageGraph,
-      foundLibraries,
-      files,
-    );
+    await _discoverLibraries(uninitializedPackageGraph, foundLibraries, files);
     _checkForMissingIncludedFiles(foundLibraries);
     uninitializedPackageGraph.allLibrariesAdded = true;
   }
@@ -642,8 +685,10 @@ class PubPackageBuilder implements PackageBuilder {
           .difference(Set.of(knownLibraryNames))
           .difference(_config.exclude);
       if (notFound.isNotEmpty) {
-        throw StateError('Did not find: [${notFound.join(', ')}] in '
-            'known libraries: [${knownLibraryNames.join(', ')}]');
+        throw StateError(
+          'Did not find: [${notFound.join(', ')}] in '
+          'known libraries: [${knownLibraryNames.join(', ')}]',
+        );
       }
     }
   }
@@ -662,7 +707,7 @@ class PubPackageBuilder implements PackageBuilder {
       if (pubspec is File && libDirectory is Folder)
         libDirectory
       else
-        ...resources
+        ...resources,
     ];
   }
 }
@@ -674,8 +719,8 @@ class DartDocResolvedLibrary {
   final List<CompilationUnit> units;
 
   DartDocResolvedLibrary(ResolvedLibraryResult result)
-      : element = result.element,
-        units = result.units.map((unit) => unit.unit).toList();
+    : element = result.element,
+      units = result.units.map((unit) => unit.unit).toList();
 }
 
 extension on Set<String> {

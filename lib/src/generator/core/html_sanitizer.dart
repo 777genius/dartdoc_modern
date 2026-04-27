@@ -15,32 +15,46 @@ import 'package:dartdoc_modern/src/logging.dart';
 // Pre-compiled patterns for sanitization.
 // ---------------------------------------------------------------------------
 final _scriptOpenClose = RegExp(
-    r'<\s*script\b[^>]*>[\s\S]*?<\s*/\s*script\s*>',
-    caseSensitive: false);
-final _scriptSelfClose =
-    RegExp(r'<\s*script\b[^>]*/\s*>', caseSensitive: false);
+  r'<\s*script\b[^>]*>[\s\S]*?<\s*/\s*script\s*>',
+  caseSensitive: false,
+);
+final _scriptSelfClose = RegExp(
+  r'<\s*script\b[^>]*/\s*>',
+  caseSensitive: false,
+);
 final _styleOpenClose = RegExp(
-    r'<\s*style\b[^>]*>[\s\S]*?<\s*/\s*style\s*>',
-    caseSensitive: false);
+  r'<\s*style\b[^>]*>[\s\S]*?<\s*/\s*style\s*>',
+  caseSensitive: false,
+);
 final _baseTag = RegExp(r'<\s*base\b[^>]*/?\s*>', caseSensitive: false);
 final _metaTag = RegExp(r'<\s*meta\b[^>]*/?\s*>', caseSensitive: false);
 final _linkTag = RegExp(r'<\s*link\b[^>]*/?\s*>', caseSensitive: false);
 final _iframeTag = RegExp(
-    r'<\s*iframe\b[^>]*>[\s\S]*?<\s*/\s*iframe\s*>',
-    caseSensitive: false);
-final _iframeSrcAttr =
-    RegExp(r"""src\s*=\s*["']([^"']*)["']""", caseSensitive: false);
-final _javascriptUrl =
-    RegExp(r'''(href|src)\s*=\s*["']?\s*javascript:''', caseSensitive: false);
-final _dataUrl =
-    RegExp(r'''(href|src)\s*=\s*["']?\s*data:''', caseSensitive: false);
+  r'<\s*iframe\b[^>]*>[\s\S]*?<\s*/\s*iframe\s*>',
+  caseSensitive: false,
+);
+final _iframeSrcAttr = RegExp(
+  r"""src\s*=\s*["']([^"']*)["']""",
+  caseSensitive: false,
+);
+final _javascriptUrl = RegExp(
+  r'''(href|src)\s*=\s*["']?\s*javascript:''',
+  caseSensitive: false,
+);
+final _dataUrl = RegExp(
+  r'''(href|src)\s*=\s*["']?\s*data:''',
+  caseSensitive: false,
+);
 final _eventHandler = RegExp(
-    r'''\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)''',
-    caseSensitive: false);
+  r'''\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)''',
+  caseSensitive: false,
+);
 final _dangerousEmbedOpenClose = {
   for (final tag in ['embed', 'object', 'applet', 'form', 'svg'])
-    tag: RegExp('<\\s*$tag\\b[^>]*>[\\s\\S]*?<\\s*/\\s*$tag\\s*>',
-        caseSensitive: false),
+    tag: RegExp(
+      '<\\s*$tag\\b[^>]*>[\\s\\S]*?<\\s*/\\s*$tag\\s*>',
+      caseSensitive: false,
+    ),
 };
 final _dangerousEmbedSelfClose = {
   for (final tag in ['embed', 'object', 'applet', 'form', 'svg'])
@@ -73,8 +87,7 @@ final _sanitizerLogCounts = <String, int>{};
 ///
 /// Does NOT perform format-specific escaping (e.g. Vue template syntax).
 /// Format backends should apply their own escaping after calling this.
-String sanitizeHtml(String html,
-    {Set<String> extraAllowedHosts = const {}}) {
+String sanitizeHtml(String html, {Set<String> extraAllowedHosts = const {}}) {
   // 1. Remove null bytes (bypass prevention).
   html = html.replaceAll('\x00', '');
 
@@ -101,65 +114,56 @@ String sanitizeHtml(String html,
   html = _warnOnRemoval(html, _linkTag, '<link>');
 
   // 5. Remove <iframe> tags whose host is not in the allowed set.
-  html = html.replaceAllMapped(
-    _iframeTag,
-    (match) {
-      final tag = match.group(0)!;
-      final srcMatch = _iframeSrcAttr.firstMatch(tag);
-      if (srcMatch != null) {
-        final src = srcMatch.group(1)!;
-        final uri = Uri.tryParse(src);
-        if (uri != null && (uri.scheme == 'https' || uri.scheme == 'http')) {
-          final host = uri.host.toLowerCase();
-          if (builtinAllowedHosts.contains(host) ||
-              extraAllowedHosts.contains(host)) {
-            return tag; // Keep allowed iframe embeds.
-          }
-          _logSanitizerWarning(
-            'removed <iframe> with host "$host"',
-            'sanitizeHtml: removed <iframe> with host "$host". '
-                'To allow it, add "$host" to the allowedIframeHosts option '
-                'in dartdoc_options.yaml.',
-          );
-        } else {
-          _logSanitizerWarning(
-            'removed <iframe> with disallowed src',
-            'sanitizeHtml: removed <iframe> with disallowed src: $src',
-          );
+  html = html.replaceAllMapped(_iframeTag, (match) {
+    final tag = match.group(0)!;
+    final srcMatch = _iframeSrcAttr.firstMatch(tag);
+    if (srcMatch != null) {
+      final src = srcMatch.group(1)!;
+      final uri = Uri.tryParse(src);
+      if (uri != null && (uri.scheme == 'https' || uri.scheme == 'http')) {
+        final host = uri.host.toLowerCase();
+        if (builtinAllowedHosts.contains(host) ||
+            extraAllowedHosts.contains(host)) {
+          return tag; // Keep allowed iframe embeds.
         }
+        _logSanitizerWarning(
+          'removed <iframe> with host "$host"',
+          'sanitizeHtml: removed <iframe> with host "$host". '
+              'To allow it, add "$host" to the allowedIframeHosts option '
+              'in dartdoc_options.yaml.',
+        );
       } else {
         _logSanitizerWarning(
-          'removed <iframe> without src attribute',
-          'sanitizeHtml: removed <iframe> without src attribute',
+          'removed <iframe> with disallowed src',
+          'sanitizeHtml: removed <iframe> with disallowed src: $src',
         );
       }
-      return '';
-    },
-  );
+    } else {
+      _logSanitizerWarning(
+        'removed <iframe> without src attribute',
+        'sanitizeHtml: removed <iframe> without src attribute',
+      );
+    }
+    return '';
+  });
 
   // 6. Remove javascript: URLs.
-  html = html.replaceAllMapped(
-    _javascriptUrl,
-    (match) {
-      _logSanitizerWarning(
-        'removed javascript: URL',
-        'sanitizeHtml: removed javascript: URL',
-      );
-      return '${match[1]}="';
-    },
-  );
+  html = html.replaceAllMapped(_javascriptUrl, (match) {
+    _logSanitizerWarning(
+      'removed javascript: URL',
+      'sanitizeHtml: removed javascript: URL',
+    );
+    return '${match[1]}="';
+  });
 
   // 6b. Remove data: URIs in href/src.
-  html = html.replaceAllMapped(
-    _dataUrl,
-    (match) {
-      _logSanitizerWarning(
-        'removed data: URI',
-        'sanitizeHtml: removed data: URI',
-      );
-      return '${match[1]}="';
-    },
-  );
+  html = html.replaceAllMapped(_dataUrl, (match) {
+    _logSanitizerWarning(
+      'removed data: URI',
+      'sanitizeHtml: removed data: URI',
+    );
+    return '${match[1]}="';
+  });
 
   // 7. Remove inline event handlers.
   html = _warnOnRemoval(html, _eventHandler, 'inline event handler');
@@ -170,16 +174,13 @@ String sanitizeHtml(String html,
 /// Removes all matches of [pattern] from [html], logging a warning
 /// for each occurrence with the given [description].
 String _warnOnRemoval(String html, Pattern pattern, String description) {
-  return html.replaceAllMapped(
-    pattern,
-    (match) {
-      _logSanitizerWarning(
-        'removed $description tag',
-        'sanitizeHtml: removed $description tag',
-      );
-      return '';
-    },
-  );
+  return html.replaceAllMapped(pattern, (match) {
+    _logSanitizerWarning(
+      'removed $description tag',
+      'sanitizeHtml: removed $description tag',
+    );
+    return '';
+  });
 }
 
 void _logSanitizerWarning(String key, String message) {

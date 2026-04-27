@@ -11,8 +11,12 @@ class Parameter extends ModelElement with HasNoPage {
   @override
   final FormalParameterElement element;
 
-  Parameter(this.element, super.library, super.packageGraph,
-      {FormalParameterElement? super.originalElement});
+  Parameter(
+    this.element,
+    super.library,
+    super.packageGraph, {
+    FormalParameterElement? super.originalElement,
+  });
 
   String? get defaultValue => hasDefaultValue ? element.defaultValueCode : null;
 
@@ -84,9 +88,7 @@ class Parameter extends ModelElement with HasNoPage {
   @override
   late final Map<String, Referable> referenceChildren = {
     if (modelType is Callable)
-      ...(modelType as Callable)
-          .returnType
-          .typeArguments
+      ...(modelType as Callable).returnType.typeArguments
           .explicitOnCollisionWith(this),
     ...modelType.typeArguments.explicitOnCollisionWith(this),
     if (modelType is Callable)
@@ -103,6 +105,8 @@ class Parameter extends ModelElement with HasNoPage {
   FormalParameterElement? get originalMember =>
       super.originalMember as FormalParameterElement?;
 
-  late final ElementType modelType =
-      getTypeFor((originalMember ?? element).type, library);
+  late final ElementType modelType = getTypeFor(
+    (originalMember ?? element).type,
+    library,
+  );
 }

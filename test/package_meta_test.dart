@@ -19,24 +19,31 @@ void main() {
     late PackageMeta p;
 
     setUp(() {
-      p = pubPackageMetaProvider.fromDir(resourceProvider.getFolder(
+      p = pubPackageMetaProvider.fromDir(
+        resourceProvider.getFolder(
           resourceProvider.pathContext.join(
-              resourceProvider.pathContext.current,
-              'testing',
-              'test_package')))!;
+            resourceProvider.pathContext.current,
+            'testing',
+            'test_package',
+          ),
+        ),
+      )!;
     });
 
     test('readme with corrupt UTF-8 loads without throwing', () {
       expect(
-          resourceProvider
-              .readAsMalformedAllowedStringSync(p.getReadmeContents()!),
-          contains('Here is some messed up UTF-8.\nÃf'));
+        resourceProvider.readAsMalformedAllowedStringSync(
+          p.getReadmeContents()!,
+        ),
+        contains('Here is some messed up UTF-8.\nÃf'),
+      );
     });
   });
 
   group('PackageMeta.fromDir for this package', () {
     var p = pubPackageMetaProvider.fromDir(
-        resourceProvider.getFolder(resourceProvider.pathContext.current))!;
+      resourceProvider.getFolder(resourceProvider.pathContext.current),
+    )!;
 
     test('has a name', () {
       expect(p.name, 'dartdoc_modern');
@@ -53,21 +60,26 @@ void main() {
 
     test('has a repository', () {
       expect(
-          p.repository, equals('https://github.com/777genius/dartdoc_modern'));
+        p.repository,
+        equals('https://github.com/777genius/dartdoc_modern'),
+      );
     });
 
     test('has a readme', () {
       expect(p.getReadmeContents(), isNotNull);
       expect(
-          resourceProvider
-              .readAsMalformedAllowedStringSync(p.getReadmeContents()!),
-          contains('dartdoc_modern'));
+        resourceProvider.readAsMalformedAllowedStringSync(
+          p.getReadmeContents()!,
+        ),
+        contains('dartdoc_modern'),
+      );
     });
   });
 
   group('PackageMeta.fromSdk', () {
-    var p =
-        pubPackageMetaProvider.fromDir(pubPackageMetaProvider.defaultSdkDir)!;
+    var p = pubPackageMetaProvider.fromDir(
+      pubPackageMetaProvider.defaultSdkDir,
+    )!;
 
     test('has a name', () {
       expect(p.name, 'Dart');
@@ -94,9 +106,11 @@ void main() {
     test('has a readme', () {
       expect(p.getReadmeContents(), isNotNull);
       expect(
-          resourceProvider
-              .readAsMalformedAllowedStringSync(p.getReadmeContents()!),
-          contains('Welcome to the'));
+        resourceProvider.readAsMalformedAllowedStringSync(
+          p.getReadmeContents()!,
+        ),
+        contains('Welcome to the'),
+      );
     });
   });
 }

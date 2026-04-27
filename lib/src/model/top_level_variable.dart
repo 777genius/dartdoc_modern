@@ -17,8 +17,13 @@ class TopLevelVariable extends ModelElement with GetterSetterCombo, HasLibrary {
   @override
   final Accessor? setter;
 
-  TopLevelVariable(this.element, Library super.library, super.packageGraph,
-      this.getter, this.setter) {
+  TopLevelVariable(
+    this.element,
+    Library super.library,
+    super.packageGraph,
+    this.getter,
+    this.setter,
+  ) {
     getter?.enclosingCombo = this;
     setter?.enclosingCombo = this;
   }
@@ -62,7 +67,8 @@ class TopLevelVariable extends ModelElement with GetterSetterCombo, HasLibrary {
 
   // For use in templates.
   Extension get enclosingExtension => throw UnsupportedError(
-      'Top-level variables are not provided by extensions');
+    'Top-level variables are not provided by extensions',
+  );
 
   @override
   Kind get kind => isConst ? Kind.topLevelConstant : Kind.topLevelProperty;

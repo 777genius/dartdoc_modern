@@ -12,10 +12,13 @@ import 'package:dartdoc_modern/src/model/model_element.dart';
 import 'package:dartdoc_modern/src/model/referable.dart';
 
 String generateCategoryJson(
-    List<ModelElement> categorizedElements, bool pretty) {
+  List<ModelElement> categorizedElements,
+  bool pretty,
+) {
   final indexItems = [
-    for (final categorization
-        in categorizedElements.sorted(_compareElementRepresentations))
+    for (final categorization in categorizedElements.sorted(
+      _compareElementRepresentations,
+    ))
       <String, Object?>{
         'name': categorization.name,
         'qualifiedName': categorization.canonicalQualifiedName,
@@ -26,11 +29,12 @@ String generateCategoryJson(
           'categories': categorization.categoryNames,
         if (categorization.subCategoryNames.isNotEmpty)
           'subcategories': categorization.subCategoryNames,
-      }
+      },
   ];
 
-  final encoder =
-      pretty ? const JsonEncoder.withIndent(' ') : const JsonEncoder();
+  final encoder = pretty
+      ? const JsonEncoder.withIndent(' ')
+      : const JsonEncoder();
 
   return encoder.convert(indexItems.toList(growable: false));
 }
@@ -39,8 +43,11 @@ String generateCategoryJson(
 /// [indexedElements] and [packageOrder].
 ///
 /// Passing `pretty: true` will use a [JsonEncoder] with a single-space indent.
-String generateSearchIndexJson(Iterable<Documentable> indexedElements,
-    {required List<String> packageOrder, required bool pretty}) {
+String generateSearchIndexJson(
+  Iterable<Documentable> indexedElements, {
+  required List<String> packageOrder,
+  required bool pretty,
+}) {
   var indexItems = <Map<String, Object?>>[];
 
   for (var element in indexedElements.sorted(_compareElementRepresentations)) {
@@ -80,8 +87,9 @@ String generateSearchIndexJson(Iterable<Documentable> indexedElements,
     indexItems.add(item);
   }
 
-  final encoder =
-      pretty ? const JsonEncoder.withIndent(' ') : const JsonEncoder();
+  final encoder = pretty
+      ? const JsonEncoder.withIndent(' ')
+      : const JsonEncoder();
 
   return encoder.convert(indexItems);
 }
@@ -128,13 +136,18 @@ const _dartCoreLibraries = {
 String _removeHtmlTags(String? input) =>
     input?.replaceAll(_htmlTagPattern, '') ?? '';
 
-final _htmlTagPattern =
-    RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
+final _htmlTagPattern = RegExp(
+  r'<[^>]*>',
+  multiLine: true,
+  caseSensitive: true,
+);
 
 // Compares two elements, first by fully qualified name, then by kind.
 int _compareElementRepresentations(Documentable a, Documentable b) {
-  final value =
-      compareNatural(a.canonicalQualifiedName, b.canonicalQualifiedName);
+  final value = compareNatural(
+    a.canonicalQualifiedName,
+    b.canonicalQualifiedName,
+  );
   if (value == 0) {
     return compareNatural(a.kind.toString(), b.kind.toString());
   }

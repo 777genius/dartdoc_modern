@@ -9,7 +9,9 @@ void main() {
   group('match glob', () {
     test('basic POSIX', () {
       expect(
-          matchGlobs(['/a/b/*', '/b/c/*'], '/b/c/d', isWindows: false), isTrue);
+        matchGlobs(['/a/b/*', '/b/c/*'], '/b/c/d', isWindows: false),
+        isTrue,
+      );
       expect(matchGlobs(['/q/r/s'], '/foo', isWindows: false), isFalse);
     });
 

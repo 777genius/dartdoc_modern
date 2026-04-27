@@ -27,9 +27,7 @@ List<StyleRule> docsSidebarToggleStyles() => [
     ),
   ),
   downContent([
-    css(
-      '[data-has-sidebar] .sidebar-toggle-button',
-    ).styles(
+    css('[data-has-sidebar] .sidebar-toggle-button').styles(
       display: Display.flex,
       margin: Margin.only(left: (-0.85).rem),
     ),

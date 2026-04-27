@@ -50,8 +50,10 @@ void funcTypeParams<T extends String, U extends num>(
 const aFuncWithArgs = funcTypeParams<String, int>;
 ''');
     var aFuncWithArgs = library.constants.named('aFuncWithArgs');
-    expect(aFuncWithArgs.constantValue,
-        equals('funcTypeParams&lt;String, int&gt;'));
+    expect(
+      aFuncWithArgs.constantValue,
+      equals('funcTypeParams&lt;String, int&gt;'),
+    );
   }
 
   void test_namedConstructorReference() async {
@@ -61,8 +63,9 @@ class F<T> {
 }
 const aTearOffNamedConstructor = F.alternative;
 ''');
-    var aTearOffNamedConstructor =
-        library.constants.named('aTearOffNamedConstructor');
+    var aTearOffNamedConstructor = library.constants.named(
+      'aTearOffNamedConstructor',
+    );
     expect(aTearOffNamedConstructor.constantValue, equals('F.alternative'));
   }
 
@@ -73,10 +76,13 @@ class F<T> {
 }
 const aTearOffNamedConstructorArgs = F<int>.alternative;
 ''');
-    var aTearOffNamedConstructorArgs =
-        library.constants.named('aTearOffNamedConstructorArgs');
-    expect(aTearOffNamedConstructorArgs.constantValue,
-        equals('F&lt;int&gt;.alternative'));
+    var aTearOffNamedConstructorArgs = library.constants.named(
+      'aTearOffNamedConstructorArgs',
+    );
+    expect(
+      aTearOffNamedConstructorArgs.constantValue,
+      equals('F&lt;int&gt;.alternative'),
+    );
   }
 
   void test_unnamedConstructorReference() async {
@@ -86,8 +92,9 @@ class F<T> {
 }
 const aTearOffUnnamedConstructor = F.new;
 ''');
-    var aTearOffUnnamedConstructor =
-        library.constants.named('aTearOffUnnamedConstructor');
+    var aTearOffUnnamedConstructor = library.constants.named(
+      'aTearOffUnnamedConstructor',
+    );
     expect(aTearOffUnnamedConstructor.constantValue, equals('F.new'));
   }
 
@@ -98,10 +105,13 @@ class F<T> {
 }
 const aTearOffUnnamedConstructorArgs = F<String>.new;
 ''');
-    var aTearOffUnnamedConstructorArgs =
-        library.constants.named('aTearOffUnnamedConstructorArgs');
-    expect(aTearOffUnnamedConstructorArgs.constantValue,
-        equals('F&lt;String&gt;.new'));
+    var aTearOffUnnamedConstructorArgs = library.constants.named(
+      'aTearOffUnnamedConstructorArgs',
+    );
+    expect(
+      aTearOffUnnamedConstructorArgs.constantValue,
+      equals('F&lt;String&gt;.new'),
+    );
   }
 
   void test_unnamedTypedefConstructorReference() async {
@@ -111,10 +121,13 @@ class F<T> {
 }
 const aTearOffUnnamedConstructorTypedef = Fstring.new;
 ''');
-    var aTearOffUnnamedConstructorTypedef =
-        library.constants.named('aTearOffUnnamedConstructorTypedef');
+    var aTearOffUnnamedConstructorTypedef = library.constants.named(
+      'aTearOffUnnamedConstructorTypedef',
+    );
     expect(
-        aTearOffUnnamedConstructorTypedef.constantValue, equals('Fstring.new'));
+      aTearOffUnnamedConstructorTypedef.constantValue,
+      equals('Fstring.new'),
+    );
   }
 
   void test_unnamedTypedefConstructorReferenceWithTypeArgs() async {
@@ -124,10 +137,13 @@ class F<T> {
 }
 const aTearOffUnnamedConstructorArgsTypedef = Ft<String>.new;
 ''');
-    var aTearOffUnnamedConstructorArgsTypedef =
-        library.constants.named('aTearOffUnnamedConstructorArgsTypedef');
-    expect(aTearOffUnnamedConstructorArgsTypedef.constantValue,
-        equals('Ft&lt;String&gt;.new'));
+    var aTearOffUnnamedConstructorArgsTypedef = library.constants.named(
+      'aTearOffUnnamedConstructorArgsTypedef',
+    );
+    expect(
+      aTearOffUnnamedConstructorArgsTypedef.constantValue,
+      equals('Ft&lt;String&gt;.new'),
+    );
   }
 
   void test_namedParametersInConstInvocationValue_specifiedLast() async {
@@ -139,8 +155,10 @@ const p = C(1, 2, c: 3, d: 4);
 ''');
     var pConst = library.constants.named('p');
 
-    expect(pConst.constantValue,
-        equals('<a href="$linkPrefix/C/C.html">C</a>(1, 2, c: 3, d: 4)'));
+    expect(
+      pConst.constantValue,
+      equals('<a href="$linkPrefix/C/C.html">C</a>(1, 2, c: 3, d: 4)'),
+    );
   }
 
   void test_namedParametersInConstInvocationValue_specifiedAnywhere() async {
@@ -152,8 +170,10 @@ const q = C(1, c: 2, 3, d: 4);
 ''');
     var qConst = library.constants.named('q');
 
-    expect(qConst.constantValue,
-        equals('<a href="$linkPrefix/C/C.html">C</a>(1, c: 2, 3, d: 4)'));
+    expect(
+      qConst.constantValue,
+      equals('<a href="$linkPrefix/C/C.html">C</a>(1, c: 2, 3, d: 4)'),
+    );
   }
 
   void test_namedParametersInConstInvocationValue_specifiedFirst() async {
@@ -165,8 +185,10 @@ const r = C(c: 1, d: 2, 3, 4);
 ''');
     var rConst = library.constants.named('r');
 
-    expect(rConst.constantValue,
-        equals('<a href="$linkPrefix/C/C.html">C</a>(c: 1, d: 2, 3, 4)'));
+    expect(
+      rConst.constantValue,
+      equals('<a href="$linkPrefix/C/C.html">C</a>(c: 1, d: 2, 3, 4)'),
+    );
   }
 }
 
@@ -189,15 +211,18 @@ class A {
   }
 
   void test_topLevel() async {
-    var library = await bootPackageWithLibrary('''
+    var library = await bootPackageWithLibrary(
+      '''
 class A {
   static const int aConst = 12;
 }
 
 static const aTopLevelConst = 37;
-''', libraryPreamble: '''
+''',
+      libraryPreamble: '''
 /// Some documentation.
-''');
+''',
+    );
     var aConst = library.classes.named('A').constantFields.named('aConst');
     expect(aConst.hasConstantValueForDisplay, isFalse);
     var aTopLevelConst = library.constants.named('aTopLevelConst');

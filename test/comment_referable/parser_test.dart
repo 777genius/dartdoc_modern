@@ -6,8 +6,11 @@ import 'package:dartdoc_modern/src/comment_references/parser.dart';
 import 'package:test/test.dart';
 
 void main() {
-  void expectParseEquivalent(String codeRef, List<String> parts,
-      {bool callableHint = false}) {
+  void expectParseEquivalent(
+    String codeRef,
+    List<String> parts, {
+    bool callableHint = false,
+  }) {
     var result = CommentReferenceParser(codeRef).parse();
     var hasCallableHint =
         result.isNotEmpty && result.last is CallableHintEndNode;
@@ -20,8 +23,10 @@ void main() {
       expectParseEquivalent(codeRef, [codeRef]);
 
   void expectParseError(String codeRef) {
-    expect(CommentReferenceParser(codeRef).parse().whereType<IdentifierNode>(),
-        isEmpty);
+    expect(
+      CommentReferenceParser(codeRef).parse().whereType<IdentifierNode>(),
+      isEmpty,
+    );
   }
 
   group('StringTrie tests', () {
@@ -53,8 +58,11 @@ void main() {
       expectParseEquivalent('const valid()', ['valid'], callableHint: true);
       expectParseEquivalent('final valid', ['valid']);
       expectParseEquivalent('this.is.valid', ['this', 'is', 'valid']);
-      expectParseEquivalent('this.is.valid()', ['this', 'is', 'valid'],
-          callableHint: true);
+      expectParseEquivalent('this.is.valid()', [
+        'this',
+        'is',
+        'valid',
+      ], callableHint: true);
       expectParseEquivalent('const this.is.valid', ['this', 'is', 'valid']);
       expectParseEquivalent('final this.is.valid', ['this', 'is', 'valid']);
       expectParseEquivalent('var this.is.valid', ['this', 'is', 'valid']);
@@ -66,16 +74,18 @@ void main() {
       expectParseEquivalent('\nthis.is.valid', ['this', 'is', 'valid']);
     });
 
-    test('Check that cases dependent on prefix resolution not firing parse',
-        () {
-      expectParsePassthrough('constant');
-      expectParsePassthrough('newThingy');
-      expectParsePassthrough('operatorThingy');
-      expectParseEquivalent('operator+', ['+']);
-      expectParseError('const()');
-      expectParsePassthrough('new');
-      expectParseEquivalent('new()', ['new'], callableHint: true);
-    });
+    test(
+      'Check that cases dependent on prefix resolution not firing parse',
+      () {
+        expectParsePassthrough('constant');
+        expectParsePassthrough('newThingy');
+        expectParsePassthrough('operatorThingy');
+        expectParseEquivalent('operator+', ['+']);
+        expectParseError('const()');
+        expectParsePassthrough('new');
+        expectParseEquivalent('new()', ['new'], callableHint: true);
+      },
+    );
 
     test('Check that operator references parse', () {
       expectParsePassthrough('[]');
@@ -91,16 +101,23 @@ void main() {
       expectParseEquivalent('operator >=', ['>=']);
 
       expectParseEquivalent('ThisThingy.operator []', ['ThisThingy', '[]']);
-      expectParseEquivalent('ThisThingy.operator [].parameter',
-          ['ThisThingy', '[]', 'parameter']);
+      expectParseEquivalent('ThisThingy.operator [].parameter', [
+        'ThisThingy',
+        '[]',
+        'parameter',
+      ]);
     });
 
     test('Check that embedded types within tearoff-like constructs parse', () {
       expectParseEquivalent('this<stuff>.isValid', ['this', 'isValid']);
+      expectParseEquivalent('this<stuff, is, also>.isValid', [
+        'this',
+        'isValid',
+      ]);
       expectParseEquivalent(
-          'this<stuff, is, also>.isValid', ['this', 'isValid']);
-      expectParseEquivalent('this<stuff<that<is, real>, complicated>>.isValid',
-          ['this', 'isValid']);
+        'this<stuff<that<is, real>, complicated>>.isValid',
+        ['this', 'isValid'],
+      );
       expectParseError('this<stuff.isntValid');
       expectParseError('this<stuff>, notBeingValid>.isntValid');
       expectParseError('(AndThisMayBeValidDart.butIt).isntValidInReferences');

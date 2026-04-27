@@ -65,17 +65,19 @@ class WarningsCollection {
     }
 
     if (onlyOriginal.isNotEmpty) {
-      buffer
-          .writeln('*** $title: ${onlyOriginal.length} warnings from $branch, '
-              'missing in ${current.branch}:');
+      buffer.writeln(
+        '*** $title: ${onlyOriginal.length} warnings from $branch, '
+        'missing in ${current.branch}:',
+      );
       for (var key in onlyOriginal) {
         buffer.writeln(_fromKey(key));
       }
     }
     if (onlyCurrent.isNotEmpty) {
       buffer.writeln(
-          '*** $title: ${onlyCurrent.length} new warnings in ${current.branch}, '
-          'missing in $branch');
+        '*** $title: ${onlyCurrent.length} new warnings in ${current.branch}, '
+        'missing in $branch',
+      );
       for (var key in onlyCurrent) {
         buffer.writeln(current._fromKey(key));
       }
@@ -83,23 +85,29 @@ class WarningsCollection {
     if (quantityChangedOuts.isNotEmpty) {
       buffer.writeln('*** $title : Identical warning quantity changed');
       for (var key in quantityChangedOuts) {
-        buffer.writeln('* Appeared ${warningKeyCounts[key]} times in $branch, '
-            '${current.warningKeyCounts[key]} in ${current.branch}:');
+        buffer.writeln(
+          '* Appeared ${warningKeyCounts[key]} times in $branch, '
+          '${current.warningKeyCounts[key]} in ${current.branch}:',
+        );
         buffer.writeln(current._fromKey(key));
       }
     }
     if (onlyOriginal.isEmpty &&
         onlyCurrent.isEmpty &&
         quantityChangedOuts.isEmpty) {
-      buffer.writeln('*** $title: No difference in warning output from '
-          '$branch to ${current.branch}');
+      buffer.writeln(
+        '*** $title: No difference in warning output from '
+        '$branch to ${current.branch}',
+      );
       if (allKeys.isNotEmpty) {
         buffer.write(' (${allKeys.length} warnings found)');
       }
     } else if (identical.isNotEmpty) {
-      buffer.writeln('*** $title: Difference in warning output found for '
-          '${allKeys.length - identical.length} warnings '
-          '(${allKeys.length} warnings found)"');
+      buffer.writeln(
+        '*** $title: Difference in warning output found for '
+        '${allKeys.length - identical.length} warnings '
+        '(${allKeys.length} warnings found)"',
+      );
     }
     return buffer.toString();
   }

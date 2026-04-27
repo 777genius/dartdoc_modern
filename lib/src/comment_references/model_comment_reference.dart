@@ -24,6 +24,7 @@ class ModelCommentReference {
   /// Constructs a [ModelCommentReference] given a raw string.
   ModelCommentReference(this._codeRef);
 
-  late final List<CommentReferenceNode> _parsed =
-      CommentReferenceParser(_codeRef).parse();
+  late final List<CommentReferenceNode> _parsed = CommentReferenceParser(
+    _codeRef,
+  ).parse();
 }

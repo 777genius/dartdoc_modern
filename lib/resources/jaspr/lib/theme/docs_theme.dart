@@ -6,18 +6,14 @@ import 'package:jaspr_content/theme.dart';
 /// Use a preset when you want to swap the docs personality without editing the
 /// layout styles directly. For deeper branding, start from
 /// [DocsThemeConfig.preset] and override fields with [copyWith].
-enum DocsThemePreset {
-  ocean,
-  graphite,
-  forest,
-}
+enum DocsThemePreset { ocean, graphite, forest }
 
 extension DocsThemePresetX on DocsThemePreset {
   String get name => switch (this) {
-        DocsThemePreset.ocean => 'ocean',
-        DocsThemePreset.graphite => 'graphite',
-        DocsThemePreset.forest => 'forest',
-      };
+    DocsThemePreset.ocean => 'ocean',
+    DocsThemePreset.graphite => 'graphite',
+    DocsThemePreset.forest => 'forest',
+  };
 
   static DocsThemePreset parse(String value) {
     return switch (value.trim().toLowerCase()) {
@@ -28,9 +24,7 @@ extension DocsThemePresetX on DocsThemePreset {
   }
 }
 
-ContentTheme buildDocsTheme({
-  DocsThemeConfig? config,
-}) {
+ContentTheme buildDocsTheme({DocsThemeConfig? config}) {
   return (config ?? DocsThemeConfig.ocean()).toContentTheme();
 }
 
@@ -49,29 +43,34 @@ class DocsThemeConfig {
   factory DocsThemeConfig.ocean() {
     return DocsThemeConfig(
       primary: ThemeColor(ThemeColors.blue.$600, dark: ThemeColors.sky.$300),
-      background:
-          ThemeColor(const Color('#edf4ff'), dark: ThemeColors.zinc.$950),
+      background: ThemeColor(
+        const Color('#edf4ff'),
+        dark: ThemeColors.zinc.$950,
+      ),
       text: ThemeColor(ThemeColors.slate.$800, dark: ThemeColors.zinc.$200),
       colors: _contentColors(
-        headings:
-            ThemeColor(ThemeColors.slate.$950, dark: Colors.white),
+        headings: ThemeColor(ThemeColors.slate.$950, dark: Colors.white),
         links: ThemeColor(ThemeColors.blue.$700, dark: ThemeColors.sky.$300),
-        lead:
-            ThemeColor(ThemeColors.slate.$700, dark: ThemeColors.zinc.$400),
-        quotes:
-            ThemeColor(ThemeColors.slate.$900, dark: ThemeColors.zinc.$100),
-        quoteBorders:
-            ThemeColor(const Color('#cfe0ff'), dark: ThemeColors.zinc.$700),
-        code:
-            ThemeColor(ThemeColors.slate.$950, dark: Colors.white),
-        preCode:
-            ThemeColor(ThemeColors.slate.$800, dark: ThemeColors.zinc.$200),
-        preBg:
-            ThemeColor(const Color('#f8fbff'), dark: ThemeColors.zinc.$950),
-        thBorders:
-            ThemeColor(const Color('#c5d8fb'), dark: ThemeColors.zinc.$700),
-        tdBorders:
-            ThemeColor(const Color('#d7e4fb'), dark: ThemeColors.zinc.$800),
+        lead: ThemeColor(ThemeColors.slate.$700, dark: ThemeColors.zinc.$400),
+        quotes: ThemeColor(ThemeColors.slate.$900, dark: ThemeColors.zinc.$100),
+        quoteBorders: ThemeColor(
+          const Color('#cfe0ff'),
+          dark: ThemeColors.zinc.$700,
+        ),
+        code: ThemeColor(ThemeColors.slate.$950, dark: Colors.white),
+        preCode: ThemeColor(
+          ThemeColors.slate.$800,
+          dark: ThemeColors.zinc.$200,
+        ),
+        preBg: ThemeColor(const Color('#f8fbff'), dark: ThemeColors.zinc.$950),
+        thBorders: ThemeColor(
+          const Color('#c5d8fb'),
+          dark: ThemeColors.zinc.$700,
+        ),
+        tdBorders: ThemeColor(
+          const Color('#d7e4fb'),
+          dark: ThemeColors.zinc.$800,
+        ),
       ),
       typography: _oceanTypography(),
       font: FontFamily.list([
@@ -110,10 +109,14 @@ class DocsThemeConfig {
           Color('rgba(59, 73, 96, 0.78)'),
           dark: Color('rgba(212, 212, 216, 0.76)'),
         ),
-        shellAccent:
-            ThemeColor(ThemeColors.blue.$600, dark: ThemeColors.sky.$300),
-        shellAccentStrong:
-            ThemeColor(ThemeColors.blue.$700, dark: ThemeColors.sky.$400),
+        shellAccent: ThemeColor(
+          ThemeColors.blue.$600,
+          dark: ThemeColors.sky.$300,
+        ),
+        shellAccentStrong: ThemeColor(
+          ThemeColors.blue.$700,
+          dark: ThemeColors.sky.$400,
+        ),
         shellAccentSoft: const ThemeColor(
           Color('rgba(37, 99, 235, 0.12)'),
           dark: Color('rgba(125, 211, 252, 0.12)'),
@@ -152,32 +155,35 @@ class DocsThemeConfig {
 
   factory DocsThemeConfig.graphite() {
     return DocsThemeConfig(
-      primary:
-          ThemeColor(ThemeColors.indigo.$600, dark: ThemeColors.violet.$300),
-      background:
-          ThemeColor(ThemeColors.zinc.$50, dark: ThemeColors.zinc.$950),
+      primary: ThemeColor(
+        ThemeColors.indigo.$600,
+        dark: ThemeColors.violet.$300,
+      ),
+      background: ThemeColor(ThemeColors.zinc.$50, dark: ThemeColors.zinc.$950),
       text: ThemeColor(ThemeColors.zinc.$700, dark: ThemeColors.zinc.$200),
       colors: _contentColors(
-        headings:
-            ThemeColor(ThemeColors.zinc.$950, dark: Colors.white),
-        links:
-            ThemeColor(ThemeColors.indigo.$700, dark: ThemeColors.violet.$300),
-        lead:
-            ThemeColor(ThemeColors.zinc.$600, dark: ThemeColors.zinc.$400),
-        quotes:
-            ThemeColor(ThemeColors.zinc.$900, dark: ThemeColors.zinc.$100),
-        quoteBorders:
-            ThemeColor(ThemeColors.zinc.$300, dark: ThemeColors.zinc.$700),
-        code:
-            ThemeColor(ThemeColors.zinc.$950, dark: Colors.white),
-        preCode:
-            ThemeColor(ThemeColors.zinc.$800, dark: ThemeColors.zinc.$200),
-        preBg:
-            ThemeColor(ThemeColors.zinc.$50, dark: Colors.black),
-        thBorders:
-            ThemeColor(ThemeColors.zinc.$300, dark: ThemeColors.zinc.$700),
-        tdBorders:
-            ThemeColor(ThemeColors.zinc.$200, dark: ThemeColors.zinc.$800),
+        headings: ThemeColor(ThemeColors.zinc.$950, dark: Colors.white),
+        links: ThemeColor(
+          ThemeColors.indigo.$700,
+          dark: ThemeColors.violet.$300,
+        ),
+        lead: ThemeColor(ThemeColors.zinc.$600, dark: ThemeColors.zinc.$400),
+        quotes: ThemeColor(ThemeColors.zinc.$900, dark: ThemeColors.zinc.$100),
+        quoteBorders: ThemeColor(
+          ThemeColors.zinc.$300,
+          dark: ThemeColors.zinc.$700,
+        ),
+        code: ThemeColor(ThemeColors.zinc.$950, dark: Colors.white),
+        preCode: ThemeColor(ThemeColors.zinc.$800, dark: ThemeColors.zinc.$200),
+        preBg: ThemeColor(ThemeColors.zinc.$50, dark: Colors.black),
+        thBorders: ThemeColor(
+          ThemeColors.zinc.$300,
+          dark: ThemeColors.zinc.$700,
+        ),
+        tdBorders: ThemeColor(
+          ThemeColors.zinc.$200,
+          dark: ThemeColors.zinc.$800,
+        ),
       ),
       typography: _graphiteTypography(),
       font: FontFamily.list([
@@ -196,10 +202,14 @@ class DocsThemeConfig {
           ThemeColors.zinc.$100,
           dark: const Color('rgba(39, 39, 42, 0.9)'),
         ),
-        shellAccent:
-            ThemeColor(ThemeColors.indigo.$600, dark: ThemeColors.violet.$300),
-        shellAccentStrong:
-            ThemeColor(ThemeColors.indigo.$700, dark: ThemeColors.violet.$400),
+        shellAccent: ThemeColor(
+          ThemeColors.indigo.$600,
+          dark: ThemeColors.violet.$300,
+        ),
+        shellAccentStrong: ThemeColor(
+          ThemeColors.indigo.$700,
+          dark: ThemeColors.violet.$400,
+        ),
         shellAccentSoft: const ThemeColor(
           Color('rgba(79, 70, 229, 0.08)'),
           dark: Color('rgba(196, 181, 253, 0.14)'),
@@ -210,34 +220,44 @@ class DocsThemeConfig {
 
   factory DocsThemeConfig.forest() {
     return DocsThemeConfig(
-      primary:
-          ThemeColor(ThemeColors.emerald.$600, dark: ThemeColors.emerald.$300),
-      background:
-          ThemeColor(ThemeColors.stone.$50, dark: ThemeColors.stone.$950),
+      primary: ThemeColor(
+        ThemeColors.emerald.$600,
+        dark: ThemeColors.emerald.$300,
+      ),
+      background: ThemeColor(
+        ThemeColors.stone.$50,
+        dark: ThemeColors.stone.$950,
+      ),
       text: ThemeColor(ThemeColors.stone.$700, dark: ThemeColors.stone.$200),
       colors: _contentColors(
-        headings:
-            ThemeColor(ThemeColors.stone.$950, dark: Colors.white),
-        links:
-            ThemeColor(ThemeColors.emerald.$700, dark: ThemeColors.emerald.$300),
-        lead:
-            ThemeColor(ThemeColors.stone.$600, dark: ThemeColors.stone.$400),
-        quotes:
-            ThemeColor(ThemeColors.stone.$900, dark: ThemeColors.stone.$100),
-        quoteBorders:
-            ThemeColor(ThemeColors.stone.$300, dark: ThemeColors.stone.$700),
-        code:
-            ThemeColor(ThemeColors.stone.$950, dark: Colors.white),
-        preCode:
-            ThemeColor(ThemeColors.stone.$800, dark: ThemeColors.stone.$200),
-        preBg: ThemeColor(
-          const Color('#f8faf6'),
-          dark: ThemeColors.stone.$950,
+        headings: ThemeColor(ThemeColors.stone.$950, dark: Colors.white),
+        links: ThemeColor(
+          ThemeColors.emerald.$700,
+          dark: ThemeColors.emerald.$300,
         ),
-        thBorders:
-            ThemeColor(ThemeColors.stone.$300, dark: ThemeColors.stone.$700),
-        tdBorders:
-            ThemeColor(ThemeColors.stone.$200, dark: ThemeColors.stone.$800),
+        lead: ThemeColor(ThemeColors.stone.$600, dark: ThemeColors.stone.$400),
+        quotes: ThemeColor(
+          ThemeColors.stone.$900,
+          dark: ThemeColors.stone.$100,
+        ),
+        quoteBorders: ThemeColor(
+          ThemeColors.stone.$300,
+          dark: ThemeColors.stone.$700,
+        ),
+        code: ThemeColor(ThemeColors.stone.$950, dark: Colors.white),
+        preCode: ThemeColor(
+          ThemeColors.stone.$800,
+          dark: ThemeColors.stone.$200,
+        ),
+        preBg: ThemeColor(const Color('#f8faf6'), dark: ThemeColors.stone.$950),
+        thBorders: ThemeColor(
+          ThemeColors.stone.$300,
+          dark: ThemeColors.stone.$700,
+        ),
+        tdBorders: ThemeColor(
+          ThemeColors.stone.$200,
+          dark: ThemeColors.stone.$800,
+        ),
       ),
       typography: _forestTypography(),
       font: FontFamily.list([
@@ -255,10 +275,14 @@ class DocsThemeConfig {
           ThemeColors.stone.$100,
           dark: const Color('rgba(41, 37, 36, 0.92)'),
         ),
-        shellAccent:
-            ThemeColor(ThemeColors.emerald.$600, dark: ThemeColors.emerald.$300),
-        shellAccentStrong:
-            ThemeColor(ThemeColors.emerald.$700, dark: ThemeColors.emerald.$400),
+        shellAccent: ThemeColor(
+          ThemeColors.emerald.$600,
+          dark: ThemeColors.emerald.$300,
+        ),
+        shellAccentStrong: ThemeColor(
+          ThemeColors.emerald.$700,
+          dark: ThemeColors.emerald.$400,
+        ),
         shellAccentSoft: const ThemeColor(
           Color('rgba(5, 150, 105, 0.08)'),
           dark: Color('rgba(52, 211, 153, 0.14)'),
@@ -347,91 +371,93 @@ class DocsThemeExtension extends ThemeExtension<DocsThemeExtension> {
     ThemeColor? shellDartPadStage,
     ThemeColor? shellShadow,
     ThemeColor? shellFocus,
-  })  : shellSurface = shellSurface ??
-            const ThemeColor(
-              Colors.white,
-              dark: Color('rgba(24, 24, 27, 0.92)'),
-            ),
-        shellSurfaceSoft = shellSurfaceSoft ??
-            ThemeColor(
-              ThemeColors.slate.$50,
-              dark: const Color('rgba(39, 39, 42, 0.88)'),
-            ),
-        shellSurfaceElevated = shellSurfaceElevated ??
-            ThemeColor(
-              Colors.white,
-              dark: ThemeColors.zinc.$900,
-            ),
-        shellBorder = shellBorder ??
-            const ThemeColor(
-              Color('rgba(148, 163, 184, 0.22)'),
-              dark: Color('rgba(148, 163, 184, 0.18)'),
-            ),
-        shellBorderStrong = shellBorderStrong ??
-            const ThemeColor(
-              Color('rgba(148, 163, 184, 0.34)'),
-              dark: Color('rgba(148, 163, 184, 0.24)'),
-            ),
-        shellOverlay = shellOverlay ??
-            const ThemeColor(
-              Color('rgba(15, 23, 42, 0.58)'),
-              dark: Color('rgba(2, 6, 23, 0.76)'),
-            ),
-        shellMuted = shellMuted ??
-            const ThemeColor(
-              Color('rgba(71, 85, 105, 0.78)'),
-              dark: Color('rgba(212, 212, 216, 0.76)'),
-            ),
-        shellAccent = shellAccent ??
-            ThemeColor(
-              ThemeColors.blue.$600,
-              dark: ThemeColors.sky.$300,
-            ),
-        shellAccentSoft = shellAccentSoft ??
-            const ThemeColor(
-              Color('rgba(37, 99, 235, 0.08)'),
-              dark: Color('rgba(125, 211, 252, 0.12)'),
-            ),
-        shellAccentStrong = shellAccentStrong ??
-            ThemeColor(
-              ThemeColors.blue.$700,
-              dark: ThemeColors.sky.$400,
-            ),
-        shellCalloutBg = shellCalloutBg ??
-            const ThemeColor(
-              Color('rgba(34, 197, 94, 0.08)'),
-              dark: Color('rgba(34, 197, 94, 0.12)'),
-            ),
-        shellCalloutBorder = shellCalloutBorder ??
-            const ThemeColor(
-              Color('rgba(34, 197, 94, 0.55)'),
-              dark: Color('rgba(74, 222, 128, 0.65)'),
-            ),
-        shellCodeButtonBg = shellCodeButtonBg ??
-            const ThemeColor(
-              Color('rgba(15, 23, 42, 0.9)'),
-              dark: Color('rgba(39, 39, 42, 0.96)'),
-            ),
-        shellCodeButtonFg = shellCodeButtonFg ??
-            const ThemeColor(
-              Colors.white,
-              dark: Color('#fafafa'),
-            ),
-        shellDartPadStage = shellDartPadStage ??
-            const ThemeColor(
-              Colors.white,
-              dark: Color('#0b1120'),
-            ),
-        shellShadow = shellShadow ??
-            const ThemeColor(
-              Color('rgba(15, 23, 42, 0.18)'),
-              dark: Color('rgba(2, 6, 23, 0.45)'),
-            ),
-        shellFocus = shellFocus ??
-            const ThemeColor(
-              Color('rgba(37, 99, 235, 0.18)'),
-              dark: Color('rgba(125, 211, 252, 0.18)'),
-            );
+  }) : shellSurface =
+           shellSurface ??
+           const ThemeColor(
+             Colors.white,
+             dark: Color('rgba(24, 24, 27, 0.92)'),
+           ),
+       shellSurfaceSoft =
+           shellSurfaceSoft ??
+           ThemeColor(
+             ThemeColors.slate.$50,
+             dark: const Color('rgba(39, 39, 42, 0.88)'),
+           ),
+       shellSurfaceElevated =
+           shellSurfaceElevated ??
+           ThemeColor(Colors.white, dark: ThemeColors.zinc.$900),
+       shellBorder =
+           shellBorder ??
+           const ThemeColor(
+             Color('rgba(148, 163, 184, 0.22)'),
+             dark: Color('rgba(148, 163, 184, 0.18)'),
+           ),
+       shellBorderStrong =
+           shellBorderStrong ??
+           const ThemeColor(
+             Color('rgba(148, 163, 184, 0.34)'),
+             dark: Color('rgba(148, 163, 184, 0.24)'),
+           ),
+       shellOverlay =
+           shellOverlay ??
+           const ThemeColor(
+             Color('rgba(15, 23, 42, 0.58)'),
+             dark: Color('rgba(2, 6, 23, 0.76)'),
+           ),
+       shellMuted =
+           shellMuted ??
+           const ThemeColor(
+             Color('rgba(71, 85, 105, 0.78)'),
+             dark: Color('rgba(212, 212, 216, 0.76)'),
+           ),
+       shellAccent =
+           shellAccent ??
+           ThemeColor(ThemeColors.blue.$600, dark: ThemeColors.sky.$300),
+       shellAccentSoft =
+           shellAccentSoft ??
+           const ThemeColor(
+             Color('rgba(37, 99, 235, 0.08)'),
+             dark: Color('rgba(125, 211, 252, 0.12)'),
+           ),
+       shellAccentStrong =
+           shellAccentStrong ??
+           ThemeColor(ThemeColors.blue.$700, dark: ThemeColors.sky.$400),
+       shellCalloutBg =
+           shellCalloutBg ??
+           const ThemeColor(
+             Color('rgba(34, 197, 94, 0.08)'),
+             dark: Color('rgba(34, 197, 94, 0.12)'),
+           ),
+       shellCalloutBorder =
+           shellCalloutBorder ??
+           const ThemeColor(
+             Color('rgba(34, 197, 94, 0.55)'),
+             dark: Color('rgba(74, 222, 128, 0.65)'),
+           ),
+       shellCodeButtonBg =
+           shellCodeButtonBg ??
+           const ThemeColor(
+             Color('rgba(15, 23, 42, 0.9)'),
+             dark: Color('rgba(39, 39, 42, 0.96)'),
+           ),
+       shellCodeButtonFg =
+           shellCodeButtonFg ??
+           const ThemeColor(Colors.white, dark: Color('#fafafa')),
+       shellDartPadStage =
+           shellDartPadStage ??
+           const ThemeColor(Colors.white, dark: Color('#0b1120')),
+       shellShadow =
+           shellShadow ??
+           const ThemeColor(
+             Color('rgba(15, 23, 42, 0.18)'),
+             dark: Color('rgba(2, 6, 23, 0.45)'),
+           ),
+       shellFocus =
+           shellFocus ??
+           const ThemeColor(
+             Color('rgba(37, 99, 235, 0.18)'),
+             dark: Color('rgba(125, 211, 252, 0.18)'),
+           );
 
   final ThemeColor shellSurface;
   final ThemeColor shellSurfaceSoft;
@@ -474,8 +500,7 @@ class DocsThemeExtension extends ThemeExtension<DocsThemeExtension> {
     return DocsThemeExtension(
       shellSurface: shellSurface ?? this.shellSurface,
       shellSurfaceSoft: shellSurfaceSoft ?? this.shellSurfaceSoft,
-      shellSurfaceElevated:
-          shellSurfaceElevated ?? this.shellSurfaceElevated,
+      shellSurfaceElevated: shellSurfaceElevated ?? this.shellSurfaceElevated,
       shellBorder: shellBorder ?? this.shellBorder,
       shellBorderStrong: shellBorderStrong ?? this.shellBorderStrong,
       shellOverlay: shellOverlay ?? this.shellOverlay,
@@ -572,10 +597,9 @@ ContentTypography _graphiteTypography() {
 ContentTypography _forestTypography() {
   return ContentTypography.base.apply(
     rules: [
-      css('h1').styles(
-        fontWeight: FontWeight.w800,
-        raw: {'letter-spacing': '-0.02em'},
-      ),
+      css(
+        'h1',
+      ).styles(fontWeight: FontWeight.w800, raw: {'letter-spacing': '-0.02em'}),
       css('h2').styles(fontWeight: FontWeight.w700),
       css('h2, h3').styles(raw: {'scroll-margin-top': '5rem'}),
       css('p, li').styles(raw: {'line-height': '1.8'}),

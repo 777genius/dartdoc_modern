@@ -117,8 +117,9 @@ const _validHtmlTags = [
   'wbr',
 ];
 
-final RegExp _nonHtml =
-    RegExp("</?(?!(${_validHtmlTags.join("|")})[> ])\\w+[> ]");
+final RegExp _nonHtml = RegExp(
+  "</?(?!(${_validHtmlTags.join("|")})[> ])\\w+[> ]",
+);
 
 final HtmlEscape _htmlEscape = const HtmlEscape(HtmlEscapeMode.element);
 
@@ -146,8 +147,10 @@ final RegExp _hideSchemas = RegExp('^(http|https)://');
 bool _rejectUnnamedAndShadowingConstructors(Referable? referable) {
   if (referable is Constructor) {
     if (referable.isUnnamedConstructor) return false;
-    if (referable.enclosingElement
-        .referenceChildren[referable.name.split('.').last] is! Constructor) {
+    if (referable.enclosingElement.referenceChildren[referable.name
+            .split('.')
+            .last]
+        is! Constructor) {
       return false;
     }
   }
@@ -161,7 +164,9 @@ bool _requireCallable(Referable? referable) =>
     referable is ModelElement && referable.isCallable;
 
 MatchingLinkResult _getMatchingLinkElement(
-    String referenceText, Warnable element) {
+  String referenceText,
+  Warnable element,
+) {
   var commentReference = ModelCommentReference(referenceText);
 
   var filter = commentReference.hasCallableHint
@@ -171,8 +176,10 @@ MatchingLinkResult _getMatchingLinkElement(
       // force resolution to the class.
       : _rejectUnnamedAndShadowingConstructors;
 
-  var lookupResult =
-      element.referenceBy(commentReference.referenceBy, filter: filter);
+  var lookupResult = element.referenceBy(
+    commentReference.referenceBy,
+    filter: filter,
+  );
 
   // TODO(jcollins-g): Consider prioritizing analyzer resolution before custom.
   return MatchingLinkResult(lookupResult);
@@ -182,7 +189,9 @@ MatchingLinkResult _getMatchingLinkElement(
 /// comment reference found in the doc comment attached to [element].
 @visibleForTesting
 MatchingLinkResult getMatchingLinkElement(
-    String referenceText, Warnable element) {
+  String referenceText,
+  Warnable element,
+) {
   var result = _getMatchingLinkElement(referenceText, element);
   runtimeStats.totalReferences++;
   if (result.referable != null) {
@@ -206,19 +215,25 @@ final RegExp _allAfterLastNewline = RegExp(r'\n.*$', multiLine: true);
 /// Generics should be wrapped in `[]`, to avoid handling them as HTML tags
 // (like, [Apple<int>]).
 void showWarningsForGenericsOutsideSquareBracketsBlocks(
-    String text, Warnable element) {
+  String text,
+  Warnable element,
+) {
   // Skip this if not warned for performance and for dart-lang/sdk#46419.
-  if (element.config.packageWarningOptions
-          .warningModes[PackageWarning.typeAsHtml] ==
+  if (element.config.packageWarningOptions.warningModes[PackageWarning
+          .typeAsHtml] ==
       PackageWarningMode.ignore) {
     return;
   }
 
   for (var position in findFreeHangingGenericsPositions(text)) {
-    var priorContext =
-        text.substring(max(position - maxPriorContext, 0), position);
-    var postContext =
-        text.substring(position, min(position + maxPostContext, text.length));
+    var priorContext = text.substring(
+      max(position - maxPriorContext, 0),
+      position,
+    );
+    var postContext = text.substring(
+      position,
+      min(position + maxPostContext, text.length),
+    );
     priorContext = priorContext.replaceAll(_allBeforeFirstNewline, '');
     postContext = postContext.replaceAll(_allAfterLastNewline, '');
     var errorMessage = '$priorContext$postContext';
@@ -235,8 +250,11 @@ Iterable<int> findFreeHangingGenericsPositions(String string) sync* {
     final nextOpenBracket = string.indexOf('[', currentPosition);
     final nextCloseBracket = string.indexOf(']', currentPosition);
     final nextNonHtmlTag = string.indexOf(_nonHtml, currentPosition);
-    final nextPositions = [nextOpenBracket, nextCloseBracket, nextNonHtmlTag]
-        .where((p) => p != -1);
+    final nextPositions = [
+      nextOpenBracket,
+      nextCloseBracket,
+      nextNonHtmlTag,
+    ].where((p) => p != -1);
 
     if (nextPositions.isEmpty) {
       break;
@@ -275,12 +293,17 @@ class MarkdownDocument extends md.Document {
 
   /// Parses markdown text, collecting the first [md.Node] or all of them
   /// if [processFullText] is `true`.
-  List<md.Node> parseMarkdownText(String text,
-      {required bool processFullText}) {
-    var lines =
-        LineSplitter.split(text).map(md.Line.new).toList(growable: false);
-    var nodes =
-        md.BlockParser(lines, this).parseLines().toList(growable: false);
+  List<md.Node> parseMarkdownText(
+    String text, {
+    required bool processFullText,
+  }) {
+    var lines = LineSplitter.split(
+      text,
+    ).map(md.Line.new).toList(growable: false);
+    var nodes = md.BlockParser(
+      lines,
+      this,
+    ).parseLines().toList(growable: false);
     if (!processFullText && nodes.isNotEmpty) {
       nodes = [nodes.first];
     }
@@ -334,10 +357,13 @@ class MarkdownDocument extends md.Document {
       // Avoid claiming documentation is inherited when it comes from the
       // current element.
       var referredFrom = {
-        if (element is ModelElement) ...element.documentationFrom
+        if (element is ModelElement) ...element.documentationFrom,
       }..remove(element);
-      element.warn(PackageWarning.unresolvedDocReference,
-          message: referenceText, referredFrom: referredFrom);
+      element.warn(
+        PackageWarning.unresolvedDocReference,
+        message: referenceText,
+        referredFrom: referredFrom,
+      );
       return md.Element.text('code', textContent);
     }
   }

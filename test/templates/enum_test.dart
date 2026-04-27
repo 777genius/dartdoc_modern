@@ -124,8 +124,14 @@ extension Ext<T> on E<T> {}
           .readAsStringSync()
           .split('\n');
       enumWithDefaultConstructorLines = resourceProvider
-          .getFile(path.join(
-              packagePath, 'doc', 'lib', 'EnumWithDefaultConstructor.html'))
+          .getFile(
+            path.join(
+              packagePath,
+              'doc',
+              'lib',
+              'EnumWithDefaultConstructor.html',
+            ),
+          )
           .readAsStringSync()
           .split('\n');
     });
@@ -133,11 +139,14 @@ extension Ext<T> on E<T> {}
     test('enum page contains enum name with generics', () async {
       // TODO(srawlins): Use expectMainContentContainsAllInOrder throughout.
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<span class="kind-enum">E&lt;<wbr>'
-                '<span class="type-parameter">T</span>&gt;</span>'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches(
+            '<span class="kind-enum">E&lt;<wbr>'
+            '<span class="type-parameter">T</span>&gt;</span>',
+          ),
+        ]),
+      );
     });
 
     test('enum page contains implemented types', () async {
@@ -145,31 +154,37 @@ extension Ext<T> on E<T> {}
         eLines,
         containsAllInOrder([
           matches('<dt>Implemented types</dt>'),
-          matches('<a href="../lib/C-class.html">C</a>'
-              '<span class="signature">&lt;<wbr>'
-              '<span class="type-parameter">T</span>&gt;</span>'),
+          matches(
+            '<a href="../lib/C-class.html">C</a>'
+            '<span class="signature">&lt;<wbr>'
+            '<span class="type-parameter">T</span>&gt;</span>',
+          ),
         ]),
       );
     });
 
     test('enum page contains mixed-in types', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<dt>Mixed-in types</dt>'),
-            matches('<a href="../lib/M-mixin.html">M</a>'
-                '<span class="signature">&lt;<wbr>'
-                '<span class="type-parameter">T</span>&gt;</span>'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<dt>Mixed-in types</dt>'),
+          matches(
+            '<a href="../lib/M-mixin.html">M</a>'
+            '<span class="signature">&lt;<wbr>'
+            '<span class="type-parameter">T</span>&gt;</span>',
+          ),
+        ]),
+      );
     });
 
     test('enum page contains available extensions', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<dt>Available extensions</dt>'),
-            matches('<a href="../lib/E.html">E</a></span>'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<dt>Available extensions</dt>'),
+          matches('<a href="../lib/E.html">E</a></span>'),
+        ]),
+      );
     });
 
     test('enum page contains annotations', () async {
@@ -177,7 +192,8 @@ extension Ext<T> on E<T> {}
         matches('<dt>Annotations</dt>'),
         matches('<ul class="annotation-list eNum-relationships">'),
         matches(
-            r'<li>@<a href="../lib/C/C.html">C</a>&lt;dynamic&gt;\(&#39;message&#39;\)</li>'),
+          r'<li>@<a href="../lib/C/C.html">C</a>&lt;dynamic&gt;\(&#39;message&#39;\)</li>',
+        ),
         matches('</ul>'),
       ]);
     });
@@ -190,7 +206,8 @@ extension Ext<T> on E<T> {}
           matches('<span class="name ">one</span>'),
           matches('<p>Doc comment for <a href="../lib/E.html">one</a>.</p>'),
           matches(
-              r'<span class="signature"><code>const E&lt;int&gt;.named\(1\)</code></span>'),
+            r'<span class="signature"><code>const E&lt;int&gt;.named\(1\)</code></span>',
+          ),
         ]),
       );
     });
@@ -202,145 +219,161 @@ extension Ext<T> on E<T> {}
           matches('<h2>Values</h2>'),
           matches('<span class="name ">four</span>'),
           matches(
-              '<p>Doc comment for <a href="../lib/EnumWithDefaultConstructor.html">six</a>.</p>'),
+            '<p>Doc comment for <a href="../lib/EnumWithDefaultConstructor.html">six</a>.</p>',
+          ),
         ]),
       );
       expect(
         enumWithDefaultConstructorLines.join('\n'),
-        isNot(contains(
-            '<span class="signature"><code>EnumWithDefaultConstructor')),
+        isNot(
+          contains('<span class="signature"><code>EnumWithDefaultConstructor'),
+        ),
       );
     });
 
     test('enum page contains values with deprecated annotation', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Values</h2>'),
-            matches('<span class="name deprecated">two</span>'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Values</h2>'),
+          matches('<span class="name deprecated">two</span>'),
+        ]),
+      );
     });
 
     test("enum page contains the 'values' constant", () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Constants</h2>'),
-            matches('<a href="../lib/E/values-constant.html">values</a>'),
-            matches(
-                'A constant List of the values in this enum, in order of their declaration.'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Constants</h2>'),
+          matches('<a href="../lib/E/values-constant.html">values</a>'),
+          matches(
+            'A constant List of the values in this enum, in order of their declaration.',
+          ),
+        ]),
+      );
     });
 
     test('enum page contains hashCode property', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Properties</h2>'),
-            matches('<a href=".*/dart-core/Object/hashCode.html">hashCode</a>'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Properties</h2>'),
+          matches('<a href=".*/dart-core/Object/hashCode.html">hashCode</a>'),
+        ]),
+      );
     });
 
     test('enum page contains index property', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Properties</h2>'),
-            matches('<a href=".*/dart-core/Enum/index.html">index</a>'),
-            matches('The integer index of this enum value.'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Properties</h2>'),
+          matches('<a href=".*/dart-core/Enum/index.html">index</a>'),
+          matches('The integer index of this enum value.'),
+        ]),
+      );
     });
 
     test('enum page contains other properties', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Properties</h2>'),
-            matches('<a href="../lib/E/f1.html">f1</a>'),
-            matches('A field.'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Properties</h2>'),
+          matches('<a href="../lib/E/f1.html">f1</a>'),
+          matches('A field.'),
+        ]),
+      );
     });
 
     test('enum page contains instance getters', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Properties</h2>'),
-            matches('<a href="../lib/E/ig1.html">ig1</a>'),
-            matches('An instance getter.'),
-            matches('<span class="feature">no setter</span>'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Properties</h2>'),
+          matches('<a href="../lib/E/ig1.html">ig1</a>'),
+          matches('An instance getter.'),
+          matches('<span class="feature">no setter</span>'),
+        ]),
+      );
     });
 
     test('enum page contains instance setters', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Properties</h2>'),
-            matches('<a href="../lib/E/is1.html">is1</a>'),
-            matches('An instance setter.'),
-            matches('<span class="feature">no getter</span>'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Properties</h2>'),
+          matches('<a href="../lib/E/is1.html">is1</a>'),
+          matches('An instance setter.'),
+          matches('<span class="feature">no getter</span>'),
+        ]),
+      );
     });
 
     test('enum page contains instance methods', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Methods</h2>'),
-            matches('<a href="../lib/E/m1.html">m1</a>'),
-            matches('A method.'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Methods</h2>'),
+          matches('<a href="../lib/E/m1.html">m1</a>'),
+          matches('A method.'),
+        ]),
+      );
     });
 
     test('enum page contains static methods', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Static Methods</h2>'),
-            matches('<a href="../lib/E/s1.html">s1</a>'),
-            matches('A static method.'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Static Methods</h2>'),
+          matches('<a href="../lib/E/s1.html">s1</a>'),
+          matches('A static method.'),
+        ]),
+      );
     });
 
     test('enum page contains static fields', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Static Properties</h2>'),
-            matches('<a href="../lib/E/sf1.html">sf1</a>'),
-            matches('A static field.'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Static Properties</h2>'),
+          matches('<a href="../lib/E/sf1.html">sf1</a>'),
+          matches('A static field.'),
+        ]),
+      );
     });
 
     test('enum page contains static getter/setter pairs', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Static Properties</h2>'),
-            matches('<a href="../lib/E/gs1.html">gs1</a>'),
-            matches('A static getter.'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Static Properties</h2>'),
+          matches('<a href="../lib/E/gs1.html">gs1</a>'),
+          matches('A static getter.'),
+        ]),
+      );
     });
 
     test('enum page contains (static) constants', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Constants</h2>'),
-            matches('<a href="../lib/E/c1-constant.html">c1</a>'),
-            matches('A constant.'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Constants</h2>'),
+          matches('<a href="../lib/E/c1-constant.html">c1</a>'),
+          matches('A constant.'),
+        ]),
+      );
     });
 
     test('enum page contains instance operators', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Operators</h2>'),
-            matches('<a href="../lib/E/operator_greater.html">operator ></a>'),
-            matches('An operator.'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Operators</h2>'),
+          matches('<a href="../lib/E/operator_greater.html">operator ></a>'),
+          matches('An operator.'),
+        ]),
+      );
     });
 
     test('enum sidebar contains values', () async {
@@ -389,7 +422,8 @@ extension Ext<T> on E<T> {}
         eRightSidebarLines,
         containsAllInOrder([
           matches(
-              '<a href="lib/E.html#static-properties">Static properties</a>'),
+            '<a href="lib/E.html#static-properties">Static properties</a>',
+          ),
           matches('<a href="lib/E/gs1.html">gs1</a>'),
           matches('<a href="lib/E/sf1.html">sf1</a>'),
         ]),

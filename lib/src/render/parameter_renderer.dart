@@ -25,10 +25,7 @@ class ParameterRendererHtmlList extends ParameterRendererHtml {
     String openingBracket = '',
     String closingBracket = '',
   }) {
-    var classes = [
-      'parameter-list',
-      if (!multiLine) 'single-line',
-    ];
+    var classes = ['parameter-list', if (!multiLine) 'single-line'];
     return '$openingBracket'
         '<ol class="${classes.join(' ')}"> $listItems</ol>'
         '$closingBracket';
@@ -51,8 +48,7 @@ class ParameterRendererHtml extends ParameterRenderer {
     bool multiLine = false,
     String openingBracket = '',
     String closingBracket = '',
-  }) =>
-      '$openingBracket$listItems$closingBracket';
+  }) => '$openingBracket$listItems$closingBracket';
 
   @override
   String annotation(String annotation) => '<span>$annotation</span>';
@@ -62,8 +58,9 @@ class ParameterRendererHtml extends ParameterRenderer {
 
   @override
   String defaultValue(String defaultValue) {
-    var escaped =
-        const HtmlEscape(HtmlEscapeMode.unknown).convert(defaultValue);
+    var escaped = const HtmlEscape(
+      HtmlEscapeMode.unknown,
+    ).convert(defaultValue);
     return '<span class="default-value">$escaped</span>';
   }
 
@@ -103,8 +100,10 @@ abstract class ParameterRenderer {
   String typeName(String typeName);
   String required(String required);
 
-  String renderLinkedParams(List<Parameter> parameters,
-      {bool showMetadata = true}) {
+  String renderLinkedParams(
+    List<Parameter> parameters, {
+    bool showMetadata = true,
+  }) {
     if (parameters.isEmpty) {
       return '';
     }
@@ -115,8 +114,9 @@ abstract class ParameterRenderer {
     var optionalPositionalParams = parameters
         .where((Parameter p) => p.isOptionalPositional)
         .toList(growable: false);
-    var namedParams =
-        parameters.where((Parameter p) => p.isNamed).toList(growable: false);
+    var namedParams = parameters
+        .where((Parameter p) => p.isNamed)
+        .toList(growable: false);
     var isMultiline =
         isBlock && (namedParams.isNotEmpty || parameters.length > 3);
 
@@ -152,7 +152,8 @@ abstract class ParameterRenderer {
       for (var p in positionalParams) {
         var suffix = identical(p, positionalParams.last) ? trailingText : ', ';
         buffer.write(
-            _renderParameter(p, showMetadata: showMetadata, suffix: suffix));
+          _renderParameter(p, showMetadata: showMetadata, suffix: suffix),
+        );
       }
     }
     if (optionalPositionalParams.isNotEmpty) {
@@ -163,7 +164,8 @@ abstract class ParameterRenderer {
             ? ', '
             : '';
         buffer.write(
-            _renderParameter(p, showMetadata: showMetadata, suffix: suffix));
+          _renderParameter(p, showMetadata: showMetadata, suffix: suffix),
+        );
       }
     }
     if (namedParams.isNotEmpty) {
@@ -172,7 +174,8 @@ abstract class ParameterRenderer {
       for (var p in namedParams) {
         var suffix = isMultiline || !identical(p, namedParams.last) ? ', ' : '';
         buffer.write(
-            _renderParameter(p, showMetadata: showMetadata, suffix: suffix));
+          _renderParameter(p, showMetadata: showMetadata, suffix: suffix),
+        );
       }
     }
 
@@ -218,8 +221,10 @@ abstract class ParameterRenderer {
           if (!modelType.typeFormals.every((t) => t.name == 'dynamic')) {
             buffer
               ..write('&lt;<wbr><span class="type-parameter">')
-              ..writeAll(modelType.typeFormals.map((t) => t.name),
-                  '</span>, <span class="type-parameter">')
+              ..writeAll(
+                modelType.typeFormals.map((t) => t.name),
+                '</span>, <span class="type-parameter">',
+              )
               ..write('</span>&gt;');
           }
         }
@@ -227,19 +232,20 @@ abstract class ParameterRenderer {
 
       if (!modelType.isTypedef && modelType is DefinedElementType) {
         buffer.write('(');
-        buffer.write(renderLinkedParams(
-          (modelType as DefinedElementType).modelElement.parameters,
-          showMetadata: showMetadata,
-        ));
+        buffer.write(
+          renderLinkedParams(
+            (modelType as DefinedElementType).modelElement.parameters,
+            showMetadata: showMetadata,
+          ),
+        );
         buffer.write(')');
         buffer.write(modelType.nullabilitySuffix);
       }
       if (!modelType.isTypedef) {
         buffer.write('(');
-        buffer.write(renderLinkedParams(
-          modelType.parameters,
-          showMetadata: showMetadata,
-        ));
+        buffer.write(
+          renderLinkedParams(modelType.parameters, showMetadata: showMetadata),
+        );
         buffer.write(')');
         buffer.write(modelType.nullabilitySuffix);
       }

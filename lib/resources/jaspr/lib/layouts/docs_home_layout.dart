@@ -159,15 +159,18 @@ class DocsHomeLayout extends PageLayoutBase {
     // highlight.js CDN
     yield link(
       id: 'hljs-theme',
-      href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css',
+      href:
+          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css',
       rel: 'stylesheet',
     );
     yield script(
-      src: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js',
+      src:
+          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js',
       defer: true,
     );
     yield script(
-      src: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/dart.min.js',
+      src:
+          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/dart.min.js',
       defer: true,
     );
     yield script(content: _hljsInitScript);
@@ -721,11 +724,7 @@ class DocsHomeLayout extends PageLayoutBase {
         color: Color('var(--docs-shell-shadow)'),
       ),
     ),
-    css('.content pre code.hljs').styles(
-      raw: {
-        'background': 'transparent',
-      },
-    ),
+    css('.content pre code.hljs').styles(raw: {'background': 'transparent'}),
     css('.docs-home-footer').styles(
       padding: Padding.only(top: 0.3.rem),
       color: Color('var(--docs-shell-muted)'),

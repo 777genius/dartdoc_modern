@@ -22,7 +22,7 @@ final class Annotation extends Attribute {
   final PackageGraph _packageGraph;
 
   Annotation(this._annotation, this._library, this._packageGraph)
-      : super(_annotation.element!.name!);
+    : super(_annotation.element!.name!);
 
   @override
   String get linkedNameWithParameters {
@@ -33,8 +33,9 @@ final class Annotation extends Attribute {
     // akin to source_gen's Reviver, in order to link to inner components. For
     // example, in `@Foo(const Bar(), baz: <Baz>[Baz.one, Baz.two])`, link to
     // `Foo`, `Bar`, `Baz`, `Baz.one`, and `Baz.two`.
-    var parameterText =
-        source.substring(startIndex == -1 ? source.length : startIndex);
+    var parameterText = source.substring(
+      startIndex == -1 ? source.length : startIndex,
+    );
 
     var escapedParameterText = const HtmlEscape().convert(parameterText);
     return '@$linkedName$_linkedTypeArguments$escapedParameterText';
@@ -42,12 +43,12 @@ final class Annotation extends Attribute {
 
   @override
   String get linkedName => switch (_annotation.element) {
-        PropertyAccessorElement element =>
-          _packageGraph.getModelForElement(element).linkedName,
-        ConstructorElement element =>
-          _packageGraph.getModelForElement(element).linkedName,
-        _ => _modelType.linkedName
-      };
+    PropertyAccessorElement element =>
+      _packageGraph.getModelForElement(element).linkedName,
+    ConstructorElement element =>
+      _packageGraph.getModelForElement(element).linkedName,
+    _ => _modelType.linkedName,
+  };
 
   /// The linked type argument text, with `<` and `>`, if there are any type
   /// arguments.
@@ -79,13 +80,16 @@ final class Annotation extends Attribute {
   }
 
   late final ElementType _modelType = switch (_annotation.element) {
-    ConstructorElement(:var returnType) =>
-      _packageGraph.getTypeFor(returnType, _library),
+    ConstructorElement(:var returnType) => _packageGraph.getTypeFor(
+      returnType,
+      _library,
+    ),
     PropertyAccessorElement(:var variable) =>
       (_packageGraph.getModelForElement(variable) as GetterSetterCombo)
           .modelType,
     _ => throw StateError(
-        'non-callable element used as annotation?: ${_annotation.element}')
+      'non-callable element used as annotation?: ${_annotation.element}',
+    ),
   };
 
   // We only construct Annotations which are public, as per

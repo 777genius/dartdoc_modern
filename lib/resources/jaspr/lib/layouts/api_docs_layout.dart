@@ -149,15 +149,18 @@ class ApiDocsLayout extends DocsLayout {
     // highlight.js CDN
     yield link(
       id: 'hljs-theme',
-      href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css',
+      href:
+          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css',
       rel: 'stylesheet',
     );
     yield script(
-      src: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js',
+      src:
+          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js',
       defer: true,
     );
     yield script(
-      src: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/dart.min.js',
+      src:
+          'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/dart.min.js',
       defer: true,
     );
     yield script(content: _hljsInitScript);
@@ -204,11 +207,7 @@ class ApiDocsLayout extends DocsLayout {
             (pageImage?.isNotEmpty ?? false));
 
     return Component.fragment([
-      Document.head(
-        children: [
-          Style(styles: _styles),
-        ],
-      ),
+      Document.head(children: [Style(styles: _styles)]),
       div(
         classes: 'docs',
         attributes: {'data-docs-layout': 'docs'},
@@ -985,9 +984,7 @@ class ApiDocsLayout extends DocsLayout {
         raw: {'overflow': 'visible'},
       ),
       css('main').styles(width: 100.percent, raw: {'overflow': 'visible'}),
-      css('.main-container main').styles(
-        padding: Padding.only(top: Unit.zero),
-      ),
+      css('.main-container main').styles(padding: Padding.only(top: Unit.zero)),
       css('main > div').styles(
         display: Display.grid,
         raw: {
@@ -1675,9 +1672,9 @@ class ApiDocsLayout extends DocsLayout {
       fontStyle: FontStyle.italic,
     ),
     // Dark mode: boost plain text contrast in code blocks.
-    css('[data-theme="dark"] .content pre code.hljs').styles(
-      raw: {'color': '#d4d4d8'},
-    ),
+    css(
+      '[data-theme="dark"] .content pre code.hljs',
+    ).styles(raw: {'color': '#d4d4d8'}),
     css(
       '.content pre .hljs-keyword, .content pre .hljs-selector-tag, .content pre .hljs-meta, .content pre .hljs-subst',
     ).styles(

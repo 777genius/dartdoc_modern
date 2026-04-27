@@ -35,14 +35,16 @@ import 'annotations.dart';
         ]),
       ],
     );
-    var renderersLibrary =
-        await resolveGeneratedLibrary2(aotRenderersForHtmlPath);
+    var renderersLibrary = await resolveGeneratedLibrary2(
+      aotRenderersForHtmlPath,
+    );
 
     expect(renderersLibrary.getTopLevelFunction('renderFoo'), isNotNull);
     expect(renderersLibrary.getTopLevelFunction('renderBar'), isNotNull);
     expect(
-        renderersLibrary.getTopLevelFunction('_renderFoo_partial_foo_header_0'),
-        isNotNull);
+      renderersLibrary.getTopLevelFunction('_renderFoo_partial_foo_header_0'),
+      isNotNull,
+    );
   }, timeout: Timeout.factor(2));
 
   test('builds a public API render function', () async {
@@ -58,12 +60,8 @@ library foo;
 import 'annotations.dart';
 ''',
       additionalAssets: () => [
-        d.dir('lib/templates', [
-          d.file('foo.html', 's1 is {{ s1 }}'),
-        ]),
-        d.dir('md', [
-          d.file('foo.md', 's1 is {{ s1 }}'),
-        ]),
+        d.dir('lib/templates', [d.file('foo.html', 's1 is {{ s1 }}')]),
+        d.dir('md', [d.file('foo.md', 's1 is {{ s1 }}')]),
       ],
     );
     var generatedContent = await File(aotRenderersForHtmlPath).readAsString();
@@ -92,8 +90,10 @@ import 'annotations.dart';
       ],
     );
     var generatedContent = await File(aotRenderersForHtmlPath).readAsString();
-    expect(generatedContent,
-        contains('String _renderFoo_partial_foo_header_0<T>(Foo<T> context0)'));
+    expect(
+      generatedContent,
+      contains('String _renderFoo_partial_foo_header_0<T>(Foo<T> context0)'),
+    );
   });
 
   test('builds a renderer for a generic, bounded type', () async {
@@ -104,8 +104,9 @@ class Foo<T extends num> {
 class Bar {}
 class Baz {}
 ''');
-    var renderersLibrary =
-        await resolveGeneratedLibrary2(aotRenderersForHtmlPath);
+    var renderersLibrary = await resolveGeneratedLibrary2(
+      aotRenderersForHtmlPath,
+    );
 
     var fooRenderFunction = renderersLibrary.getTopLevelFunction('renderFoo')!;
     expect(fooRenderFunction.typeParameters, hasLength(1));
@@ -147,13 +148,17 @@ import 'annotations.dart';
     var generatedContent = await File(aotRenderersForHtmlPath).readAsString();
     expect(
       generatedContent,
-      contains('String _renderFoo_partial_base_0(Foo context0) => '
-          '_deduplicated__base(context0);\n'),
+      contains(
+        'String _renderFoo_partial_base_0(Foo context0) => '
+        '_deduplicated__base(context0);\n',
+      ),
     );
     expect(
       generatedContent,
-      contains('String _renderBar_partial_base_0(Bar context0) => '
-          '_deduplicated__base(context0);\n'),
+      contains(
+        'String _renderBar_partial_base_0(Bar context0) => '
+        '_deduplicated__base(context0);\n',
+      ),
     );
     expect(
       generatedContent,
@@ -161,10 +166,11 @@ import 'annotations.dart';
     );
   });
 
-  test('deduplicates partials used multiple times in the same template',
-      () async {
-    await testMustachioBuilder(
-      '''
+  test(
+    'deduplicates partials used multiple times in the same template',
+    () async {
+      await testMustachioBuilder(
+        '''
 abstract class Foo {
   List<A> get l1;
   List<B> get l2;
@@ -176,15 +182,15 @@ class Base {
 class A extends Base {}
 class B extends Base {}
 ''',
-      libraryFrontMatter: '''
+        libraryFrontMatter: '''
 @Renderer(#renderFoo, Context<Foo>(), 'foo')
 library foo;
 import 'annotations.dart';
 ''',
-      additionalAssets: () => [
-        d.dir('lib', [
-          d.dir('templates', [
-            d.file('foo.html', '''
+        additionalAssets: () => [
+          d.dir('lib', [
+            d.dir('templates', [
+              d.file('foo.html', '''
 {{ #l1 }}
   {{ >base }}
 {{ /l1 }}
@@ -192,32 +198,38 @@ import 'annotations.dart';
   {{ >base }}
 {{ /l2 }}
 '''),
-            d.file('_base.html', 's1 is {{ s1 }}'),
+              d.file('_base.html', 's1 is {{ s1 }}'),
+            ]),
           ]),
-        ]),
-      ],
-    );
-    var generatedContent = await File(aotRenderersForHtmlPath).readAsString();
-    expect(
-      generatedContent,
-      contains('String _renderFoo_partial_base_0(A context1) => '
-          '_deduplicated__base(context1);\n'),
-    );
-    expect(
-      generatedContent,
-      contains('String _renderFoo_partial_base_1(B context1) => '
-          '_deduplicated__base(context1);\n'),
-    );
-    expect(
-      generatedContent,
-      contains('String _deduplicated__base(Base context0)'),
-    );
-  });
+        ],
+      );
+      var generatedContent = await File(aotRenderersForHtmlPath).readAsString();
+      expect(
+        generatedContent,
+        contains(
+          'String _renderFoo_partial_base_0(A context1) => '
+          '_deduplicated__base(context1);\n',
+        ),
+      );
+      expect(
+        generatedContent,
+        contains(
+          'String _renderFoo_partial_base_1(B context1) => '
+          '_deduplicated__base(context1);\n',
+        ),
+      );
+      expect(
+        generatedContent,
+        contains('String _deduplicated__base(Base context0)'),
+      );
+    },
+  );
 
-  test('does not deduplicate partials when attempting to do so throws',
-      () async {
-    await testMustachioBuilder(
-      '''
+  test(
+    'does not deduplicate partials when attempting to do so throws',
+    () async {
+      await testMustachioBuilder(
+        '''
 abstract class Base {}
 
 class Foo implements Base {
@@ -230,30 +242,31 @@ class Bar implements Base {
   String s1 = 'B';
 }
 ''',
-      libraryFrontMatter: '''
+        libraryFrontMatter: '''
 @Renderer(#renderFoo, Context<Foo>(), 'foo')
 @Renderer(#renderBar, Context<Bar>(), 'bar')
 library foo;
 import 'annotations.dart';
 ''',
-      additionalAssets: () => [
-        d.dir('lib/templates', [
-          d.file('foo.html', '{{ >base }}'),
-          d.file('bar.html', '{{ >base }}'),
-          d.file('_base.html', 's1 is {{ s1 }}'),
-        ]),
-      ],
-    );
-    var generatedContent = await File(aotRenderersForHtmlPath).readAsString();
-    expect(
-      generatedContent,
-      contains('String _renderFoo_partial_base_0(Foo context0) {'),
-    );
-    expect(
-      generatedContent,
-      contains('String _renderBar_partial_base_0(Bar context0) {'),
-    );
-  });
+        additionalAssets: () => [
+          d.dir('lib/templates', [
+            d.file('foo.html', '{{ >base }}'),
+            d.file('bar.html', '{{ >base }}'),
+            d.file('_base.html', 's1 is {{ s1 }}'),
+          ]),
+        ],
+      );
+      var generatedContent = await File(aotRenderersForHtmlPath).readAsString();
+      expect(
+        generatedContent,
+        contains('String _renderFoo_partial_base_0(Foo context0) {'),
+      );
+      expect(
+        generatedContent,
+        contains('String _renderBar_partial_base_0(Bar context0) {'),
+      );
+    },
+  );
 }
 
 String get aotRenderersForHtmlPath =>

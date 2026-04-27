@@ -170,8 +170,10 @@ enum E {
   const E.named(this.x);
 }
 ''');
-    var namedConstructor =
-        library.enums.named('E').constructors.named('E.named');
+    var namedConstructor = library.enums
+        .named('E')
+        .constructors
+        .named('E.named');
 
     expect(namedConstructor.isFactory, false);
     expect(namedConstructor.fullyQualifiedName, 'enums.E.named');
@@ -206,8 +208,10 @@ enum E { one, two, three }
 
     expect(eEnum.hasAnnotations, true);
     expect(eEnum.annotations, hasLength(1));
-    expect(eEnum.annotations.single.linkedName,
-        '<a href="$linkPrefix/C/C.html">C</a>');
+    expect(
+      eEnum.annotations.single.linkedName,
+      '<a href="$linkPrefix/C/C.html">C</a>',
+    );
   }
 
   void test_hasDocComment() async {
@@ -263,10 +267,7 @@ enum E {
     expect(field1.isInherited, false);
     expect(field1.isStatic, false);
     expect(field1.isDocumented, true);
-    expect(
-      field1.linkedName,
-      '<a href="$linkPrefix/E/field1.html">field1</a>',
-    );
+    expect(field1.linkedName, '<a href="$linkPrefix/E/field1.html">field1</a>');
     expect(field1.documentationComment, '/// Doc comment.');
   }
 
@@ -441,8 +442,10 @@ enum E {
   bool operator <(E other) => index < other.index;
 }
 ''');
-    var greaterThan =
-        library.enums.named('E').instanceOperators.named('operator >');
+    var greaterThan = library.enums
+        .named('E')
+        .instanceOperators
+        .named('operator >');
 
     expect(greaterThan.isInherited, false);
     expect(greaterThan.isOperator, true);
@@ -455,8 +458,10 @@ enum E {
     );
     expect(greaterThan.documentationComment, '/// Greater than.');
 
-    var lessThan =
-        library.enums.named('E').instanceOperators.named('operator <');
+    var lessThan = library.enums
+        .named('E')
+        .instanceOperators
+        .named('operator <');
 
     expect(lessThan.isInherited, false);
     expect(lessThan.isOperator, true);
@@ -599,8 +604,10 @@ class C {}
     var eEnum = library.enums.named('E');
     var toStringMethod = eEnum.instanceMethods.named('toString');
     expect(toStringMethod.characterLocation, isNotNull);
-    expect(toStringMethod.characterLocation.toString(),
-        equals(eEnum.characterLocation.toString()));
+    expect(
+      toStringMethod.characterLocation.toString(),
+      equals(eEnum.characterLocation.toString()),
+    );
   }
 
   void test_value_canBeReferenced() async {
@@ -611,8 +618,10 @@ enum E { one, two, three }
 class C {}
 ''');
     var cClass = library.classes.named('C');
-    expect(cClass.documentationAsHtml,
-        '<p>Reference to <a href="$linkPrefix/E.html">E.one</a>.</p>');
+    expect(
+      cClass.documentationAsHtml,
+      '<p>Reference to <a href="$linkPrefix/E.html">E.one</a>.</p>',
+    );
   }
 
   void test_value_hasDocComment() async {
@@ -646,9 +655,7 @@ enum E { one, two three }
       d.file('lib/enums.dart', '''
 export 'src/library.dart';
 '''),
-    ]))
-        .libraries
-        .named(libraryName);
+    ])).libraries.named(libraryName);
     var oneValue =
         library.enums.named('E').publicEnumValues.named('one') as EnumField;
     expect(oneValue.linkedName, '<a href="$linkPrefix/E.html#one">one</a>');

@@ -12,8 +12,10 @@ class ExtensionType extends InheritingContainer with Constructable {
   @override
   final ExtensionTypeElement element;
 
-  late final ElementType representationType =
-      getTypeFor(element.representation.type, library);
+  late final ElementType representationType = getTypeFor(
+    element.representation.type,
+    library,
+  );
 
   ExtensionType(this.element, super.library, super.packageGraph);
 
@@ -39,19 +41,26 @@ class ExtensionType extends InheritingContainer with Constructable {
   bool get isSealed => false;
 
   @override
-  late final List<Field> declaredFields = element.fields.map((field) {
-    ContainerAccessor? getter, setter;
-    final fieldGetter = field.getter;
-    if (fieldGetter != null) {
-      getter = ContainerAccessor(fieldGetter, library, packageGraph, this);
-    }
-    final fieldSetter = field.setter;
-    if (fieldSetter != null) {
-      setter = ContainerAccessor(fieldSetter, library, packageGraph, this);
-    }
-    return getModelForPropertyInducingElement(field, library,
-        getter: getter, setter: setter) as Field;
-  }).toList(growable: false);
+  late final List<Field> declaredFields = element.fields
+      .map((field) {
+        ContainerAccessor? getter, setter;
+        final fieldGetter = field.getter;
+        if (fieldGetter != null) {
+          getter = ContainerAccessor(fieldGetter, library, packageGraph, this);
+        }
+        final fieldSetter = field.setter;
+        if (fieldSetter != null) {
+          setter = ContainerAccessor(fieldSetter, library, packageGraph, this);
+        }
+        return getModelForPropertyInducingElement(
+              field,
+              library,
+              getter: getter,
+              setter: setter,
+            )
+            as Field;
+      })
+      .toList(growable: false);
 
   @override
   late final List<ModelElement> allModelElements = [

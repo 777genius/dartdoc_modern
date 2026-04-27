@@ -253,8 +253,12 @@ R<int> f(int a, String b) {
     final fFunc = library.functions.named('f');
 
     expect(
-        fFunc.modelType.returnType,
-        isA<AliasedUndefinedElementType>().having((e) => e.typeAliasElement2,
-            'typeAliasElement', equals(rTypedef.element)));
+      fFunc.modelType.returnType,
+      isA<AliasedUndefinedElementType>().having(
+        (e) => e.typeAliasElement2,
+        'typeAliasElement',
+        equals(rTypedef.element),
+      ),
+    );
   }
 }

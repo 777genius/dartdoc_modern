@@ -14,7 +14,8 @@ class BasePathLinkExtension implements PageExtension {
 
   List<Node> _rewriteNodes(List<Node> nodes, {required String currentPageUrl}) {
     return [
-      for (final node in nodes) _rewriteNode(node, currentPageUrl: currentPageUrl),
+      for (final node in nodes)
+        _rewriteNode(node, currentPageUrl: currentPageUrl),
     ];
   }
 

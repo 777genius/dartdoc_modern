@@ -21,10 +21,11 @@ class MultiplyDefinedTest extends DartdocTestBase {
   String get libraryName => 'multiply_defined';
 
   void test_referencingAnErroneousMultiplyDefinedElement() async {
-    await d.dir('lib', [
-      d.file('import1.dart', 'class C {}'),
-      d.file('import2.dart', 'class C {}'),
-      d.file('lib.dart', '''
+    await d
+        .dir('lib', [
+          d.file('import1.dart', 'class C {}'),
+          d.file('import2.dart', 'class C {}'),
+          d.file('lib.dart', '''
 library $libraryName;
 
 import 'import1.dart';
@@ -33,7 +34,8 @@ import 'import2.dart';
 /// Reference to [C].
 void foo(C c) {}
 '''),
-    ]).createInMemory(resourceProvider, packagePath);
+        ])
+        .createInMemory(resourceProvider, packagePath);
 
     var packageGraph = await bootBasicPackage(packagePath, packageMetaProvider);
     var library = packageGraph.libraries.named(libraryName);

@@ -77,16 +77,20 @@ class ProgressBar {
       return;
     }
     _tickCount++;
-    final fractionComplete =
-        math.max(0, _tickCount * _innerWidth ~/ totalTickCount - 1);
+    final fractionComplete = math.max(
+      0,
+      _tickCount * _innerWidth ~/ totalTickCount - 1,
+    );
     // The inner space consists of hyphens, one spinner character, spaces, and a
     // percentage (8 characters).
     final hyphens = '-' * fractionComplete;
     final trailingSpace = ' ' * (_innerWidth - fractionComplete - 1);
     final spinner = _animationItems[_tickCount % 4];
     final pctComplete = (_tickCount * 100 / totalTickCount).toStringAsFixed(2);
-    _logger.log(progressBarUpdate,
-        '\r[$hyphens$spinner$trailingSpace] ($pctComplete%)');
+    _logger.log(
+      progressBarUpdate,
+      '\r[$hyphens$spinner$trailingSpace] ($pctComplete%)',
+    );
   }
 }
 

@@ -6,11 +6,11 @@ class DocsDisclosureRuntime extends StatelessComponent {
 
   @override
   Component build(BuildContext context) => span(
-        attributes: {
-          'data-docs-disclosure-runtime': '',
-          'hidden': 'hidden',
-          'aria-hidden': 'true',
-        },
-        const [],
-      );
+    attributes: {
+      'data-docs-disclosure-runtime': '',
+      'hidden': 'hidden',
+      'aria-hidden': 'true',
+    },
+    const [],
+  );
 }

@@ -58,7 +58,8 @@ Future<void> testMustachioBuilder(
   String libraryFrontMatter = libraryFrontMatter,
   Iterable<DirectoryDescriptor> Function()? additionalAssets,
 }) async {
-  sourceLibraryContent = '''
+  sourceLibraryContent =
+      '''
 $libraryFrontMatter
 $sourceLibraryContent
 ''';
@@ -75,8 +76,10 @@ $sourceLibraryContent
     ]),
   ]).create();
   await d.dir('foo_package', [...additionalAssets()]).create();
-  await build(path.join(d.sandbox, 'foo_package', 'lib/foo.dart'),
-      root: path.join(d.sandbox, 'foo_package'));
+  await build(
+    path.join(d.sandbox, 'foo_package', 'lib/foo.dart'),
+    root: path.join(d.sandbox, 'foo_package'),
+  );
 }
 
 Future<LibraryElement> resolveGeneratedLibrary2(String libraryPath) async {
@@ -89,12 +92,14 @@ Future<LibraryElement> resolveGeneratedLibrary2(String libraryPath) async {
     withFineDependencies: true,
   );
   var analysisContext = contextCollection.contextFor(d.sandbox);
-  final libraryResult =
-      await analysisContext.currentSession.getResolvedLibrary(libraryPath);
+  final libraryResult = await analysisContext.currentSession.getResolvedLibrary(
+    libraryPath,
+  );
   if (libraryResult is! ResolvedLibraryResult) {
     throw StateError(
-        'Expected library result to be ResolvedLibraryResult, but is '
-        '${libraryResult.runtimeType}');
+      'Expected library result to be ResolvedLibraryResult, but is '
+      '${libraryResult.runtimeType}',
+    );
   }
 
   return libraryResult.element;

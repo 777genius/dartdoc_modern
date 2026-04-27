@@ -222,8 +222,10 @@ abstract class _D<K, V> implements A<K, V> {
 abstract class E<K, V> = C<K, V> with _D<K, V>;
 ''');
 
-    var indexAssign =
-        library.classes.named('E').inheritedOperators.named('operator []=');
+    var indexAssign = library.classes
+        .named('E')
+        .inheritedOperators
+        .named('operator []=');
     expect(indexAssign.element.enclosingElement!.name, '_D');
     expect(indexAssign.canonicalEnclosingContainer!.name, 'E');
     expect(indexAssign.canonicalModelElement!.enclosingElement!.name, 'E');

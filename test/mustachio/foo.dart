@@ -2,8 +2,12 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-@Renderer.forTest(#renderFoo, Context<Foo>(), 'foo',
-    visibleTypes: {Property1, Property2, Property3})
+@Renderer.forTest(
+  #renderFoo,
+  Context<Foo>(),
+  'foo',
+  visibleTypes: {Property1, Property2, Property3},
+)
 @Renderer.forTest(#renderBar, Context<Bar>(), 'bar')
 @Renderer.forTest(#renderBaz, Context<Baz>(), 'baz')
 library;

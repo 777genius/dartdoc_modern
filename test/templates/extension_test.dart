@@ -96,7 +96,8 @@ dartdoc:
           .split('\n');
       eRightSidebarLines = resourceProvider
           .getFile(
-              path.join(packagePath, 'doc', 'lib', 'E-extension-sidebar.html'))
+            path.join(packagePath, 'doc', 'lib', 'E-extension-sidebar.html'),
+          )
           .readAsStringSync()
           .split('\n');
     });
@@ -104,11 +105,14 @@ dartdoc:
     test('extension page contains extension name with generics', () async {
       // TODO(srawlins): Use expectMainContentContainsAllInOrder throughout.
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<span class="kind-class">E&lt;<wbr>'
-                '<span class="type-parameter">T</span>&gt;</span> extension'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches(
+            '<span class="kind-class">E&lt;<wbr>'
+            '<span class="type-parameter">T</span>&gt;</span> extension',
+          ),
+        ]),
+      );
     });
 
     test('extension page contains extended types', () async {
@@ -116,70 +120,79 @@ dartdoc:
         eLines,
         containsAllInOrder([
           matches('<dt>on</dt>'),
-          matches('<a href="../lib/C-class.html">C</a>'
-              '<span class="signature">&lt;<wbr>'
-              '<span class="type-parameter">T</span>&gt;</span>'),
+          matches(
+            '<a href="../lib/C-class.html">C</a>'
+            '<span class="signature">&lt;<wbr>'
+            '<span class="type-parameter">T</span>&gt;</span>',
+          ),
         ]),
       );
     });
 
     test('extension page contains static methods', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Static Methods</h2>'),
-            matches('<a href="../lib/E/s1.html">s1</a>'),
-            matches('A static method.'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Static Methods</h2>'),
+          matches('<a href="../lib/E/s1.html">s1</a>'),
+          matches('A static method.'),
+        ]),
+      );
     });
 
     test('extension page contains static fields', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Static Properties</h2>'),
-            matches('<a href="../lib/E/sf1.html">sf1</a>'),
-            matches('A static field.'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Static Properties</h2>'),
+          matches('<a href="../lib/E/sf1.html">sf1</a>'),
+          matches('A static field.'),
+        ]),
+      );
     });
 
     test('extension page contains static getter/setter pairs', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Static Properties</h2>'),
-            matches('<a href="../lib/E/gs1.html">gs1</a>'),
-            matches('A static getter.'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Static Properties</h2>'),
+          matches('<a href="../lib/E/gs1.html">gs1</a>'),
+          matches('A static getter.'),
+        ]),
+      );
     });
 
     test('extension page contains (static) constants', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Constants</h2>'),
-            matches('<a href="../lib/E/c1-constant.html">c1</a>'),
-            matches('A constant.'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Constants</h2>'),
+          matches('<a href="../lib/E/c1-constant.html">c1</a>'),
+          matches('A constant.'),
+        ]),
+      );
     });
 
     test('extension page contains instance operators', () async {
       expect(
-          eLines,
-          containsAllInOrder([
-            matches('<h2>Operators</h2>'),
-            matches('<a href="../lib/E/operator_greater.html">operator ></a>'),
-            matches('An operator.'),
-          ]));
+        eLines,
+        containsAllInOrder([
+          matches('<h2>Operators</h2>'),
+          matches('<a href="../lib/E/operator_greater.html">operator ></a>'),
+          matches('An operator.'),
+        ]),
+      );
     });
 
     test('extension page contains source link', () async {
       expect(
         eLines,
         containsAllInOrder([
-          matches('<a title="View source code" class="source-link" '
-              'href="https://github.com/dart-lang/TEST_PKG/lib/lib.dart#L5">'
-              '<span class="material-symbols-outlined">description</span></a>'),
+          matches(
+            '<a title="View source code" class="source-link" '
+            'href="https://github.com/dart-lang/TEST_PKG/lib/lib.dart#L5">'
+            '<span class="material-symbols-outlined">description</span></a>',
+          ),
         ]),
       );
     });
@@ -209,7 +222,8 @@ dartdoc:
         eRightSidebarLines,
         containsAllInOrder([
           matches(
-              '<a href="lib/E.html#static-properties">Static properties</a>'),
+            '<a href="lib/E.html#static-properties">Static properties</a>',
+          ),
           matches('<a href="lib/E/gs1.html">gs1</a>'),
           matches('<a href="lib/E/sf1.html">sf1</a>'),
         ]),

@@ -8,4 +8,5 @@ build/
 .packages
 
 # Generated files
-lib/generated/
+lib/generated/*
+!lib/generated/api_symbols.dart

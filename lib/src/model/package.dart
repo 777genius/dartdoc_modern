@@ -38,41 +38,42 @@ final class Package extends LibraryContainer
 
   // Creates a package, if necessary, and adds it to the [packageGraph].
   factory Package.fromPackageMeta(
-      PackageMeta packageMeta, PackageGraph packageGraph) {
+    PackageMeta packageMeta,
+    PackageGraph packageGraph,
+  ) {
     var packageName = packageMeta.name;
-    var expectNonLocal = !packageGraph.packageMap.containsKey(packageName) &&
+    var expectNonLocal =
+        !packageGraph.packageMap.containsKey(packageName) &&
         packageGraph.allLibrariesAdded;
-    var packagePath = packageGraph.resourceProvider.pathContext
-        .canonicalize(packageMeta.dir.path);
+    var packagePath = packageGraph.resourceProvider.pathContext.canonicalize(
+      packageMeta.dir.path,
+    );
     var package = packageGraph.packageMap.putIfAbsent(
       packageMeta.name,
-      () => Package._(
-        packageMeta.name,
-        packageGraph,
-        packageMeta,
-        packagePath,
-      ),
+      () => Package._(packageMeta.name, packageGraph, packageMeta, packagePath),
     );
     // Verify that we don't somehow decide to document locally a package picked
     // up after all documented libraries are added, because that breaks the
     // assumption that we've picked up all documented libraries and packages
     // before allLibrariesAdded is true.
     assert(
-        !(expectNonLocal && package.documentedWhere == DocumentLocation.local),
-        "Found more libraries to document after 'allLibrariesAdded' was set to "
-        'true');
+      !(expectNonLocal && package.documentedWhere == DocumentLocation.local),
+      "Found more libraries to document after 'allLibrariesAdded' was set to "
+      'true',
+    );
     return package;
   }
 
   Package._(this.name, this.packageGraph, this.packageMeta, this.packagePath)
-      : config = DartdocOptionContext.fromContext(
-          packageGraph.config,
-          packageGraph.resourceProvider.getFolder(packagePath),
-          packageGraph.resourceProvider,
-        ),
-        super(
-            isSdk: packageMeta.isSdk,
-            enclosingName: packageGraph.defaultPackageName);
+    : config = DartdocOptionContext.fromContext(
+        packageGraph.config,
+        packageGraph.resourceProvider.getFolder(packagePath),
+        packageGraph.resourceProvider,
+      ),
+      super(
+        isSdk: packageMeta.isSdk,
+        enclosingName: packageGraph.defaultPackageName,
+      );
 
   @override
   bool get isCanonical => true;
@@ -138,8 +139,12 @@ final class Package extends LibraryContainer
     if (!packageGraph.hasEmbedderSdk) return false;
     if (!packageMeta.isSdk) return false;
     final packagePath = packageGraph.packageMeta.dir.path;
-    return libraries.any((l) => _pathContext.isWithin(
-        packagePath, l.element.firstFragment.source.fullName));
+    return libraries.any(
+      (l) => _pathContext.isWithin(
+        packagePath,
+        l.element.firstFragment.source.fullName,
+      ),
+    );
   }
 
   /// True if the global config excludes this package by name.
@@ -203,8 +208,10 @@ final class Package extends LibraryContainer
               tag = version.preRelease.whereType<String>().first;
               // Who knows about non-SDK packages, but SDKs must conform to the
               // known format.
-              assert(!packageMeta.isSdk || int.tryParse(tag) == null,
-                  'Got an integer as string instead of the expected "dev" tag');
+              assert(
+                !packageMeta.isSdk || int.tryParse(tag) == null,
+                'Got an integer as string instead of the expected "dev" tag',
+              );
             }
             return tag;
           }
@@ -245,7 +252,9 @@ final class Package extends LibraryContainer
   /// map, if it is annotated with `{@category}`, or `[defaultCategory], if not,
   /// via the [addTo] callback.
   void addToCategories(
-      ModelElement categorization, void Function(Category) addTo) {
+    ModelElement categorization,
+    void Function(Category) addTo,
+  ) {
     if (!categorization.isCanonical) {
       return;
     }
@@ -255,8 +264,12 @@ final class Package extends LibraryContainer
       return;
     }
     for (var category in categoryNames) {
-      addTo(nameToCategory.putIfAbsent(
-          category, () => Category(category, this, config)));
+      addTo(
+        nameToCategory.putIfAbsent(
+          category,
+          () => Category(category, this, config),
+        ),
+      );
     }
   }
 
@@ -284,7 +297,9 @@ final class Package extends LibraryContainer
       }
       for (var extensionType in library.extensionTypes) {
         addToCategories(
-            extensionType, (c) => c.extensionTypes.add(extensionType));
+          extensionType,
+          (c) => c.extensionTypes.add(extensionType),
+        );
       }
       for (var class_ in library.classesAndExceptions) {
         addToCategories(class_, (c) => c.addClass(class_));
@@ -302,8 +317,7 @@ final class Package extends LibraryContainer
   late final List<Category> categories = [
     defaultCategory,
     ...nameToCategory.values,
-  ].where((c) => c.name.isNotEmpty).toList(growable: false)
-    ..sort();
+  ].where((c) => c.name.isNotEmpty).toList(growable: false)..sort();
 
   Iterable<Category> get categoriesWithPublicLibraries =>
       categories.where((c) => c.libraries.any((e) => e.isPublic));
@@ -321,27 +335,27 @@ final class Package extends LibraryContainer
       return categories.whereDocumented;
     }
 
-    var documentedCategories =
-        categories.whereDocumented.toList(growable: false);
-    return documentedCategories
-      ..sort((a, b) {
-        var aIndex = config.categoryOrder.indexOf(a.name);
-        var bIndex = config.categoryOrder.indexOf(b.name);
-        if (aIndex >= 0 && bIndex >= 0) {
-          return aIndex.compareTo(bIndex);
-        } else if (aIndex < 0 && bIndex >= 0) {
-          // `a` is not found in the category order, but `b` is.
-          return 1;
-        } else if (bIndex < 0 && aIndex >= 0) {
-          // `b` is not found in the category order, but `a` is.
-          return -1;
-        } else {
-          // Neither is found in the category order.
-          return documentedCategories
-              .indexOf(a)
-              .compareTo(documentedCategories.indexOf(b));
-        }
-      });
+    var documentedCategories = categories.whereDocumented.toList(
+      growable: false,
+    );
+    return documentedCategories..sort((a, b) {
+      var aIndex = config.categoryOrder.indexOf(a.name);
+      var bIndex = config.categoryOrder.indexOf(b.name);
+      if (aIndex >= 0 && bIndex >= 0) {
+        return aIndex.compareTo(bIndex);
+      } else if (aIndex < 0 && bIndex >= 0) {
+        // `a` is not found in the category order, but `b` is.
+        return 1;
+      } else if (bIndex < 0 && aIndex >= 0) {
+        // `b` is not found in the category order, but `a` is.
+        return -1;
+      } else {
+        // Neither is found in the category order.
+        return documentedCategories
+            .indexOf(a)
+            .compareTo(documentedCategories.indexOf(b));
+      }
+    });
   }
 
   bool get hasDocumentedCategories => categories.any((e) => e.isDocumented);
@@ -379,7 +393,7 @@ final class Package extends LibraryContainer
     for (var library in publicLibrariesSorted) ...{
       library.referenceName: library,
       ...library.referenceChildren,
-    }
+    },
   };
 
   @override

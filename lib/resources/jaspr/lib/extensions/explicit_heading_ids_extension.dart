@@ -31,11 +31,10 @@ class ExplicitHeadingIdsExtension implements PageExtension {
       return ElementNode(node.tag, node.attributes, rewrittenChildren);
     }
 
-    return ElementNode(
-      node.tag,
-      {...node.attributes, 'id': explicitId},
-      rewrittenChildren,
-    );
+    return ElementNode(node.tag, {
+      ...node.attributes,
+      'id': explicitId,
+    }, rewrittenChildren);
   }
 
   String? _extractTrailingAnchor(List<Node> children) {

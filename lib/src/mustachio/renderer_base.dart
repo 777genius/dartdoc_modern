@@ -50,10 +50,11 @@ class Template {
   /// A mapping of partial [File]s to parsed Mustache templates.
   final Map<File, Template> partialTemplates;
 
-  Template._(
-      {required this.ast,
-      required this.partials,
-      required this.partialTemplates});
+  Template._({
+    required this.ast,
+    required this.partials,
+    required this.partialTemplates,
+  });
 
   /// Parses [file] as a Mustache template, returning a [Template].
   ///
@@ -71,9 +72,11 @@ class Template {
   /// node, `{{>p2.html}}`, then this partial file path is resolved (relative to
   /// the directory containing `p1.html`, not relative to the top-level
   /// template), as `/foo/partials/p2.html`.
-  static Future<Template> parse(File file,
-      {PartialResolver? partialResolver,
-      @internal Map<File, Template>? partialTemplates}) async {
+  static Future<Template> parse(
+    File file, {
+    PartialResolver? partialResolver,
+    @internal Map<File, Template>? partialTemplates,
+  }) async {
     partialTemplates ??= <File, Template>{};
     if (partialResolver == null) {
       var pathContext = file.provider.pathContext;
@@ -84,8 +87,9 @@ class Template {
         var partialPath = pathContext.isAbsolute(path)
             ? path
             : pathContext.join(file.parent.path, path);
-        var partialFile =
-            file.provider.getFile(pathContext.normalize(partialPath));
+        var partialFile = file.provider.getFile(
+          pathContext.normalize(partialPath),
+        );
         return partialFile;
       };
     }
@@ -118,20 +122,28 @@ class Template {
           var partialFile = partials[key]!;
           if (!partialTemplates.containsKey(partialFile)) {
             try {
-              var partialTemplate = await Template.parse(partialFile,
-                  partialResolver: partialResolver,
-                  partialTemplates: {...partialTemplates});
+              var partialTemplate = await Template.parse(
+                partialFile,
+                partialResolver: partialResolver,
+                partialTemplates: {...partialTemplates},
+              );
               partialTemplates[partialFile] = partialTemplate;
             } on FileSystemException catch (e) {
-              throw MustachioResolutionException(span.message(
-                  'FileSystemException (${e.message}) when reading partial:'));
+              throw MustachioResolutionException(
+                span.message(
+                  'FileSystemException (${e.message}) when reading partial:',
+                ),
+              );
             }
           }
       }
     }
 
     return Template._(
-        ast: ast, partials: partials, partialTemplates: partialTemplates);
+      ast: ast,
+      partials: partials,
+      partialTemplates: partialTemplates,
+    );
   }
 }
 
@@ -196,11 +208,14 @@ abstract class RendererBase<T extends Object?> {
           // The exception thrown by [Property.renderVariable] does not have all
           // of the names required for a decent error. We throw a new error
           // here.
-          throw MustachioResolutionException(node.keySpan.message(
+          throw MustachioResolutionException(
+            node.keySpan.message(
               "Failed to resolve '${e.name}' on ${e.contextType} while "
               'resolving $remainingNames as a property chain on any types in '
               'the context chain: $contextChainString, after first resolving '
-              "'$firstName' to a property on $T"));
+              "'$firstName' to a property on $T",
+            ),
+          );
         }
       }
     } on _MustachioResolutionExceptionWithoutSpan catch (e) {
@@ -211,9 +226,12 @@ abstract class RendererBase<T extends Object?> {
     if (parent != null) {
       return parent.getFields(node);
     } else {
-      throw MustachioResolutionException(node.keySpan.message(
+      throw MustachioResolutionException(
+        node.keySpan.message(
           "Failed to resolve '${names.first}' as a property on any types in "
-          'the context chain: $contextChainString'));
+          'the context chain: $contextChainString',
+        ),
+      );
     }
   }
 
@@ -244,9 +262,12 @@ abstract class RendererBase<T extends Object?> {
     if (property == null) {
       final parent = this.parent;
       if (parent == null) {
-        throw MustachioResolutionException(node.keySpan.message(
+        throw MustachioResolutionException(
+          node.keySpan.message(
             "Failed to resolve '$key' as a property on any types in the "
-            'current context'));
+            'current context',
+          ),
+        );
       } else {
         return parent.section(node);
       }
@@ -295,9 +316,14 @@ abstract class RendererBase<T extends Object?> {
   }
 }
 
-String renderSimple(Object? context, List<MustachioNode> ast, Template template,
-    StringSink sink,
-    {required RendererBase<Object> parent, required Set<String> getters}) {
+String renderSimple(
+  Object? context,
+  List<MustachioNode> ast,
+  Template template,
+  StringSink sink, {
+  required RendererBase<Object> parent,
+  required Set<String> getters,
+}) {
   var renderer = SimpleRenderer(context, parent, template, sink, getters);
   renderer.renderBlock(ast);
   return renderer.sink.toString();
@@ -329,7 +355,8 @@ class SimpleRenderer extends RendererBase<Object?> {
       return context.toString();
     } else if (_invisibleGetters.contains(firstName)) {
       throw MustachioResolutionException(
-          _failedKeyVisibilityMessage(firstName));
+        _failedKeyVisibilityMessage(firstName),
+      );
     } else if (parent != null) {
       return parent!.getFields(node);
     } else {
@@ -361,31 +388,40 @@ class Property<T extends Object?> {
   final bool Function(T context)? getBool;
 
   final Iterable<void> Function(
-      T, RendererBase<T>, List<MustachioNode>, StringSink)? renderIterable;
+    T,
+    RendererBase<T>,
+    List<MustachioNode>,
+    StringSink,
+  )?
+  renderIterable;
 
   final bool Function(T) isNullValue;
 
   final void Function(T, RendererBase<T>, List<MustachioNode>, StringSink)?
-      renderValue;
+  renderValue;
 
-  Property(
-      {required this.getValue,
-      required this.renderVariable,
-      this.getBool,
-      this.renderIterable,
-      // TODO(jcollins-g): consider making this required or emitting warnings
-      // if called on a non-nullable?
-      bool Function(T)? isNullValue,
-      this.renderValue})
-      : isNullValue = (isNullValue ?? (_) => false);
+  Property({
+    required this.getValue,
+    required this.renderVariable,
+    this.getBool,
+    this.renderIterable,
+    // TODO(jcollins-g): consider making this required or emitting warnings
+    // if called on a non-nullable?
+    bool Function(T)? isNullValue,
+    this.renderValue,
+  }) : isNullValue = (isNullValue ?? (_) => false);
 
   String renderSimpleVariable(
-      T c, List<String> remainingNames, String typeString) {
+    T c,
+    List<String> remainingNames,
+    String typeString,
+  ) {
     if (remainingNames.isEmpty) {
       return getValue(c).toString();
     } else {
       throw MustachioResolutionException(
-          _simpleResolveErrorMessage(remainingNames, typeString));
+        _simpleResolveErrorMessage(remainingNames, typeString),
+      );
     }
   }
 

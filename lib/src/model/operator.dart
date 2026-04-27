@@ -16,7 +16,8 @@ class Operator extends Method {
     super.packageGraph, {
     Element? originalMember,
   }) : super.providedByExtension(
-            originalElement: originalMember as ExecutableElement?);
+         originalElement: originalMember as ExecutableElement?,
+       );
 
   Operator.inherited(
     super.element,

@@ -17,9 +17,11 @@ void main() {
 
 @reflectiveTest
 class ExampleDirectiveTest extends DocumentationCommentTestBase {
-  Future<void> _bootPackage(String comment,
-      {Map<String, String> files = const {},
-      String libraryPath = 'lib/a.dart'}) async {
+  Future<void> _bootPackage(
+    String comment, {
+    Map<String, String> files = const {},
+    String libraryPath = 'lib/a.dart',
+  }) async {
     projectRoot = utils.writePackage(packageName, resourceProvider);
     var pathContext = resourceProvider.pathContext;
 
@@ -29,13 +31,17 @@ class ExampleDirectiveTest extends DocumentationCommentTestBase {
 
     _writeFile(libraryPath, '$comment\nlibrary;');
 
-    packageGraph =
-        await utils.bootBasicPackage(projectRoot.path, packageMetaProvider);
+    packageGraph = await utils.bootBasicPackage(
+      projectRoot.path,
+      packageMetaProvider,
+    );
 
-    var expectedPath =
-        pathContext.normalize(pathContext.join(projectRoot.path, libraryPath));
+    var expectedPath = pathContext.normalize(
+      pathContext.join(projectRoot.path, libraryPath),
+    );
     libraryModel = packageGraph.defaultPackage.libraries.firstWhere(
-        (l) => pathContext.normalize(l.sourceFileName) == expectedPath);
+      (l) => pathContext.normalize(l.sourceFileName) == expectedPath,
+    );
   }
 
   void _writeFile(String path, String content) {
@@ -51,20 +57,23 @@ class ExampleDirectiveTest extends DocumentationCommentTestBase {
   }
 
   void test_processesExampleDirective() async {
-    await _bootPackage('''
+    await _bootPackage(
+      '''
 /// Text.
 ///
 /// {@example /examples/hello.dart}
 ///
 /// End text.
-''', files: {
-      'examples/hello.dart': 'void main() => print("hello");',
-    });
+''',
+      files: {'examples/hello.dart': 'void main() => print("hello");'},
+    );
 
     var doc = await libraryModel.processComment();
 
     expectNoWarnings();
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 Text.
 
 
@@ -73,122 +82,153 @@ void main() => print("hello");
 ```
 
 
-End text.'''));
+End text.'''),
+    );
   }
 
   void test_processesExampleDirective_noExtension_noLang() async {
-    await _bootPackage('''
+    await _bootPackage(
+      '''
 /// {@example /examples/hello}
-''', files: {
-      'examples/hello': 'hello world',
-    });
+''',
+      files: {'examples/hello': 'hello world'},
+    );
 
     var doc = await libraryModel.processComment();
 
     expectNoWarnings();
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 
 ```
 hello world
 ```
-'''));
+'''),
+    );
   }
 
   void test_processesExampleDirective_withLang() async {
-    await _bootPackage('''
+    await _bootPackage(
+      '''
 /// {@example /examples/hello.txt lang=text}
-''', files: {
-      'examples/hello.txt': 'hello world',
-    });
+''',
+      files: {'examples/hello.txt': 'hello world'},
+    );
 
     var doc = await libraryModel.processComment();
 
     expectNoWarnings();
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 
 ```text
 hello world
 ```
-'''));
+'''),
+    );
   }
 
   void test_processesExampleDirective_withIndentKeep() async {
-    await _bootPackage('''
+    await _bootPackage(
+      '''
 /// {@example /examples/hello.dart indent=keep}
-''', files: {
-      'examples/hello.dart': '  void main() {\n    print("hello");\n  }',
-    });
+''',
+      files: {
+        'examples/hello.dart': '  void main() {\n    print("hello");\n  }',
+      },
+    );
 
     var doc = await libraryModel.processComment();
 
     expectNoWarnings();
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 
 ```dart
   void main() {
     print("hello");
   }
 ```
-'''));
+'''),
+    );
   }
 
   void test_processesExampleDirective_inline_ignored() async {
-    await _bootPackage('''
+    await _bootPackage(
+      '''
 /// This is an inline {@example /examples/hello.dart} directive.
-''', files: {
-      'examples/hello.dart': 'void main() => print("hello");',
-    });
+''',
+      files: {'examples/hello.dart': 'void main() => print("hello");'},
+    );
 
     var doc = await libraryModel.processComment();
 
     expectNoWarnings();
     // It should NOT be replaced because it's not on its own line.
-    expect(doc, equals('''
-This is an inline {@example /examples/hello.dart} directive.'''));
+    expect(
+      doc,
+      equals('''
+This is an inline {@example /examples/hello.dart} directive.'''),
+    );
   }
 
   void test_processesExampleDirective_withIndentStrip() async {
-    await _bootPackage('''
+    await _bootPackage(
+      '''
 /// {@example /examples/hello.dart indent=strip}
-''', files: {
-      'examples/hello.dart': '  void main() {\n    print("hello");\n  }',
-    });
+''',
+      files: {
+        'examples/hello.dart': '  void main() {\n    print("hello");\n  }',
+      },
+    );
 
     var doc = await libraryModel.processComment();
 
     expectNoWarnings();
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 
 ```dart
 void main() {
   print("hello");
 }
 ```
-'''));
+'''),
+    );
   }
 
   void test_processesExampleDirective_withIndentStrip_mixedWhitespace() async {
-    await _bootPackage('''
+    await _bootPackage(
+      '''
 /// {@example /examples/hello.dart indent=strip}
-''', files: {
-      'examples/hello.dart': '  space\n\ttab\n  space',
-    });
+''',
+      files: {'examples/hello.dart': '  space\n\ttab\n  space'},
+    );
 
     var doc = await libraryModel.processComment();
 
     expect(
       libraryModel,
-      hasWarning(PackageWarning.invalidParameter,
-          'Example contains non-space whitespace in indentation. Indentation stripping disabled to avoid incorrect formatting.'),
+      hasWarning(
+        PackageWarning.invalidParameter,
+        'Example contains non-space whitespace in indentation. Indentation stripping disabled to avoid incorrect formatting.',
+      ),
     );
-    expect(doc, equals('''
+    expect(
+      doc,
+      equals('''
 
 ```dart
   space
 \ttab
   space
 ```
-'''));
+'''),
+    );
   }
 
   void test_exampleDirective_missingFile() async {
@@ -201,7 +241,9 @@ void main() {
     expect(
       libraryModel,
       hasWarning(
-          PackageWarning.missingExampleFile, '/examples/non_existent.dart'),
+        PackageWarning.missingExampleFile,
+        '/examples/non_existent.dart',
+      ),
     );
   }
 
@@ -214,26 +256,30 @@ void main() {
 
     expect(
       libraryModel,
-      hasWarning(PackageWarning.invalidParameter,
-          'Must specify a file path for the @example directive.'),
+      hasWarning(
+        PackageWarning.invalidParameter,
+        'Must specify a file path for the @example directive.',
+      ),
     );
   }
 
   void test_exampleDirective_extraPositionalArguments() async {
-    await _bootPackage('''
+    await _bootPackage(
+      '''
 /// {@example /examples/hello.dart extra1 extra2}
-''', files: {
-      'examples/hello.dart': 'void main() {}',
-    });
+''',
+      files: {'examples/hello.dart': 'void main() {}'},
+    );
 
     await libraryModel.processComment();
 
     expect(
       libraryModel,
       hasWarning(
-          PackageWarning.invalidParameter,
-          'The {@example} directive only takes one positional argument (the file path). '
-          'Ignoring extra arguments: extra1 extra2'),
+        PackageWarning.invalidParameter,
+        'The {@example} directive only takes one positional argument (the file path). '
+        'Ignoring extra arguments: extra1 extra2',
+      ),
     );
   }
 }

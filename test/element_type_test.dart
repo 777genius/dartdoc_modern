@@ -34,13 +34,15 @@ void main() async {
   }
 
   Future<Library> bootPackageWithLibrary(String libraryContent) async {
-    await d.dir('lib', [
-      d.file('lib.dart', '''
+    await d
+        .dir('lib', [
+          d.file('lib.dart', '''
 library $libraryName;
 
 $libraryContent
 '''),
-    ]).createInMemory(resourceProvider, packagePath);
+        ])
+        .createInMemory(resourceProvider, packagePath);
 
     final packageGraph = await bootBasicPackage(
       packagePath,
@@ -60,8 +62,10 @@ void f(C p) {}
       final fFunction = library.functions.named('f');
       final parameterType = fFunction.parameters.single.modelType;
 
-      expect(parameterType.linkedName,
-          equals('<a href="$linkPrefix/C-class.html">C</a>'));
+      expect(
+        parameterType.linkedName,
+        equals('<a href="$linkPrefix/C-class.html">C</a>'),
+      );
       expect(parameterType.nameWithGenerics, equals('C'));
     });
 
@@ -73,66 +77,74 @@ void f(C? p) {}
       final fFunction = library.functions.named('f');
       final parameterType = fFunction.parameters.single.modelType;
 
-      expect(parameterType.linkedName,
-          equals('<a href="$linkPrefix/C-class.html">C</a>?'));
+      expect(
+        parameterType.linkedName,
+        equals('<a href="$linkPrefix/C-class.html">C</a>?'),
+      );
       expect(parameterType.nameWithGenerics, equals('C?'));
     });
 
-    test('generic class, instantiated with a simple type, has rendered names',
-        () async {
-      final library = await bootPackageWithLibrary('''
+    test(
+      'generic class, instantiated with a simple type, has rendered names',
+      () async {
+        final library = await bootPackageWithLibrary('''
 class C<T> {}
 void f(C<int> p) {}
 ''');
-      final fFunction = library.functions.named('f');
-      final parameterType = fFunction.parameters.single.modelType;
+        final fFunction = library.functions.named('f');
+        final parameterType = fFunction.parameters.single.modelType;
 
-      expect(
-        parameterType.linkedName,
-        '<a href="$linkPrefix/C-class.html">C</a>'
-        '<span class="signature">&lt;<wbr>'
-        '<span class="type-parameter">$intLink</span>&gt;</span>',
-      );
-      expect(
-        parameterType.nameWithGenerics,
-        equals('C&lt;<wbr><span class="type-parameter">int</span>&gt;'),
-      );
-    });
+        expect(
+          parameterType.linkedName,
+          '<a href="$linkPrefix/C-class.html">C</a>'
+          '<span class="signature">&lt;<wbr>'
+          '<span class="type-parameter">$intLink</span>&gt;</span>',
+        );
+        expect(
+          parameterType.nameWithGenerics,
+          equals('C&lt;<wbr><span class="type-parameter">int</span>&gt;'),
+        );
+      },
+    );
 
     test(
-        'generic class, instantiated with a simple nullable type, has a linked '
-        'name', () async {
-      final library = await bootPackageWithLibrary('''
+      'generic class, instantiated with a simple nullable type, has a linked '
+      'name',
+      () async {
+        final library = await bootPackageWithLibrary('''
 class C<T> {}
 void f(C<int?> p) {}
 ''');
-      final fFunction = library.functions.named('f');
-      final parameterType = fFunction.parameters.single.modelType;
+        final fFunction = library.functions.named('f');
+        final parameterType = fFunction.parameters.single.modelType;
 
-      expect(
-        parameterType.linkedName,
-        '<a href="$linkPrefix/C-class.html">C</a>'
-        '<span class="signature">&lt;<wbr>'
-        '<span class="type-parameter">$intLink?</span>&gt;</span>',
-      );
-    });
+        expect(
+          parameterType.linkedName,
+          '<a href="$linkPrefix/C-class.html">C</a>'
+          '<span class="signature">&lt;<wbr>'
+          '<span class="type-parameter">$intLink?</span>&gt;</span>',
+        );
+      },
+    );
 
-    test('generic class, instantiated with a type variable, has a linked name',
-        () async {
-      final library = await bootPackageWithLibrary('''
+    test(
+      'generic class, instantiated with a type variable, has a linked name',
+      () async {
+        final library = await bootPackageWithLibrary('''
 class C<T> {}
 void f<T>(C<T> p) {}
 ''');
-      final fFunction = library.functions.named('f');
-      final parameterType = fFunction.parameters.single.modelType;
+        final fFunction = library.functions.named('f');
+        final parameterType = fFunction.parameters.single.modelType;
 
-      expect(
-        parameterType.linkedName,
-        '<a href="$linkPrefix/C-class.html">C</a>'
-        '<span class="signature">&lt;<wbr>'
-        '<span class="type-parameter">T</span>&gt;</span>',
-      );
-    });
+        expect(
+          parameterType.linkedName,
+          '<a href="$linkPrefix/C-class.html">C</a>'
+          '<span class="signature">&lt;<wbr>'
+          '<span class="type-parameter">T</span>&gt;</span>',
+        );
+      },
+    );
   });
 
   group('function type', () {

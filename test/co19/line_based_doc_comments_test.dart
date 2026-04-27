@@ -36,9 +36,11 @@ class LineBasedDocCommentsTest extends Co19TestBase {
 /// Text.
 /// More text.
 ''');
-    expectDocComment(equals('''
+    expectDocComment(
+      equals('''
 Text.
-More text.'''));
+More text.'''),
+    );
   }
 
   /// Check empty lines after three slashes are preserved
@@ -48,25 +50,29 @@ More text.'''));
 ///
 /// More text.
 ''');
-    expectDocComment(equals('''
+    expectDocComment(
+      equals('''
 Text.
 
-More text.'''));
+More text.'''),
+    );
   }
 
   /// Check that the parser removes the three slashes and all leading
   /// whitespace
   void test_removesSpaceAfterTripleSlashes() async {
-    markTestSkipped('Skipping until issue '
-        'https://github.com/dart-lang/dartdoc/issues/4137 is resolved.');
+    markTestSkipped(
+      'Skipping until issue '
+      'https://github.com/dart-lang/dartdoc/issues/4137 is resolved.',
+    );
     return;
-//     await writePackageWithCommentedLibrary('''
-// ///  Text.
-// ///    More text.
-// ''');
-//     expectDocComment(equals('''
-// Text.
-// More text.'''));
+    //     await writePackageWithCommentedLibrary('''
+    // ///  Text.
+    // ///    More text.
+    // ''');
+    //     expectDocComment(equals('''
+    // Text.
+    // More text.'''));
   }
 
   /// Check that interrupting blank lines and starting with `// ` are ignored.
@@ -80,11 +86,13 @@ More text.'''));
 
 /// And more.
 ''');
-    expectDocComment(equals('''
+    expectDocComment(
+      equals('''
 Text.
 More text.
 And more text.
-And more.'''));
+And more.'''),
+    );
   }
 
   /// Check that the doc comment starts after `///` even if there is no trailing
@@ -95,10 +103,12 @@ And more.'''));
 /////More text.
 ///And more.
 ''');
-    expectDocComment(equals('''
+    expectDocComment(
+      equals('''
 / Text.
 //More text.
-And more.'''));
+And more.'''),
+    );
   }
 
   /// Check that inside fenced code blocks (```), whitespace after the leading
@@ -112,13 +122,15 @@ And more.'''));
 /// }
 /// ```
 ''');
-    expectDocComment(equals('''
+    expectDocComment(
+      equals('''
 ```
 void main() {
   /// This line prints "Hello, world!"
   print('Hello, world!');
 }
-```'''));
+```'''),
+    );
   }
 
   /// Check that inside fenced code blocks (~~~), whitespace after the leading
@@ -132,36 +144,40 @@ void main() {
 /// }
 /// ~~~
 ''');
-    expectDocComment(equals('''
+    expectDocComment(
+      equals('''
 ~~~
 void main() {
   /// This line prints "Hello, world!"
   print('Hello, world!');
 }
-~~~'''));
+~~~'''),
+    );
   }
 
   /// Check that inside fenced code span (`), whitespace after the leading
   /// `///` is removed.
   void test_whitespaceInCodeSpan() async {
-    markTestSkipped('Skipping until issue '
-        'https://github.com/dart-lang/dartdoc/issues/4138 is resolved.');
+    markTestSkipped(
+      'Skipping until issue '
+      'https://github.com/dart-lang/dartdoc/issues/4138 is resolved.',
+    );
     return;
-//     await writePackageWithCommentedLibrary('''
-// /// `
-// /// void main() {
-// ///   /// This line prints "Hello, world!"
-// ///   print('Hello, world!');
-// /// }
-// /// `
-// ''');
-//     expectDocComment(equals('''
-// `
-// void main() {
-// /// This line prints "Hello, world!"
-// print('Hello, world!');
-// }
-// `'''));
+    //     await writePackageWithCommentedLibrary('''
+    // /// `
+    // /// void main() {
+    // ///   /// This line prints "Hello, world!"
+    // ///   print('Hello, world!');
+    // /// }
+    // /// `
+    // ''');
+    //     expectDocComment(equals('''
+    // `
+    // void main() {
+    // /// This line prints "Hello, world!"
+    // print('Hello, world!');
+    // }
+    // `'''));
   }
 
   /// Check that the parser removes leading whitespace before the three slashes
@@ -170,8 +186,10 @@ void main() {
 /// Text.
    /// More text.
 ''');
-    expectDocComment(equals('''
+    expectDocComment(
+      equals('''
 Text.
-More text.'''));
+More text.'''),
+    );
   }
 }

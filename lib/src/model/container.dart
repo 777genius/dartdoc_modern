@@ -57,17 +57,18 @@ abstract class Container extends ModelElement with HasLibrary, TypeParameters {
   /// The model elements of all of the members of this container, including
   /// declared and inherited ones.
   Iterable<ModelElement> get allModelElements => [
-        ...instanceMethods,
-        ...instanceFields,
-        ...instanceOperators,
-        ...instanceAccessors,
-        ...staticFields,
-        ...staticAccessors,
-        ...staticMethods,
-      ];
+    ...instanceMethods,
+    ...instanceFields,
+    ...instanceOperators,
+    ...instanceAccessors,
+    ...staticFields,
+    ...staticAccessors,
+    ...staticMethods,
+  ];
 
-  late final List<ModelElement> allCanonicalModelElements =
-      allModelElements.where((e) => e.isCanonical).toList(growable: false);
+  late final List<ModelElement> allCanonicalModelElements = allModelElements
+      .where((e) => e.isCanonical)
+      .toList(growable: false);
 
   /// All methods, including operators and statics, declared on [element].
   ///
@@ -99,8 +100,9 @@ abstract class Container extends ModelElement with HasLibrary, TypeParameters {
   List<Method> get availableInstanceMethodsSorted;
 
   @nonVirtual
-  late final List<Operator> declaredOperators =
-      declaredMethods.whereType<Operator>().toList(growable: false);
+  late final List<Operator> declaredOperators = declaredMethods
+      .whereType<Operator>()
+      .toList(growable: false);
 
   @override
   ModelElement get enclosingElement;
@@ -158,8 +160,9 @@ abstract class Container extends ModelElement with HasLibrary, TypeParameters {
   /// See [Inheritable.canonicalEnclosingContainer].
   bool containsElement(Element? element) => _allElements.contains(element);
 
-  late final Set<Element> _allElements =
-      allModelElements.map((e) => e.element).toSet();
+  late final Set<Element> _allElements = allModelElements
+      .map((e) => e.element)
+      .toSet();
 
   bool get hasPublicStaticFields => staticFields.any((e) => e.isPublic);
 
@@ -201,9 +204,10 @@ abstract class Container extends ModelElement with HasLibrary, TypeParameters {
       // here to wean people off the habit of unscoped parameter references.
       if (modelElement.hasParameters) ...modelElement.parameters.asMapByName,
     ...extraReferenceChildren,
-    for (var element in allModelElements
-        .whereNotType<Accessor>()
-        .whereNotType<Constructor>())
+    for (var element
+        in allModelElements
+            .whereNotType<Accessor>()
+            .whereNotType<Constructor>())
       element.referenceName: element,
   };
 

@@ -29,11 +29,9 @@ class C {
 }
 ''');
     var f1Lines = readLines(['lib', 'C', 'f1.html']);
-    f1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<h1><span class="kind-property">f1</span> property'),
-      ],
-    );
+    f1Lines.expectMainContentContainsAllInOrder([
+      matches('<h1><span class="kind-property">f1</span> property'),
+    ]);
   }
 
   void test_class_annotations() async {
@@ -49,15 +47,14 @@ class A {
 }
 ''');
     var f1Lines = readLines(['lib', 'C', 'f1.html']);
-    f1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<ol class="annotation-list">'),
-        matches('<li>@deprecated</li>'),
-        matches(
-            r'<li>@<a href="../../lib/A/A.html">A</a>\(&#39;message&#39;\)</li>'),
-        matches('</ol>'),
-      ],
-    );
+    f1Lines.expectMainContentContainsAllInOrder([
+      matches('<ol class="annotation-list">'),
+      matches('<li>@deprecated</li>'),
+      matches(
+        r'<li>@<a href="../../lib/A/A.html">A</a>\(&#39;message&#39;\)</li>',
+      ),
+      matches('</ol>'),
+    ]);
   }
 
   void test_class_docComment() async {
@@ -68,12 +65,10 @@ class C {
 }
 ''');
     var f1Lines = readLines(['lib', 'C', 'f1.html']);
-    f1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<section class="desc markdown">'),
-        matches('<p>Documentation text.</p>'),
-      ],
-    );
+    f1Lines.expectMainContentContainsAllInOrder([
+      matches('<section class="desc markdown">'),
+      matches('<p>Documentation text.</p>'),
+    ]);
   }
 
   void test_extension_fieldName() async {
@@ -83,11 +78,9 @@ extension E on String {
 }
 ''');
     var f1Lines = readLines(['lib', 'E', 'f1.html']);
-    f1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<h1><span class="kind-property">f1</span> property'),
-      ],
-    );
+    f1Lines.expectMainContentContainsAllInOrder([
+      matches('<h1><span class="kind-property">f1</span> property'),
+    ]);
   }
 
   void test_extensionType_representationField_final() async {
@@ -97,12 +90,9 @@ extension type ET(
   int f1) {}
 ''');
     var f1Lines = readLines(['lib', 'ET', 'f1.html']);
-    f1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches(
-            '<div class="features"><span class="feature">final</span></div>'),
-      ],
-    );
+    f1Lines.expectMainContentContainsAllInOrder([
+      matches('<div class="features"><span class="feature">final</span></div>'),
+    ]);
   }
 
   void test_getter_signature() async {
@@ -112,15 +102,13 @@ class C {
 }
 ''');
     var f1Lines = readLines(['lib', 'C', 'f1.html']);
-    f1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<h1><span class="kind-property">f1</span> property'),
-        matches('<section class="multi-line-signature">'),
-        matches('<span class="returntype">int</span>'),
-        matches('get'),
-        matches('<span class="name ">f1</span>'),
-      ],
-    );
+    f1Lines.expectMainContentContainsAllInOrder([
+      matches('<h1><span class="kind-property">f1</span> property'),
+      matches('<section class="multi-line-signature">'),
+      matches('<span class="returntype">int</span>'),
+      matches('get'),
+      matches('<span class="name ">f1</span>'),
+    ]);
   }
 
   void test_getter_overridingProperty_signature() async {
@@ -134,15 +122,13 @@ class D extends C {
 }
 ''');
     var f1Lines = readLines(['lib', 'D', 'f1.html']);
-    f1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<h1><span class="kind-property">f1</span> property'),
-        matches('<section class="multi-line-signature">'),
-        matches('<span class="returntype">int</span>'),
-        matches('get'),
-        matches('<span class="name ">f1</span>'),
-      ],
-    );
+    f1Lines.expectMainContentContainsAllInOrder([
+      matches('<h1><span class="kind-property">f1</span> property'),
+      matches('<section class="multi-line-signature">'),
+      matches('<span class="returntype">int</span>'),
+      matches('get'),
+      matches('<span class="name ">f1</span>'),
+    ]);
   }
 
   void test_setter_signature() async {
@@ -152,19 +138,19 @@ class C {
 }
 ''');
     var f1Lines = readLines(['lib', 'C', 'f1.html']);
-    f1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<section class="multi-line-signature">'),
-        matches('set'),
-        matches('<span class="name ">f1</span>'),
-        matches(r'<span class="signature">\('
-            '<wbr><span class="parameter" id="f1=-param-value">'
-            '<span class="type-annotation">int</span> '
-            '<span class="parameter-name">value</span>'
-            r'</span>\)'
-            '</span>'),
-      ],
-    );
+    f1Lines.expectMainContentContainsAllInOrder([
+      matches('<section class="multi-line-signature">'),
+      matches('set'),
+      matches('<span class="name ">f1</span>'),
+      matches(
+        r'<span class="signature">\('
+        '<wbr><span class="parameter" id="f1=-param-value">'
+        '<span class="type-annotation">int</span> '
+        '<span class="parameter-name">value</span>'
+        r'</span>\)'
+        '</span>',
+      ),
+    ]);
   }
 
   void test_setter_overridingProperty_signature() async {
@@ -177,19 +163,19 @@ class D extends C {
 }
 ''');
     var f1Lines = readLines(['lib', 'D', 'f1.html']);
-    f1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<section class="multi-line-signature">'),
-        matches('set'),
-        matches('<span class="name ">f1</span>'),
-        matches(r'<span class="signature">\('
-            '<wbr><span class="parameter" id="f1=-param-value">'
-            '<span class="type-annotation">int</span> '
-            '<span class="parameter-name">value</span>'
-            r'</span>\)'
-            '</span>'),
-      ],
-    );
+    f1Lines.expectMainContentContainsAllInOrder([
+      matches('<section class="multi-line-signature">'),
+      matches('set'),
+      matches('<span class="name ">f1</span>'),
+      matches(
+        r'<span class="signature">\('
+        '<wbr><span class="parameter" id="f1=-param-value">'
+        '<span class="type-annotation">int</span> '
+        '<span class="parameter-name">value</span>'
+        r'</span>\)'
+        '</span>',
+      ),
+    ]);
   }
 
   // TODO(srawlins): Add rendering tests:

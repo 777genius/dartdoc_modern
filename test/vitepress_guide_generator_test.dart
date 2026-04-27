@@ -28,10 +28,7 @@ void main() {
 
     test('ignores H2 and finds first H1', () {
       var content = '## Section\n\n### Subsection\n\n# Real Title';
-      expect(
-        guide_core.extractTitle(content, 'doc.md'),
-        equals('Real Title'),
-      );
+      expect(guide_core.extractTitle(content, 'doc.md'), equals('Real Title'));
     });
 
     test('falls back to filename for empty content', () {
@@ -113,10 +110,7 @@ void main() {
 
   group('extractSidebarLabel', () {
     test('returns null when no frontmatter', () {
-      expect(
-        guide_core.extractSidebarLabel('# Title\n\nContent.'),
-        isNull,
-      );
+      expect(guide_core.extractSidebarLabel('# Title\n\nContent.'), isNull);
     });
 
     test('returns null when frontmatter has no sidebar_label', () {
@@ -198,20 +192,14 @@ void main() {
     });
 
     test('include + exclude combined', () {
-      var gen = makeGenerator(
-        include: [r'.*\.md$'],
-        exclude: [r'internal/.*'],
-      );
+      var gen = makeGenerator(include: [r'.*\.md$'], exclude: [r'internal/.*']);
       expect(gen.matchesFilters('guide.md'), isTrue);
       expect(gen.matchesFilters('internal/secret.md'), isFalse);
       expect(gen.matchesFilters('guide.txt'), isFalse);
     });
 
     test('exclude takes precedence over include', () {
-      var gen = makeGenerator(
-        include: [r'.*\.md$'],
-        exclude: [r'draft.*'],
-      );
+      var gen = makeGenerator(include: [r'.*\.md$'], exclude: [r'draft.*']);
       expect(gen.matchesFilters('draft-guide.md'), isFalse);
     });
 
@@ -237,10 +225,7 @@ void main() {
     });
 
     test('throws FormatException for invalid exclude regex', () {
-      expect(
-        () => makeGenerator(exclude: [r'*broken']),
-        throwsFormatException,
-      );
+      expect(() => makeGenerator(exclude: [r'*broken']), throwsFormatException);
     });
   });
 

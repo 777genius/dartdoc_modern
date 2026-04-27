@@ -45,29 +45,35 @@ class ToolDefinition {
   /// Creates a ToolDefinition or subclass that is appropriate for the command
   /// given.
   factory ToolDefinition.fromCommand(
-      List<String> command,
-      List<String> setupCommand,
-      String description,
-      ResourceProvider resourceProvider,
-      {List<String>? compileArgs}) {
+    List<String> command,
+    List<String> setupCommand,
+    String description,
+    ResourceProvider resourceProvider, {
+    List<String>? compileArgs,
+  }) {
     assert(command.isNotEmpty);
     if (isDartExecutable(command[0])) {
       return DartToolDefinition(
-          command, setupCommand, description, resourceProvider,
-          compileArgs: compileArgs ?? const []);
+        command,
+        setupCommand,
+        description,
+        resourceProvider,
+        compileArgs: compileArgs ?? const [],
+      );
     } else {
       if (compileArgs != null && compileArgs.isNotEmpty) {
         throw DartdocOptionError(
-            'Compile arguments may only be specified for Dart tools, but '
-            '$compileArgsTagName of $compileArgs were specified for '
-            '$command.');
+          'Compile arguments may only be specified for Dart tools, but '
+          '$compileArgsTagName of $compileArgs were specified for '
+          '$command.',
+        );
       }
       return ToolDefinition(command, setupCommand, description);
     }
   }
 
   ToolDefinition(this.command, this.setupCommand, this.description)
-      : assert(command.isNotEmpty);
+    : assert(command.isNotEmpty);
 
   @override
   String toString() {
@@ -81,8 +87,11 @@ class ToolDefinition {
     }
   }
 
-  Future<ToolStateForArgs> toolStateForArgs(String toolName, List<String> args,
-      {required ToolErrorCallback toolErrorCallback}) async {
+  Future<ToolStateForArgs> toolStateForArgs(
+    String toolName,
+    List<String> args, {
+    required ToolErrorCallback toolErrorCallback,
+  }) async {
     var commandPath = args.removeAt(0);
     return ToolStateForArgs(commandPath, args);
   }
@@ -102,38 +111,44 @@ class DartToolDefinition extends ToolDefinition {
   /// so that if they are executed with dart, will result in the snapshot being
   /// built.
   @override
-  Future<ToolStateForArgs> toolStateForArgs(String toolName, List<String> args,
-      {required ToolErrorCallback toolErrorCallback}) async {
+  Future<ToolStateForArgs> toolStateForArgs(
+    String toolName,
+    List<String> args, {
+    required ToolErrorCallback toolErrorCallback,
+  }) async {
     assert(args[0] == command.first);
     // Set up flags to create a new snapshot, if needed, and use the first run
     // as the training run.
     var snapshotCache = SnapshotCache.instanceFor(_resourceProvider);
     var snapshot = snapshotCache._getSnapshot(command.first);
     var snapshotFile = snapshot._snapshotFile;
-    var snapshotPath =
-        _resourceProvider.pathContext.absolute(snapshotFile.path);
+    var snapshotPath = _resourceProvider.pathContext.absolute(
+      snapshotFile.path,
+    );
     var needsSnapshot = snapshot.needsSnapshot;
     if (needsSnapshot) {
       return ToolStateForArgs(
-          _resourceProvider.resolvedExecutable,
-          [
-            // TODO(jcollins-g): remove ignore and verbosity resets once
-            // https://dart-review.googlesource.com/c/sdk/+/181421 is safely
-            // in the rearview mirror in dev/Flutter.
-            '--ignore-unrecognized-flags',
-            '--verbosity=error',
-            '--snapshot=$snapshotPath',
-            '--snapshot_kind=app-jit',
-            ...compileArgs,
-            ...args,
-          ],
-          onProcessComplete: snapshot._snapshotCompleted);
+        _resourceProvider.resolvedExecutable,
+        [
+          // TODO(jcollins-g): remove ignore and verbosity resets once
+          // https://dart-review.googlesource.com/c/sdk/+/181421 is safely
+          // in the rearview mirror in dev/Flutter.
+          '--ignore-unrecognized-flags',
+          '--verbosity=error',
+          '--snapshot=$snapshotPath',
+          '--snapshot_kind=app-jit',
+          ...compileArgs,
+          ...args,
+        ],
+        onProcessComplete: snapshot._snapshotCompleted,
+      );
     } else {
       await snapshot._snapshotValid();
       if (!snapshotFile.exists) {
         toolErrorCallback(
-            'Snapshot creation failed for $toolName tool. $snapshotPath does '
-            'not exist. Will execute tool without snapshot.');
+          'Snapshot creation failed for $toolName tool. $snapshotPath does '
+          'not exist. Will execute tool without snapshot.',
+        );
       } else {
         // replace the first argument with the path to the snapshot.
         args[0] = snapshotPath;
@@ -142,9 +157,13 @@ class DartToolDefinition extends ToolDefinition {
     }
   }
 
-  DartToolDefinition(super.command, super.setupCommand, super.description,
-      this._resourceProvider,
-      {this.compileArgs = const []});
+  DartToolDefinition(
+    super.command,
+    super.setupCommand,
+    super.description,
+    this._resourceProvider, {
+    this.compileArgs = const [],
+  });
 }
 
 /// Manages the creation of a single snapshot file in a context where multiple
@@ -169,21 +188,29 @@ class _Snapshot {
 
   final Completer<void> _snapshotCompleter = Completer();
 
-  factory _Snapshot(Folder snapshotCache, String toolPath, int serial,
-      ResourceProvider resourceProvider) {
+  factory _Snapshot(
+    Folder snapshotCache,
+    String toolPath,
+    int serial,
+    ResourceProvider resourceProvider,
+  ) {
     if (toolPath.endsWith('.snapshot')) {
       return _Snapshot.existing(toolPath, resourceProvider);
     } else {
-      return _Snapshot.create(resourceProvider.getFile(
+      return _Snapshot.create(
+        resourceProvider.getFile(
           resourceProvider.pathContext.join(
-              resourceProvider.pathContext.absolute(snapshotCache.path),
-              'snapshot_$serial')));
+            resourceProvider.pathContext.absolute(snapshotCache.path),
+            'snapshot_$serial',
+          ),
+        ),
+      );
     }
   }
 
   _Snapshot.existing(String toolPath, ResourceProvider resourceProvider)
-      : _needsSnapshot = false,
-        _snapshotFile = resourceProvider.getFile(toolPath) {
+    : _needsSnapshot = false,
+      _snapshotFile = resourceProvider.getFile(toolPath) {
     _snapshotCompleted();
   }
 
@@ -218,14 +245,17 @@ class SnapshotCache {
   int _serial = 0;
 
   SnapshotCache._(this._resourceProvider)
-      : snapshotCache =
-            _resourceProvider.createSystemTemp('dartdoc_snapshot_cache_');
+    : snapshotCache = _resourceProvider.createSystemTemp(
+        'dartdoc_snapshot_cache_',
+      );
 
   /// Returns a [SnapshotCache] for a given [ResourceProvider], creating one
   /// only if one doesn't exist yet for the given [ResourceProvider].
   factory SnapshotCache.instanceFor(ResourceProvider resourceProvider) {
     return _instances.putIfAbsent(
-        resourceProvider, () => SnapshotCache._(resourceProvider));
+      resourceProvider,
+      () => SnapshotCache._(resourceProvider),
+    );
   }
 
   _Snapshot _getSnapshot(String toolPath) {
@@ -233,8 +263,12 @@ class SnapshotCache {
     if (toolSnapshot != null) {
       return toolSnapshot;
     }
-    toolSnapshot =
-        _Snapshot(snapshotCache, toolPath, _serial, _resourceProvider);
+    toolSnapshot = _Snapshot(
+      snapshotCache,
+      toolPath,
+      _serial,
+      _resourceProvider,
+    );
     _snapshots[toolPath] = toolSnapshot;
     _serial++;
     return toolSnapshot;

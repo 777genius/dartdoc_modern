@@ -191,7 +191,7 @@ class E extends D with M {}
   }
 
   void
-      test_field_inherited_fromExtended_andFromTransitiveExtended_andMixin() async {
+  test_field_inherited_fromExtended_andFromTransitiveExtended_andMixin() async {
     var library = await bootPackageWithLibrary('''
 class C {
   /// Comment.
@@ -223,7 +223,7 @@ class E extends D with M {}
   }
 
   void
-      test_field_overrides_fromExtended_andTransitiveExtended_andMixin() async {
+  test_field_overrides_fromExtended_andTransitiveExtended_andMixin() async {
     var library = await bootPackageWithLibrary('''
 class C {
   /// Comment.

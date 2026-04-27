@@ -16,34 +16,26 @@ void main() {
 @reflectiveTest
 class SearchTest {
   List<Map<String, Object?>> get searchIndex => _toJson([
-        {'qualifiedName': 'foo', 'kind': Kind.library.index},
-        {'qualifiedName': 'foo.Foo', 'kind': Kind.class_.index},
-        {'qualifiedName': 'foo.Bar', 'kind': Kind.class_.index},
-        {'qualifiedName': 'foo.Bart', 'kind': Kind.class_.index},
-        {'qualifiedName': 'foo.HelloFoo', 'kind': Kind.class_.index},
-        {'qualifiedName': 'bar.Bar.foo', 'kind': Kind.method.index},
-        {'qualifiedName': 'foo.Foo.method', 'kind': Kind.method.index},
-        {
-          'qualifiedName': 'foo.Bar.method',
-          'kind': Kind.method.index,
-          'overriddenDepth': 1,
-        },
-        {
-          'qualifiedName': 'foo.Baz.method',
-          'kind': Kind.method.index,
-          'overriddenDepth': 2,
-        },
-        {
-          'qualifiedName': 'FOO',
-          'kind': Kind.library.index,
-          'packageRank': 0,
-        },
-        {
-          'qualifiedName': 'foo.FOO',
-          'kind': Kind.class_.index,
-          'packageRank': 0,
-        },
-      ]);
+    {'qualifiedName': 'foo', 'kind': Kind.library.index},
+    {'qualifiedName': 'foo.Foo', 'kind': Kind.class_.index},
+    {'qualifiedName': 'foo.Bar', 'kind': Kind.class_.index},
+    {'qualifiedName': 'foo.Bart', 'kind': Kind.class_.index},
+    {'qualifiedName': 'foo.HelloFoo', 'kind': Kind.class_.index},
+    {'qualifiedName': 'bar.Bar.foo', 'kind': Kind.method.index},
+    {'qualifiedName': 'foo.Foo.method', 'kind': Kind.method.index},
+    {
+      'qualifiedName': 'foo.Bar.method',
+      'kind': Kind.method.index,
+      'overriddenDepth': 1,
+    },
+    {
+      'qualifiedName': 'foo.Baz.method',
+      'kind': Kind.method.index,
+      'overriddenDepth': 2,
+    },
+    {'qualifiedName': 'FOO', 'kind': Kind.library.index, 'packageRank': 0},
+    {'qualifiedName': 'foo.FOO', 'kind': Kind.class_.index, 'packageRank': 0},
+  ]);
 
   List<String> matchNames(String query) {
     final indexList = searchIndex.map(IndexItem.fromMap).toList();
@@ -52,55 +44,34 @@ class SearchTest {
   }
 
   void test_doesNotMatchOnlyOneCharacter() {
-    expect(
-      matchNames('f'),
-      isEmpty,
-    );
+    expect(matchNames('f'), isEmpty);
   }
 
   void test_excludesNotMatches() {
     expect(
       matchNames('bar'),
-      allOf(
-        isNot(contains(['foo'])),
-        isNot(contains(['foo.Foo'])),
-      ),
+      allOf(isNot(contains(['foo'])), isNot(contains(['foo.Foo']))),
     );
   }
 
   void test_matchesAgainstLowercaseMatch() {
-    expect(
-      matchNames('foo.foo'),
-      contains('foo.Foo'),
-    );
+    expect(matchNames('foo.foo'), contains('foo.Foo'));
   }
 
   void test_matchesAgainstLowercaseQuery() {
-    expect(
-      matchNames('FOO'),
-      contains('foo'),
-    );
+    expect(matchNames('FOO'), contains('foo'));
   }
 
   void test_matchesPrefixBeforeContains() {
-    expect(
-      matchNames('Fo'),
-      containsAllInOrder(['foo.Foo', 'foo.HelloFoo']),
-    );
+    expect(matchNames('Fo'), containsAllInOrder(['foo.Foo', 'foo.HelloFoo']));
   }
 
   void test_matchesQualifiedName() {
-    expect(
-      matchNames('foo.bar'),
-      contains('foo.Bar'),
-    );
+    expect(matchNames('foo.bar'), contains('foo.Bar'));
   }
 
   void test_prefersExactMatch() {
-    expect(
-      matchNames('Bar'),
-      containsAllInOrder(['foo.Bar', 'foo.Bart']),
-    );
+    expect(matchNames('Bar'), containsAllInOrder(['foo.Bar', 'foo.Bart']));
   }
 
   void test_prefersHigherPackages() {
@@ -113,9 +84,11 @@ class SearchTest {
   void test_prefersNonOverrides() {
     expect(
       matchNames('method'),
-      containsAllInOrder(
-        ['foo.Foo.method', 'foo.Bar.method', 'foo.Baz.method'],
-      ),
+      containsAllInOrder([
+        'foo.Foo.method',
+        'foo.Bar.method',
+        'foo.Baz.method',
+      ]),
     );
   }
 

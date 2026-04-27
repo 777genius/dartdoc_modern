@@ -1,3 +1,13 @@
+## 1.1.6
+
+* Fix `@docImport` stripping when analyzer doc-import offsets do not match
+  the raw documentation comment string.
+* Fix Flutter SDK documentation generation crash when an import prefix points
+  to an unresolved imported library, such as `dart:ui`.
+* Improve pub.dev package scoring metadata, dependency lower bounds, scaffold
+  analysis, and formatting.
+* Add generated-docs examples for `flutter_headless` and `modularity_dart`.
+
 ## 1.1.5
 
 * Fix Jaspr `--sdk-docs` generation under Flutter SDK, including scaffold

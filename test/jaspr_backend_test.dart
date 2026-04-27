@@ -372,7 +372,8 @@ See [Section 6.2.2](#_6-2-2-getters-and-setters).
       backend.beforeGenerate(packageGraph);
       backend.generatePackage(packageGraph, packageGraph.defaultPackage);
 
-      bool exists(String relativePath) => pubPackageMetaProvider.resourceProvider
+      bool exists(String relativePath) => pubPackageMetaProvider
+          .resourceProvider
           .getResource(p.normalize(p.join(outPath, relativePath)))
           .exists;
 

@@ -15,8 +15,8 @@ abstract class ElementTypeRenderer<T extends ElementType> {
 
   String wrapNullabilityParens(T elementType, String inner) =>
       elementType.nullabilitySuffix.isEmpty
-          ? inner
-          : '$inner${elementType.nullabilitySuffix}';
+      ? inner
+      : '$inner${elementType.nullabilitySuffix}';
 }
 
 // HTML implementations.
@@ -26,15 +26,20 @@ abstract class ElementTypeRendererHtml<T extends ElementType>
   const ElementTypeRendererHtml();
 
   String _renderLinkedName(
-      T elementType, String name, Iterable<ElementType> typeArguments) {
+    T elementType,
+    String name,
+    Iterable<ElementType> typeArguments,
+  ) {
     var buffer = StringBuffer()..write(name);
     if (typeArguments.isNotEmpty &&
         !typeArguments.every((t) => t.name == 'dynamic')) {
       buffer
         ..write('<span class="signature">')
         ..write('&lt;<wbr><span class="type-parameter">')
-        ..writeAll(typeArguments.map((t) => t.linkedName),
-            '</span>, <span class="type-parameter">')
+        ..writeAll(
+          typeArguments.map((t) => t.linkedName),
+          '</span>, <span class="type-parameter">',
+        )
         ..write('</span>&gt;')
         ..write('</span>');
     }
@@ -43,8 +48,11 @@ abstract class ElementTypeRendererHtml<T extends ElementType>
   }
 
   String _renderNameWithGenerics(
-      T elementType, String name, Iterable<ElementType> typeArguments,
-      {bool plain = false}) {
+    T elementType,
+    String name,
+    Iterable<ElementType> typeArguments, {
+    bool plain = false,
+  }) {
     var buffer = StringBuffer()..write(name);
     if (typeArguments.isNotEmpty &&
         !typeArguments.every((t) => t.name == 'dynamic')) {
@@ -56,8 +64,10 @@ abstract class ElementTypeRendererHtml<T extends ElementType>
       } else {
         buffer
           ..write('&lt;<wbr><span class="type-parameter">')
-          ..writeAll(typeArguments.map((t) => t.nameWithGenerics),
-              '</span>, <span class="type-parameter">')
+          ..writeAll(
+            typeArguments.map((t) => t.nameWithGenerics),
+            '</span>, <span class="type-parameter">',
+          )
           ..write('</span>&gt;');
       }
     }
@@ -77,15 +87,20 @@ class FunctionTypeElementTypeRendererHtml
       ..write(' ')
       ..write(elementType.nameWithGenerics)
       ..write('<span class="signature">(')
-      ..write(const ParameterRendererHtml()
-          .renderLinkedParams(elementType.parameters))
+      ..write(
+        const ParameterRendererHtml().renderLinkedParams(
+          elementType.parameters,
+        ),
+      )
       ..write(')</span>');
     return wrapNullabilityParens(elementType, buffer.toString());
   }
 
   @override
-  String renderNameWithGenerics(FunctionTypeElementType elementType,
-      {bool plain = false}) {
+  String renderNameWithGenerics(
+    FunctionTypeElementType elementType, {
+    bool plain = false,
+  }) {
     var buffer = StringBuffer()..write(elementType.name);
     if (elementType.typeFormals.isNotEmpty) {
       if (!elementType.typeFormals.every((t) => t.name == 'dynamic')) {
@@ -93,21 +108,24 @@ class FunctionTypeElementTypeRendererHtml
           buffer
             ..write('<')
             ..writeAll(
-                elementType.typeFormals.map((t) {
-                  var result = t.element.name!;
-                  final bound = t.boundType;
-                  if (bound != null) {
-                    result += ' extends ${bound.nameWithGenericsPlain}';
-                  }
-                  return result;
-                }),
-                ', ')
+              elementType.typeFormals.map((t) {
+                var result = t.element.name!;
+                final bound = t.boundType;
+                if (bound != null) {
+                  result += ' extends ${bound.nameWithGenericsPlain}';
+                }
+                return result;
+              }),
+              ', ',
+            )
             ..write('>');
         } else {
           buffer
             ..write('&lt;<wbr><span class="type-parameter">')
-            ..writeAll(elementType.typeFormals.map((t) => t.name),
-                '</span>, <span class="type-parameter">')
+            ..writeAll(
+              elementType.typeFormals.map((t) => t.name),
+              '</span>, <span class="type-parameter">',
+            )
             ..write('</span>&gt;');
         }
       }
@@ -129,14 +147,15 @@ class ParameterizedElementTypeRendererHtml
       );
 
   @override
-  String renderNameWithGenerics(ParameterizedElementType elementType,
-          {bool plain = false}) =>
-      _renderNameWithGenerics(
-        elementType,
-        elementType.modelElement.name,
-        elementType.typeArguments,
-        plain: plain,
-      );
+  String renderNameWithGenerics(
+    ParameterizedElementType elementType, {
+    bool plain = false,
+  }) => _renderNameWithGenerics(
+    elementType,
+    elementType.modelElement.name,
+    elementType.typeArguments,
+    plain: plain,
+  );
 }
 
 class RecordElementTypeRendererHtml
@@ -147,9 +166,11 @@ class RecordElementTypeRendererHtml
   String renderLinkedName(RecordElementType elementType) {
     var buffer = StringBuffer()
       ..write('(')
-      ..write(const RecordTypeFieldListHtmlRenderer()
-          .renderLinkedFields(elementType)
-          .trim())
+      ..write(
+        const RecordTypeFieldListHtmlRenderer()
+            .renderLinkedFields(elementType)
+            .trim(),
+      )
       ..write(')');
     if (elementType.nullabilitySuffix.isNotEmpty) {
       buffer.write(elementType.nullabilitySuffix);
@@ -158,8 +179,10 @@ class RecordElementTypeRendererHtml
   }
 
   @override
-  String renderNameWithGenerics(RecordElementType elementType,
-      {bool plain = false}) {
+  String renderNameWithGenerics(
+    RecordElementType elementType, {
+    bool plain = false,
+  }) {
     return '${elementType.name}${elementType.nullabilitySuffix}';
   }
 }
@@ -177,14 +200,15 @@ class AliasedUndefinedElementTypeRendererHtml
       );
 
   @override
-  String renderNameWithGenerics(AliasedUndefinedElementType elementType,
-          {bool plain = false}) =>
-      _renderNameWithGenerics(
-        elementType,
-        elementType.aliasElement.name,
-        elementType.aliasArguments,
-        plain: plain,
-      );
+  String renderNameWithGenerics(
+    AliasedUndefinedElementType elementType, {
+    bool plain = false,
+  }) => _renderNameWithGenerics(
+    elementType,
+    elementType.aliasElement.name,
+    elementType.aliasArguments,
+    plain: plain,
+  );
 }
 
 class AliasedElementTypeRendererHtml
@@ -193,18 +217,19 @@ class AliasedElementTypeRendererHtml
 
   @override
   String renderLinkedName(AliasedElementType elementType) => _renderLinkedName(
-        elementType,
-        elementType.aliasElement.linkedName,
-        elementType.aliasArguments,
-      );
+    elementType,
+    elementType.aliasElement.linkedName,
+    elementType.aliasArguments,
+  );
 
   @override
-  String renderNameWithGenerics(AliasedElementType elementType,
-          {bool plain = false}) =>
-      _renderNameWithGenerics(
-        elementType,
-        elementType.aliasElement.name,
-        elementType.aliasArguments,
-        plain: plain,
-      );
+  String renderNameWithGenerics(
+    AliasedElementType elementType, {
+    bool plain = false,
+  }) => _renderNameWithGenerics(
+    elementType,
+    elementType.aliasElement.name,
+    elementType.aliasArguments,
+    plain: plain,
+  );
 }

@@ -71,7 +71,8 @@ abstract class DartdocTestBase {
     );
     String? analysisOptions;
     if (experiments.isNotEmpty) {
-      analysisOptions = '''
+      analysisOptions =
+          '''
 analyzer:
   enable-experiment:${experiments.map((experiment) => '\n  - $experiment').join('')}
 ''';
@@ -84,10 +85,13 @@ analyzer:
     );
   }
 
-  Future<PackageGraph> bootPackageFromFiles(Iterable<d.Descriptor> files,
-      {List<String> additionalArguments = const []}) async {
-    var packagePathBasename =
-        resourceProvider.pathContext.basename(packagePath);
+  Future<PackageGraph> bootPackageFromFiles(
+    Iterable<d.Descriptor> files, {
+    List<String> additionalArguments = const [],
+  }) async {
+    var packagePathBasename = resourceProvider.pathContext.basename(
+      packagePath,
+    );
     var packagePathDirname = resourceProvider.pathContext.dirname(packagePath);
     await d
         .dir(packagePathBasename, files)
@@ -118,9 +122,7 @@ library $libraryName;
 $libraryContent
 '''),
       ...extraFiles,
-    ], additionalArguments: additionalArguments))
-        .libraries
-        .named(libraryName);
+    ], additionalArguments: additionalArguments)).libraries.named(libraryName);
   }
 
   Dartdoc buildDartdoc({
@@ -129,8 +131,11 @@ $libraryContent
     bool skipUnreachableSdkLibraries = true,
     bool useJson = false,
   }) {
-    final dir = resourceProvider.getFolder(resourceProvider.pathContext
-        .absolute(resourceProvider.pathContext.normalize(packagePath)));
+    final dir = resourceProvider.getFolder(
+      resourceProvider.pathContext.absolute(
+        resourceProvider.pathContext.normalize(packagePath),
+      ),
+    );
     final context = generatorContextFromArgv([
       '--input',
       dir.path,

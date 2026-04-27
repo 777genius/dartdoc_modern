@@ -31,10 +31,14 @@ class Validator {
   /// The set of files that simply redirect to a different file.
   final Set<String> _redirects = {};
 
-  Validator(this._packageGraph, this._config, String origin, this._writtenFiles,
-      this._onCheckProgress)
-      : _origin = path.normalize(origin),
-        _hrefs = _packageGraph.allHrefs;
+  Validator(
+    this._packageGraph,
+    this._config,
+    String origin,
+    this._writtenFiles,
+    this._onCheckProgress,
+  ) : _origin = path.normalize(origin),
+      _hrefs = _packageGraph.allHrefs;
 
   /// Don't call this method more than once, and only after you've
   /// generated all docs for the Package.
@@ -55,8 +59,12 @@ class Validator {
     final pageLinks = _getLinksAndBaseHref(fullPath);
     if (pageLinks == null) {
       // The file could not be read.
-      _warn(PackageWarning.brokenLink, pathToCheck, _origin,
-          referredFrom: source);
+      _warn(
+        PackageWarning.brokenLink,
+        pathToCheck,
+        _origin,
+        referredFrom: source,
+      );
       _onCheckProgress.add(pathToCheck);
       // Remove so that we properly count that the file doesn't exist for
       // the orphan check.
@@ -125,8 +133,11 @@ class Validator {
         } else {
           // Error messages are orphaned by design and do not appear in the
           // search index.
-          if (const {'__404error.html', 'search.html', 'categories.json'}
-              .contains(fullPath)) {
+          if (const {
+            '__404error.html',
+            'search.html',
+            'categories.json',
+          }.contains(fullPath)) {
             _warn(PackageWarning.orphanedFile, fullPath, _origin);
           }
         }
@@ -159,23 +170,33 @@ class Validator {
     found.add(indexPath);
     for (var entry in jsonData.cast<Map<String, dynamic>>()) {
       if (entry.containsKey('href')) {
-        var href =
-            path.joinAll([_origin, ...path.url.split(entry['href'] as String)]);
+        var href = path.joinAll([
+          _origin,
+          ...path.url.split(entry['href'] as String),
+        ]);
         if (path.extension(href).isEmpty) {
           // An aliased link to an `index.html` file.
           href = path.join(href, 'index.html');
         }
         if (!_visited.contains(href)) {
-          _warn(PackageWarning.brokenLink, href, _origin,
-              referredFrom: fullPath);
+          _warn(
+            PackageWarning.brokenLink,
+            href,
+            _origin,
+            referredFrom: fullPath,
+          );
         }
         found.add(href);
       }
     }
     final missingFromSearch = _visited.difference(_redirects).difference(found);
     for (final missingFile in missingFromSearch) {
-      _warn(PackageWarning.missingFromSearchIndex, missingFile, _origin,
-          referredFrom: fullPath);
+      _warn(
+        PackageWarning.missingFromSearchIndex,
+        missingFile,
+        _origin,
+        referredFrom: fullPath,
+      );
     }
   }
 
@@ -203,17 +224,21 @@ class Validator {
     final stringLinks = links
         .map((link) => link.attributes['href'])
         .nonNulls
-        .where((uri) =>
-            uri.isNotEmpty &&
-            !uri.startsWith('https:') &&
-            !uri.startsWith('http:') &&
-            !uri.startsWith('mailto:') &&
-            !uri.startsWith('ftp:'))
-        .map((uri) =>
-            // An aliased link to an `index.html` file.
-            path.extension(uri).isEmpty
-                ? path.url.join(uri, 'index.html')
-                : uri)
+        .where(
+          (uri) =>
+              uri.isNotEmpty &&
+              !uri.startsWith('https:') &&
+              !uri.startsWith('http:') &&
+              !uri.startsWith('mailto:') &&
+              !uri.startsWith('ftp:'),
+        )
+        .map(
+          (uri) =>
+              // An aliased link to an `index.html` file.
+              path.extension(uri).isEmpty
+              ? path.url.join(uri, 'index.html')
+              : uri,
+        )
         .toSet();
     var refreshTag = doc
         .querySelectorAll('meta')
@@ -261,10 +286,15 @@ class Validator {
     if (referredFromElements.isEmpty && referredFrom == 'index.html') {
       referredFromElements.add(_packageGraph.defaultPackage);
     }
-    final message =
-        referredFrom == 'index.json' ? '$warnOn (from index.json)' : warnOn;
-    _packageGraph.warnOnElement(warnOnElement, kind,
-        message: message, referredFrom: referredFromElements);
+    final message = referredFrom == 'index.json'
+        ? '$warnOn (from index.json)'
+        : warnOn;
+    _packageGraph.warnOnElement(
+      warnOnElement,
+      kind,
+      message: message,
+      referredFrom: referredFromElements,
+    );
   }
 }
 

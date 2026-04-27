@@ -4,7 +4,8 @@
 
 import 'package:dartdoc_modern/src/generator/generator.dart';
 import 'package:dartdoc_modern/src/generator/generator_backend.dart';
-import 'package:dartdoc_modern/src/generator/html_resources.g.dart' as resources;
+import 'package:dartdoc_modern/src/generator/html_resources.g.dart'
+    as resources;
 import 'package:dartdoc_modern/src/generator/resource_loader.dart';
 import 'package:dartdoc_modern/src/generator/template_data.dart';
 import 'package:dartdoc_modern/src/model/model.dart';
@@ -13,7 +14,11 @@ import 'package:dartdoc_modern/src/runtime_stats.dart';
 /// Generator backend for HTML output.
 class HtmlGeneratorBackend extends GeneratorBackend {
   HtmlGeneratorBackend(
-      super.options, super.templates, super.writer, super.resourceProvider);
+    super.options,
+    super.templates,
+    super.writer,
+    super.resourceProvider,
+  );
 
   @override
   void generateClass(PackageGraph packageGraph, Library library, Class class_) {
@@ -35,7 +40,10 @@ class HtmlGeneratorBackend extends GeneratorBackend {
 
   @override
   void generateExtension(
-      PackageGraph packageGraph, Library library, Extension extension) {
+    PackageGraph packageGraph,
+    Library library,
+    Extension extension,
+  ) {
     super.generateExtension(packageGraph, library, extension);
     var data = ExtensionTemplateData(options, packageGraph, library, extension);
     var sidebarContent = templates.renderSidebarForContainer(data);
@@ -45,13 +53,25 @@ class HtmlGeneratorBackend extends GeneratorBackend {
 
   @override
   void generateExtensionType(
-      PackageGraph packageGraph, Library library, ExtensionType extensionType) {
+    PackageGraph packageGraph,
+    Library library,
+    ExtensionType extensionType,
+  ) {
     super.generateExtensionType(packageGraph, library, extensionType);
     var data = ExtensionTypeTemplateData(
-        options, packageGraph, library, extensionType);
+      options,
+      packageGraph,
+      library,
+      extensionType,
+    );
     var sidebarContent = templates.renderSidebarForContainer(data);
-    write(writer, extensionType.sidebarPath, data, sidebarContent,
-        isSidebar: true);
+    write(
+      writer,
+      extensionType.sidebarPath,
+      data,
+      sidebarContent,
+      isSidebar: true,
+    );
     runtimeStats.incrementAccumulator('writtenSidebarFileCount');
   }
 
@@ -78,8 +98,11 @@ class HtmlGeneratorBackend extends GeneratorBackend {
     super.generatePackage(packageGraph, package);
     // We have to construct the data again. This only happens once per package.
     var data = PackageTemplateData(options, packageGraph, package);
-    var dataForSearch =
-        PackageTemplateDataForSearch(options, packageGraph, package);
+    var dataForSearch = PackageTemplateDataForSearch(
+      options,
+      packageGraph,
+      package,
+    );
     var content = templates.renderError(data);
     write(writer, '__404error.html', data, content);
     var searchContent = templates.renderSearchPage(dataForSearch);
@@ -102,7 +125,8 @@ class HtmlGeneratorBackend extends GeneratorBackend {
   }
 
   Future<void> _copyResources(FileWriter writer) async {
-    var resourcesDir = options.resourcesDir ??
+    var resourcesDir =
+        options.resourcesDir ??
         (await resourceProvider.getResourceFolder(_dartdocResourcePrefix)).path;
     for (var resourceFileName in resources.resourceNames) {
       var destinationPath = _pathJoin('static-assets', resourceFileName);

@@ -39,9 +39,11 @@ class BlockBasedDocCommentsTest extends Co19TestBase {
  * Line 2.
  */
 ''');
-    expectDocComment(equals('''
+    expectDocComment(
+      equals('''
 Line 1.
-Line 2.'''));
+Line 2.'''),
+    );
   }
 
   /// Check that the content within the delimiters is treated as the
@@ -55,48 +57,54 @@ Line 2.'''));
 
   /// Check that leading asterisk without trailing whitespace is stripped
   void test_contentNoTrailingWhitespace1() async {
-    markTestSkipped('Skipping until issue '
-        'https://github.com/dart-lang/dartdoc/issues/4151 is resolved.');
+    markTestSkipped(
+      'Skipping until issue '
+      'https://github.com/dart-lang/dartdoc/issues/4151 is resolved.',
+    );
     return;
-//     await writePackageWithCommentedLibrary('''
-// /**Line 1.
-//  *Line 2.
-//  */
-// ''');
-//     expectDocComment(equals('''
-// Line 1.
-// Line 2.'''));
+    //     await writePackageWithCommentedLibrary('''
+    // /**Line 1.
+    //  *Line 2.
+    //  */
+    // ''');
+    //     expectDocComment(equals('''
+    // Line 1.
+    // Line 2.'''));
   }
 
   /// Check that only a leading asterisk is stripped
   void test_contentNoTrailingWhitespace2() async {
-    markTestSkipped('Skipping until issue '
-        'https://github.com/dart-lang/dartdoc/issues/4151 is resolved.');
+    markTestSkipped(
+      'Skipping until issue '
+      'https://github.com/dart-lang/dartdoc/issues/4151 is resolved.',
+    );
     return;
-//     await writePackageWithCommentedLibrary('''
-// /***Line 1.
-//  **Line 2.
-//  **/
-// ''');
-//     expectDocComment(equals('''
-// *Line 1.
-// *Line 2.
-// *'''));
+    //     await writePackageWithCommentedLibrary('''
+    // /***Line 1.
+    //  **Line 2.
+    //  **/
+    // ''');
+    //     expectDocComment(equals('''
+    // *Line 1.
+    // *Line 2.
+    // *'''));
   }
 
   /// Check that leading whitespace followed by a single asterisk is stripped
   void test_leadingWhitespace() async {
-    markTestSkipped('Skipping until issue '
-        'https://github.com/dart-lang/dartdoc/issues/4150 is resolved.');
+    markTestSkipped(
+      'Skipping until issue '
+      'https://github.com/dart-lang/dartdoc/issues/4150 is resolved.',
+    );
     return;
-//     await writePackageWithCommentedLibrary('''
-// /** Line 1.
-//       * Line 2.
-//  */
-// ''');
-//     expectDocComment(equals('''
-// Line 1.
-// Line 2.'''));
+    //     await writePackageWithCommentedLibrary('''
+    // /** Line 1.
+    //       * Line 2.
+    //  */
+    // ''');
+    //     expectDocComment(equals('''
+    // Line 1.
+    // Line 2.'''));
   }
 
   /// Check empty lines after asterisk are preserved
@@ -107,48 +115,54 @@ Line 2.'''));
  * Line 2.
  */
 ''');
-    expectDocComment(equals('''
+    expectDocComment(
+      equals('''
 Line 1.
 
-Line 2.'''));
+Line 2.'''),
+    );
   }
 
   /// Check that any whitespace immediately following the asterisk is stripped
   void test_removeWhitespaceAfterAsterisk() async {
-    markTestSkipped('Skipping until issue '
-        'https://github.com/dart-lang/dartdoc/issues/4156 is resolved.');
+    markTestSkipped(
+      'Skipping until issue '
+      'https://github.com/dart-lang/dartdoc/issues/4156 is resolved.',
+    );
     return;
-//     await writePackageWithCommentedLibrary('''
-// /**  Line 1.
-//  *     Line 2.
-//  */
-// ''');
-//     expectDocComment(equals('''
-// Line 1.
-// Line 2.'''));
+    //     await writePackageWithCommentedLibrary('''
+    // /**  Line 1.
+    //  *     Line 2.
+    //  */
+    // ''');
+    //     expectDocComment(equals('''
+    // Line 1.
+    // Line 2.'''));
   }
 
   /// Check that line after /** with no leading `*` is left unchanged
   void test_noAsteriskLinePreserved() async {
-    markTestSkipped('Skipping until issue '
-        'https://github.com/dart-lang/dartdoc/issues/4157 is resolved.');
+    markTestSkipped(
+      'Skipping until issue '
+      'https://github.com/dart-lang/dartdoc/issues/4157 is resolved.',
+    );
     return;
-//     await writePackageWithCommentedLibrary('''
-// /** Line 1
-//  * Line 2
-//    Line 3
-//  * Line 4
-//
-//  * Line 5
-//  */
-// ''');
-//     expectDocComment(equals('''
-// Line 1
-// Line 2
-//    Line 3
-// Line 4
-//
-// Line 5'''));
+    //     await writePackageWithCommentedLibrary('''
+    // /** Line 1
+    //  * Line 2
+    //    Line 3
+    //  * Line 4
+    //
+    //  * Line 5
+    //  */
+    // ''');
+    //     expectDocComment(equals('''
+    // Line 1
+    // Line 2
+    //    Line 3
+    // Line 4
+    //
+    // Line 5'''));
   }
 
   /// Check nesting block comments
@@ -164,7 +178,8 @@ Line 2.'''));
  * /* Line 7 */
  */
 ''');
-    expectDocComment(equals('''
+    expectDocComment(
+      equals('''
 Line 1.
 /**
 Line 2.
@@ -172,7 +187,8 @@ Line 2.
 Line 4.
 */ Line 5.
 */ Line 6.
-/* Line 7 */'''));
+/* Line 7 */'''),
+    );
   }
 
   /// Check that whitespace in fenced code block (```) is preserved
@@ -187,12 +203,14 @@ Line 4.
  * ```
  */
 ''');
-    expectDocComment(equals('''
+    expectDocComment(
+      equals('''
 ```
 main() {
   print('Hello word');
 }
-```'''));
+```'''),
+    );
   }
 
   /// Check that whitespace in fenced code block (~~~) is preserved
@@ -207,36 +225,40 @@ main() {
  * ~~~
  */
 ''');
-    expectDocComment(equals('''
+    expectDocComment(
+      equals('''
 ~~~
 main() {
   print('Hello word');
 }
-~~~'''));
+~~~'''),
+    );
   }
 
   /// Check that inside fenced code span (`), whitespace after the leading
   /// `*` is removed.
   void test_whitespaceInCodeSpan() async {
-    markTestSkipped('Skipping until issue '
-        'https://github.com/dart-lang/dartdoc/issues/4138 is resolved.');
+    markTestSkipped(
+      'Skipping until issue '
+      'https://github.com/dart-lang/dartdoc/issues/4138 is resolved.',
+    );
     return;
-//     await writePackageWithCommentedLibrary('''
-// /**
-//  * `
-//  * void main() {
-//  *   /// This line prints "Hello, world!"
-//  *   print('Hello, world!');
-//  * }
-//  * `
-//  */
-// ''');
-//     expectDocComment(equals('''
-// `
-// void main() {
-// /// This line prints "Hello, world!"
-// print('Hello, world!');
-// }
-// `'''));
+    //     await writePackageWithCommentedLibrary('''
+    // /**
+    //  * `
+    //  * void main() {
+    //  *   /// This line prints "Hello, world!"
+    //  *   print('Hello, world!');
+    //  * }
+    //  * `
+    //  */
+    // ''');
+    //     expectDocComment(equals('''
+    // `
+    // void main() {
+    // /// This line prints "Hello, world!"
+    // print('Hello, world!');
+    // }
+    // `'''));
   }
 }

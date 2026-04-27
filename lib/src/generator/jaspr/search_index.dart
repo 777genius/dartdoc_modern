@@ -26,12 +26,13 @@ class JasprSearchIndexBuilder {
   final String outputPath;
 
   SearchIndexOutput build(Iterable<String> relativePaths) {
-    final markdownPaths = relativePaths
-        .where(
-          (path) => path.startsWith('content/') && path.endsWith('.md'),
-        )
-        .toList()
-      ..sort();
+    final markdownPaths =
+        relativePaths
+            .where(
+              (path) => path.startsWith('content/') && path.endsWith('.md'),
+            )
+            .toList()
+          ..sort();
 
     final pageEntries = <SearchIndexEntry>[];
     final sectionEntries = <SectionIndexEntry>[];
@@ -48,7 +49,9 @@ class JasprSearchIndexBuilder {
       final pageIndex = pageEntries.length;
       pageEntries.add(entries.first);
       sectionEntries.addAll(
-        entries.skip(1).map(
+        entries
+            .skip(1)
+            .map(
               (entry) => SectionIndexEntry.fromPageEntry(
                 pageIndex: pageIndex,
                 pageUrl: entries.first.url,
@@ -75,20 +78,16 @@ class JasprSearchIndexBuilder {
   }
 
   String _encodeEntries(List<SearchIndexEntry> entries) => jsonEncode({
-        'version': 2,
-        'entryCount': entries.length,
-        'entries': [
-          for (final entry in entries) entry.toJson(),
-        ],
-      });
+    'version': 2,
+    'entryCount': entries.length,
+    'entries': [for (final entry in entries) entry.toJson()],
+  });
 
   String _encodeSectionEntries(List<SectionIndexEntry> entries) => jsonEncode({
-        'version': 3,
-        'entryCount': entries.length,
-        'entries': [
-          for (final entry in entries) entry.toMetaJson(),
-        ],
-      });
+    'version': 3,
+    'entryCount': entries.length,
+    'entries': [for (final entry in entries) entry.toMetaJson()],
+  });
 
   String _encodeSectionContentEntries(List<SectionIndexEntry> entries) =>
       jsonEncode({
@@ -108,7 +107,8 @@ class JasprSearchIndexBuilder {
     final parsed = _ParsedPage.parse(relativePath, markdown);
     final pageTitle = parsed.pageTitle;
     final pageSummary = _excerpt(
-        parsed.description.isNotEmpty ? parsed.description : parsed.introText);
+      parsed.description.isNotEmpty ? parsed.description : parsed.introText,
+    );
     final pageText = _compactSearchText(
       summary: pageSummary,
       text: [
@@ -236,11 +236,7 @@ class SectionIndexEntry {
   final String content;
 
   List<Object?> toMetaJson() {
-    final compact = <Object?>[
-      pageIndex,
-      anchor,
-      section,
-    ];
+    final compact = <Object?>[pageIndex, anchor, section];
     while (compact.isNotEmpty && compact.last == null) {
       compact.removeLast();
     }
@@ -345,8 +341,9 @@ class _ParsedPage {
       pageTitle: pageTitle,
       description: _normalizeText(split.metadata['description'] ?? ''),
       introText: _normalizeText(introBuffer.toString()),
-      sections:
-          sections.where((section) => section.heading.isNotEmpty).toList(),
+      sections: sections
+          .where((section) => section.heading.isNotEmpty)
+          .toList(),
     );
   }
 
@@ -372,10 +369,7 @@ class _ParsedPage {
       metadata[match.group(1)!] = _cleanFrontmatterValue(match.group(2)!);
     }
 
-    return (
-      metadata: metadata,
-      body: lines.skip(index).join('\n'),
-    );
+    return (metadata: metadata, body: lines.skip(index).join('\n'));
   }
 
   static String? _firstHeading(List<String> lines) {
@@ -523,10 +517,7 @@ String _normalizeText(String value) {
         RegExp(r'\[(.*?)\]\((.*?)\)'),
         (match) => match.group(1) ?? '',
       )
-      .replaceAllMapped(
-        RegExp(r'`([^`]+)`'),
-        (match) => match.group(1) ?? '',
-      )
+      .replaceAllMapped(RegExp(r'`([^`]+)`'), (match) => match.group(1) ?? '')
       .replaceAll(RegExp(r'^:::\s*([\w-]+)\s*', multiLine: true), '')
       .replaceAll(RegExp(r'^:::\s*$', multiLine: true), ' ')
       .replaceAll(RegExp(r'<[^>]+>'), ' ')

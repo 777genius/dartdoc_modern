@@ -59,12 +59,9 @@ class _DocsSidebarToggleRuntimeState extends State<DocsSidebarToggleRuntime> {
 
   @override
   Component build(BuildContext context) => span(
-        attributes: {
-          'hidden': 'hidden',
-          'data-docs-sidebar-toggle-runtime': '',
-        },
-        const [],
-      );
+    attributes: {'hidden': 'hidden', 'data-docs-sidebar-toggle-runtime': ''},
+    const [],
+  );
 
   web.Element? _resolveTargetElement(web.EventTarget? target) {
     if (target is web.Element) return target;

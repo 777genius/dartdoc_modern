@@ -133,8 +133,12 @@ class GrandparentOverrider extends GenericChild {
   @override
   final Iterable<Base> referenceGrandparentOverrides;
 
-  GrandparentOverrider(super.name, super.children, super.parent,
-      this.referenceGrandparentOverrides);
+  GrandparentOverrider(
+    super.name,
+    super.children,
+    super.parent,
+    this.referenceGrandparentOverrides,
+  );
 }
 
 void main() {
@@ -163,8 +167,10 @@ void main() {
 
     test('Check that filters work', () {
       expect(referable.lookup('lib3'), isA<TopChild>());
-      expect(referable.lookup('lib3', filter: (r) => r is GenericChild),
-          isA<GenericChild>());
+      expect(
+        referable.lookup('lib3', filter: (r) => r is GenericChild),
+        isA<GenericChild>(),
+      );
     });
 
     test('Check that grandparent overrides work', () {

@@ -38,8 +38,9 @@ class DocumentationRendererHtml implements DocumentationRenderer {
 
       if (pre.children.isNotEmpty && pre.children.first.localName == 'code') {
         var code = pre.children.first;
-        pre.classes
-            .addAll(code.classes.where((name) => name.startsWith('language-')));
+        pre.classes.addAll(
+          code.classes.where((name) => name.startsWith('language-')),
+        );
       }
 
       var specifiesLanguage = pre.classes.isNotEmpty;
@@ -72,8 +73,10 @@ class DocumentationRenderResult {
   final String asHtml;
   final String asOneLiner;
 
-  const DocumentationRenderResult(
-      {required this.asHtml, required this.asOneLiner});
+  const DocumentationRenderResult({
+    required this.asHtml,
+    required this.asOneLiner,
+  });
 }
 
 bool _allowClassName(String className) =>
@@ -326,27 +329,19 @@ final _headingAttributeValidator = <String, bool Function(String)>{
 
 final _elementAttributeValidators =
     <String, Map<String, bool Function(String)>>{
-  'A': {
-    'href': _validLink,
-  },
-  'IMG': {
-    'src': _validUrl,
-    'longdesc': _validUrl,
-  },
-  'DIV': {
-    'itemscope': _alwaysAllowed,
-    'itemtype': _alwaysAllowed,
-  },
-  'BLOCKQUOTE': _citeAttributeValidator,
-  'DEL': _citeAttributeValidator,
-  'INS': _citeAttributeValidator,
-  'Q': _citeAttributeValidator,
-  'H1': _headingAttributeValidator,
-  'H2': _headingAttributeValidator,
-  'H3': _headingAttributeValidator,
-  'H4': _headingAttributeValidator,
-  'H5': _headingAttributeValidator,
-  'H6': _headingAttributeValidator,
-  'H7': _headingAttributeValidator,
-  'H8': _headingAttributeValidator,
-};
+      'A': {'href': _validLink},
+      'IMG': {'src': _validUrl, 'longdesc': _validUrl},
+      'DIV': {'itemscope': _alwaysAllowed, 'itemtype': _alwaysAllowed},
+      'BLOCKQUOTE': _citeAttributeValidator,
+      'DEL': _citeAttributeValidator,
+      'INS': _citeAttributeValidator,
+      'Q': _citeAttributeValidator,
+      'H1': _headingAttributeValidator,
+      'H2': _headingAttributeValidator,
+      'H3': _headingAttributeValidator,
+      'H4': _headingAttributeValidator,
+      'H5': _headingAttributeValidator,
+      'H6': _headingAttributeValidator,
+      'H7': _headingAttributeValidator,
+      'H8': _headingAttributeValidator,
+    };

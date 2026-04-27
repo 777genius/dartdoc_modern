@@ -34,8 +34,11 @@ class NoFileWriter implements FileWriter {
   }
 
   @override
-  void writeBytes(String filePath, List<int> content,
-      {bool allowOverwrite = false}) {
+  void writeBytes(
+    String filePath,
+    List<int> content, {
+    bool allowOverwrite = false,
+  }) {
     // Do nothing
   }
 
@@ -61,19 +64,21 @@ class DartdocFileWriter implements FileWriter {
     this._resourceProvider, {
     int maxFileCount = 0,
     int maxTotalSize = 0,
-  })  : _maxFileCount = maxFileCount,
-        _maxTotalSize = maxTotalSize;
+  }) : _maxFileCount = maxFileCount,
+       _maxTotalSize = maxTotalSize;
 
   void _validateMaxWriteStats(String filePath, int size) {
     _fileCount++;
     _totalSize += size;
     if (_maxFileCount > 0 && _maxFileCount < _fileCount) {
       throw DartdocFailure(
-          'Maximum file count reached: $_maxFileCount ($filePath)');
+        'Maximum file count reached: $_maxFileCount ($filePath)',
+      );
     }
     if (_maxTotalSize > 0 && _maxTotalSize < _totalSize) {
       throw DartdocFailure(
-          'Maximum total size reached: $_maxTotalSize bytes ($filePath)');
+        'Maximum total size reached: $_maxTotalSize bytes ($filePath)',
+      );
     }
   }
 
@@ -117,21 +122,28 @@ class DartdocFileWriter implements FileWriter {
 
   void _warnAboutOverwrite(String outFile, Warnable? element) {
     if (_fileElementMap.containsKey(outFile)) {
-      assert(element != null,
-          'Attempted overwrite of $outFile without corresponding element');
+      assert(
+        element != null,
+        'Attempted overwrite of $outFile without corresponding element',
+      );
       var originalElement = _fileElementMap[outFile];
-      var referredFrom =
-          originalElement == null ? const <Warnable>[] : [originalElement];
-      element?.warn(PackageWarning.duplicateFile,
-          message: outFile, referredFrom: referredFrom);
+      var referredFrom = originalElement == null
+          ? const <Warnable>[]
+          : [originalElement];
+      element?.warn(
+        PackageWarning.duplicateFile,
+        message: outFile,
+        referredFrom: referredFrom,
+      );
     }
   }
 
   /// Returns the file at [outFile] relative to [_outputDir], creating the
   /// parent directory if necessary.
   File _getFile(String outFile) {
-    var file = _resourceProvider
-        .getFile(_resourceProvider.pathContext.join(_outputDir, outFile));
+    var file = _resourceProvider.getFile(
+      _resourceProvider.pathContext.join(_outputDir, outFile),
+    );
     var parent = file.parent;
     if (!parent.exists) {
       parent.create();
@@ -149,8 +161,9 @@ class Dartdoc {
   final Folder _outputDir;
 
   // Fires when the self checks make progress.
-  final StreamController<String> _onCheckProgress =
-      StreamController(sync: true);
+  final StreamController<String> _onCheckProgress = StreamController(
+    sync: true,
+  );
 
   Dartdoc._(this.config, this._outputDir, this._generator, this.packageBuilder);
 
@@ -167,7 +180,8 @@ class Dartdoc {
     var format = context.format;
     if (format != 'html' && format != 'vitepress' && format != 'jaspr') {
       throw DartdocOptionError(
-          "Invalid format '$format'. Allowed values: html, vitepress, jaspr.");
+        "Invalid format '$format'. Allowed values: html, vitepress, jaspr.",
+      );
     }
 
     var resourceProvider = context.resourceProvider;
@@ -181,16 +195,11 @@ class Dartdoc {
             maxTotalSize: context.maxTotalSize,
           )
         : NoFileWriter();
-    return Dartdoc._(
-      context,
-      outputDir,
-      switch (format) {
-        'vitepress' => initVitePressGenerator(context, writer: writer),
-        'jaspr' => initJasprGenerator(context, writer: writer),
-        _ => initHtmlGenerator(context, writer: writer),
-      },
-      packageBuilder,
-    );
+    return Dartdoc._(context, outputDir, switch (format) {
+      'vitepress' => initVitePressGenerator(context, writer: writer),
+      'jaspr' => initJasprGenerator(context, writer: writer),
+      _ => initHtmlGenerator(context, writer: writer),
+    }, packageBuilder);
   }
 
   Stream<String> get onCheckProgress => _onCheckProgress.stream;
@@ -224,13 +233,17 @@ class Dartdoc {
 
     var warnings = packageGraph.packageWarningCounter.warningCount;
     var errors = packageGraph.packageWarningCounter.errorCount;
-    logWarning("Found $warnings ${pluralize('warning', warnings)} "
-        "and $errors ${pluralize('error', errors)}.");
+    logWarning(
+      "Found $warnings ${pluralize('warning', warnings)} "
+      "and $errors ${pluralize('error', errors)}.",
+    );
 
     var seconds = stopwatch.elapsedMilliseconds / 1000.0;
     libs = packageGraph.localPublicLibraries.length;
-    logInfo("Documented $libs public librar${libs == 1 ? 'y' : 'ies'} "
-        'in ${seconds.toStringAsFixed(1)} seconds');
+    logInfo(
+      "Documented $libs public librar${libs == 1 ? 'y' : 'ies'} "
+      'in ${seconds.toStringAsFixed(1)} seconds',
+    );
 
     if (config.showStats) {
       logInfo(runtimeStats.buildReport());
@@ -258,8 +271,9 @@ class Dartdoc {
       if (errorCount > 0) {
         throw DartdocFailure('encountered $errorCount errors');
       }
-      var outDirPath = config.resourceProvider.pathContext
-          .absolute(dartdocResults.outDir.path);
+      var outDirPath = config.resourceProvider.pathContext.absolute(
+        dartdocResults.outDir.path,
+      );
       logInfo('Success! Docs generated into $outDirPath');
       return dartdocResults;
     } finally {

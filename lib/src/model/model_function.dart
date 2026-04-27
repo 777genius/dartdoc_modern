@@ -10,7 +10,10 @@ import 'package:dartdoc_modern/src/model/model.dart';
 /// A [ModelElement] for a [TopLevelFunctionElement] that isn't part of a type definition.
 class ModelFunction extends ModelFunctionTyped {
   ModelFunction(
-      TopLevelFunctionElement super.element, super.library, super.packageGraph);
+    TopLevelFunctionElement super.element,
+    super.library,
+    super.packageGraph,
+  );
 
   bool get isStatic => element.isStatic;
 
@@ -88,5 +91,6 @@ class ModelFunctionTyped extends ModelElement with HasLibrary, TypeParameters {
 
   // For use in templates.
   Extension get enclosingExtension => throw UnsupportedError(
-      'Top-level variables are not provided by extensions');
+    'Top-level variables are not provided by extensions',
+  );
 }

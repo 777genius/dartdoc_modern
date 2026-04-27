@@ -102,8 +102,11 @@ typedef TaskQueueClosure<T> = Future<T> Function();
 void _defaultOnComplete() {}
 
 class _TaskQueueItem<T> {
-  _TaskQueueItem(this._closure, this._completer,
-      {this.onComplete = _defaultOnComplete});
+  _TaskQueueItem(
+    this._closure,
+    this._completer, {
+    this.onComplete = _defaultOnComplete,
+  });
 
   final TaskQueueClosure<T> _closure;
   final Completer<T> _completer;
@@ -129,7 +132,7 @@ class TaskQueue<T extends Object> {
   /// The [maxJobs] parameter defaults to the number of CPU cores on the
   /// system.
   TaskQueue({int? maxJobs})
-      : maxJobs = maxJobs ?? io.Platform.numberOfProcessors;
+    : maxJobs = maxJobs ?? io.Platform.numberOfProcessors;
 
   /// The maximum number of jobs that this queue will run simultaneously.
   final int maxJobs;

@@ -17,15 +17,23 @@ mixin DartdocExperimentOptionContext implements DartdocOptionContextBase {
 }
 
 List<DartdocOption<Object>> createExperimentOptions(
-    ResourceProvider resourceProvider) {
+  ResourceProvider resourceProvider,
+) {
   var knownFeatures = ExperimentStatus.knownFeatures.values;
-  var featureHelpTexts =
-      knownFeatures.map((e) => '    [no-]${e.enableString}: ${e.documentation} '
-          '(default: ${e.isEnabledByDefault})');
+  var featureHelpTexts = knownFeatures.map(
+    (e) =>
+        '    [no-]${e.enableString}: ${e.documentation} '
+        '(default: ${e.isEnabledByDefault})',
+  );
   return [
-    DartdocOptionArgFile<List<String>>('enable-experiment', [], resourceProvider,
-        splitCommas: true,
-        help: 'Enable or disable listed experiments.\n'
-            '${featureHelpTexts.join('\n')}'),
+    DartdocOptionArgFile<List<String>>(
+      'enable-experiment',
+      [],
+      resourceProvider,
+      splitCommas: true,
+      help:
+          'Enable or disable listed experiments.\n'
+          '${featureHelpTexts.join('\n')}',
+    ),
   ];
 }

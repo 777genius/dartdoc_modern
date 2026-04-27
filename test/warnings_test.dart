@@ -15,8 +15,9 @@ import 'src/test_descriptor_utils.dart' as d;
 
 void main() async {
   var resourceProvider = PhysicalResourceProvider.INSTANCE;
-  var optionSet = DartdocOptionRoot.fromOptionGenerators(
-      'dartdoc', [createDartdocOptions], pubPackageMetaProvider);
+  var optionSet = DartdocOptionRoot.fromOptionGenerators('dartdoc', [
+    createDartdocOptions,
+  ], pubPackageMetaProvider);
 
   test('excluding package from "allowed warnings" list ignores all', () async {
     await d.createPackage('test_package');
@@ -26,11 +27,14 @@ void main() async {
       '--allow-warnings-in-packages',
       'some_other_package',
     ]);
-    PackageWarningOptions options =
-        optionSet['packageWarningOptions'].valueAt(testPackage);
+    PackageWarningOptions options = optionSet['packageWarningOptions'].valueAt(
+      testPackage,
+    );
 
-    expect(options.warningModes.values,
-        everyElement(equals(PackageWarningMode.ignore)));
+    expect(
+      options.warningModes.values,
+      everyElement(equals(PackageWarningMode.ignore)),
+    );
   });
 
   test('warnings and errors are allowed at the commandline', () async {
@@ -43,15 +47,18 @@ void main() async {
       '--allow-errors-in-packages',
       'test_package',
     ]);
-    PackageWarningOptions options =
-        optionSet['packageWarningOptions'].valueAt(testPackage);
+    PackageWarningOptions options = optionSet['packageWarningOptions'].valueAt(
+      testPackage,
+    );
 
     expect(options.warningModes.values, contains(PackageWarningMode.warn));
     expect(options.warningModes.values, contains(PackageWarningMode.error));
   });
 
   test('allowing and ignoring warnings from a package ignores all', () async {
-    await d.createPackage('test_package', dartdocOptions: '''
+    await d.createPackage(
+      'test_package',
+      dartdocOptions: '''
 dartdoc:
   warnings:
     - type-as-html
@@ -59,7 +66,8 @@ dartdoc:
     - unresolved-doc-reference
   ignore:
     - ambiguous-reexport
-''');
+''',
+    );
     var testPackage = resourceProvider.getFolder(d.dir('test_package').io.path);
 
     optionSet.parseArguments([
@@ -72,15 +80,20 @@ dartdoc:
       '--ignore-errors-in-packages',
       'test_package',
     ]);
-    PackageWarningOptions options =
-        optionSet['packageWarningOptions'].valueAt(testPackage);
+    PackageWarningOptions options = optionSet['packageWarningOptions'].valueAt(
+      testPackage,
+    );
 
-    expect(options.warningModes.values,
-        everyElement(equals(PackageWarningMode.ignore)));
+    expect(
+      options.warningModes.values,
+      everyElement(equals(PackageWarningMode.ignore)),
+    );
   });
 
   test('loading warning options from files works', () async {
-    await d.createPackage('test_package', dartdocOptions: '''
+    await d.createPackage(
+      'test_package',
+      dartdocOptions: '''
 dartdoc:
   warnings:
     - type-as-html
@@ -88,22 +101,32 @@ dartdoc:
     - unresolved-doc-reference
   ignore:
     - ambiguous-reexport
-''');
+''',
+    );
 
     optionSet.parseArguments([]);
-    PackageWarningOptions options = optionSet['packageWarningOptions']
-        .valueAt(resourceProvider.getFolder(d.dir('test_package').io.path));
+    PackageWarningOptions options = optionSet['packageWarningOptions'].valueAt(
+      resourceProvider.getFolder(d.dir('test_package').io.path),
+    );
 
-    expect(options.warningModes[PackageWarning.typeAsHtml],
-        equals(PackageWarningMode.warn));
-    expect(options.warningModes[PackageWarning.unresolvedDocReference],
-        equals(PackageWarningMode.error));
-    expect(options.warningModes[PackageWarning.ambiguousReexport],
-        equals(PackageWarningMode.ignore));
+    expect(
+      options.warningModes[PackageWarning.typeAsHtml],
+      equals(PackageWarningMode.warn),
+    );
+    expect(
+      options.warningModes[PackageWarning.unresolvedDocReference],
+      equals(PackageWarningMode.error),
+    );
+    expect(
+      options.warningModes[PackageWarning.ambiguousReexport],
+      equals(PackageWarningMode.ignore),
+    );
   });
 
   test('args override warning options from files', () async {
-    await d.createPackage('test_package', dartdocOptions: '''
+    await d.createPackage(
+      'test_package',
+      dartdocOptions: '''
 dartdoc:
   warnings:
     - type-as-html
@@ -111,7 +134,8 @@ dartdoc:
     - unresolved-doc-reference
   ignore:
     - ambiguous-reexport
-''');
+''',
+    );
     optionSet.parseArguments([
       '--warnings',
       'ambiguous-reexport',
@@ -120,21 +144,31 @@ dartdoc:
       '--ignore',
       '',
     ]);
-    PackageWarningOptions options = optionSet['packageWarningOptions']
-        .valueAt(resourceProvider.getFolder(d.dir('test_package').io.path));
-    expect(options.warningModes[PackageWarning.typeAsHtml],
-        equals(PackageWarningMode.error));
+    PackageWarningOptions options = optionSet['packageWarningOptions'].valueAt(
+      resourceProvider.getFolder(d.dir('test_package').io.path),
+    );
+    expect(
+      options.warningModes[PackageWarning.typeAsHtml],
+      equals(PackageWarningMode.error),
+    );
     // `unresolved-doc-reference` is not mentioned in command line, so it
     // reverts to default.
-    expect(options.warningModes[PackageWarning.unresolvedDocReference],
-        equals(PackageWarningMode.warn));
-    expect(options.warningModes[PackageWarning.ambiguousReexport],
-        equals(PackageWarningMode.warn));
+    expect(
+      options.warningModes[PackageWarning.unresolvedDocReference],
+      equals(PackageWarningMode.warn),
+    );
+    expect(
+      options.warningModes[PackageWarning.ambiguousReexport],
+      equals(PackageWarningMode.warn),
+    );
   });
 
-  test('null values for warnings, ignore, and errors reset to defaults',
-      () async {
-    await d.createPackage('test_package', dartdocOptions: '''
+  test(
+    'null values for warnings, ignore, and errors reset to defaults',
+    () async {
+      await d.createPackage(
+        'test_package',
+        dartdocOptions: '''
 dartdoc:
   warnings:
     - type-as-html
@@ -142,23 +176,31 @@ dartdoc:
     - unresolved-doc-reference
   ignore:
     - ambiguous-reexport
-''');
-    optionSet.parseArguments([
-      '--warnings',
-      '',
-      '--errors',
-      '',
-      '--ignore',
-      '',
-    ]);
-    PackageWarningOptions options = optionSet['packageWarningOptions']
-        .valueAt(resourceProvider.getFolder(d.dir('test_package').io.path));
+''',
+      );
+      optionSet.parseArguments([
+        '--warnings',
+        '',
+        '--errors',
+        '',
+        '--ignore',
+        '',
+      ]);
+      PackageWarningOptions options = optionSet['packageWarningOptions']
+          .valueAt(resourceProvider.getFolder(d.dir('test_package').io.path));
 
-    expect(options.warningModes[PackageWarning.typeAsHtml],
-        equals(PackageWarningMode.ignore));
-    expect(options.warningModes[PackageWarning.unresolvedDocReference],
-        equals(PackageWarningMode.warn));
-    expect(options.warningModes[PackageWarning.ambiguousReexport],
-        equals(PackageWarningMode.warn));
-  });
+      expect(
+        options.warningModes[PackageWarning.typeAsHtml],
+        equals(PackageWarningMode.ignore),
+      );
+      expect(
+        options.warningModes[PackageWarning.unresolvedDocReference],
+        equals(PackageWarningMode.warn),
+      );
+      expect(
+        options.warningModes[PackageWarning.ambiguousReexport],
+        equals(PackageWarningMode.warn),
+      );
+    },
+  );
 }

@@ -9,35 +9,55 @@
 //
 // See tool/mustachio/README.md for details.
 
-@Renderer(#renderCategory, Context<CategoryTemplateData>(), 'category',
-    visibleTypes: _visibleTypes)
-@Renderer(#renderCategoryRedirect, Context<CategoryTemplateData>(),
-    'category_redirect',
-    visibleTypes: _visibleTypes)
+@Renderer(
+  #renderCategory,
+  Context<CategoryTemplateData>(),
+  'category',
+  visibleTypes: _visibleTypes,
+)
+@Renderer(
+  #renderCategoryRedirect,
+  Context<CategoryTemplateData>(),
+  'category_redirect',
+  visibleTypes: _visibleTypes,
+)
 @Renderer(#renderClass, Context<ClassTemplateData>(), 'class')
 @Renderer(#renderConstructor, Context<ConstructorTemplateData>(), 'constructor')
 @Renderer(#renderEnum, Context<EnumTemplateData>(), 'enum')
 @Renderer(#renderError, Context<PackageTemplateData>(), '404error')
 @Renderer(#renderExtension, Context<ExtensionTemplateData>(), 'extension')
-@Renderer(#renderExtensionType, Context<ExtensionTypeTemplateData>(),
-    'extension_type')
+@Renderer(
+  #renderExtensionType,
+  Context<ExtensionTypeTemplateData>(),
+  'extension_type',
+)
 @Renderer(#renderFunction, Context<FunctionTemplateData>(), 'function')
 @Renderer(#renderIndex, Context<PackageTemplateData>(), 'index')
 @Renderer(#renderLibrary, Context<LibraryTemplateData>(), 'library')
 @Renderer(
-    #renderLibraryRedirect, Context<LibraryTemplateData>(), 'library_redirect')
+  #renderLibraryRedirect,
+  Context<LibraryTemplateData>(),
+  'library_redirect',
+)
 @Renderer(#renderMethod, Context<MethodTemplateData>(), 'method')
 @Renderer(#renderMixin, Context<MixinTemplateData>(), 'mixin')
 @Renderer(#renderProperty, Context<PropertyTemplateData>(), 'property')
 @Renderer(#renderSearchPage, Context<PackageTemplateData>(), 'search')
 @Renderer(
-    #renderSidebarForContainer,
-    Context<TemplateDataWithContainer<Documentable>>(),
-    '_sidebar_for_container')
-@Renderer(#renderSidebarForLibrary,
-    Context<TemplateDataWithLibrary<Documentable>>(), '_sidebar_for_library')
-@Renderer(#renderTopLevelProperty, Context<TopLevelPropertyTemplateData>(),
-    'top_level_property')
+  #renderSidebarForContainer,
+  Context<TemplateDataWithContainer<Documentable>>(),
+  '_sidebar_for_container',
+)
+@Renderer(
+  #renderSidebarForLibrary,
+  Context<TemplateDataWithLibrary<Documentable>>(),
+  '_sidebar_for_library',
+)
+@Renderer(
+  #renderTopLevelProperty,
+  Context<TopLevelPropertyTemplateData>(),
+  'top_level_property',
+)
 @Renderer(#renderTypedef, Context<TypedefTemplateData>(), 'typedef')
 library;
 
@@ -102,7 +122,8 @@ abstract class Templates {
   String renderProperty(PropertyTemplateData context);
   String renderSearchPage(PackageTemplateData context);
   String renderSidebarForContainer(
-      TemplateDataWithContainer<Documentable> context);
+    TemplateDataWithContainer<Documentable> context,
+  );
   String renderSidebarForLibrary(TemplateDataWithLibrary<Documentable> context);
   String renderTopLevelProperty(TopLevelPropertyTemplateData context);
   String renderTypedef(TypedefTemplateData context);
@@ -177,13 +198,13 @@ class HtmlAotTemplates implements Templates {
 
   @override
   String renderSidebarForContainer(
-          TemplateDataWithContainer<Documentable> context) =>
-      aot_renderers_for_html.renderSidebarForContainer(context);
+    TemplateDataWithContainer<Documentable> context,
+  ) => aot_renderers_for_html.renderSidebarForContainer(context);
 
   @override
   String renderSidebarForLibrary(
-          TemplateDataWithLibrary<Documentable> context) =>
-      aot_renderers_for_html.renderSidebarForLibrary(context);
+    TemplateDataWithLibrary<Documentable> context,
+  ) => aot_renderers_for_html.renderSidebarForLibrary(context);
 
   @override
   String renderTopLevelProperty(TopLevelPropertyTemplateData context) =>

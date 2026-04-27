@@ -41,9 +41,13 @@ class Enum extends InheritingContainer with Constructable, MixedInTypes {
   @override
   late final List<Field> publicEnumValues = [
     for (var value in element.constants)
-      getModelForPropertyInducingElement(value, library,
-          getter: getModelFor(value.getter!, library) as ContainerAccessor,
-          setter: null) as Field
+      getModelForPropertyInducingElement(
+            value,
+            library,
+            getter: getModelFor(value.getter!, library) as ContainerAccessor,
+            setter: null,
+          )
+          as Field,
   ];
 
   @override
@@ -69,10 +73,13 @@ class Enum extends InheritingContainer with Constructable, MixedInTypes {
 class EnumField extends Field {
   final int index;
 
-  EnumField.forConstant(this.index, FieldElement element, Library library,
-      PackageGraph packageGraph, Accessor? getter)
-      : super(
-            element, library, packageGraph, getter as ContainerAccessor?, null);
+  EnumField.forConstant(
+    this.index,
+    FieldElement element,
+    Library library,
+    PackageGraph packageGraph,
+    Accessor? getter,
+  ) : super(element, library, packageGraph, getter as ContainerAccessor?, null);
 
   @override
   bool get isEnumValue => true;
@@ -80,8 +87,9 @@ class EnumField extends Field {
   @override
   bool get hasConstantValueForDisplay {
     final enum_ = element.enclosingElement as EnumElement;
-    final enumHasDefaultConstructor =
-        enum_.constructors.any((c) => c.isDefaultConstructor);
+    final enumHasDefaultConstructor = enum_.constructors.any(
+      (c) => c.isDefaultConstructor,
+    );
     // If this enum does not have any explicit constructors (and so only has a
     // default constructor), then there is no meaningful constant initializer to
     // display.
@@ -91,8 +99,8 @@ class EnumField extends Field {
   @override
   String get constantValueBase =>
       element.library.featureSet.isEnabled(Feature.enhanced_enums)
-          ? super.constantValueBase
-          : renderedName;
+      ? super.constantValueBase
+      : renderedName;
 
   @override
   List<ModelElement> get documentationFrom {
@@ -137,7 +145,7 @@ class EnumField extends Field {
   @visibleForTesting
   String get renderedName => name == 'values'
       ? 'const List&lt;<wbr>'
-          '<span class="type-parameter">${enclosingElement.name}</span>'
-          '&gt;'
+            '<span class="type-parameter">${enclosingElement.name}</span>'
+            '&gt;'
       : constantValue;
 }

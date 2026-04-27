@@ -11,31 +11,35 @@ import 'package:dartdoc_modern/src/tool_definition.dart';
 import 'package:path/path.dart' as path;
 
 typedef ToolErrorCallback = void Function(String message);
-typedef FakeResultCallback = String Function(String tool,
-    {List<String> args, String content});
+typedef FakeResultCallback =
+    String Function(String tool, {List<String> args, String content});
 
 class ToolTempFileTracker {
   final ResourceProvider resourceProvider;
   final Folder temporaryDirectory;
 
   ToolTempFileTracker._(this.resourceProvider)
-      : temporaryDirectory =
-            resourceProvider.createSystemTemp('dartdoc_tools_');
+    : temporaryDirectory = resourceProvider.createSystemTemp('dartdoc_tools_');
 
   static final Map<ResourceProvider, ToolTempFileTracker> _instances = {};
 
   static ToolTempFileTracker instanceFor(ResourceProvider resourceProvider) =>
       _instances.putIfAbsent(
-          resourceProvider, () => ToolTempFileTracker._(resourceProvider));
+        resourceProvider,
+        () => ToolTempFileTracker._(resourceProvider),
+      );
 
   int _temporaryFileCount = 0;
 
   File createTemporaryFile() {
     _temporaryFileCount++;
     // TODO(srawlins): Assume [temporaryDirectory]'s path is always absolute.
-    var tempFile = resourceProvider.getFile(resourceProvider.pathContext.join(
+    var tempFile = resourceProvider.getFile(
+      resourceProvider.pathContext.join(
         resourceProvider.pathContext.absolute(temporaryDirectory.path),
-        'input_$_temporaryFileCount'));
+        'input_$_temporaryFileCount',
+      ),
+    );
     tempFile.writeAsStringSync('');
     return tempFile;
   }
@@ -66,10 +70,11 @@ class ToolRunner {
   final ToolConfiguration toolConfiguration;
 
   Future<void> _runSetup(
-      String name,
-      ToolDefinition tool,
-      Map<String, String> environment,
-      ToolErrorCallback toolErrorCallback) async {
+    String name,
+    ToolDefinition tool,
+    Map<String, String> environment,
+    ToolErrorCallback toolErrorCallback,
+  ) async {
     var isDartSetup = ToolDefinition.isDartExecutable(tool.setupCommand[0]);
     var args = tool.setupCommand.toList(growable: true);
     String commandPath;
@@ -80,8 +85,14 @@ class ToolRunner {
       commandPath = args.removeAt(0);
     }
     // We do not use the stdout of the setup process.
-    await _runProcess(name, '', commandPath, args, environment,
-        toolErrorCallback: toolErrorCallback);
+    await _runProcess(
+      name,
+      '',
+      commandPath,
+      args,
+      environment,
+      toolErrorCallback: toolErrorCallback,
+    );
     tool.setupComplete = true;
   }
 
@@ -90,16 +101,25 @@ class ToolRunner {
   ///
   /// If the process's exit code is not 0, or if a [ProcessException] is thrown,
   /// calls [toolErrorCallback] with a detailed error message, and returns `''`.
-  Future<String> _runProcess(String name, String content, String commandPath,
-      List<String> args, Map<String, String> environment,
-      {required ToolErrorCallback toolErrorCallback}) async {
+  Future<String> _runProcess(
+    String name,
+    String content,
+    String commandPath,
+    List<String> args,
+    Map<String, String> environment, {
+    required ToolErrorCallback toolErrorCallback,
+  }) async {
     String commandString() => ([commandPath] + args).join(' ');
     try {
-      var result =
-          await Process.run(commandPath, args, environment: environment);
+      var result = await Process.run(
+        commandPath,
+        args,
+        environment: environment,
+      );
       if (result.exitCode != 0) {
-        var envString =
-            environment.entries.map((e) => '${e.key}: ${e.value}').join(', ');
+        var envString = environment.entries
+            .map((e) => '${e.key}: ${e.value}')
+            .join(', ');
         toolErrorCallback(
           'Tool "$name" returned non-zero exit code '
           '(${result.exitCode}) when run as "${commandString()}".\n'
@@ -115,10 +135,12 @@ class ToolRunner {
         return result.stdout as String;
       }
     } on ProcessException catch (exception) {
-      toolErrorCallback('Failed to run tool "$name" as '
-          '"${commandString()}": $exception\n'
-          'Input to $name was:\n'
-          '$content');
+      toolErrorCallback(
+        'Failed to run tool "$name" as '
+        '"${commandString()}": $exception\n'
+        'Input to $name was:\n'
+        '$content',
+      );
       return '';
     }
   }
@@ -128,29 +150,36 @@ class ToolRunner {
   /// The name of the tool is the first argument in the [args]. The content to
   /// be sent to to the tool is given in the optional [content]. The stdout of
   /// the tool is returned.
-  Future<String> run(List<String> args,
-      {required String content,
-      required ToolErrorCallback toolErrorCallback,
-      Map<String, String> environment = const {}}) async {
+  Future<String> run(
+    List<String> args, {
+    required String content,
+    required ToolErrorCallback toolErrorCallback,
+    Map<String, String> environment = const {},
+  }) async {
     assert(args.isNotEmpty);
     return _toolTracker.add(() {
-      return _run(args,
-          toolErrorCallback: toolErrorCallback,
-          content: content,
-          environment: environment);
+      return _run(
+        args,
+        toolErrorCallback: toolErrorCallback,
+        content: content,
+        environment: environment,
+      );
     });
   }
 
-  Future<String> _run(List<String> args,
-      {required ToolErrorCallback toolErrorCallback,
-      required Map<String, String> environment,
-      String content = ''}) async {
+  Future<String> _run(
+    List<String> args, {
+    required ToolErrorCallback toolErrorCallback,
+    required Map<String, String> environment,
+    String content = '',
+  }) async {
     assert(args.isNotEmpty);
     var toolName = args.removeAt(0);
     if (!toolConfiguration.tools.containsKey(toolName)) {
       toolErrorCallback(
-          'Unable to find definition for tool "$toolName" in tool map. '
-          'Did you add it to dartdoc_options.yaml?');
+        'Unable to find definition for tool "$toolName" in tool map. '
+        'Did you add it to dartdoc_options.yaml?',
+      );
       return '';
     }
     var toolDefinition = toolConfiguration.tools[toolName];
@@ -172,32 +201,41 @@ class ToolRunner {
       // find out where their script was coming from as an absolute path on the
       // filesystem.
       envWithInput['DART_SNAPSHOT_CACHE'] = pathContext.absolute(
-          SnapshotCache.instanceFor(resourceProvider).snapshotCache.path);
+        SnapshotCache.instanceFor(resourceProvider).snapshotCache.path,
+      );
       if (toolDefinition.setupCommand.isNotEmpty) {
         envWithInput['DART_SETUP_COMMAND'] = toolDefinition.setupCommand[0];
       }
     }
 
-    var argsWithInput = [
-      ...toolArgs,
-      ..._substituteInArgs(args, envWithInput),
-    ];
+    var argsWithInput = [...toolArgs, ..._substituteInArgs(args, envWithInput)];
 
     if (toolDefinition.setupCommand.isNotEmpty &&
         !toolDefinition.setupComplete) {
       await _runSetup(
-          toolName, toolDefinition, envWithInput, toolErrorCallback);
+        toolName,
+        toolDefinition,
+        envWithInput,
+        toolErrorCallback,
+      );
     }
 
     var toolStateForArgs = await toolDefinition.toolStateForArgs(
-        toolName, argsWithInput,
-        toolErrorCallback: toolErrorCallback);
+      toolName,
+      argsWithInput,
+      toolErrorCallback: toolErrorCallback,
+    );
     var commandPath = toolStateForArgs.commandPath;
     argsWithInput = toolStateForArgs.args;
     var callCompleter = toolStateForArgs.onProcessComplete;
     var stdout = _runProcess(
-        toolName, content, commandPath, argsWithInput, envWithInput,
-        toolErrorCallback: toolErrorCallback);
+      toolName,
+      content,
+      commandPath,
+      argsWithInput,
+      envWithInput,
+      toolErrorCallback: toolErrorCallback,
+    );
 
     if (callCompleter == null) {
       return stdout;
@@ -217,15 +255,18 @@ class ToolRunner {
     // file before running the tool synchronously.
 
     // Write the content to a temp file.
-    var tmpFile =
-        ToolTempFileTracker.instanceFor(resourceProvider).createTemporaryFile();
+    var tmpFile = ToolTempFileTracker.instanceFor(
+      resourceProvider,
+    ).createTemporaryFile();
     tmpFile.writeAsStringSync(content);
     return pathContext.absolute(tmpFile.path);
   }
 
   // TODO(srawlins): Unit tests.
   List<String> _substituteInArgs(
-      List<String> args, Map<String, String> envWithInput) {
+    List<String> args,
+    Map<String, String> envWithInput,
+  ) {
     var substitutions = envWithInput.map<RegExp, String>((key, value) {
       var escapedKey = RegExp.escape(key);
       return MapEntry(RegExp('\\\$(\\($escapedKey\\)|$escapedKey\\b)'), value);
@@ -234,8 +275,9 @@ class ToolRunner {
     var argsWithInput = <String>[];
     for (var arg in args) {
       var newArg = arg;
-      substitutions
-          .forEach((regex, value) => newArg = newArg.replaceAll(regex, value));
+      substitutions.forEach(
+        (regex, value) => newArg = newArg.replaceAll(regex, value),
+      );
       argsWithInput.add(newArg);
     }
 

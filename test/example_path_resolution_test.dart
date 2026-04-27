@@ -15,7 +15,9 @@ void main() {
       // Set current to a directory far away from the package root to ensure
       // resolution does not accidentally depend on it.
       pathContext = p.Context(
-          style: p.Style.posix, current: '/completely/different/path');
+        style: p.Style.posix,
+        current: '/completely/different/path',
+      );
       packagePath = '/project';
     });
 
@@ -42,8 +44,10 @@ void main() {
 
     test('relative path with ..', () {
       expect(
-        resolve('../examples/hello.dart',
-            sourceFileName: '/project/lib/a.dart'),
+        resolve(
+          '../examples/hello.dart',
+          sourceFileName: '/project/lib/a.dart',
+        ),
         '/project/examples/hello.dart',
       );
     });
@@ -67,14 +71,8 @@ void main() {
         resolve('/examples/100%25effective.dart'),
         '/project/examples/100%effective.dart',
       );
-      expect(
-        resolve('/examples/a%5cb.dart'),
-        '/project/examples/a\\b.dart',
-      );
-      expect(
-        resolve('/examples/a%20b.dart'),
-        '/project/examples/a b.dart',
-      );
+      expect(resolve('/examples/a%5cb.dart'), '/project/examples/a\\b.dart');
+      expect(resolve('/examples/a%20b.dart'), '/project/examples/a b.dart');
     });
 
     test('path with fragment and query (ignored)', () {
@@ -82,10 +80,7 @@ void main() {
         resolve('/examples/hello.dart?q=1#region'),
         '/project/examples/hello.dart',
       );
-      expect(
-        resolve('/examples/hello.dart?#'),
-        '/project/examples/hello.dart',
-      );
+      expect(resolve('/examples/hello.dart?#'), '/project/examples/hello.dart');
     });
 
     test('special characters in package and source paths', () {
@@ -107,36 +102,36 @@ void main() {
 
     test('clamping: relative traversal cannot escape root', () {
       expect(
-        resolve('../../../examples/hello.dart',
-            sourceFileName: '/project/lib/a.dart'),
+        resolve(
+          '../../../examples/hello.dart',
+          sourceFileName: '/project/lib/a.dart',
+        ),
         '/project/examples/hello.dart',
       );
     });
 
     test('clamping: absolute traversal cannot escape root', () {
-      expect(
-        resolve('/../outside.dart'),
-        '/project/outside.dart',
-      );
+      expect(resolve('/../outside.dart'), '/project/outside.dart');
     });
 
     test('absolute URI (rejected)', () {
-      expect(
-        resolve('https://example.com/hello.dart'),
-        isNull,
-      );
+      expect(resolve('https://example.com/hello.dart'), isNull);
     });
 
     test('path with backslashes', () {
       // Uri.resolve converts backslashes to forward slashes.
-      var result = resolve('examples\\hello.dart',
-          sourceFileName: '/project/lib/a.dart');
+      var result = resolve(
+        'examples\\hello.dart',
+        sourceFileName: '/project/lib/a.dart',
+      );
       expect(result, '/project/lib/examples/hello.dart');
     });
 
     test('Windows-style absolute paths and resolution', () {
-      var windowsContext =
-          p.Context(style: p.Style.windows, current: r'C:\project');
+      var windowsContext = p.Context(
+        style: p.Style.windows,
+        current: r'C:\project',
+      );
       var windowsPackagePath = r'C:\project';
 
       String? resolveWindows(String filepath, {String? sourceFileName}) {
@@ -154,13 +149,17 @@ void main() {
         r'C:\project\lib\hello.dart',
       );
       expect(
-        resolveWindows('../examples/hello.dart',
-            sourceFileName: r'C:\project\lib\a.dart'),
+        resolveWindows(
+          '../examples/hello.dart',
+          sourceFileName: r'C:\project\lib\a.dart',
+        ),
         r'C:\project\examples\hello.dart',
       );
       expect(
-        resolveWindows('../../../outside.dart',
-            sourceFileName: r'C:\project\lib\a.dart'),
+        resolveWindows(
+          '../../../outside.dart',
+          sourceFileName: r'C:\project\lib\a.dart',
+        ),
         r'C:\project\outside.dart',
       );
     });
@@ -209,8 +208,11 @@ void main() {
             pathContext: pathContext,
             warn: (kind, {message}) => warned = true,
           );
-          expect(warned, isTrue,
-              reason: 'Expected a warning for input "$input"');
+          expect(
+            warned,
+            isTrue,
+            reason: 'Expected a warning for input "$input"',
+          );
         });
       }
     });
@@ -233,12 +235,17 @@ void main() {
             pathContext: pathContext,
             warn: (kind, {message}) {
               warned = true;
-              expect(message,
-                  contains('Schemes and authorities are not allowed.'));
+              expect(
+                message,
+                contains('Schemes and authorities are not allowed.'),
+              );
             },
           );
-          expect(warned, isTrue,
-              reason: 'Expected a warning for input "$input"');
+          expect(
+            warned,
+            isTrue,
+            reason: 'Expected a warning for input "$input"',
+          );
         });
       }
     });

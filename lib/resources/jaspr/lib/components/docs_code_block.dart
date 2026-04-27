@@ -105,9 +105,13 @@ class _BashState {
   _BashState({required this.cmdNext});
 }
 
-void _enhanceBashNodesRecursive(highlighting.Node node, _BashState state,
-    {bool? parentSkipped}) {
-  final skip = parentSkipped ??
+void _enhanceBashNodesRecursive(
+  highlighting.Node node,
+  _BashState state, {
+  bool? parentSkipped,
+}) {
+  final skip =
+      parentSkipped ??
       (node.className != null && _skipScopes.hasMatch(node.className!));
 
   if (skip && node.value != null) return;
@@ -166,10 +170,12 @@ List<highlighting.Node>? _tokenizeBashText(String text, _BashState state) {
     } else if (RegExp(r'^\s-[a-zA-Z0-9]$').hasMatch(t)) {
       // Short flag with leading whitespace: split into space + flag.
       nodes.add(highlighting.Node(value: t[0]));
-      nodes.add(highlighting.Node(
-        className: 'attribute',
-        children: [highlighting.Node(value: t.substring(1))],
-      ));
+      nodes.add(
+        highlighting.Node(
+          className: 'attribute',
+          children: [highlighting.Node(value: t.substring(1))],
+        ),
+      );
       state.cmdNext = false;
       continue;
     } else if (_operators.contains(t)) {
@@ -185,10 +191,12 @@ List<highlighting.Node>? _tokenizeBashText(String text, _BashState state) {
     }
 
     if (cls != null) {
-      nodes.add(highlighting.Node(
-        className: cls,
-        children: [highlighting.Node(value: t)],
-      ));
+      nodes.add(
+        highlighting.Node(
+          className: cls,
+          children: [highlighting.Node(value: t)],
+        ),
+      );
     } else {
       nodes.add(highlighting.Node(value: t));
     }

@@ -24,7 +24,8 @@ bool matchGlobs(List<String> globs, String fullName, {bool? isWindows}) {
     // TODO(jcollins-g): port this special casing to the glob package.
     if (driveChar < 0) {
       throw DartdocFailure(
-          'Unable to recognize drive letter on Windows in:  $fullName');
+        'Unable to recognize drive letter on Windows in:  $fullName',
+      );
     }
     // Remove drive letter and colon.
     fullName = fullName.substring(2);
@@ -35,13 +36,15 @@ bool matchGlobs(List<String> globs, String fullName, {bool? isWindows}) {
         // Starts with same drive letter.
         if (driveChar == _windowsDriveLetterOf(glob))
           // Remove leading drive letter and colon, change `\` to `/`.
-          path.posix.joinAll(path.windows.split(glob.substring(2)))
+          path.posix.joinAll(path.windows.split(glob.substring(2))),
     ];
     globs = filteredGlobs;
   }
 
-  return globs.any((g) =>
-      Glob(g, context: windows ? path.windows : path.posix).matches(fullName));
+  return globs.any(
+    (g) =>
+        Glob(g, context: windows ? path.windows : path.posix).matches(fullName),
+  );
 }
 
 // The lower-case ASCII code of the drive letter of path, or -1 if none.
@@ -55,7 +58,8 @@ int _windowsDriveLetterOf(String path) {
 }
 
 Iterable<T> filterHasCanonical<T extends ModelElement>(
-    Iterable<T> maybeHasCanonicalItems) {
+  Iterable<T> maybeHasCanonicalItems,
+) {
   return maybeHasCanonicalItems.where((me) => me.canonicalModelElement != null);
 }
 

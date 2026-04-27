@@ -17,8 +17,10 @@ class Extension extends Container {
   @override
   final ExtensionElement element;
 
-  late final ElementType extendedElement =
-      getTypeFor(element.extendedType, library);
+  late final ElementType extendedElement = getTypeFor(
+    element.extendedType,
+    library,
+  );
 
   Extension(this.element, super.library, super.packageGraph);
 
@@ -97,28 +99,53 @@ class Extension extends Container {
   String get name => element.name == null ? '' : super.name;
 
   @override
-  late final List<Field> declaredFields = element.fields.map((field) {
-    ContainerAccessor? getter, setter;
-    final fieldGetter = field.getter;
-    if (fieldGetter != null) {
-      getter = ModelElement.for_(fieldGetter, library, packageGraph,
-          enclosingContainer: this) as ContainerAccessor;
-    }
-    final fieldSetter = field.setter;
-    if (fieldSetter != null) {
-      setter = ModelElement.for_(fieldSetter, library, packageGraph,
-          enclosingContainer: this) as ContainerAccessor;
-    }
-    return getModelForPropertyInducingElement(field, library,
-        getter: getter, setter: setter, enclosingContainer: this) as Field;
-  }).toList(growable: false);
+  late final List<Field> declaredFields = element.fields
+      .map((field) {
+        ContainerAccessor? getter, setter;
+        final fieldGetter = field.getter;
+        if (fieldGetter != null) {
+          getter =
+              ModelElement.for_(
+                    fieldGetter,
+                    library,
+                    packageGraph,
+                    enclosingContainer: this,
+                  )
+                  as ContainerAccessor;
+        }
+        final fieldSetter = field.setter;
+        if (fieldSetter != null) {
+          setter =
+              ModelElement.for_(
+                    fieldSetter,
+                    library,
+                    packageGraph,
+                    enclosingContainer: this,
+                  )
+                  as ContainerAccessor;
+        }
+        return getModelForPropertyInducingElement(
+              field,
+              library,
+              getter: getter,
+              setter: setter,
+              enclosingContainer: this,
+            )
+            as Field;
+      })
+      .toList(growable: false);
 
   @override
   late final List<TypeParameter> typeParameters = element.typeParameters
-      .map((typeParameter) => getModelFor(
-          typeParameter,
-          getModelForElement(typeParameter.enclosingElement!.library!)
-              as Library) as TypeParameter)
+      .map(
+        (typeParameter) =>
+            getModelFor(
+                  typeParameter,
+                  getModelForElement(typeParameter.enclosingElement!.library!)
+                      as Library,
+                )
+                as TypeParameter,
+      )
       .toList(growable: false);
 
   @override

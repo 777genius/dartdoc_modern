@@ -43,24 +43,30 @@ class SearchIndexTest extends DartdocTestBase {
   }) async {
     var library = await bootPackageWithLibrary(
       libraryContent,
-      additionalArguments:
-          actAsFlutter ? const ['--auto-include-dependencies'] : const [],
+      additionalArguments: actAsFlutter
+          ? const ['--auto-include-dependencies']
+          : const [],
     );
     var libraries = [
       library,
       if (actAsFlutter)
-        ...library.packageGraph.libraries
-            .where((l) => l.name.startsWith('dart:')),
+        ...library.packageGraph.libraries.where(
+          (l) => l.name.startsWith('dart:'),
+        ),
     ];
     // TODO(srawlins): `Library.allModelElements` is not a great fit for this
     // test, because we can only calculate the `href` properties of canonical,
     // documented elements. But this filter gets us approximately what we want.
-    var elements = libraries.expand((library) => library.allModelElements
-        .whereDocumentedIn(library)
-        .where((e) => e is! TypeParameter)
-        .where((e) => e is ContainerMember
-            ? e.enclosingElement.canonicalLibrary != null
-            : e.canonicalLibrary != null));
+    var elements = libraries.expand(
+      (library) => library.allModelElements
+          .whereDocumentedIn(library)
+          .where((e) => e is! TypeParameter)
+          .where(
+            (e) => e is ContainerMember
+                ? e.enclosingElement.canonicalLibrary != null
+                : e.canonicalLibrary != null,
+          ),
+    );
     var text = generateSearchIndexJson(
       elements,
       packageOrder: actAsFlutter ? const ['flutter', 'Dart'] : const [],
@@ -151,13 +157,10 @@ class D extends C {
   }
 
   void test_sdkPackageRank_core() async {
-    var jsonIndex = await jsonIndexForPackageWithLibrary(
-      actAsFlutter: true,
-      '''
+    var jsonIndex = await jsonIndexForPackageWithLibrary(actAsFlutter: true, '''
 /// A library.
 library;
-''',
-    );
+''');
     var classItem = jsonIndex.named('dart:core.List');
 
     expect(classItem['kind'], equals(Kind.class_.index));
@@ -165,13 +168,10 @@ library;
   }
 
   void test_sdkPackageRank_nonCore() async {
-    var jsonIndex = await jsonIndexForPackageWithLibrary(
-      actAsFlutter: true,
-      '''
+    var jsonIndex = await jsonIndexForPackageWithLibrary(actAsFlutter: true, '''
 /// A library.
 library;
-''',
-    );
+''');
     var classItem = jsonIndex.named('dart:io.File');
 
     expect(classItem['kind'], equals(Kind.class_.index));

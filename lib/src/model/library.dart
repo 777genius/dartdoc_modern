@@ -27,12 +27,20 @@ class Library extends ModelElement with TopLevelContainer {
   @override
   final Package package;
 
-  Library._(this.element, PackageGraph packageGraph, this.package,
-      this._restoredUri, this._localElements, this._exportedElements)
-      : super(null, packageGraph);
+  Library._(
+    this.element,
+    PackageGraph packageGraph,
+    this.package,
+    this._restoredUri,
+    this._localElements,
+    this._exportedElements,
+  ) : super(null, packageGraph);
 
-  factory Library.fromLibraryResult(DartDocResolvedLibrary resolvedLibrary,
-      PackageGraph packageGraph, Package package) {
+  factory Library.fromLibraryResult(
+    DartDocResolvedLibrary resolvedLibrary,
+    PackageGraph packageGraph,
+    Package package,
+  ) {
     packageGraph.gatherModelNodes(resolvedLibrary);
 
     var libraryElement = resolvedLibrary.element;
@@ -51,7 +59,7 @@ class Library extends ModelElement with TopLevelContainer {
       for (var a in firstLibraryFragment.typeAliases) a.element,
     };
     var exportedElements = {
-      ...libraryElement.exportNamespace.definedNames2.values
+      ...libraryElement.exportNamespace.definedNames2.values,
     }.difference(localElements);
     var library = Library._(
       libraryElement,
@@ -92,9 +100,10 @@ class Library extends ModelElement with TopLevelContainer {
     // Private Dart SDK libraries are not public.
     if (elementUri.isScheme('dart')) {
       var segments = elementUri.pathSegments;
-      if (segments case [var firstSegment, ...]
-          when firstSegment.startsWith('_') ||
-              firstSegment == 'nativewrappers') {
+      if (segments case [
+        var firstSegment,
+        ...,
+      ] when firstSegment.startsWith('_') || firstSegment == 'nativewrappers') {
         return false;
       }
     }
@@ -108,10 +117,9 @@ class Library extends ModelElement with TopLevelContainer {
       return false;
     }
     if (
-        // TODO(srawlins): Stop supporting a 'name' here.
-        config.isLibraryExcluded(name) ||
-            config.isLibraryExcluded(
-                element.firstFragment.source.uri.toString())) {
+    // TODO(srawlins): Stop supporting a 'name' here.
+    config.isLibraryExcluded(name) ||
+        config.isLibraryExcluded(element.firstFragment.source.uri.toString())) {
       return false;
     }
     return true;
@@ -151,8 +159,10 @@ class Library extends ModelElement with TopLevelContainer {
         // analyzer resolves anonymous library sources to absolute file paths.
         // Compute a meaningful relative path from the package root.
         var fullName = element.firstFragment.source.fullName;
-        var relativePath =
-            pathContext.relative(fullName, from: package.packagePath);
+        var relativePath = pathContext.relative(
+          fullName,
+          from: package.packagePath,
+        );
         if (relativePath.startsWith('lib${pathContext.separator}')) {
           const libDirectoryLength = 'lib/'.length;
           nameFromPath = relativePath.substring(libDirectoryLength);
@@ -177,7 +187,9 @@ class Library extends ModelElement with TopLevelContainer {
       if (nameFromPath.endsWith('.dart')) {
         const dartExtensionLength = '.dart'.length;
         nameFromPath = nameFromPath.substring(
-            0, nameFromPath.length - dartExtensionLength);
+          0,
+          nameFromPath.length - dartExtensionLength,
+        );
       }
     } else {
       nameFromPath = name;
@@ -268,7 +280,6 @@ class Library extends ModelElement with TopLevelContainer {
   }
 
   @override
-
   /// The path portion of this library's import URI as a 'package:' URI.
   String get breadcrumbName {
     var source = element.firstFragment.source;
@@ -281,12 +292,15 @@ class Library extends ModelElement with TopLevelContainer {
         package.packagePath.contains('/google3/')) {
       // In google3, `fullName` is specified as if the root of google3 was `/`.
       // And `package.packagePath` contains the true google3 root.
-      var root = pathContext
-          .joinAll(pathContext.split(package.packagePath)..removeLast());
+      var root = pathContext.joinAll(
+        pathContext.split(package.packagePath)..removeLast(),
+      );
       fullName = '$root$fullName';
     }
-    var relativePath =
-        pathContext.relative(fullName, from: package.packagePath);
+    var relativePath = pathContext.relative(
+      fullName,
+      from: package.packagePath,
+    );
     assert(relativePath.startsWith('lib${pathContext.separator}'));
     const libDirectoryLength = 'lib/'.length;
     return relativePath.substring(libDirectoryLength);
@@ -296,8 +310,8 @@ class Library extends ModelElement with TopLevelContainer {
   String get packageName => packageMeta?.name ?? '';
 
   /// The real packageMeta, as opposed to the package we are documenting with.
-  late final PackageMeta? packageMeta =
-      packageGraph.packageMetaProvider.fromElement(element, config.sdkDir);
+  late final PackageMeta? packageMeta = packageGraph.packageMetaProvider
+      .fromElement(element, config.sdkDir);
 
   late final List<Class> classesAndExceptions = [
     ..._localElementsOfType<ClassElement, Class>(),
@@ -362,44 +376,46 @@ class Library extends ModelElement with TopLevelContainer {
   ];
 
   Iterable<U>
-      _localElementsOfType<T extends Element, U extends ModelElement>() =>
-          _localElements
-              .whereType<T>()
-              .map((e) => packageGraph.getModelFor(e, this) as U);
+  _localElementsOfType<T extends Element, U extends ModelElement>() =>
+      _localElements.whereType<T>().map(
+        (e) => packageGraph.getModelFor(e, this) as U,
+      );
 
   Iterable<U>
-      _exportedElementsOfType<T extends Element, U extends ModelElement>() =>
-          _exportedElements.whereType<T>().map((e) {
-            var library = e.library;
-            if (library == null) {
-              throw StateError("The library of '$e' is null!");
-            }
-            return packageGraph.getModelFor(
+  _exportedElementsOfType<T extends Element, U extends ModelElement>() =>
+      _exportedElements.whereType<T>().map((e) {
+        var library = e.library;
+        if (library == null) {
+          throw StateError("The library of '$e' is null!");
+        }
+        return packageGraph.getModelFor(
               e,
               packageGraph.getModelForElement(library) as Library,
-            ) as U;
-          });
+            )
+            as U;
+      });
 
   Iterable<TopLevelVariable> get _localVariables {
     return {
       ..._localElements.whereType<TopLevelVariableElement>(),
-      ..._localElements
-          .whereType<PropertyAccessorElement>()
-          .map((a) => a.variable as TopLevelVariableElement),
+      ..._localElements.whereType<PropertyAccessorElement>().map(
+        (a) => a.variable as TopLevelVariableElement,
+      ),
     }.map(_topLevelVariableFor);
   }
 
   Iterable<TopLevelVariable> get _exportedVariables {
     return {
       ..._exportedElements.whereType<TopLevelVariableElement>(),
-      ..._exportedElements
-          .whereType<PropertyAccessorElement>()
-          .map((a) => a.variable as TopLevelVariableElement),
+      ..._exportedElements.whereType<PropertyAccessorElement>().map(
+        (a) => a.variable as TopLevelVariableElement,
+      ),
     }.map(_topLevelVariableFor);
   }
 
   TopLevelVariable _topLevelVariableFor(
-      TopLevelVariableElement topLevelVariableElement) {
+    TopLevelVariableElement topLevelVariableElement,
+  ) {
     Accessor? getter;
     var elementGetter = topLevelVariableElement.getter;
     if (elementGetter != null) {
@@ -410,8 +426,13 @@ class Library extends ModelElement with TopLevelContainer {
     if (elementSetter != null) {
       setter = packageGraph.getModelFor(elementSetter, this) as Accessor;
     }
-    return getModelForPropertyInducingElement(topLevelVariableElement, this,
-        getter: getter, setter: setter) as TopLevelVariable;
+    return getModelForPropertyInducingElement(
+          topLevelVariableElement,
+          this,
+          getter: getter,
+          setter: setter,
+        )
+        as TopLevelVariable;
   }
 
   /// All [ModelElement]s, direct and indirect, which are part of this library's
@@ -439,10 +460,11 @@ class Library extends ModelElement with TopLevelContainer {
   @override
   Map<String, Referable> get referenceChildren {
     var referenceChildrenBuilder = <String, Referable>{};
-    var definedNamesModelElements =
-        element.exportNamespace.definedNames2.values.map(getModelForElement);
-    referenceChildrenBuilder
-        .addAll(definedNamesModelElements.whereNotType<Accessor>().asMapByName);
+    var definedNamesModelElements = element.exportNamespace.definedNames2.values
+        .map(getModelForElement);
+    referenceChildrenBuilder.addAll(
+      definedNamesModelElements.whereNotType<Accessor>().asMapByName,
+    );
     // TODO(jcollins-g): warn and get rid of this case where it shows up.
     // If a user is hiding parts of a prefix import, the user should not
     // refer to hidden members via the prefix, because that can be
@@ -502,7 +524,7 @@ class Library extends ModelElement with TopLevelContainer {
       for (var member in libraryMembers) ...[
         member.originalFullyQualifiedName,
         '$name.${member.qualifiedName}',
-      ]
+      ],
     };
   }();
 }

@@ -33,37 +33,42 @@ class DocumentationCommentTestBase extends DartdocTestBase {
     List<String> additionalArguments = const [],
   }) async {
     projectRoot = utils.writePackage(packageName, resourceProvider);
-    projectRoot
-        .getChildAssumingFile('dartdoc_options.yaml')
-        .writeAsStringSync('''
+    projectRoot.getChildAssumingFile('dartdoc_options.yaml').writeAsStringSync(
+      '''
       dartdoc:
         warnings:
           - missing-code-block-language
-      ''');
+      ''',
+    );
 
     for (var (fileName, comment) in filesAndComments) {
       projectRoot
           .getChildAssumingFolder('lib')
           .getChildAssumingFile(fileName)
-          .writeAsStringSync('$comment\n'
-              'library;');
+          .writeAsStringSync(
+            '$comment\n'
+            'library;',
+          );
     }
 
-    var optionSet = DartdocOptionRoot.fromOptionGenerators(
-        'dartdoc', [createDartdocOptions], packageMetaProvider);
+    var optionSet = DartdocOptionRoot.fromOptionGenerators('dartdoc', [
+      createDartdocOptions,
+    ], packageMetaProvider);
     optionSet.parseArguments([]);
     packageGraph = await utils.bootBasicPackage(
-        projectRoot.path, packageMetaProvider,
-        additionalArguments: additionalArguments);
+      projectRoot.path,
+      packageMetaProvider,
+      additionalArguments: additionalArguments,
+    );
     libraryModel = packageGraph.defaultPackage.libraries.first;
   }
 
   Future<void> writePackageWithCommentedLibrary(
     String comment, {
     List<String> additionalArguments = const [],
-  }) =>
-      writePackageWithCommentedLibraries([('a.dart', comment)],
-          additionalArguments: additionalArguments);
+  }) => writePackageWithCommentedLibraries([
+    ('a.dart', comment),
+  ], additionalArguments: additionalArguments);
 
   Matcher hasWarning(PackageWarning kind, String message) =>
       _HasWarning(kind, message);
@@ -78,8 +83,11 @@ class _HasWarning extends Matcher {
   @override
   bool matches(Object? actual, Map<Object?, Object?> matchState) {
     if (actual is ModelElement) {
-      return actual.packageGraph.packageWarningCounter
-          .hasWarning(actual, kind, message);
+      return actual.packageGraph.packageWarningCounter.hasWarning(
+        actual,
+        kind,
+        message,
+      );
     } else {
       return false;
     }
@@ -90,11 +98,17 @@ class _HasWarning extends Matcher {
       description.add('Library to be warned with $kind and message: $message');
 
   @override
-  Description describeMismatch(Object? actual, Description mismatchDescription,
-      Map<Object?, Object?> matchState, bool verbose) {
+  Description describeMismatch(
+    Object? actual,
+    Description mismatchDescription,
+    Map<Object?, Object?> matchState,
+    bool verbose,
+  ) {
     if (actual is ModelElement) {
       var warnings = actual
-          .packageGraph.packageWarningCounter.countedWarnings[actual.element];
+          .packageGraph
+          .packageWarningCounter
+          .countedWarnings[actual.element];
       if (warnings == null) {
         return mismatchDescription.add('has no warnings');
       }

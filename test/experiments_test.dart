@@ -16,14 +16,14 @@ void main() {
     });
 
     test('are disabled by default', () async {
-      var library = await testBase.bootPackageWithLibrary(
-        'void f() {}',
-      );
+      var library = await testBase.bootPackageWithLibrary('void f() {}');
       // Verify that 'macros' and 'augmentations' are actually disabled by
       // default so our other tests are meaningful.
       expect(library.element.featureSet.isEnabled(Feature.macros), isFalse);
       expect(
-          library.element.featureSet.isEnabled(Feature.augmentations), isFalse);
+        library.element.featureSet.isEnabled(Feature.augmentations),
+        isFalse,
+      );
     });
 
     test('are picked up from command-line', () async {
@@ -81,7 +81,9 @@ dartdoc:
       // CLI should win.
       expect(library.element.featureSet.isEnabled(Feature.macros), isTrue);
       expect(
-          library.element.featureSet.isEnabled(Feature.augmentations), isFalse);
+        library.element.featureSet.isEnabled(Feature.augmentations),
+        isFalse,
+      );
     });
 
     test('dartdoc_options.yaml overrides analysis_options.yaml', () async {
@@ -104,7 +106,9 @@ analyzer:
       // dartdoc_options.yaml should win over analysis_options.yaml.
       expect(library.element.featureSet.isEnabled(Feature.macros), isTrue);
       expect(
-          library.element.featureSet.isEnabled(Feature.augmentations), isFalse);
+        library.element.featureSet.isEnabled(Feature.augmentations),
+        isFalse,
+      );
     });
   });
 }

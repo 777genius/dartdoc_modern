@@ -84,10 +84,15 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
 
         _restoreLockedScroll(root);
         _setLoading(root, false);
-        contentWindow?.postMessage({
-          'type': 'sourceCode',
-          'sourceCode': _decodeBase64(root.getAttribute('data-source-base64')),
-        }.jsify(), event.origin.toJS);
+        contentWindow?.postMessage(
+          {
+            'type': 'sourceCode',
+            'sourceCode': _decodeBase64(
+              root.getAttribute('data-source-base64'),
+            ),
+          }.jsify(),
+          event.origin.toJS,
+        );
         _scheduleScrollRestore(root);
         return;
       }
@@ -121,8 +126,8 @@ class _DocsDartPadRuntimeState extends State<DocsDartPadRuntime> {
 
   String _currentTheme() =>
       web.document.documentElement?.getAttribute('data-theme') == 'dark'
-          ? 'dark'
-          : 'light';
+      ? 'dark'
+      : 'light';
 
   String _buildDartPadUrl(web.HTMLElement root) {
     final params = Uri(

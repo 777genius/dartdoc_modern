@@ -193,26 +193,23 @@ List<StyleRule> docsHeaderShellStyles() => [
     '[data-theme="dark"] .header-search-shell .search-launcher-shortcut',
   ).styles(opacity: 0.6),
   downContent([
-    css('.header-search-shell').styles(
-      justifyContent: JustifyContent.end,
-      raw: {'flex': '0 0 auto'},
-    ),
+    css(
+      '.header-search-shell',
+    ).styles(justifyContent: JustifyContent.end, raw: {'flex': '0 0 auto'}),
     css('.header-search-shell .search-launcher').styles(
       minWidth: 0.rem,
       gap: Gap.column(0.42.rem),
       padding: Padding.symmetric(vertical: 0.5.rem, horizontal: 0.72.rem),
       raw: {'min-width': 'auto'},
     ),
-    css('.header-search-shell .search-launcher-label').styles(
-      fontSize: 0.92.rem,
-    ),
-    css('.header-search-shell .search-launcher-shortcut').styles(
-      display: Display.none,
-    ),
+    css(
+      '.header-search-shell .search-launcher-label',
+    ).styles(fontSize: 0.92.rem),
+    css(
+      '.header-search-shell .search-launcher-shortcut',
+    ).styles(display: Display.none),
   ]),
-  downMobile([
-    css('.theme-toggle').styles(width: 2.45.rem, height: 2.45.rem),
-  ]),
+  downMobile([css('.theme-toggle').styles(width: 2.45.rem, height: 2.45.rem)]),
   downCompact([
     css('.theme-toggle').styles(width: 2.3.rem, height: 2.3.rem),
     css('.theme-toggle-icon').styles(fontSize: 0.92.rem),
@@ -254,9 +251,7 @@ List<StyleRule> docsHeaderShellStyles() => [
     ),
     raw: {'white-space': 'nowrap'},
   ),
-  css('.version-switch-option:hover').styles(
-    color: ContentColors.text,
-  ),
+  css('.version-switch-option:hover').styles(color: ContentColors.text),
   css('.version-switch-option.is-active').styles(
     backgroundColor: Color('var(--docs-shell-accent)'),
     color: Color('white'),

@@ -62,7 +62,9 @@ void main() {
   group('VitePressPathResolver.stripGenerics', () {
     test('returns name unchanged when no generics', () {
       expect(
-          VitePressPathResolver.stripGenerics('SimpleBinder'), 'SimpleBinder');
+        VitePressPathResolver.stripGenerics('SimpleBinder'),
+        'SimpleBinder',
+      );
       expect(VitePressPathResolver.stripGenerics('get'), 'get');
     });
 
@@ -73,7 +75,9 @@ void main() {
 
     test('strips nested generic parameters', () {
       expect(
-          VitePressPathResolver.stripGenerics('Map<String, List<int>>'), 'Map');
+        VitePressPathResolver.stripGenerics('Map<String, List<int>>'),
+        'Map',
+      );
     });
 
     test('handles empty name', () {
@@ -120,8 +124,10 @@ void main() {
       // Since we can't easily create Field mocks, we test sanitizeAnchor directly.
       // The prop- prefix is added in anchorFor(), not sanitizeAnchor().
       // Just verify sanitizeAnchor handles prop- prefixed names correctly.
-      expect(VitePressPathResolver.sanitizeAnchor('prop-myfield'),
-          equals('prop-myfield'));
+      expect(
+        VitePressPathResolver.sanitizeAnchor('prop-myfield'),
+        equals('prop-myfield'),
+      );
     });
   });
 
@@ -134,7 +140,10 @@ void main() {
     test('detects private sub-libraries with ._ pattern', () {
       expect(isInternalSdkLibrary(_FakeLibrary('dart._http')), isTrue);
       expect(isInternalSdkLibrary(_FakeLibrary('dart._wasm')), isTrue);
-      expect(isInternalSdkLibrary(_FakeLibrary('dart2js._js_primitives')), isTrue);
+      expect(
+        isInternalSdkLibrary(_FakeLibrary('dart2js._js_primitives')),
+        isTrue,
+      );
     });
 
     test('detects known internal libraries by name', () {
@@ -143,7 +152,10 @@ void main() {
       expect(isInternalSdkLibrary(_FakeLibrary('metadata')), isTrue);
       expect(isInternalSdkLibrary(_FakeLibrary('nativewrappers')), isTrue);
       expect(isInternalSdkLibrary(_FakeLibrary('html_common')), isTrue);
-      expect(isInternalSdkLibrary(_FakeLibrary('dart2js_runtime_metrics')), isTrue);
+      expect(
+        isInternalSdkLibrary(_FakeLibrary('dart2js_runtime_metrics')),
+        isTrue,
+      );
     });
 
     test('returns false for canonical public libraries', () {

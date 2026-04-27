@@ -54,8 +54,10 @@ class _RuntimeStats {
     final report = StringBuffer();
     report.writeln('\nReference Counts:');
     report.writeln('  total references: $totalReferences');
-    report.writeln('  resolved references:  '
-        '${_valueAndPercent(resolvedReferences)}');
+    report.writeln(
+      '  resolved references:  '
+      '${_valueAndPercent(resolvedReferences)}',
+    );
 
     if (perfTasks.isNotEmpty) {
       report.writeln('\nRuntime performance:');

@@ -928,17 +928,21 @@ mixin DocumentationComment implements Warnable, SourceCode {
 
   String _stripDocImports(String content) {
     if (modelNode?.commentData case var commentData?) {
+      if (commentData.docImports.isEmpty) return content;
+
       var commentOffset = commentData.offset;
       var buffer = StringBuffer();
-      if (commentData.docImports.isEmpty) return content;
-      var firstDocImport = commentData.docImports.first;
-      buffer.write(content.substring(0, firstDocImport.offset - commentOffset));
-      var offset = firstDocImport.end - commentOffset;
-      for (var docImport in commentData.docImports.skip(1)) {
-        buffer.write(
-          content.substring(offset, docImport.offset - commentOffset),
-        );
-        offset = docImport.end - commentOffset;
+      var offset = 0;
+      for (var docImport in commentData.docImports) {
+        var docImportOffset = docImport.offset - commentOffset;
+        var docImportEnd = docImport.end - commentOffset;
+        if (docImportOffset < offset ||
+            docImportEnd < docImportOffset ||
+            docImportEnd > content.length) {
+          return _stripDocImportsByText(content);
+        }
+        buffer.write(content.substring(offset, docImportOffset));
+        offset = docImportEnd;
       }
       if (offset < content.length) {
         // Write from the end of the last doc-import to the end of the comment.
@@ -948,6 +952,17 @@ mixin DocumentationComment implements Warnable, SourceCode {
     } else {
       return content;
     }
+  }
+
+  String _stripDocImportsByText(String content) {
+    const docImportPrefixPattern = r'([ \t]*(?:/// ?|\* ?)?[ \t]*)';
+    return content.replaceAllMapped(
+      RegExp(
+        '^$docImportPrefixPattern@docImport\\b[^\\r\\n]*(\\r?\\n|\\z)',
+        multiLine: true,
+      ),
+      (match) => '${match[1]}${match[2]}',
+    );
   }
 
   /// Parse and remove &#123;@inject-html ...&#125; in API comments and store

@@ -33,14 +33,16 @@ mixin ContainerMember on ModelElement {
 
   @override
   Set<Attribute> get attributes => {
-        ...super.attributes,
-        if (isExtended) Attribute.extended,
-      };
+    ...super.attributes,
+    if (isExtended) Attribute.extended,
+  };
 
   late final Container? canonicalEnclosingContainer = () {
     final canonicalEnclosingContainer = computeCanonicalEnclosingContainer();
-    assert(canonicalEnclosingContainer == null ||
-        canonicalEnclosingContainer.isDocumented);
+    assert(
+      canonicalEnclosingContainer == null ||
+          canonicalEnclosingContainer.isDocumented,
+    );
     return canonicalEnclosingContainer;
   }();
 

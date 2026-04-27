@@ -17,7 +17,7 @@ extension DartTypeExtension on DartType {
       InterfaceType() => self.element,
       NeverType() => self.element,
       TypeParameterType() => self.element,
-      _ => null
+      _ => null,
     };
   }
 }

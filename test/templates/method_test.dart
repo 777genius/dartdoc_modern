@@ -47,15 +47,14 @@ class C {
 }
 ''');
     var m1Lines = readLines(['lib', 'C', 'm1.html']);
-    m1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<ol class="annotation-list">'),
-        matches('<li>@deprecated</li>'),
-        matches(
-            r'<li>@<a href="../../lib/A/A.html">A</a>\(&#39;message&#39;\)</li>'),
-        matches('</ol>'),
-      ],
-    );
+    m1Lines.expectMainContentContainsAllInOrder([
+      matches('<ol class="annotation-list">'),
+      matches('<li>@deprecated</li>'),
+      matches(
+        r'<li>@<a href="../../lib/A/A.html">A</a>\(&#39;message&#39;\)</li>',
+      ),
+      matches('</ol>'),
+    ]);
   }
 
   void test_onClass() async {
@@ -65,11 +64,9 @@ class C {
 }
 ''');
     var m1Lines = readLines(['lib', 'C', 'm1.html']);
-    m1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<h1><span class="kind-method">m1</span> method'),
-      ],
-    );
+    m1Lines.expectMainContentContainsAllInOrder([
+      matches('<h1><span class="kind-method">m1</span> method'),
+    ]);
   }
 
   void test_onClass_static() async {
@@ -79,11 +76,9 @@ class C {
 }
 ''');
     var m1Lines = readLines(['lib', 'C', 'm1.html']);
-    m1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<h1><span class="kind-method">m1</span> static method'),
-      ],
-    );
+    m1Lines.expectMainContentContainsAllInOrder([
+      matches('<h1><span class="kind-method">m1</span> static method'),
+    ]);
   }
 
   void test_onEnum() async {
@@ -94,11 +89,9 @@ enum E {
 }
 ''');
     var m1Lines = readLines(['lib', 'E', 'm1.html']);
-    m1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<h1><span class="kind-method">m1</span> method'),
-      ],
-    );
+    m1Lines.expectMainContentContainsAllInOrder([
+      matches('<h1><span class="kind-method">m1</span> method'),
+    ]);
   }
 
   void test_onEnum_static() async {
@@ -109,11 +102,9 @@ enum E {
 }
 ''');
     var m1Lines = readLines(['lib', 'E', 'm1.html']);
-    m1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<h1><span class="kind-method">m1</span> static method'),
-      ],
-    );
+    m1Lines.expectMainContentContainsAllInOrder([
+      matches('<h1><span class="kind-method">m1</span> static method'),
+    ]);
   }
 
   void test_onExtension() async {
@@ -123,11 +114,9 @@ extension E on int {
 }
 ''');
     var m1Lines = readLines(['lib', 'E', 'm1.html']);
-    m1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<h1><span class="kind-method">m1</span> method'),
-      ],
-    );
+    m1Lines.expectMainContentContainsAllInOrder([
+      matches('<h1><span class="kind-method">m1</span> method'),
+    ]);
   }
 
   void test_onExtension_static() async {
@@ -137,11 +126,9 @@ extension E on int {
 }
 ''');
     var m1Lines = readLines(['lib', 'E', 'm1.html']);
-    m1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<h1><span class="kind-method">m1</span> static method'),
-      ],
-    );
+    m1Lines.expectMainContentContainsAllInOrder([
+      matches('<h1><span class="kind-method">m1</span> static method'),
+    ]);
   }
 
   void test_onMixin() async {
@@ -151,11 +138,9 @@ mixin M {
 }
 ''');
     var m1Lines = readLines(['lib', 'M', 'm1.html']);
-    m1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<h1><span class="kind-method">m1</span> method'),
-      ],
-    );
+    m1Lines.expectMainContentContainsAllInOrder([
+      matches('<h1><span class="kind-method">m1</span> method'),
+    ]);
   }
 
   void test_onMixin_static() async {
@@ -165,11 +150,9 @@ mixin M {
 }
 ''');
     var m1Lines = readLines(['lib', 'M', 'm1.html']);
-    m1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<h1><span class="kind-method">m1</span> static method'),
-      ],
-    );
+    m1Lines.expectMainContentContainsAllInOrder([
+      matches('<h1><span class="kind-method">m1</span> static method'),
+    ]);
   }
 
   void test_onExtensionType() async {
@@ -179,11 +162,9 @@ extension type E(int it) {
 }
 ''');
     var m1Lines = readLines(['lib', 'E', 'm1.html']);
-    m1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<h1><span class="kind-method">m1</span> method'),
-      ],
-    );
+    m1Lines.expectMainContentContainsAllInOrder([
+      matches('<h1><span class="kind-method">m1</span> method'),
+    ]);
   }
 
   void test_onExtensionType_static() async {
@@ -193,11 +174,9 @@ extension type E(int it) {
 }
 ''');
     var m1Lines = readLines(['lib', 'E', 'm1.html']);
-    m1Lines.expectMainContentContainsAllInOrder(
-      [
-        matches('<h1><span class="kind-method">m1</span> static method'),
-      ],
-    );
+    m1Lines.expectMainContentContainsAllInOrder([
+      matches('<h1><span class="kind-method">m1</span> static method'),
+    ]);
   }
 
   // TODO(srawlins): Add rendering tests.

@@ -6,11 +6,11 @@ class DocsTocRuntime extends StatelessComponent {
 
   @override
   Component build(BuildContext context) => span(
-        attributes: {
-          'data-docs-toc-runtime': '',
-          'hidden': 'hidden',
-          'aria-hidden': 'true',
-        },
-        const [],
-      );
+    attributes: {
+      'data-docs-toc-runtime': '',
+      'hidden': 'hidden',
+      'aria-hidden': 'true',
+    },
+    const [],
+  );
 }

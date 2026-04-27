@@ -18,20 +18,21 @@ abstract class TemplateTestBase extends DartdocTestBase {
   Future<void> createPackageWithLibrary(String content) async {
     packagePath = await d.createPackage(
       packageName,
-      pubspec: '''
+      pubspec:
+          '''
 name: $packageName
 version: 0.0.1
 environment:
   sdk: '>=3.3.0-0 <4.0.0'
 ''',
-      libFiles: [
-        d.file('lib.dart', content),
-      ],
+      libFiles: [d.file('lib.dart', content)],
       resourceProvider: resourceProvider,
     );
     await writeDartdocResources(resourceProvider);
 
-    await buildDartdoc(additionalArguments: ['--format', 'html']).generateDocs();
+    await buildDartdoc(
+      additionalArguments: ['--format', 'html'],
+    ).generateDocs();
   }
 
   List<String> readLines(List<String> filePath) =>

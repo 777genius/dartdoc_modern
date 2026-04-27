@@ -10,18 +10,17 @@ class DartPadComponent extends CustomComponent {
 
   @override
   Component? create(Node node, NodesBuilder builder) {
-    if (node
-        case ElementNode(
-          tag: 'pre',
-          attributes: final preAttributes,
-          children: [
-            ElementNode(
-              tag: 'code',
-              attributes: final codeAttributes,
-              children: final children,
-            ),
-          ],
-        )) {
+    if (node case ElementNode(
+      tag: 'pre',
+      attributes: final preAttributes,
+      children: [
+        ElementNode(
+          tag: 'code',
+          attributes: final codeAttributes,
+          children: final children,
+        ),
+      ],
+    )) {
       final language = codeAttributes['class'];
       if (language != 'language-dartpad') return null;
 
@@ -134,7 +133,10 @@ class _DartPadBlock extends StatelessComponent {
               span(classes: 'dartpad-label', [Component.text('DartPad')]),
               button(
                 classes: 'dartpad-btn dartpad-close',
-                attributes: {'type': 'button', 'aria-label': 'Close playground'},
+                attributes: {
+                  'type': 'button',
+                  'aria-label': 'Close playground',
+                },
                 [
                   span(classes: 'dartpad-btn-icon', [Component.text('×')]),
                   span(classes: 'dartpad-btn-label', [Component.text('Close')]),
@@ -147,10 +149,9 @@ class _DartPadBlock extends StatelessComponent {
                 attributes: {'hidden': 'hidden'},
                 [
                   span(classes: 'dartpad-spinner', []),
-                  span(
-                    classes: 'dartpad-loader-text',
-                    [Component.text('Loading DartPad…')],
-                  ),
+                  span(classes: 'dartpad-loader-text', [
+                    Component.text('Loading DartPad…'),
+                  ]),
                 ],
               ),
               div(classes: 'dartpad-stage', []),

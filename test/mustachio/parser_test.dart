@@ -45,8 +45,12 @@ void main() {
     var parser = MustachioParser('Words, punctuation, #^!>/ etc.', _filePath);
     var ast = parser.parse();
     expect(ast, hasLength(1));
-    _expectText(ast.single, equals('Words, punctuation, #^!>/ etc.'),
-        spanStart: 0, spanEnd: 30);
+    _expectText(
+      ast.single,
+      equals('Words, punctuation, #^!>/ etc.'),
+      spanStart: 0,
+      spanEnd: 30,
+    );
   });
 
   test('drops comment, start of content', () {
@@ -87,7 +91,9 @@ void main() {
 
   test('drops comment with various chars', () {
     var parser = MustachioParser(
-        'Text {{!Text, punct. `!@#\$%^&*()-=+}} Text', _filePath);
+      'Text {{!Text, punct. `!@#\$%^&*()-=+}} Text',
+      _filePath,
+    );
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '), spanStart: 0, spanEnd: 5);
@@ -107,8 +113,14 @@ void main() {
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '), spanStart: 0, spanEnd: 5);
-    _expectVariable(ast[1], equals(['key']),
-        spanStart: 5, spanEnd: 12, keySpanStart: 7, keySpanEnd: 10);
+    _expectVariable(
+      ast[1],
+      equals(['key']),
+      spanStart: 5,
+      spanEnd: 12,
+      keySpanStart: 7,
+      keySpanEnd: 10,
+    );
   });
 
   test('parses variable with whitespace', () {
@@ -116,8 +128,14 @@ void main() {
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
-    _expectVariable(ast[1], equals(['key']),
-        spanStart: 5, spanEnd: 16, keySpanStart: 9, keySpanEnd: 12);
+    _expectVariable(
+      ast[1],
+      equals(['key']),
+      spanStart: 5,
+      spanEnd: 16,
+      keySpanStart: 9,
+      keySpanEnd: 12,
+    );
   });
 
   test('parses variable with newlines', () {
@@ -125,8 +143,14 @@ void main() {
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
-    _expectVariable(ast[1], equals(['key']),
-        spanStart: 5, spanEnd: 20, keySpanStart: 11, keySpanEnd: 14);
+    _expectVariable(
+      ast[1],
+      equals(['key']),
+      spanStart: 5,
+      spanEnd: 20,
+      keySpanStart: 11,
+      keySpanEnd: 14,
+    );
   });
 
   test('parses variable with triple mustaches', () {
@@ -134,12 +158,15 @@ void main() {
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
-    _expectVariable(ast[1], equals(['key']),
-        escape: false,
-        spanStart: 5,
-        spanEnd: 14,
-        keySpanStart: 8,
-        keySpanEnd: 11);
+    _expectVariable(
+      ast[1],
+      equals(['key']),
+      escape: false,
+      spanStart: 5,
+      spanEnd: 14,
+      keySpanStart: 8,
+      keySpanEnd: 11,
+    );
   });
 
   test('parses variable with triple mustaches, whitespace', () {
@@ -147,12 +174,15 @@ void main() {
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
-    _expectVariable(ast[1], equals(['key']),
-        escape: false,
-        spanStart: 5,
-        spanEnd: 18,
-        keySpanStart: 10,
-        keySpanEnd: 13);
+    _expectVariable(
+      ast[1],
+      equals(['key']),
+      escape: false,
+      spanStart: 5,
+      spanEnd: 18,
+      keySpanStart: 10,
+      keySpanEnd: 13,
+    );
   });
 
   test('parses "." pseudo-variable', () {
@@ -160,8 +190,14 @@ void main() {
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
-    _expectVariable(ast[1], equals(['.']),
-        spanStart: 5, spanEnd: 10, keySpanStart: 7, keySpanEnd: 8);
+    _expectVariable(
+      ast[1],
+      equals(['.']),
+      spanStart: 5,
+      spanEnd: 10,
+      keySpanStart: 7,
+      keySpanEnd: 8,
+    );
   });
 
   test('parses "." pseudo-variable with whitespace', () {
@@ -169,8 +205,14 @@ void main() {
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
-    _expectVariable(ast[1], equals(['.']),
-        spanStart: 5, spanEnd: 12, keySpanStart: 8, keySpanEnd: 9);
+    _expectVariable(
+      ast[1],
+      equals(['.']),
+      spanStart: 5,
+      spanEnd: 12,
+      keySpanStart: 8,
+      keySpanEnd: 9,
+    );
   });
 
   test('parses variable with multiple names', () {
@@ -178,8 +220,14 @@ void main() {
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
-    _expectVariable(ast[1], equals(['a', 'b']),
-        spanStart: 5, spanEnd: 12, keySpanStart: 7, keySpanEnd: 10);
+    _expectVariable(
+      ast[1],
+      equals(['a', 'b']),
+      spanStart: 5,
+      spanEnd: 12,
+      keySpanStart: 7,
+      keySpanEnd: 10,
+    );
   });
 
   test('parses variable with multiple names and whitespace', () {
@@ -187,8 +235,14 @@ void main() {
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
-    _expectVariable(ast[1], equals(['a', 'b']),
-        spanStart: 5, spanEnd: 14, keySpanStart: 8, keySpanEnd: 11);
+    _expectVariable(
+      ast[1],
+      equals(['a', 'b']),
+      spanStart: 5,
+      spanEnd: 14,
+      keySpanStart: 8,
+      keySpanEnd: 11,
+    );
   });
 
   test('parses almost-variable with trailing "." as text', () {
@@ -221,45 +275,81 @@ void main() {
   });
 
   test('parses section', () {
-    var parser =
-        MustachioParser('Text {{#key}}Section text{{/key}}', _filePath);
+    var parser = MustachioParser(
+      'Text {{#key}}Section text{{/key}}',
+      _filePath,
+    );
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
     var section = ast[1] as Section;
-    _expectSection(section, equals(['key']),
-        spanStart: 5, spanEnd: 33, keySpanStart: 8, keySpanEnd: 11);
+    _expectSection(
+      section,
+      equals(['key']),
+      spanStart: 5,
+      spanEnd: 33,
+      keySpanStart: 8,
+      keySpanEnd: 11,
+    );
     expect(section.children, hasLength(1));
-    _expectText(section.children.single, equals('Section text'),
-        spanStart: 13, spanEnd: 25);
+    _expectText(
+      section.children.single,
+      equals('Section text'),
+      spanStart: 13,
+      spanEnd: 25,
+    );
   });
 
   test('parses section with whitespace before delimiter', () {
-    var parser =
-        MustachioParser('Text {{ #key }}Section text{{ /key }}', _filePath);
+    var parser = MustachioParser(
+      'Text {{ #key }}Section text{{ /key }}',
+      _filePath,
+    );
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
     var section = ast[1] as Section;
-    _expectSection(section, equals(['key']),
-        spanStart: 5, spanEnd: 37, keySpanStart: 9, keySpanEnd: 12);
+    _expectSection(
+      section,
+      equals(['key']),
+      spanStart: 5,
+      spanEnd: 37,
+      keySpanStart: 9,
+      keySpanEnd: 12,
+    );
     expect(section.children, hasLength(1));
-    _expectText(section.children.single, equals('Section text'),
-        spanStart: 15, spanEnd: 27);
+    _expectText(
+      section.children.single,
+      equals('Section text'),
+      spanStart: 15,
+      spanEnd: 27,
+    );
   });
 
   test('parses section with whitespace after delimiter', () {
-    var parser =
-        MustachioParser('Text {{# key }}Section text{{/ key }}', _filePath);
+    var parser = MustachioParser(
+      'Text {{# key }}Section text{{/ key }}',
+      _filePath,
+    );
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
     var section = ast[1] as Section;
-    _expectSection(section, equals(['key']),
-        spanStart: 5, spanEnd: 37, keySpanStart: 9, keySpanEnd: 12);
+    _expectSection(
+      section,
+      equals(['key']),
+      spanStart: 5,
+      spanEnd: 37,
+      keySpanStart: 9,
+      keySpanEnd: 12,
+    );
     expect(section.children, hasLength(1));
-    _expectText(section.children.single, equals('Section text'),
-        spanStart: 15, spanEnd: 27);
+    _expectText(
+      section.children.single,
+      equals('Section text'),
+      spanStart: 15,
+      spanEnd: 27,
+    );
   });
 
   test('parses empty section', () {
@@ -280,47 +370,86 @@ void main() {
     var section = ast[1] as Section;
     _expectSection(section, equals(['key']), spanStart: 5, spanEnd: 28);
     expect(section.children, hasLength(1));
-    _expectVariable(section.children.single, equals(['two']),
-        spanStart: 13, spanEnd: 20);
+    _expectVariable(
+      section.children.single,
+      equals(['two']),
+      spanStart: 13,
+      spanEnd: 20,
+    );
   });
 
   test('parses section with multi-name key', () {
     var parser = MustachioParser(
-        'Text {{#one.two.three}}Text{{/one.two.three}}', _filePath);
+      'Text {{#one.two.three}}Text{{/one.two.three}}',
+      _filePath,
+    );
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
     var sectionOne = ast[1] as Section;
-    _expectSection(sectionOne, equals(['one']),
-        spanStart: 5, spanEnd: 45, keySpanStart: 8, keySpanEnd: 11);
+    _expectSection(
+      sectionOne,
+      equals(['one']),
+      spanStart: 5,
+      spanEnd: 45,
+      keySpanStart: 8,
+      keySpanEnd: 11,
+    );
     expect(sectionOne.children, hasLength(1));
     var sectionTwo = sectionOne.children[0] as Section;
-    _expectSection(sectionTwo, equals(['two']),
-        spanStart: 5, spanEnd: 45, keySpanStart: 12, keySpanEnd: 15);
+    _expectSection(
+      sectionTwo,
+      equals(['two']),
+      spanStart: 5,
+      spanEnd: 45,
+      keySpanStart: 12,
+      keySpanEnd: 15,
+    );
     var sectionThree = sectionTwo.children[0] as Section;
-    _expectSection(sectionThree, equals(['three']),
-        spanStart: 5, spanEnd: 45, keySpanStart: 16, keySpanEnd: 21);
-    _expectText(sectionThree.children[0], equals('Text'),
-        spanStart: 23, spanEnd: 27);
+    _expectSection(
+      sectionThree,
+      equals(['three']),
+      spanStart: 5,
+      spanEnd: 45,
+      keySpanStart: 16,
+      keySpanEnd: 21,
+    );
+    _expectText(
+      sectionThree.children[0],
+      equals('Text'),
+      spanStart: 23,
+      spanEnd: 27,
+    );
   });
 
   test('parses inverse section with multi-name key', () {
-    var parser =
-        MustachioParser('Text {{^one.two}}Text{{/one.two}}', _filePath);
+    var parser = MustachioParser(
+      'Text {{^one.two}}Text{{/one.two}}',
+      _filePath,
+    );
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
     var sectionOne = ast[1] as Section;
-    _expectSection(sectionOne, equals(['one']),
-        spanStart: 5, spanEnd: 33, keySpanStart: 8, keySpanEnd: 11);
+    _expectSection(
+      sectionOne,
+      equals(['one']),
+      spanStart: 5,
+      spanEnd: 33,
+      keySpanStart: 8,
+      keySpanEnd: 11,
+    );
     expect(sectionOne.children, hasLength(1));
     var sectionTwo = sectionOne.children[0] as Section;
-    _expectSection(sectionTwo, equals(['two']),
-        invert: true,
-        spanStart: 5,
-        spanEnd: 33,
-        keySpanStart: 12,
-        keySpanEnd: 15);
+    _expectSection(
+      sectionTwo,
+      equals(['two']),
+      invert: true,
+      spanStart: 5,
+      spanEnd: 33,
+      keySpanStart: 12,
+      keySpanEnd: 15,
+    );
     _expectText(sectionTwo.children[0], equals('Text'));
   });
 
@@ -346,8 +475,12 @@ void main() {
     var section = ast[1] as Section;
     _expectSection(section, equals(['key']), spanStart: 5, spanEnd: 31);
     expect(section.children, hasLength(1));
-    _expectText(section.children.single, equals('{{/other}}'),
-        spanStart: 13, spanEnd: 23);
+    _expectText(
+      section.children.single,
+      equals('{{/other}}'),
+      spanStart: 13,
+      spanEnd: 23,
+    );
   });
 
   test('parses empty closing tag as text', () {
@@ -363,7 +496,9 @@ void main() {
 
   test('parses nested sections', () {
     var parser = MustachioParser(
-        'Text {{#key1}} AA {{#key2}} BB {{/key2}} CC {{/key1}}', _filePath);
+      'Text {{#key1}} AA {{#key2}} BB {{/key2}} CC {{/key1}}',
+      _filePath,
+    );
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
@@ -379,7 +514,9 @@ void main() {
 
   test('parses nested sections with the same key', () {
     var parser = MustachioParser(
-        'Text {{#key}} AA {{#key}} BB {{/key}} CC {{/key}}', _filePath);
+      'Text {{#key}} AA {{#key}} BB {{/key}} CC {{/key}}',
+      _filePath,
+    );
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
@@ -399,12 +536,15 @@ void main() {
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
     var section = ast[1] as Section;
-    _expectSection(section, equals(['key']),
-        invert: true,
-        spanStart: 5,
-        spanEnd: 25,
-        keySpanStart: 8,
-        keySpanEnd: 11);
+    _expectSection(
+      section,
+      equals(['key']),
+      invert: true,
+      spanStart: 5,
+      spanEnd: 25,
+      keySpanStart: 8,
+      keySpanEnd: 11,
+    );
     expect(section.children, hasLength(1));
     _expectText(section.children[0], equals(' AA '));
   });
@@ -415,12 +555,15 @@ void main() {
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
     var section = ast[1] as Section;
-    _expectSection(section, equals(['key']),
-        invert: true,
-        spanStart: 5,
-        spanEnd: 29,
-        keySpanStart: 9,
-        keySpanEnd: 12);
+    _expectSection(
+      section,
+      equals(['key']),
+      invert: true,
+      spanStart: 5,
+      spanEnd: 29,
+      keySpanStart: 9,
+      keySpanEnd: 12,
+    );
     expect(section.children, hasLength(1));
     _expectText(section.children[0], equals(' AA '));
   });
@@ -431,12 +574,15 @@ void main() {
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
     var section = ast[1] as Section;
-    _expectSection(section, equals(['key']),
-        invert: true,
-        spanStart: 5,
-        spanEnd: 29,
-        keySpanStart: 9,
-        keySpanEnd: 12);
+    _expectSection(
+      section,
+      equals(['key']),
+      invert: true,
+      spanStart: 5,
+      spanEnd: 29,
+      keySpanStart: 9,
+      keySpanEnd: 12,
+    );
     expect(section.children, hasLength(1));
     _expectText(section.children[0], equals(' AA '));
   });
@@ -453,8 +599,14 @@ void main() {
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
-    _expectPartial(ast[1], equals('partial'),
-        spanStart: 5, spanEnd: 17, keySpanStart: 8, keySpanEnd: 15);
+    _expectPartial(
+      ast[1],
+      equals('partial'),
+      spanStart: 5,
+      spanEnd: 17,
+      keySpanStart: 8,
+      keySpanEnd: 15,
+    );
   });
 
   test('parses partial with whitespace before delimiter', () {
@@ -462,8 +614,14 @@ void main() {
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
-    _expectPartial(ast[1], equals('partial'),
-        spanStart: 5, spanEnd: 19, keySpanStart: 9, keySpanEnd: 16);
+    _expectPartial(
+      ast[1],
+      equals('partial'),
+      spanStart: 5,
+      spanEnd: 19,
+      keySpanStart: 9,
+      keySpanEnd: 16,
+    );
   });
 
   test('parses partial with whitespace after delimiter', () {
@@ -471,33 +629,53 @@ void main() {
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
-    _expectPartial(ast[1], equals('partial'),
-        spanStart: 5, spanEnd: 19, keySpanStart: 9, keySpanEnd: 16);
+    _expectPartial(
+      ast[1],
+      equals('partial'),
+      spanStart: 5,
+      spanEnd: 19,
+      keySpanStart: 9,
+      keySpanEnd: 16,
+    );
   });
 
   test('parses partial with various chars', () {
-    var parser =
-        MustachioParser('Text {{ >Text,punct.`!@#\$%^&*()-=+ }}', _filePath);
+    var parser = MustachioParser(
+      'Text {{ >Text,punct.`!@#\$%^&*()-=+ }}',
+      _filePath,
+    );
     var ast = parser.parse();
     expect(ast, hasLength(2));
     _expectText(ast[0], equals('Text '));
-    _expectPartial(ast[1], equals('Text,punct.`!@#\$%^&*()-=+'),
-        spanStart: 5, spanEnd: 37, keySpanStart: 9, keySpanEnd: 34);
+    _expectPartial(
+      ast[1],
+      equals('Text,punct.`!@#\$%^&*()-=+'),
+      spanStart: 5,
+      spanEnd: 37,
+      keySpanStart: 9,
+      keySpanEnd: 34,
+    );
   });
 }
 
-void _expectText(MustachioNode node, Object matcher,
-    {int? spanStart, int? spanEnd}) {
+void _expectText(
+  MustachioNode node,
+  Object matcher, {
+  int? spanStart,
+  int? spanEnd,
+}) {
   expect(node, isA<Text>().having((e) => e.content, 'content', matcher));
   if (spanStart != null) {
     expect(
-        node,
-        isA<Text>()
-            .having((e) => e.span.start.offset, 'span.start', spanStart));
+      node,
+      isA<Text>().having((e) => e.span.start.offset, 'span.start', spanStart),
+    );
   }
   if (spanEnd != null) {
-    expect(node,
-        isA<Text>().having((e) => e.span.end.offset, 'span.end', spanEnd));
+    expect(
+      node,
+      isA<Text>().having((e) => e.span.end.offset, 'span.end', spanEnd),
+    );
   }
 }
 
@@ -511,10 +689,11 @@ void _expectVariable(
   int? keySpanEnd,
 }) {
   expect(
-      node,
-      isA<Variable>()
-          .having((e) => e.key, 'key', matcher)
-          .having((e) => e.escape, 'escape', escape));
+    node,
+    isA<Variable>()
+        .having((e) => e.key, 'key', matcher)
+        .having((e) => e.escape, 'escape', escape),
+  );
   node as Variable;
 
   var actualSpanStart = node.span.start.offset;
@@ -526,7 +705,11 @@ void _expectVariable(
   if (keySpanStart != null) {
     var actualKeySpanStart = node.keySpan.start.offset;
     _expectSpanOffset(
-        'Variable key', 'start', actualKeySpanStart, keySpanStart);
+      'Variable key',
+      'start',
+      actualKeySpanStart,
+      keySpanStart,
+    );
   }
   if (keySpanEnd != null) {
     var actualKeySpanEnd = node.keySpan.end.offset;
@@ -544,10 +727,11 @@ void _expectSection(
   int? keySpanEnd,
 }) {
   expect(
-      node,
-      isA<Section>()
-          .having((e) => e.key, 'key', matcher)
-          .having((e) => e.invert, 'invert', invert));
+    node,
+    isA<Section>()
+        .having((e) => e.key, 'key', matcher)
+        .having((e) => e.invert, 'invert', invert),
+  );
   node as Section;
 
   var actualSpanStart = node.span.start.offset;
@@ -594,9 +778,16 @@ void _expectPartial(
 }
 
 void _expectSpanOffset(
-    String nodeType, String offsetType, int actualOffset, int expectedOffset) {
-  expect(actualOffset, expectedOffset,
-      reason:
-          '$nodeType span $offsetType offset expected to be $expectedOffset '
-          'but was $actualOffset');
+  String nodeType,
+  String offsetType,
+  int actualOffset,
+  int expectedOffset,
+) {
+  expect(
+    actualOffset,
+    expectedOffset,
+    reason:
+        '$nodeType span $offsetType offset expected to be $expectedOffset '
+        'but was $actualOffset',
+  );
 }

@@ -47,17 +47,17 @@ class DartdocGeneratorBackendOptions implements TemplateOptions {
   final List<String> packageOrder;
 
   DartdocGeneratorBackendOptions.fromContext(
-      DartdocGeneratorOptionContext context)
-      : relCanonicalPrefix = context.relCanonicalPrefix,
-        toolVersion = packageVersion,
-        favicon = context.favicon,
-        prettyIndexJson = context.prettyIndexJson,
-        useBaseHref = context.useBaseHref,
-        customHeaderContent = context.header,
-        customFooterContent = context.footer,
-        customInnerFooterText = context.footerText,
-        resourcesDir = context.resourcesDir,
-        packageOrder = context.packageOrder;
+    DartdocGeneratorOptionContext context,
+  ) : relCanonicalPrefix = context.relCanonicalPrefix,
+      toolVersion = packageVersion,
+      favicon = context.favicon,
+      prettyIndexJson = context.prettyIndexJson,
+      useBaseHref = context.useBaseHref,
+      customHeaderContent = context.header,
+      customFooterContent = context.footer,
+      customInnerFooterText = context.footerText,
+      resourcesDir = context.resourcesDir,
+      packageOrder = context.packageOrder;
 }
 
 /// Outputs generated documentation.
@@ -70,8 +70,11 @@ abstract class GeneratorBackend {
   final p.Context _pathContext;
 
   GeneratorBackend(
-      this.options, this.templates, this.writer, this.resourceProvider)
-      : _pathContext = resourceProvider.pathContext;
+    this.options,
+    this.templates,
+    this.writer,
+    this.resourceProvider,
+  ) : _pathContext = resourceProvider.pathContext;
 
   /// Binds template data and emits the content to the [writer].
   void write(
@@ -98,7 +101,9 @@ abstract class GeneratorBackend {
     var json = '[]';
     if (categorizedElements.isNotEmpty) {
       json = generator_util.generateCategoryJson(
-          categorizedElements, options.prettyIndexJson);
+        categorizedElements,
+        options.prettyIndexJson,
+      );
       if (!options.useBaseHref) {
         json = json.replaceAll(htmlBasePlaceholder, '');
       }
@@ -142,10 +147,19 @@ abstract class GeneratorBackend {
   }
 
   /// Emits documentation content for the [constructor].
-  void generateConstructor(PackageGraph packageGraph, Library library,
-      Constructable constructable, Constructor constructor) {
+  void generateConstructor(
+    PackageGraph packageGraph,
+    Library library,
+    Constructable constructable,
+    Constructor constructor,
+  ) {
     var data = ConstructorTemplateData(
-        options, packageGraph, library, constructable, constructor);
+      options,
+      packageGraph,
+      library,
+      constructable,
+      constructor,
+    );
     var content = templates.renderConstructor(data);
     write(writer, constructor.filePath, data, content);
     runtimeStats.incrementAccumulator('writtenConstructorFileCount');
@@ -161,7 +175,10 @@ abstract class GeneratorBackend {
 
   /// Emits documentation content for the [extension].
   void generateExtension(
-      PackageGraph packageGraph, Library library, Extension extension) {
+    PackageGraph packageGraph,
+    Library library,
+    Extension extension,
+  ) {
     var data = ExtensionTemplateData(options, packageGraph, library, extension);
     var content = templates.renderExtension(data);
     write(writer, extension.filePath, data, content);
@@ -170,9 +187,16 @@ abstract class GeneratorBackend {
 
   /// Emits documentation content for the [extensionType].
   void generateExtensionType(
-      PackageGraph packageGraph, Library library, ExtensionType extensionType) {
+    PackageGraph packageGraph,
+    Library library,
+    ExtensionType extensionType,
+  ) {
     var data = ExtensionTypeTemplateData(
-        options, packageGraph, library, extensionType);
+      options,
+      packageGraph,
+      library,
+      extensionType,
+    );
     var content = templates.renderExtensionType(data);
     write(writer, extensionType.filePath, data, content);
     runtimeStats.incrementAccumulator('writtenExtensionTypeFileCount');
@@ -180,7 +204,10 @@ abstract class GeneratorBackend {
 
   /// Emits documentation content for the [function].
   void generateFunction(
-      PackageGraph packageGraph, Library library, ModelFunction function) {
+    PackageGraph packageGraph,
+    Library library,
+    ModelFunction function,
+  ) {
     var data = FunctionTemplateData(options, packageGraph, library, function);
     var content = templates.renderFunction(data);
     write(writer, function.filePath, data, content);
@@ -199,10 +226,19 @@ abstract class GeneratorBackend {
   }
 
   /// Emits documentation content for the [method].
-  void generateMethod(PackageGraph packageGraph, Library library,
-      Container container, Method method) {
-    var data =
-        MethodTemplateData(options, packageGraph, library, container, method);
+  void generateMethod(
+    PackageGraph packageGraph,
+    Library library,
+    Container container,
+    Method method,
+  ) {
+    var data = MethodTemplateData(
+      options,
+      packageGraph,
+      library,
+      container,
+      method,
+    );
     var content = templates.renderMethod(data);
     write(writer, method.filePath, data, content);
     runtimeStats.incrementAccumulator('writtenMethodFileCount');
@@ -225,10 +261,19 @@ abstract class GeneratorBackend {
   }
 
   /// Emits documentation content for the [field].
-  void generateProperty(PackageGraph packageGraph, Library library,
-      Container container, Field field) {
-    var data =
-        PropertyTemplateData(options, packageGraph, library, container, field);
+  void generateProperty(
+    PackageGraph packageGraph,
+    Library library,
+    Container container,
+    Field field,
+  ) {
+    var data = PropertyTemplateData(
+      options,
+      packageGraph,
+      library,
+      container,
+      field,
+    );
     var content = templates.renderProperty(data);
     write(writer, field.filePath, data, content);
     runtimeStats.incrementAccumulator('writtenPropertyFileCount');
@@ -236,9 +281,16 @@ abstract class GeneratorBackend {
 
   /// Emits documentation content for the [property].
   void generateTopLevelProperty(
-      PackageGraph packageGraph, Library library, TopLevelVariable property) {
-    var data =
-        TopLevelPropertyTemplateData(options, packageGraph, library, property);
+    PackageGraph packageGraph,
+    Library library,
+    TopLevelVariable property,
+  ) {
+    var data = TopLevelPropertyTemplateData(
+      options,
+      packageGraph,
+      library,
+      property,
+    );
     var content = templates.renderTopLevelProperty(data);
     write(writer, property.filePath, data, content);
     runtimeStats.incrementAccumulator('writtenTopLevelPropertyFileCount');
@@ -246,7 +298,10 @@ abstract class GeneratorBackend {
 
   /// Emits documentation content for the [typedef].
   void generateTypeDef(
-      PackageGraph packageGraph, Library library, Typedef typedef) {
+    PackageGraph packageGraph,
+    Library library,
+    Typedef typedef,
+  ) {
     var data = TypedefTemplateData(options, packageGraph, library, typedef);
     var content = templates.renderTypedef(data);
     write(writer, typedef.filePath, data, content);
@@ -271,8 +326,13 @@ abstract class GeneratorBackend {
     Set<String> writtenFiles,
     StreamController<String> onCheckProgress,
   ) {
-    Validator(packageGraph, config, origin, writtenFiles, onCheckProgress)
-        .validateLinks();
+    Validator(
+      packageGraph,
+      config,
+      origin,
+      writtenFiles,
+      onCheckProgress,
+    ).validateLinks();
   }
 
   /// Called once before the documentation traversal begins.

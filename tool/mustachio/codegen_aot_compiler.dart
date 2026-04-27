@@ -34,7 +34,8 @@ Future<String> compileTemplatesToRenderers(
   var buildData = _BuildData(typeProvider, typeSystem, sourcePath, root);
   var referenceUris = <String>{};
   logInfo(
-      'Compiling ${specs.length} renderer specs into renderer functions...');
+    'Compiling ${specs.length} renderer specs into renderer functions...',
+  );
   for (var spec in specs) {
     var templatePath = spec.standardHtmlTemplate;
     var compiler = await _AotCompiler._readAndParse(
@@ -46,7 +47,10 @@ Future<String> compileTemplatesToRenderers(
     await compiler._compileToRenderer(referenceUris);
   }
   await _deduplicateRenderers(
-      buildData._rendererCache, typeSystem, referenceUris);
+    buildData._rendererCache,
+    typeSystem,
+    referenceUris,
+  );
   var buffer = StringBuffer();
   for (var uri in referenceUris.sorted()) {
     buffer.writeln("import '$uri';");
@@ -69,8 +73,9 @@ Future<String> compileTemplatesToRenderers(
     buffer.writeln();
     buffer.writeln();
   }
-  return DartFormatter(languageVersion: DartFormatter.latestLanguageVersion)
-      .format('''
+  return DartFormatter(
+    languageVersion: DartFormatter.latestLanguageVersion,
+  ).format('''
 // GENERATED CODE. DO NOT EDIT.
 //
 // To change the contents of this library, make changes to the builder source
@@ -115,8 +120,10 @@ Future<void> _deduplicateRenderers(
 ) async {
   var initialRendererCount = rendererCache.rendererCount;
   if (initialRendererCount < 2) return;
-  logInfo('Deduplicating the initial set of $initialRendererCount partial '
-      'renderer functions...');
+  logInfo(
+    'Deduplicating the initial set of $initialRendererCount partial '
+    'renderer functions...',
+  );
 
   var partialsCompilersToRemove = <_AotCompiler>{};
   void markCompilerForRemoval(_AotCompiler c) {
@@ -154,8 +161,9 @@ Future<void> _deduplicateRenderers(
     // The names of the renderers which are being replaced all include some
     // reference to the template/partial which referred to them; we must create
     // a new renderer name from scratch.
-    var rendererName =
-        path.basenameWithoutExtension(templatePath).replaceAll('.', '_');
+    var rendererName = path
+        .basenameWithoutExtension(templatePath)
+        .replaceAll('.', '_');
     var firstCompiler = rendererCache.allCompilersFor(templatePath)!.first;
     var lubCompiler = _AotCompiler._(
       contextStackTypes.first,
@@ -164,7 +172,7 @@ Future<void> _deduplicateRenderers(
       firstCompiler._syntaxTree,
       firstCompiler._buildData,
       contextStack: [
-        ...contextStackTypes.map((t) => _VariableLookup(t, 'UNUSED'))
+        ...contextStackTypes.map((t) => _VariableLookup(t, 'UNUSED')),
       ],
     );
     try {
@@ -178,8 +186,10 @@ Future<void> _deduplicateRenderers(
       if (names.length > 5) {
         names = [...names.take(5), '... (${names.length - 5} more)'];
       }
-      logInfo("Could not deduplicate '$templatePath' with context types: "
-          '$contextStackTypes, from ${names.join(', ')}');
+      logInfo(
+        "Could not deduplicate '$templatePath' with context types: "
+        '$contextStackTypes, from ${names.join(', ')}',
+      );
       // Any partials generated before the exception was thrown are not needed.
       markCompilerForRemoval(lubCompiler);
       continue;
@@ -204,18 +214,23 @@ Future<void> _deduplicateRenderers(
     rendererCache.remove(compiler._templatePath, compiler._usedContextStack);
   }
 
-  logInfo('Deduplicated down to ${rendererCache.rendererCount} '
-      'partial renderer functions.');
+  logInfo(
+    'Deduplicated down to ${rendererCache.rendererCount} '
+    'partial renderer functions.',
+  );
 }
 
 /// Returns a method body for the render function for [compiler], which simply
 /// redirects to the render function for [lubCompiler].
 Future<String> _redirectingMethod(
-    _AotCompiler compiler, _AotCompiler lubCompiler) async {
+  _AotCompiler compiler,
+  _AotCompiler lubCompiler,
+) async {
   var buffer = StringBuffer()..write('String ${compiler._rendererName}');
 
   buffer.writeTypeParameters(
-      compiler._usedContextStack.expand((c) => c.type.element.typeParameters));
+    compiler._usedContextStack.expand((c) => c.type.element.typeParameters),
+  );
   buffer.write('(');
 
   for (var context in compiler._usedContextStack) {
@@ -278,8 +293,9 @@ class _AotCompiler {
   /// This field is only complete after [_compileToRenderer] has run.
   final Set<_VariableLookup> _usedContexts = {};
 
-  ContextStack get _usedContextStack =>
-      [..._contextStack.where(_usedContexts.contains)];
+  ContextStack get _usedContextStack => [
+    ..._contextStack.where(_usedContexts.contains),
+  ];
 
   /// A counter for naming partial render functions.
   ///
@@ -301,12 +317,18 @@ class _AotCompiler {
     _BuildData buildData, {
     ContextStack contextStack = const [],
   }) async {
-    var template =
-        await File(path.join(buildData._root, templatePath)).readAsString();
+    var template = await File(
+      path.join(buildData._root, templatePath),
+    ).readAsString();
     var syntaxTree = MustachioParser(template, templatePath).parse();
     return _AotCompiler._(
-        contextType, rendererName, templatePath, syntaxTree, buildData,
-        contextStack: contextStack);
+      contextType,
+      rendererName,
+      templatePath,
+      syntaxTree,
+      buildData,
+      contextStack: contextStack,
+    );
   }
 
   _AotCompiler._(
@@ -316,8 +338,8 @@ class _AotCompiler {
     this._syntaxTree,
     this._buildData, {
     required ContextStack contextStack,
-  })  : _contextStack = _rename(contextStack),
-        _contextNameCounter = contextStack.length;
+  }) : _contextStack = _rename(contextStack),
+       _contextNameCounter = contextStack.length;
 
   /// Returns a copy of [original], replacing each variable's name with
   /// `context0` through `contextN` for `N - 1` variables.
@@ -328,8 +350,13 @@ class _AotCompiler {
     var result = <_VariableLookup>[];
     var index = original.length - 1;
     for (var variable in original) {
-      result.push(_VariableLookup(variable.type, 'context$index',
-          indexInParent: original.indexOf(variable)));
+      result.push(
+        _VariableLookup(
+          variable.type,
+          'context$index',
+          indexInParent: original.indexOf(variable),
+        ),
+      );
       index--;
     }
     return [...result.reversed];
@@ -345,11 +372,14 @@ class _AotCompiler {
     var blockCompiler = _BlockCompiler(this, _contextStack);
     await blockCompiler._compile(_syntaxTree);
     var rendererBody = blockCompiler._buffer.toString();
-    _usedContexts.addAll(_contextStack
-        .where((c) => blockCompiler._usedContextTypes.contains(c)));
+    _usedContexts.addAll(
+      _contextStack.where((c) => blockCompiler._usedContextTypes.contains(c)),
+    );
 
-    var cachedRenderer =
-        _buildData._rendererCache.get(_templatePath, _usedContextStack);
+    var cachedRenderer = _buildData._rendererCache.get(
+      _templatePath,
+      _usedContextStack,
+    );
     if (cachedRenderer != null) {
       // No need to keep compiling a new renderer.
       return;
@@ -403,8 +433,12 @@ class _AotCompiler {
 }
 ''');
 
-    _buildData._rendererCache
-        .put(_templatePath, _usedContextStack, this, buffer.toString());
+    _buildData._rendererCache.put(
+      _templatePath,
+      _usedContextStack,
+      this,
+      buffer.toString(),
+    );
   }
 
   /// Returns the URI of [element] for use in generated import directives.
@@ -412,8 +446,10 @@ class _AotCompiler {
     var libraryElement = element.library!;
     var libraryUri = libraryElement.firstFragment.source.uri;
     if (libraryUri.scheme == 'file') {
-      return path.relative(libraryUri.path,
-          from: path.absolute(path.dirname(_buildData._sourcePath)));
+      return path.relative(
+        libraryUri.path,
+        from: path.absolute(path.dirname(_buildData._sourcePath)),
+      );
     }
     return libraryUri.toString();
   }
@@ -482,22 +518,30 @@ class _BlockCompiler {
     var fileName = filePath.removeLast();
     filePath.add('_$fileName.$extension');
     var partialPath = path.join(
-        path.dirname(_templateCompiler._templatePath), filePath.join('/'));
+      path.dirname(_templateCompiler._templatePath),
+      filePath.join('/'),
+    );
     // First see if there is a compiler in the global cache.
     var sanitizedKey = node.key.replaceAll('.', '_').replaceAll('/', '_');
-    var name = '${partialBaseName}_'
+    var name =
+        '${partialBaseName}_'
         '${sanitizedKey}_'
         '${_templateCompiler._partialCounter}';
     var potentialPartialCompiler = await _AotCompiler._readAndParse(
-        contextType, name, partialPath, _templateCompiler._buildData,
-        contextStack: _contextStack);
+      contextType,
+      name,
+      partialPath,
+      _templateCompiler._buildData,
+      contextStack: _contextStack,
+    );
     await potentialPartialCompiler._compileToRenderer(referenceUris);
     var partialCompiler = _templateCompiler._buildData._rendererCache
         .get(partialPath, potentialPartialCompiler._usedContextStack)
         ?.compiler;
     // Check the set of partial compilers this _BlockCompiler has created.
     partialCompiler ??= _templateCompiler._partialCompilers.firstWhereOrNull(
-        (p) => p._templatePath == partialPath && p._contextType == contextType);
+      (p) => p._templatePath == partialPath && p._contextType == contextType,
+    );
     // If we still don't have an existing one, then use the one we just created.
     partialCompiler ??= potentialPartialCompiler;
     _templateCompiler._partialCompilers.add(partialCompiler);
@@ -519,17 +563,28 @@ class _BlockCompiler {
     var variableLookup = _lookUpGetter(node);
     if (variableLookup.type.isDartCoreBool) {
       // Conditional block.
-      await _compileConditionalSection(variableLookup, node.children,
-          invert: node.invert);
+      await _compileConditionalSection(
+        variableLookup,
+        node.children,
+        invert: node.invert,
+      );
     } else if (typeSystem.isAssignableTo(
-        variableLookup.type, typeProvider.iterableDynamicType)) {
+      variableLookup.type,
+      typeProvider.iterableDynamicType,
+    )) {
       // Repeated block.
-      await _compileRepeatedSection(variableLookup, node.children,
-          invert: node.invert);
+      await _compileRepeatedSection(
+        variableLookup,
+        node.children,
+        invert: node.invert,
+      );
     } else {
       // Use accessor value as context.
-      await _compileValueSection(variableLookup, node.children,
-          invert: node.invert);
+      await _compileValueSection(
+        variableLookup,
+        node.children,
+        invert: node.invert,
+      );
     }
   }
 
@@ -538,8 +593,10 @@ class _BlockCompiler {
   ///
   /// Assumes that [variableLookup] references a non-nullable [bool].
   Future<void> _compileConditionalSection(
-      _VariableLookup variableLookup, List<MustachioNode> block,
-      {bool invert = false}) async {
+    _VariableLookup variableLookup,
+    List<MustachioNode> block, {
+    bool invert = false,
+  }) async {
     var variableAccess = variableLookup.name;
     if (invert) {
       writeln('if (!$variableAccess) {');
@@ -553,10 +610,13 @@ class _BlockCompiler {
   /// Compiles a repeated section containing [block] into a renderer's Dart
   /// source.
   Future<void> _compileRepeatedSection(
-      _VariableLookup variableLookup, List<MustachioNode> block,
-      {bool invert = false}) async {
-    var variableIsPotentiallyNullable =
-        typeSystem.isPotentiallyNullable(variableLookup.type);
+    _VariableLookup variableLookup,
+    List<MustachioNode> block, {
+    bool invert = false,
+  }) async {
+    var variableIsPotentiallyNullable = typeSystem.isPotentiallyNullable(
+      variableLookup.type,
+    );
     var variableAccess = variableLookup.name;
     if (invert) {
       if (variableIsPotentiallyNullable) {
@@ -595,11 +655,14 @@ class _BlockCompiler {
 
   /// Compiles a value section containing [block] into a renderer's Dart source.
   Future<void> _compileValueSection(
-      _VariableLookup variableLookup, List<MustachioNode> block,
-      {bool invert = false}) async {
+    _VariableLookup variableLookup,
+    List<MustachioNode> block, {
+    bool invert = false,
+  }) async {
     var variableAccess = variableLookup.name;
-    var variableIsPotentiallyNullable =
-        typeSystem.isPotentiallyNullable(variableLookup.type);
+    var variableIsPotentiallyNullable = typeSystem.isPotentiallyNullable(
+      variableLookup.type,
+    );
     if (invert) {
       writeln('if ($variableAccess == null) {');
       await _compile(block);
@@ -611,8 +674,9 @@ class _BlockCompiler {
         writeln('if ($innerContextName != null) {');
       }
       var innerContext = _VariableLookup(
-          typeSystem.promoteToNonNull(variableLookup.type) as InterfaceType,
-          innerContextName);
+        typeSystem.promoteToNonNull(variableLookup.type) as InterfaceType,
+        innerContextName,
+      );
       _contextStack.push(innerContext);
       await _compile(block);
       _contextStack.pop();
@@ -647,9 +711,12 @@ class _BlockCompiler {
     }
     if (getter == null) {
       var contextTypes = [for (var c in _contextStack) c.type];
-      throw MustachioResolutionException(node.keySpan
-          .message("Failed to resolve '$key' as a property on any types in the "
-              'context chain: $contextTypes'));
+      throw MustachioResolutionException(
+        node.keySpan.message(
+          "Failed to resolve '$key' as a property on any types in the "
+          'context chain: $contextTypes',
+        ),
+      );
     }
 
     var type = getter.returnType as InterfaceType;
@@ -665,11 +732,14 @@ class _BlockCompiler {
     for (var secondaryKey in remainingNames) {
       getter = type.lookUpGetter(secondaryKey, type.element.library);
       if (getter == null) {
-        throw MustachioResolutionException(node.keySpan.message(
+        throw MustachioResolutionException(
+          node.keySpan.message(
             "Failed to resolve '$secondaryKey' on ${context.type} while "
             'resolving $remainingNames as a property chain on any types in '
             'the context chain: $contextChain, after first resolving '
-            "'$primaryName' to a property on $type"));
+            "'$primaryName' to a property on $type",
+          ),
+        );
       }
       contextChain = typeSystem.isPotentiallyNullable(type)
           ? '$contextChain!.$secondaryKey'
@@ -717,11 +787,11 @@ class _BlockCompiler {
     var toString = variableLookup.type.isDartCoreString
         ? variableAccess
         : typeSystem.isPotentiallyNullable(variableLookup.type)
-            ? '$variableAccess?.toString()'
-            : '$variableAccess.toString()';
-    writeln(escape
-        ? 'buffer.writeEscaped($toString);'
-        : 'buffer.write($toString);');
+        ? '$variableAccess?.toString()'
+        : '$variableAccess.toString()';
+    writeln(
+      escape ? 'buffer.writeEscaped($toString);' : 'buffer.write($toString);',
+    );
   }
 }
 
@@ -740,7 +810,7 @@ class _BuildData {
   final _RendererCache _rendererCache;
 
   _BuildData(this._typeProvider, this._typeSystem, this._sourcePath, this._root)
-      : _rendererCache = _RendererCache(_typeSystem);
+    : _rendererCache = _RendererCache(_typeSystem);
 }
 
 /// A cache which maps template paths to the various compilers and renderer data
@@ -759,8 +829,9 @@ class _RendererCache {
   /// Returns the compiler for [templatePath] and [usedContextStack], or `null`
   /// if there is no such compiler in the cache.
   _AotCompiler? getCompiler(
-          String templatePath, ContextStack usedContextStack) =>
-      _renderers[templatePath]?.get(usedContextStack)?.compiler;
+    String templatePath,
+    ContextStack usedContextStack,
+  ) => _renderers[templatePath]?.get(usedContextStack)?.compiler;
 
   /// Inserts [compiler] and [renderer] as the data for [templatePath] and
   /// [usedContextStack].
@@ -785,9 +856,10 @@ class _RendererCache {
   Iterable<String> get allTemplatePaths => _renderers.keys;
 
   /// A mapping of all template paths to their used context stacks.
-  Map<String, List<ContextStack>> get allUsedContextStacks =>
-      _renderers.map((templatePath, renderers) =>
-          MapEntry(templatePath, renderers._renderers.keys.toList()));
+  Map<String, List<ContextStack>> get allUsedContextStacks => _renderers.map(
+    (templatePath, renderers) =>
+        MapEntry(templatePath, renderers._renderers.keys.toList()),
+  );
 
   /// All of the context stacks for [templatePath].
   List<ContextStack> allContextStacksFor(String templatePath) =>
@@ -799,8 +871,9 @@ class _RendererCache {
 
   /// All of the compiled renderer functions for all of the templates known to
   /// the renderer cache.
-  Iterable<String> get allRendererFunctions => _renderers.values
-      .expand((e) => e._renderers.values.map((f) => f.renderer));
+  Iterable<String> get allRendererFunctions => _renderers.values.expand(
+    (e) => e._renderers.values.map((f) => f.renderer),
+  );
 
   /// The total number of renderers.
   int get rendererCount =>
@@ -827,7 +900,9 @@ class _RenderersForPath {
       var keyIsAllSubtypes = true;
       for (var i = 0; i < usedContextStack.length; i++) {
         if (!_typeSystem.isSubtypeOf(
-            usedContextStack[i].type, existingContextStack[i].type)) {
+          usedContextStack[i].type,
+          existingContextStack[i].type,
+        )) {
           keyIsAllSubtypes = false;
           break;
         }
@@ -865,15 +940,20 @@ class _RenderersForPath {
 
   /// Inserts [compiler] and [renderer] as the data for [usedContextStack].
   void put(
-      ContextStack usedContextStack, _AotCompiler compiler, String renderer) {
+    ContextStack usedContextStack,
+    _AotCompiler compiler,
+    String renderer,
+  ) {
     var existingContextStack = _existingKey(usedContextStack);
     if (existingContextStack == null) {
       _renderers[usedContextStack] = _RendererData(compiler, renderer);
       return;
     }
     var data = _renderers[existingContextStack]!;
-    _renderers[_existingKey(usedContextStack)!] =
-        _RendererData(compiler, renderer)..referenceCount = data.referenceCount;
+    _renderers[_existingKey(usedContextStack)!] = _RendererData(
+      compiler,
+      renderer,
+    )..referenceCount = data.referenceCount;
   }
 
   /// Decrements the renderer data 'references' counter for [usedContextStack],
@@ -922,7 +1002,8 @@ extension<T> on List<T> {
 
 extension on StringBuffer {
   Set<Element> writeTypeParameters(
-      Iterable<TypeParameterElement> typeParameters) {
+    Iterable<TypeParameterElement> typeParameters,
+  ) {
     var referencedElements = <Element>{};
     var hasTypeParameters = false;
     for (var typeParameter in typeParameters) {
@@ -988,13 +1069,13 @@ final class _CompressingBuffer {
         .replaceAll(RegExp(r'\n+'), '\n');
     if (_prevEndsWithNewline) {
       var first = text.codeUnits.first;
-      if (first == 0x0A /* '\n' */) {
+      if (first == 0x0A /* '\n' */ ) {
         text = text.substring(1);
       }
     }
     if (text.isEmpty) return;
     var last = text.codeUnits.last;
-    if (last == 0x0A /* '\n' */) {
+    if (last == 0x0A /* '\n' */ ) {
       _prevEndsWithNewline = true;
     }
     _buffer.write(text);

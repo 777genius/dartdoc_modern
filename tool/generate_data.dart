@@ -63,16 +63,20 @@ void main(List<String> args) async {
     final content = StringBuffer();
     for (var cIndex = 1; cIndex <= classCount; cIndex++) {
       content.writeln('/// Doc comment.');
-      final references =
-          List.generate(referenceCount, (_) => '[C${rng.nextInt(classCount)}]')
-              .join(' ');
+      final references = List.generate(
+        referenceCount,
+        (_) => '[C${rng.nextInt(classCount)}]',
+      ).join(' ');
       content.writeln('/// References: $references');
       content.writeln('class C$classCounter {');
       for (var mIndex = 1; mIndex <= methodCount; mIndex++) {
         content.write('  void m$methodCounter(');
         content.write(
-            List.generate(parameterCount, (var pIndex) => 'int p$pIndex')
-                .join(', '));
+          List.generate(
+            parameterCount,
+            (var pIndex) => 'int p$pIndex',
+          ).join(', '),
+        );
         content.writeln(') {}');
         methodCounter++;
       }

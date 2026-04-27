@@ -22,7 +22,9 @@ void main() {
       .replaceFirst(RegExp('\n$multilineStringMargin\$'), '');
 
   void expectCorrectDocumentation() => expect(
-      stripCommentDelimiters(trimMargin(comment)), trimMargin(documentation));
+    stripCommentDelimiters(trimMargin(comment)),
+    trimMargin(documentation),
+  );
 
   group('///-style', () {
     test('one-line comment', () {
@@ -34,10 +36,15 @@ void main() {
     });
 
     test('multiple runs with multiline comments', () {
-      expect(stripCommentDelimiters(stripCommentDelimiters('''
+      expect(
+        stripCommentDelimiters(
+          stripCommentDelimiters('''
           /// A line.
           /// * An asterisk
-      ''')), equals('A line.\n* An asterisk'));
+      '''),
+        ),
+        equals('A line.\n* An asterisk'),
+      );
     });
 
     test('multi-line comment', () {
@@ -99,12 +106,17 @@ void main() {
 
   group('/**-style', () {
     test('multiple runs with cstyle comments', () {
-      expect(stripCommentDelimiters(stripCommentDelimiters('''
+      expect(
+        stripCommentDelimiters(
+          stripCommentDelimiters('''
           /**
            * A line.
            * * An asterisk
            */
-      ''')), equals('A line.\n* An asterisk'));
+      '''),
+        ),
+        equals('A line.\n* An asterisk'),
+      );
     });
 
     test('one-line comment', () {
@@ -193,13 +205,15 @@ void main() {
 
   group('leadingWhitespace', () {
     test('strip common leading whitespace, but no more', () {
-      var input = '   3 space indent\n'
+      var input =
+          '   3 space indent\n'
           '    4 space indent (one preserved)\n'
           '       7 space indent (four preserved)\n'
           '\t  2 spaces, one tab (same as 3 space)\n'
           '    \t4 spaces, one tab (preserve the tab)\n'
           '   3 space indent again\n';
-      var output = '3 space indent\n'
+      var output =
+          '3 space indent\n'
           ' 4 space indent (one preserved)\n'
           '    7 space indent (four preserved)\n'
           '2 spaces, one tab (same as 3 space)\n'

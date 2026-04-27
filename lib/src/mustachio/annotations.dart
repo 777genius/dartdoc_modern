@@ -55,7 +55,7 @@ class Renderer {
     String standardTemplateBasename, {
     this.visibleTypes = const {},
   }) : standardHtmlTemplate =
-            'test/mustachio/templates/$standardTemplateBasename.html';
+           'test/mustachio/templates/$standardTemplateBasename.html';
 }
 
 /// A container for a type, [T], which is the type of a context object,

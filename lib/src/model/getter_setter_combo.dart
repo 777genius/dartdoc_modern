@@ -30,10 +30,10 @@ mixin GetterSetterCombo on ModelElement {
 
   @override
   List<Annotation> get annotations => [
-        ...super.annotations,
-        if (hasGetter) ...getter!.annotations,
-        if (hasSetter) ...setter!.annotations,
-      ];
+    ...super.annotations,
+    if (hasGetter) ...getter!.annotations,
+    if (hasSetter) ...setter!.annotations,
+  ];
 
   List<Accessor> get allAccessors {
     final getter = this.getter;
@@ -47,16 +47,22 @@ mixin GetterSetterCombo on ModelElement {
 
   @protected
   Set<Attribute> get comboAttributes => {
-        if (getter
-            case Accessor(isPublic: true, isSynthetic: false, :var attributes))
-          ...attributes,
-        if (setter
-            case Accessor(isPublic: true, isSynthetic: false, :var attributes))
-          ...attributes,
-        if (readOnly && !isFinal && !isConst) Attribute.noSetter,
-        if (writeOnly) Attribute.noGetter,
-        if (readWrite && !isLate) Attribute.getterSetterPair,
-      };
+    if (getter case Accessor(
+      isPublic: true,
+      isSynthetic: false,
+      :var attributes,
+    ))
+      ...attributes,
+    if (setter case Accessor(
+      isPublic: true,
+      isSynthetic: false,
+      :var attributes,
+    ))
+      ...attributes,
+    if (readOnly && !isFinal && !isConst) Attribute.noSetter,
+    if (writeOnly) Attribute.noGetter,
+    if (readWrite && !isLate) Attribute.getterSetterPair,
+  };
 
   @override
   ModelElement get enclosingElement;
@@ -72,8 +78,8 @@ mixin GetterSetterCombo on ModelElement {
   String get fileName => isConst
       ? '$name-constant.html'
       : name == 'index'
-          ? '$name-property.html'
-          : '$name.html';
+      ? '$name-property.html'
+      : '$name.html';
 
   /// Whether this has a constant value which should be displayed.
   bool get hasConstantValueForDisplay => false;
@@ -99,8 +105,10 @@ mixin GetterSetterCombo on ModelElement {
       var linkedName = '${parts.tag}${enclosingElement.name}${parts.endTag}';
       return original.replaceAll(enclosingElement.name, linkedName);
     }
-    return original.replaceAll('${enclosingElement.name}.${target.name}',
-        '${enclosingElement.linkedName}.${target.linkedName}');
+    return original.replaceAll(
+      '${enclosingElement.name}.${target.name}',
+      '${enclosingElement.linkedName}.${target.linkedName}',
+    );
   }
 
   String get constantValue => linkifyConstantValue(constantValueBase);
@@ -126,15 +134,17 @@ mixin GetterSetterCombo on ModelElement {
 
     var isImplicitConstructorCall =
         _constantInitializer.constructorName.element?.isDefaultConstructor ??
-            false;
+        false;
     if (isImplicitConstructorCall) {
       // For an enum value with an implicit constructor call (like
       // `enum E { one, two; }`), `constantInitializer.toString()` does not
       // include the implicit enum index argument (it is something like
       // `const E()`). We must manually include it. See
       // https://github.com/dart-lang/sdk/issues/54988.
-      initializerString =
-          initializerString.replaceFirst('()', '(${self.index})');
+      initializerString = initializerString.replaceFirst(
+        '()',
+        '(${self.index})',
+      );
     }
     return _htmlEscape.convert(initializerString);
   }();
@@ -177,11 +187,15 @@ mixin GetterSetterCombo on ModelElement {
       return super.oneLineDoc;
     } else {
       return [
-        if (getter case Accessor(isPublic: true, :var oneLineDoc)
-            when oneLineDoc.isNotEmpty)
+        if (getter case Accessor(
+          isPublic: true,
+          :var oneLineDoc,
+        ) when oneLineDoc.isNotEmpty)
           oneLineDoc,
-        if (setter case Accessor(isPublic: true, :var oneLineDoc)
-            when oneLineDoc.isNotEmpty && !getterSetterBothAvailable)
+        if (setter case Accessor(
+          isPublic: true,
+          :var oneLineDoc,
+        ) when oneLineDoc.isNotEmpty && !getterSetterBothAvailable)
           oneLineDoc,
       ].join();
     }
@@ -195,10 +209,10 @@ mixin GetterSetterCombo on ModelElement {
   /// from the [getter] and/or [setter].
   late final String? _getterSetterDocumentationComment = () {
     String? getComment(Accessor? a) => switch (a) {
-          Accessor(isSynthetic: false, isPublic: true) =>
-            a.documentationFrom.firstOrNull?.documentationComment,
-          _ => null,
-        };
+      Accessor(isSynthetic: false, isPublic: true) =>
+        a.documentationFrom.firstOrNull?.documentationComment,
+      _ => null,
+    };
 
     var getterComment = getComment(getter);
     var setterComment = getComment(setter);
@@ -258,7 +272,8 @@ mixin GetterSetterCombo on ModelElement {
     // ↔
     if (readWrite) return r'&#8596;';
     throw UnsupportedError(
-        'GetterSetterCombo must be one of readOnly, writeOnly, or readWrite');
+      'GetterSetterCombo must be one of readOnly, writeOnly, or readWrite',
+    );
   }
 
   // TODO(srawlins): This should be private.

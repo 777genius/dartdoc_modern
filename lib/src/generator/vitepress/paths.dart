@@ -2,8 +2,10 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'package:dartdoc_modern/src/comment_references/parser.dart' show operatorNames;
-import 'package:dartdoc_modern/src/generator/core/path_utils.dart' as path_utils;
+import 'package:dartdoc_modern/src/comment_references/parser.dart'
+    show operatorNames;
+import 'package:dartdoc_modern/src/generator/core/path_utils.dart'
+    as path_utils;
 import 'package:dartdoc_modern/src/model/model.dart';
 import 'package:dartdoc_modern/src/model_utils.dart';
 import 'package:meta/meta.dart';
@@ -74,8 +76,7 @@ class VitePressPathResolver {
       for (final library in package.publicLibrariesSorted) {
         allLibraries.add(library);
         final normalized = _normalizeDots(library.dirName);
-        dirNameCounts[normalized] =
-            (dirNameCounts[normalized] ?? 0) + 1;
+        dirNameCounts[normalized] = (dirNameCounts[normalized] ?? 0) + 1;
       }
     }
 
@@ -468,8 +469,7 @@ class VitePressPathResolver {
       final lib = _resolveLibrary(element);
       if (lib != null) {
         final containerSet = _containerNames[lib];
-        if (containerSet != null &&
-            containerSet.contains(safe.toLowerCase())) {
+        if (containerSet != null && containerSet.contains(safe.toLowerCase())) {
           safe = '$safe-${_kindSuffix(element)}';
         }
       }
@@ -494,17 +494,20 @@ class VitePressPathResolver {
   /// Replaces characters that are invalid or problematic on common file
   /// systems with hyphens, then collapses runs of hyphens.
   @visibleForTesting
-  static String sanitizeFileName(String name) => path_utils.sanitizeFileName(name);
+  static String sanitizeFileName(String name) =>
+      path_utils.sanitizeFileName(name);
 
   /// Strips generic type parameters from a name.
   @visibleForTesting
   static String stripGenerics(String name) => path_utils.stripGenerics(name);
 
   /// Normalizes dots to hyphens in SDK-style library directory names.
-  static String _normalizeDots(String dirName) => path_utils.normalizeDots(dirName);
+  static String _normalizeDots(String dirName) =>
+      path_utils.normalizeDots(dirName);
 
   /// Sanitizes a string for use as an anchor ID.
-  static String sanitizeAnchor(String value) => path_utils.sanitizeAnchor(value);
+  static String sanitizeAnchor(String value) =>
+      path_utils.sanitizeAnchor(value);
 
   /// Returns a kind-based suffix string for collision avoidance.
   String _kindSuffix(Documentable element) {

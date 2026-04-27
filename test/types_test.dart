@@ -28,7 +28,9 @@ class C {
 }
 ''');
     var f = library.field('C', 'f');
-    expect(f.modelType.linkedName, matchesCompressed('''
+    expect(
+      f.modelType.linkedName,
+      matchesCompressed('''
         dynamic Function
         <span class="signature">\\(
           <span class="parameter" id="p-param-a">
@@ -49,7 +51,8 @@ class C {
             <span class="parameter-name">b</span>
           </span>\\)
         </span>
-      '''));
+      '''),
+    );
   }
 
   void test_field_substitutedTypes() async {
@@ -60,14 +63,17 @@ class C<T> {
 class D extends C<int> {}
 ''');
     var f = library.field('D', 'f');
-    expect(f.modelType.linkedName, matchesCompressed('''
+    expect(
+      f.modelType.linkedName,
+      matchesCompressed('''
         <a href="$dartCoreUrlPrefix/List-class.html">List</a>
         <span class="signature">&lt;<wbr>
           <span class="type-parameter">
             <a href="$dartCoreUrlPrefix/int-class.html">int</a>
           </span>&gt;
         </span>
-      '''));
+      '''),
+    );
   }
 
   void test_getter_substitutedTypes() async {
@@ -78,14 +84,17 @@ class C<T> {
 class D extends C<int> {}
 ''');
     var f = library.field('D', 'f').getter!;
-    expect(f.modelType.returnType.linkedName, matchesCompressed('''
+    expect(
+      f.modelType.returnType.linkedName,
+      matchesCompressed('''
         <a href="$dartCoreUrlPrefix/List-class.html">List</a>
         <span class="signature">&lt;<wbr>
           <span class="type-parameter">
             <a href="$dartCoreUrlPrefix/int-class.html">int</a>
           </span>&gt;
         </span>
-      '''));
+      '''),
+    );
   }
 
   void test_setterParameter_substitutedTypes() async {
@@ -96,14 +105,17 @@ class C<T> {
 class D extends C<int> {}
 ''');
     var f = library.field('D', 'f').setter!;
-    expect(f.parameters.first.modelType.linkedName, matchesCompressed('''
+    expect(
+      f.parameters.first.modelType.linkedName,
+      matchesCompressed('''
         <a href="$dartCoreUrlPrefix/List-class.html">List</a>
         <span class="signature">&lt;<wbr>
           <span class="type-parameter">
             <a href="$dartCoreUrlPrefix/int-class.html">int</a>
           </span>&gt;
         </span>
-      '''));
+      '''),
+    );
   }
 
   void test_methodReturnType() async {
@@ -113,14 +125,17 @@ abstract class C {
 }
 ''');
     var m = library.method('C', 'm');
-    expect(m.modelType.returnType.linkedName, matchesCompressed('''
+    expect(
+      m.modelType.returnType.linkedName,
+      matchesCompressed('''
         <a href="$dartCoreUrlPrefix/List-class.html">List</a>
         <span class="signature">&lt;<wbr>
           <span class="type-parameter">
             <a href="$dartCoreUrlPrefix/int-class.html">int</a>
           </span>&gt;
         </span>
-      '''));
+      '''),
+    );
   }
 
   void test_methodReturnType_substitutedTypes() async {
@@ -131,14 +146,17 @@ abstract class C<T> {
 class D extends C<int> {}
 ''');
     var m = library.method('D', 'm');
-    expect(m.modelType.returnType.linkedName, matchesCompressed('''
+    expect(
+      m.modelType.returnType.linkedName,
+      matchesCompressed('''
         <a href="$dartCoreUrlPrefix/List-class.html">List</a>
         <span class="signature">&lt;<wbr>
           <span class="type-parameter">
             <a href="$dartCoreUrlPrefix/int-class.html">int</a>
           </span>&gt;
         </span>
-      '''));
+      '''),
+    );
   }
 
   void test_methodReturnType_parameterizedTypedef() async {
@@ -149,14 +167,17 @@ abstract class C {
 }
 ''');
     var m = library.method('C', 'm');
-    expect(m.modelType.returnType.linkedName, matchesCompressed('''
+    expect(
+      m.modelType.returnType.linkedName,
+      matchesCompressed('''
         <a href="${htmlBasePlaceholder}types/TD.html">TD</a>
         <span class="signature">&lt;<wbr>
           <span class="type-parameter">
             <a href="$dartCoreUrlPrefix/int-class.html">int</a>
           </span>&gt;
         </span>
-      '''));
+      '''),
+    );
   }
 
   void test_methodReturnType_substitutedTypes_parameterizedTypedef() async {
@@ -168,14 +189,17 @@ abstract class C<T> {
 class D extends C<int> {}
 ''');
     var m = library.method('D', 'm');
-    expect(m.modelType.returnType.linkedName, matchesCompressed('''
+    expect(
+      m.modelType.returnType.linkedName,
+      matchesCompressed('''
         <a href="${htmlBasePlaceholder}types/TD.html">TD</a>
         <span class="signature">&lt;<wbr>
           <span class="type-parameter">
             <a href="$dartCoreUrlPrefix/int-class.html">int</a>
           </span>&gt;
         </span>
-      '''));
+      '''),
+    );
   }
 
   void test_operatorTypes_substitutedTypes() async {
@@ -186,24 +210,31 @@ abstract class C<T> {
 class D extends C<int> {}
 ''');
     var plus = library.operator('D', 'operator +');
-    expect(plus.modelType.returnType.linkedName, matchesCompressed('''
+    expect(
+      plus.modelType.returnType.linkedName,
+      matchesCompressed('''
         <a href="$dartCoreUrlPrefix/List-class.html">List</a>
         <span class="signature">&lt;<wbr>
           <span class="type-parameter">
             <a href="$dartCoreUrlPrefix/int-class.html">int</a>
           </span>&gt;
         </span>
-      '''));
-    var renderedParameter =
-        ParameterRendererHtml().renderLinkedParams(plus.parameters);
-    expect(renderedParameter, matchesCompressed('''
+      '''),
+    );
+    var renderedParameter = ParameterRendererHtml().renderLinkedParams(
+      plus.parameters,
+    );
+    expect(
+      renderedParameter,
+      matchesCompressed('''
         <a href="$dartCoreUrlPrefix/List-class.html">List</a>
         <span class="signature">&lt;<wbr>
           <span class="type-parameter">
             <a href="$dartCoreUrlPrefix/int-class.html">int</a>
           </span>&gt;
         </span>
-      '''));
+      '''),
+    );
   }
 }
 

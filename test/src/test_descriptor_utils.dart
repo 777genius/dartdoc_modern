@@ -50,9 +50,9 @@ Future<String> createPackage(
   final parsedYaml = yaml.loadYaml(pubspec) as Map;
   final packageName = parsedYaml['name'];
   final versionConstraint = (parsedYaml['environment'] as Map)['sdk'] as String;
-  final languageVersion = RegExp(r'>=(\S*)\.0(-0)?(-0.0-dev)? ')
-      .firstMatch(versionConstraint)!
-      .group(1);
+  final languageVersion = RegExp(
+    r'>=(\S*)\.0(-0)?(-0.0-dev)? ',
+  ).firstMatch(versionConstraint)!.group(1);
   final packagesInfo = StringBuffer('''{
   "name": "$packageName",
   "rootUri": "../",
@@ -85,10 +85,8 @@ Future<String> createPackage(
     d.dir('lib', [...libFiles]),
     ...files,
     // Write out '.dart_tool/package_config.json' to avoid needing `pub get`.
-    d.dir(
-      '.dart_tool',
-      [
-        d.file('package_config.json', '''
+    d.dir('.dart_tool', [
+      d.file('package_config.json', '''
 {
   "configVersion": 2,
   "packages": [
@@ -98,9 +96,8 @@ Future<String> createPackage(
   "generator": "pub",
   "generatorVersion": "3.2.0"
 }
-''')
-      ],
-    ),
+'''),
+    ]),
   ]);
   if (resourceProvider == null) {
     await packageDir.create();
@@ -111,10 +108,13 @@ Future<String> createPackage(
 }
 
 extension on d.DirectoryDescriptor {
-  Future<String> createInMemory(MemoryResourceProvider resourceProvider,
-      [String? parent]) async {
+  Future<String> createInMemory(
+    MemoryResourceProvider resourceProvider, [
+    String? parent,
+  ]) async {
     parent ??= resourceProvider.pathContext.canonicalize(
-        ResourceProviderExtension(resourceProvider).convertPath('/temp'));
+      ResourceProviderExtension(resourceProvider).convertPath('/temp'),
+    );
     resourceProvider.newFolder(parent).create();
     var fullPath = resourceProvider.pathContext.join(parent, name);
     resourceProvider.newFolder(fullPath).create();
@@ -127,10 +127,13 @@ extension on d.DirectoryDescriptor {
 
 extension on d.FileDescriptor {
   Future<String> createInMemory(
-      MemoryResourceProvider resourceProvider, String parent) async {
+    MemoryResourceProvider resourceProvider,
+    String parent,
+  ) async {
     var content = await readAsBytes().transform(utf8.decoder).join('');
-    var fullPath = ResourceProviderExtension(resourceProvider)
-        .convertPath(resourceProvider.pathContext.join(parent, name));
+    var fullPath = ResourceProviderExtension(
+      resourceProvider,
+    ).convertPath(resourceProvider.pathContext.join(parent, name));
     resourceProvider.newFile(fullPath, content);
     return fullPath;
   }
@@ -141,14 +144,17 @@ extension DescriptorExtensions on d.Descriptor {
   ///
   /// For a [d.DirectoryDescriptor], the subtree will be created. For a
   /// [d.FileDescriptor], the file contents will be written.
-  Future<String> createInMemory(MemoryResourceProvider resourceProvider,
-      [String? parent]) {
+  Future<String> createInMemory(
+    MemoryResourceProvider resourceProvider, [
+    String? parent,
+  ]) {
     var self = this;
     return switch (self) {
       d.DirectoryDescriptor() => self.createInMemory(resourceProvider, parent),
       d.FileDescriptor() => self.createInMemory(resourceProvider, parent!),
       _ => throw StateError(
-          '$runtimeType is not a DirectoryDescriptor, nor a FileDescriptor!')
+        '$runtimeType is not a DirectoryDescriptor, nor a FileDescriptor!',
+      ),
     };
   }
 }

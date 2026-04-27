@@ -28,7 +28,7 @@ class Class extends InheritingContainer with Constructable, MixedInTypes {
       '${canonicalLibraryOrThrow.dirName}/$name-class-sidebar.html';
 
   Class(this.element, Library library, PackageGraph packageGraph)
-      : super(library, packageGraph) {
+    : super(library, packageGraph) {
     if (isDartCoreObject) {
       packageGraph.objectClass = this;
     }

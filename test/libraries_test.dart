@@ -37,8 +37,10 @@ library name.and.dots;
           packageMetaProvider.resourceProvider as MemoryResourceProvider,
     );
 
-    final packageGraph =
-        await bootBasicPackage(packagePath, packageMetaProvider);
+    final packageGraph = await bootBasicPackage(
+      packagePath,
+      packageMetaProvider,
+    );
     final library = packageGraph.libraries.named('name.and.dots');
     expect(library.name, 'name.and.dots');
     expect(library.fullyQualifiedName, 'name.and.dots');
@@ -71,8 +73,10 @@ library;
           packageMetaProvider.resourceProvider as MemoryResourceProvider,
     );
 
-    final packageGraph =
-        await bootBasicPackage(packagePath, packageMetaProvider);
+    final packageGraph = await bootBasicPackage(
+      packagePath,
+      packageMetaProvider,
+    );
     final library = packageGraph.libraries.named('lib');
     expect(library.name, 'lib');
     expect(library.fullyQualifiedName, 'lib');
@@ -108,12 +112,16 @@ A doc comment.
       resourceProvider: resourceProvider,
     );
 
-    final packageGraph =
-        await bootBasicPackage(packagePath, packageMetaProvider);
-    final daName =
-        ResourceProviderExtension(resourceProvider).convertPath('d/a');
-    final eaName =
-        ResourceProviderExtension(resourceProvider).convertPath('e/a');
+    final packageGraph = await bootBasicPackage(
+      packagePath,
+      packageMetaProvider,
+    );
+    final daName = ResourceProviderExtension(
+      resourceProvider,
+    ).convertPath('d/a');
+    final eaName = ResourceProviderExtension(
+      resourceProvider,
+    ).convertPath('e/a');
     final daLibrary = packageGraph.libraries.displayNamed(daName);
     final eaLibrary = packageGraph.libraries.displayNamed(eaName);
     final bLibrary = packageGraph.libraries.displayNamed('b');
@@ -134,29 +142,33 @@ A doc comment.
     );
   });
 
-  test('libraries in SDK package have appropriate data',
-      onPlatform: {'windows': Skip('Test does not work on Windows (#2446)')},
-      () async {
-    var packageMetaProvider = testPackageMetaProvider;
-    var sdkFolder = packageMetaProvider.defaultSdkDir;
+  test(
+    'libraries in SDK package have appropriate data',
+    onPlatform: {'windows': Skip('Test does not work on Windows (#2446)')},
+    () async {
+      var packageMetaProvider = testPackageMetaProvider;
+      var sdkFolder = packageMetaProvider.defaultSdkDir;
 
-    var packageGraph = await bootBasicPackage(
-        sdkFolder.path, packageMetaProvider,
+      var packageGraph = await bootBasicPackage(
+        sdkFolder.path,
+        packageMetaProvider,
         additionalArguments: [
           '--input',
           packageMetaProvider.defaultSdkDir.path,
-        ]);
+        ],
+      );
 
-    var localPackages = packageGraph.localPackages;
-    expect(localPackages, hasLength(1));
-    var sdkPackage = localPackages.single;
-    expect(sdkPackage.name, equals('Dart'));
+      var localPackages = packageGraph.localPackages;
+      expect(localPackages, hasLength(1));
+      var sdkPackage = localPackages.single;
+      expect(sdkPackage.name, equals('Dart'));
 
-    var dartAsyncLib = sdkPackage.libraries.named('dart:async');
-    expect(dartAsyncLib.name, 'dart:async');
-    expect(dartAsyncLib.dirName, 'dart-async');
-    expect(dartAsyncLib.href, '${htmlBasePlaceholder}dart-async/');
-  });
+      var dartAsyncLib = sdkPackage.libraries.named('dart:async');
+      expect(dartAsyncLib.name, 'dart:async');
+      expect(dartAsyncLib.dirName, 'dart-async');
+      expect(dartAsyncLib.href, '${htmlBasePlaceholder}dart-async/');
+    },
+  );
 }
 
 @reflectiveTest
@@ -181,15 +193,16 @@ class LibrariesTest extends DartdocTestBase {
       libraryFilePath: 'lib/library.dart',
     );
 
-    expect(library.classes.named('FileSystemEntity').linkedName,
-        '<a href="$dartSdkUrlPrefix/dart-io/FileSystemEntity-class.html">FileSystemEntity</a>');
+    expect(
+      library.classes.named('FileSystemEntity').linkedName,
+      '<a href="$dartSdkUrlPrefix/dart-io/FileSystemEntity-class.html">FileSystemEntity</a>',
+    );
   }
 
   void test_publicLibrary_unnamed() async {
-    var library =
-        (await bootPackageFromFiles([d.file('lib/lib1.dart', 'library;')]))
-            .libraries
-            .named('lib1');
+    var library = (await bootPackageFromFiles([
+      d.file('lib/lib1.dart', 'library;'),
+    ])).libraries.named('lib1');
 
     expect(library.name, 'lib1');
     expect(library.qualifiedName, 'lib1');
@@ -205,7 +218,7 @@ class LibrariesTest extends DartdocTestBase {
         d.dir('lib', [
           d.file('public.dart', '''
 export 'src/library.dart';
-''')
+'''),
         ]),
       ],
     );
@@ -246,15 +259,14 @@ version: 0.0.1
           ],
         ),
       ],
-      additionalArguments: [
-        '--auto-include-dependencies',
-      ],
+      additionalArguments: ['--auto-include-dependencies'],
     );
   }
 
   void test_dependencyPackageLibrary_noLibraryDirective() async {
     var graph = await bootPackageWithInnerPackageLibrary(
-        d.file('lib/lib2.dart', '// No content.'));
+      d.file('lib/lib2.dart', '// No content.'),
+    );
     var library = graph.libraries.named('lib2');
 
     expect(library.name, 'lib2');
@@ -268,7 +280,8 @@ version: 0.0.1
 
   void test_dependencyPackageLibrary_unnamedLibraryDirective() async {
     var graph = await bootPackageWithInnerPackageLibrary(
-        d.file('lib/lib2.dart', 'library;'));
+      d.file('lib/lib2.dart', 'library;'),
+    );
     var library = graph.libraries.named('lib2');
 
     expect(library.name, 'lib2');
@@ -282,7 +295,8 @@ version: 0.0.1
 
   void test_dependencyPackageLibrary_namedLibraryDirective() async {
     var graph = await bootPackageWithInnerPackageLibrary(
-        d.file('lib/lib2.dart', 'library lib2;'));
+      d.file('lib/lib2.dart', 'library lib2;'),
+    );
     var library = graph.libraries.named('lib2');
 
     expect(library.name, 'lib2');

@@ -39,19 +39,23 @@ Library? canonicalLibraryCandidate(ModelElement modelElement) {
     return null;
   }
 
-  final candidateLibraries = candidateList.where((l) {
-    if (!l.isPublic) return false;
-    if (l.package.documentedWhere == DocumentLocation.missing) return false;
-    if (modelElement is Library) return true;
-    if (l.name == modelElement.library?.name) return true;
-    var lookup = l.element.exportNamespace.definedNames2[topLevelElementName];
-    var lookupElement =
-        lookup is PropertyAccessorElement ? lookup.variable : lookup;
-    var targetElement = topLevelElement is PropertyAccessorElement
-        ? topLevelElement.variable
-        : topLevelElement;
-    return targetElement == lookupElement;
-  }).toList(growable: true);
+  final candidateLibraries = candidateList
+      .where((l) {
+        if (!l.isPublic) return false;
+        if (l.package.documentedWhere == DocumentLocation.missing) return false;
+        if (modelElement is Library) return true;
+        if (l.name == modelElement.library?.name) return true;
+        var lookup =
+            l.element.exportNamespace.definedNames2[topLevelElementName];
+        var lookupElement = lookup is PropertyAccessorElement
+            ? lookup.variable
+            : lookup;
+        var targetElement = topLevelElement is PropertyAccessorElement
+            ? topLevelElement.variable
+            : topLevelElement;
+        return targetElement == lookupElement;
+      })
+      .toList(growable: true);
 
   if (candidateLibraries.isEmpty) {
     return null;
@@ -60,11 +64,14 @@ Library? canonicalLibraryCandidate(ModelElement modelElement) {
     return candidateLibraries.single;
   }
 
-  var topLevelModelElement =
-      ModelElement.forElement(topLevelElement, modelElement.packageGraph);
+  var topLevelModelElement = ModelElement.forElement(
+    topLevelElement,
+    modelElement.packageGraph,
+  );
 
-  return _Canonicalization(topLevelModelElement)
-      .canonicalLibraryCandidate(candidateLibraries);
+  return _Canonicalization(
+    topLevelModelElement,
+  ).canonicalLibraryCandidate(candidateLibraries);
 }
 
 /// Canonicalization support in Dartdoc.
@@ -113,23 +120,28 @@ final class _Canonicalization {
 
   /// Calculates a candidate for the canonical library of [_modelElement], among [libraries].
   Library canonicalLibraryCandidate(Iterable<Library> libraries) {
-    var locationPieces = _getElementLocation(_modelElement.element)
-        .split(_locationSplitter)
-        .where((s) => s.isNotEmpty)
-        .toSet();
+    var locationPieces = _getElementLocation(
+      _modelElement.element,
+    ).split(_locationSplitter).where((s) => s.isNotEmpty).toSet();
     var elementQualifiedName = _modelElement.isFromInternalLibrary
         ? _modelElement.originalFullyQualifiedName
         : _modelElement.fullyQualifiedName;
-    var scoredCandidates = libraries
-        .map((library) => _scoreElementWithLibrary(
-            library, elementQualifiedName, locationPieces,
-            elementQualifiedNameInLibrary:
-                '${library.name}.${_modelElement.qualifiedName}',
-            preferredPackage: _modelElement.library?.package,
-            preferredLibraryName: _modelElement.element.library?.name,
-            preferredLibrary: _modelElement.element.library))
-        .toList(growable: false)
-      ..sort();
+    var scoredCandidates =
+        libraries
+            .map(
+              (library) => _scoreElementWithLibrary(
+                library,
+                elementQualifiedName,
+                locationPieces,
+                elementQualifiedNameInLibrary:
+                    '${library.name}.${_modelElement.qualifiedName}',
+                preferredPackage: _modelElement.library?.package,
+                preferredLibraryName: _modelElement.element.library?.name,
+                preferredLibrary: _modelElement.element.library,
+              ),
+            )
+            .toList(growable: false)
+          ..sort();
 
     final librariesByScore = scoredCandidates.map((s) => s.library).toList();
     var secondHighestScore =
@@ -141,10 +153,14 @@ final class _Canonicalization {
     if (confidence <
         _modelElement.config.ambiguousReexportScorerMinConfidence) {
       var libraryNames = librariesByScore.map((l) => l.name);
-      var message = '$libraryNames -> ${canonicalLibrary.name} '
+      var message =
+          '$libraryNames -> ${canonicalLibrary.name} '
           '(confidence ${confidence.toStringAsPrecision(4)})';
-      _modelElement.warn(PackageWarning.ambiguousReexport,
-          message: message, extendedDebug: scoredCandidates.map((s) => '$s'));
+      _modelElement.warn(
+        PackageWarning.ambiguousReexport,
+        message: message,
+        extendedDebug: scoredCandidates.map((s) => '$s'),
+      );
     }
 
     return canonicalLibrary;
@@ -154,12 +170,15 @@ final class _Canonicalization {
   // because it takes a lot of elements into account, like URIs, differing
   // package names, etc. Anyways, add more tests, in addition to the
   // `StringName` tests in `model_test.dart`.
-  static _ScoredCandidate _scoreElementWithLibrary(Library library,
-      String elementQualifiedName, Set<String> elementLocationPieces,
-      {required String elementQualifiedNameInLibrary,
-      Package? preferredPackage,
-      String? preferredLibraryName,
-      LibraryElement? preferredLibrary}) {
+  static _ScoredCandidate _scoreElementWithLibrary(
+    Library library,
+    String elementQualifiedName,
+    Set<String> elementLocationPieces, {
+    required String elementQualifiedNameInLibrary,
+    Package? preferredPackage,
+    String? preferredLibraryName,
+    LibraryElement? preferredLibrary,
+  }) {
     var scoredCandidate = _ScoredCandidate(library);
 
     // Large boost for `@canonicalFor`, essentially overriding all other
@@ -194,7 +213,7 @@ final class _Canonicalization {
     }
 
     var libraryNamePieces = {
-      ...library.name.split('.').where((s) => s.isNotEmpty)
+      ...library.name.split('.').where((s) => s.isNotEmpty),
     };
 
     // Give a big boost if the library has the package name embedded in it.
@@ -210,7 +229,9 @@ final class _Canonicalization {
     // Give a tiny boost for libraries with long names, assuming they're
     // more specific (and therefore more likely to be the owner of this symbol).
     scoredCandidate._alterScore(
-        .01 * libraryNamePieces.length, _Reason.longName);
+      .01 * libraryNamePieces.length,
+      _Reason.longName,
+    );
 
     // If we don't know the location of this element (which shouldn't be
     // possible), return our best guess.

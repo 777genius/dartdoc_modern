@@ -36,10 +36,9 @@ void init() {
     searchSidebar?.placeholder = 'Failed to initialize search';
   }
 
-  window
-      .fetch('${_htmlBase}index.json'.toJS)
-      .toDart
-      .then((fetchResponse) async {
+  window.fetch('${_htmlBase}index.json'.toJS).toDart.then((
+    fetchResponse,
+  ) async {
     if (fetchResponse.status != HttpStatus.ok) {
       disableSearch();
       return;
@@ -183,12 +182,8 @@ class _Search {
 
     mainContent
       ..textContent = ''
-      ..appendChild(
-        HTMLElement.section()..classList.add('search-summary'),
-      )
-      ..appendChild(
-        HTMLHeadingElement.h2()..innerHtml = 'Search Results',
-      )
+      ..appendChild(HTMLElement.section()..classList.add('search-summary'))
+      ..appendChild(HTMLHeadingElement.h2()..innerHtml = 'Search Results')
       ..appendChild(
         HTMLDivElement()
           ..classList.add('search-summary')
@@ -204,11 +199,11 @@ class _Search {
         ..classList.add('search-summary')
         ..innerHtml =
             'There was not a match for "$searchText". Want to try searching '
-                'from additional Dart-related sites? ';
+            'from additional Dart-related sites? ';
 
       var buildLink = Uri.parse(
-              'https://dart.dev/search?cx=011220921317074318178%3A_yy-tmb5t_i&ie=UTF-8&hl=en&q=')
-          .replace(queryParameters: {'q': searchText});
+        'https://dart.dev/search?cx=011220921317074318178%3A_yy-tmb5t_i&ie=UTF-8&hl=en&q=',
+      ).replace(queryParameters: {'q': searchText});
       var link = HTMLAnchorElement()
         ..setAttribute('href', buildLink.toString())
         ..textContent = 'Search on dart.dev.';
@@ -229,8 +224,11 @@ class _Search {
   ///
   /// [query] is only required here so that it can be displayed with emphasis
   /// (as a prefix, for example).
-  void updateSuggestions(String query, List<IndexItem> suggestions,
-      {bool isSearchPage = false}) {
+  void updateSuggestions(
+    String query,
+    List<IndexItem> suggestions, {
+    bool isSearchPage = false,
+  }) {
     suggestionsInfo = [];
     suggestionElements.clear();
     _containerMap.clear();
@@ -245,8 +243,9 @@ class _Search {
       suggestionElements.add(_createSuggestion(query, suggestion));
     }
 
-    var suggestionSource =
-        isSearchPage ? _containerMap.values : suggestionElements;
+    var suggestionSource = isSearchPage
+        ? _containerMap.values
+        : suggestionElements;
     for (final element in suggestionSource) {
       searchResults.appendChild(element);
     }
@@ -259,8 +258,11 @@ class _Search {
   }
 
   /// Handles [searchText] by generating suggestions.
-  void handleSearch(String? searchText,
-      {bool forceUpdate = false, bool isSearchPage = false}) {
+  void handleSearch(
+    String? searchText, {
+    bool forceUpdate = false,
+    bool isSearchPage = false,
+  }) {
     if (actualValue == searchText && !forceUpdate) {
       return;
     }
@@ -333,8 +335,9 @@ class _Search {
             // If there is no search suggestion selected, then change the
             // window location to `search.html`.
             var query = _htmlEscape.convert(actualValue);
-            var searchPath = Uri.parse('${_htmlBase}search.html')
-                .replace(queryParameters: {'q': query});
+            var searchPath = Uri.parse(
+              '${_htmlBase}search.html',
+            ).replace(queryParameters: {'q': query});
             window.location.assign(searchPath.toString());
             return;
           }
@@ -366,9 +369,9 @@ class _Search {
         }
 
         if (!previousSelectedElement.isBlurred) {
-          suggestionElements[previousSelectedElement]
-              .classList
-              .remove('tt-cursor');
+          suggestionElements[previousSelectedElement].classList.remove(
+            'tt-cursor',
+          );
         }
 
         if (!selectedElement.isBlurred) {
@@ -418,14 +421,18 @@ HTMLElement _createSuggestion(String query, IndexItem match) {
   final suggestionTitle = HTMLSpanElement()
     ..classList.add('tt-suggestion-title')
     ..innerHtml = _highlight(
-        '${match.name} ${match.kind.toString().toLowerCase()}', query);
+      '${match.name} ${match.kind.toString().toLowerCase()}',
+      query,
+    );
   suggestion.appendChild(suggestionTitle);
 
   final enclosingElement = match.enclosedBy;
   if (enclosingElement != null) {
-    suggestion.appendChild(HTMLSpanElement()
-      ..classList.add('tt-suggestion-container')
-      ..innerHtml = '(in ${_highlight(enclosingElement.name, query)})');
+    suggestion.appendChild(
+      HTMLSpanElement()
+        ..classList.add('tt-suggestion-container')
+        ..innerHtml = '(in ${_highlight(enclosingElement.name, query)})',
+    );
   }
 
   // The one line description to use in the search suggestions.
@@ -487,19 +494,23 @@ void _mapToContainer(HTMLElement containerElement, HTMLElement suggestion) {
 /// Creates an `<a>` [Element] for the enclosing library/class.
 HTMLElement _createContainer(String encloser, String href) => HTMLDivElement()
   ..classList.add('tt-container')
-  ..appendChild(HTMLParagraphElement()
-    ..textContent = 'Results from '
-    ..classList.add('tt-container-text')
-    ..appendChild(HTMLAnchorElement()
-      ..setAttribute('href', href)
-      ..innerHtml = encloser));
+  ..appendChild(
+    HTMLParagraphElement()
+      ..textContent = 'Results from '
+      ..classList.add('tt-container-text')
+      ..appendChild(
+        HTMLAnchorElement()
+          ..setAttribute('href', href)
+          ..innerHtml = encloser,
+      ),
+  );
 
 /// Wraps each instance of [query] in [text] with a `<strong>` tag, as HTML
 /// text.
 String _highlight(String text, String query) => text.replaceAllMapped(
-      RegExp(query, caseSensitive: false),
-      (match) => "<strong class='tt-highlight'>${match[0]}</strong>",
-    );
+  RegExp(query, caseSensitive: false),
+  (match) => "<strong class='tt-highlight'>${match[0]}</strong>",
+);
 
 /// Decodes HTML entities (like `&lt;`) into their HTML elements (like `<`).
 ///

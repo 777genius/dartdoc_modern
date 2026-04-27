@@ -78,10 +78,12 @@ mixin TypeParameters implements ModelElement {
       return '';
     }
     var joined = typeParameters
-        .map((t) => [
-              ...t.annotations.map((a) => a.linkedNameWithParameters),
-              isLinked ? t.linkedName : t.name
-            ].join(' '))
+        .map(
+          (t) => [
+            ...t.annotations.map((a) => a.linkedNameWithParameters),
+            isLinked ? t.linkedName : t.name,
+          ].join(' '),
+        )
         .join('</span>, <span class="type-parameter">');
     var typeParametersString =
         '&lt;<wbr><span class="type-parameter">$joined</span>&gt;';

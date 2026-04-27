@@ -51,11 +51,7 @@ abstract interface class Documentable with Referable {
 /// [local]ly, whether we should treat the package as [missing] and any references
 /// to it made canonical to this package, or [remote], indicating that
 /// we can build hrefs to an external source.
-enum DocumentLocation {
-  local,
-  missing,
-  remote,
-}
+enum DocumentLocation { local, missing, remote }
 
 mixin MarkdownFileDocumentation implements Documentable, Warnable {
   DocumentLocation get documentedWhere;
@@ -70,8 +66,9 @@ mixin MarkdownFileDocumentation implements Documentable, Warnable {
     final docFile = documentationFile;
     return docFile == null
         ? null
-        : packageGraph.resourceProvider
-            .readAsMalformedAllowedStringSync(docFile);
+        : packageGraph.resourceProvider.readAsMalformedAllowedStringSync(
+            docFile,
+          );
   }
 
   @override

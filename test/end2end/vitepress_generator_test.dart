@@ -118,7 +118,10 @@ String _extractMemberSignatureBlock(String content, String marker) {
   expect(signatureStart, isNonNegative, reason: 'Expected member signature');
   final signatureEnd = content.indexOf('</div></div>', signatureStart);
   expect(signatureEnd, isNonNegative, reason: 'Expected signature closing tag');
-  return content.substring(signatureStart, signatureEnd + '</div></div>'.length);
+  return content.substring(
+    signatureStart,
+    signatureEnd + '</div></div>'.length,
+  );
 }
 
 int _countMatches(String content, Pattern pattern) {
@@ -855,7 +858,10 @@ void main() {
         () {
           var content = _readOutput(outDir, 'api/ex/genericFunction.md');
           expect(content, contains(r'# genericFunction\<T\>'));
-          expect(content, contains('<span class="fn">genericFunction&lt;T&gt;</span>'));
+          expect(
+            content,
+            contains('<span class="fn">genericFunction&lt;T&gt;</span>'),
+          );
           expect(content, contains('<span class="type">T</span>'));
           expect(content, contains('data-signature-normalized="true"'));
           expect(content, contains('member-signature'));
@@ -1312,7 +1318,10 @@ void main() {
           content,
           '### Apple.fromString()',
         );
-        expect(_countMatches(signature, '<span class="member-signature-line">'), 1);
+        expect(
+          _countMatches(signature, '<span class="member-signature-line">'),
+          1,
+        );
         expect(signature, contains('<span class="fn">Apple.fromString</span>'));
         expect(signature, contains('<span class="param">s</span>'));
       });
@@ -1351,7 +1360,10 @@ void main() {
           content,
           '# <Badge type="warning" text="deprecated" /> ~~topLevelFunction~~',
         );
-        expect(_countMatches(signature, '<span class="member-signature-line">'), greaterThan(1));
+        expect(
+          _countMatches(signature, '<span class="member-signature-line">'),
+          greaterThan(1),
+        );
         // Should have trailing commas on parameter lines
         expect(
           signature,

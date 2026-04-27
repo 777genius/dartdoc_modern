@@ -40,28 +40,19 @@ class DartdocModernFooter extends StatelessComponent {
       fontSize: 0.8.rem,
       color: Color('var(--docs-shell-muted)'),
       border: Border.only(
-        top: BorderSide(
-          width: 1.px,
-          color: Color('var(--docs-shell-border)'),
-        ),
+        top: BorderSide(width: 1.px, color: Color('var(--docs-shell-border)')),
       ),
-      raw: {
-        'text-align': 'center',
-        'opacity': '0.85',
-      },
+      raw: {'text-align': 'center', 'opacity': '0.85'},
     ),
     css('.docs-generated-footer-link').styles(
       color: Color('var(--docs-shell-muted)'),
-      raw: {
-        'text-decoration': 'underline',
-        'text-underline-offset': '0.2em',
-      },
+      raw: {'text-decoration': 'underline', 'text-underline-offset': '0.2em'},
     ),
-    css('.docs-generated-footer-link:hover').styles(
-      color: Color('var(--docs-shell-accent)'),
-    ),
-    css('.docs-generated-footer-link:visited').styles(
-      color: Color('var(--docs-shell-muted)'),
-    ),
+    css(
+      '.docs-generated-footer-link:hover',
+    ).styles(color: Color('var(--docs-shell-accent)')),
+    css(
+      '.docs-generated-footer-link:visited',
+    ).styles(color: Color('var(--docs-shell-muted)')),
   ];
 }

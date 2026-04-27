@@ -11,7 +11,7 @@ class NeverType extends ModelElement with HasNoPage {
   final Element element;
 
   NeverType(this.element, PackageGraph packageGraph)
-      : super(null, packageGraph);
+    : super(null, packageGraph);
 
   /// `Never` is not a real object, and so we can't document it, so there
   /// can be nothing canonical for it.

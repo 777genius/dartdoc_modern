@@ -45,9 +45,11 @@ class Documentation {
 
     var parseResult = _parseDocumentation(processFullText: storeFullText);
 
-    var renderResult = _renderer.render(parseResult,
-        processFullDocs: storeFullText,
-        sanitizeHtml: _warnable.config.sanitizeHtml);
+    var renderResult = _renderer.render(
+      parseResult,
+      processFullDocs: storeFullText,
+      sanitizeHtml: _warnable.config.sanitizeHtml,
+    );
 
     if (storeFullText) {
       _asHtml = renderResult.asHtml;

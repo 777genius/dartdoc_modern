@@ -108,9 +108,10 @@ class Constructor extends ModelElement
     Element? dereferenceParameter(FormalParameterElement? parameter) =>
         switch (parameter) {
           FieldFormalParameterElement() => parameter.field,
-          SuperFormalParameterElement() =>
-            dereferenceParameter(parameter.superConstructorParameter),
-          _ => parameter
+          SuperFormalParameterElement() => dereferenceParameter(
+            parameter.superConstructorParameter,
+          ),
+          _ => parameter,
         };
 
     var parameterElements = parameters.map((parameter) {

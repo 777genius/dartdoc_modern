@@ -19,15 +19,10 @@ import 'codegen_aot_compiler.dart';
 
 void main() async {
   await build(path.join('lib', 'src', 'generator', 'templates.dart'));
-  await build(
-    path.join('test', 'mustachio', 'foo.dart'),
-  );
+  await build(path.join('test', 'mustachio', 'foo.dart'));
 }
 
-Future<void> build(
-  String sourcePath, {
-  String? root,
-}) async {
+Future<void> build(String sourcePath, {String? root}) async {
   root ??= Directory.current.path;
   var contextCollection = AnalysisContextCollectionImpl(
     includedPaths: [root],
@@ -38,20 +33,23 @@ Future<void> build(
     withFineDependencies: true,
   );
   var analysisContext = contextCollection.contextFor(root);
-  final libraryResult = await analysisContext.currentSession
-      .getResolvedLibrary(path.join(root, sourcePath));
+  final libraryResult = await analysisContext.currentSession.getResolvedLibrary(
+    path.join(root, sourcePath),
+  );
   if (libraryResult is! ResolvedLibraryResult) {
     throw StateError(
-        'Expected library result to be ResolvedLibraryResult, but is '
-        '${libraryResult.runtimeType}');
+      'Expected library result to be ResolvedLibraryResult, but is '
+      '${libraryResult.runtimeType}',
+    );
   }
 
   var library = libraryResult.element;
   var typeProvider = library.typeProvider;
   var typeSystem = library.typeSystem;
   var rendererSpecs = <RendererSpec>{};
-  for (var renderer in library.metadata.annotations
-      .where((e) => e.element!.enclosingElement!.name == 'Renderer')) {
+  for (var renderer in library.metadata.annotations.where(
+    (e) => e.element!.enclosingElement!.name == 'Renderer',
+  )) {
     rendererSpecs.add(_buildRendererSpec(renderer));
   }
 
@@ -71,8 +69,9 @@ Future<void> build(
     print('Warning: Could not format generated code: $e');
   }
 
-  await File(path.join(root, '$basePath.aot_renderers_for_html.dart'))
-      .writeAsString(aotRenderersContents);
+  await File(
+    path.join(root, '$basePath.aot_renderers_for_html.dart'),
+  ).writeAsString(aotRenderersContents);
 }
 
 RendererSpec _buildRendererSpec(ElementAnnotation annotation) {
@@ -94,11 +93,12 @@ RendererSpec _buildRendererSpec(ElementAnnotation annotation) {
     throw StateError('@Renderer visibleTypes must not be null');
   }
   var visibleTypes = {
-    ...visibleTypesField.toSetValue()!.map((object) => object.toTypeValue()!)
+    ...visibleTypesField.toSetValue()!.map((object) => object.toTypeValue()!),
   };
 
-  var standardHtmlTemplateField =
-      constantValue.getField('standardHtmlTemplate')!;
+  var standardHtmlTemplateField = constantValue.getField(
+    'standardHtmlTemplate',
+  )!;
   return RendererSpec(
     nameField.toSymbolValue()!,
     contextType as InterfaceType,
@@ -108,8 +108,11 @@ RendererSpec _buildRendererSpec(ElementAnnotation annotation) {
 }
 
 String get sdkPath => PhysicalResourceProvider.INSTANCE
-    .getFile(PhysicalResourceProvider.INSTANCE.pathContext
-        .absolute(Platform.resolvedExecutable))
+    .getFile(
+      PhysicalResourceProvider.INSTANCE.pathContext.absolute(
+        Platform.resolvedExecutable,
+      ),
+    )
     .parent
     .parent
     .path;

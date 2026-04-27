@@ -222,8 +222,9 @@ export 'lib.dart' show C1, E1;
 
   test('classes are not duplicated', () async {
     expect(
-      topicOneLines
-          .where((l) => l.contains('<a href="../lib/C1-class.html">C1</a>')),
+      topicOneLines.where(
+        (l) => l.contains('<a href="../lib/C1-class.html">C1</a>'),
+      ),
       // Once in the sidebar and once in the main body
       hasLength(2),
     );
@@ -276,7 +277,8 @@ export 'lib.dart' show C1, E1;
       containsAllInOrder([
         matches('<div id="dartdoc-sidebar-right" '),
         matches(
-            '<a href="../topics/cat1-topic.html#properties">Properties</a>'),
+          '<a href="../topics/cat1-topic.html#properties">Properties</a>',
+        ),
         matches('<a href="../lib/p1.html">p1</a>'),
       ]),
     );
@@ -310,7 +312,8 @@ export 'lib.dart' show C1, E1;
       containsAllInOrder([
         matches('<div id="dartdoc-sidebar-right" '),
         matches(
-            '<a href="../topics/cat1-topic.html#extensions">Extensions</a>'),
+          '<a href="../topics/cat1-topic.html#extensions">Extensions</a>',
+        ),
         matches('<a href="../lib/Ex.html">Ex</a>'),
       ]),
     );
@@ -321,8 +324,10 @@ export 'lib.dart' show C1, E1;
       topicOneLines,
       containsAllInOrder([
         matches('<div id="dartdoc-sidebar-right" '),
-        matches('<a href="../topics/cat1-topic.html#extension-types">'
-            'Extension Types</a>'),
+        matches(
+          '<a href="../topics/cat1-topic.html#extension-types">'
+          'Extension Types</a>',
+        ),
         matches('<a href="../lib/ExType-extension-type.html">ExType</a>'),
       ]),
     );

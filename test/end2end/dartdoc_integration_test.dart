@@ -23,33 +23,30 @@ Future<TestProcess> runDartdoc(
   required String workingDirectory,
   Map<String, String>? environment,
   bool includeParentEnvironment = true,
-}) =>
-    TestProcess.start(
-      Platform.resolvedExecutable,
-      [_dartdocPath, ...options],
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-    );
+}) => TestProcess.start(
+  Platform.resolvedExecutable,
+  [_dartdocPath, ...options],
+  workingDirectory: workingDirectory,
+  environment: environment,
+  includeParentEnvironment: includeParentEnvironment,
+);
 
 void main() {
   test('with tool errors cause non-zero exit when warnings are off', () async {
     // TODO(srawlins): Remove test_package_tool_error and generate afresh.
     var packagePath = await d.createPackage('test_package');
     var tempDir = path.join(
-        Directory.systemTemp
-            .createTempSync('dartdoc_integration_test.')
-            .absolute
-            .path,
-        'test_package_tool_error');
-    var process = await runDartdoc(
-      [
-        '--allow-tools',
-        '--input=${testPackageToolError.path}',
-        '--output=$tempDir',
-      ],
-      workingDirectory: packagePath,
+      Directory.systemTemp
+          .createTempSync('dartdoc_integration_test.')
+          .absolute
+          .path,
+      'test_package_tool_error',
     );
+    var process = await runDartdoc([
+      '--allow-tools',
+      '--input=${testPackageToolError.path}',
+      '--output=$tempDir',
+    ], workingDirectory: packagePath);
     await process.shouldExit(1);
   });
 }

@@ -32,7 +32,7 @@ extension type One<E>(List<E> it) {}
       matches(
         '<span class="kind-class">One&lt;<wbr>'
         '<span class="type-parameter">E</span>&gt;</span>',
-      )
+      ),
     ]);
   }
 
@@ -46,7 +46,7 @@ extension type One<E>(List<E> it) {}
       matches(
         '<span class="kind-constructor">One&lt;<wbr>'
         '<span class="type-parameter">E</span>&gt;</span> constructor',
-      )
+      ),
     ]);
   }
 
@@ -62,7 +62,7 @@ extension type One<E>(List<E> it) {
       matches(
         '<span class="kind-constructor">One&lt;<wbr>'
         '<span class="type-parameter">E</span>&gt;.named</span> constructor',
-      )
+      ),
     ]);
   }
 
@@ -75,9 +75,11 @@ extension type One<E>(Foo<E> it) {}
 
     htmlLines.expectMainContentContainsAllInOrder([
       matches('<dt>on</dt>'),
-      matches('<a href="../lib/Foo-class.html">Foo</a>'
-          '<span class="signature">&lt;<wbr>'
-          '<span class="type-parameter">E</span>&gt;</span>'),
+      matches(
+        '<a href="../lib/Foo-class.html">Foo</a>'
+        '<span class="signature">&lt;<wbr>'
+        '<span class="type-parameter">E</span>&gt;</span>',
+      ),
     ]);
   }
 
@@ -104,9 +106,11 @@ extension type One<E>(Foo<E> it) implements Base<E> {}
 
     htmlLines.expectMainContentContainsAllInOrder([
       matches('<dt>Implemented types</dt>'),
-      matches('<a href="../lib/Base-class.html">Base</a>'
-          '<span class="signature">&lt;<wbr>'
-          '<span class="type-parameter">E</span>&gt;</span>'),
+      matches(
+        '<a href="../lib/Base-class.html">Base</a>'
+        '<span class="signature">&lt;<wbr>'
+        '<span class="type-parameter">E</span>&gt;</span>',
+      ),
     ]);
   }
 
@@ -119,9 +123,11 @@ extension type Two(List<int> it) implements One<int> {}
 
     htmlLines.expectMainContentContainsAllInOrder([
       matches('<dt>Implemented types</dt>'),
-      matches('<a href="../lib/One-extension-type.html">One</a>'
-          '<span class="signature">&lt;<wbr>'
-          '<span class="type-parameter">int</span>&gt;</span>'),
+      matches(
+        '<a href="../lib/One-extension-type.html">One</a>'
+        '<span class="signature">&lt;<wbr>'
+        '<span class="type-parameter">int</span>&gt;</span>',
+      ),
     ]);
   }
 
@@ -395,7 +401,8 @@ extension type One(int it) {
       htmlLines,
       containsAllInOrder([
         matches(
-            '<a href="lib/One-extension-type.html#operators">Operators</a>'),
+          '<a href="lib/One-extension-type.html#operators">Operators</a>',
+        ),
         matches('<a href="lib/One/operator_greater.html">operator ></a>'),
       ]),
     );
@@ -416,8 +423,10 @@ extension type One(int it) {
     expect(
       htmlLines,
       containsAllInOrder([
-        matches('<a href="lib/One-extension-type.html#static-properties">'
-            'Static properties</a>'),
+        matches(
+          '<a href="lib/One-extension-type.html#static-properties">'
+          'Static properties</a>',
+        ),
         matches('<a href="lib/One/gs1.html">gs1</a>'),
         matches('<a href="lib/One/sf1.html">sf1</a>'),
       ]),
@@ -435,8 +444,10 @@ extension type One(int it) {
     expect(
       htmlLines,
       containsAllInOrder([
-        matches('<a href="lib/One-extension-type.html#static-methods">'
-            'Static methods</a>'),
+        matches(
+          '<a href="lib/One-extension-type.html#static-methods">'
+          'Static methods</a>',
+        ),
         matches('<a href="lib/One/s1.html">s1</a>'),
       ]),
     );

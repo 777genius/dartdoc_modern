@@ -21,14 +21,17 @@ class Method extends ModelElement
   late final List<TypeParameter> typeParameters;
 
   Method(this.element, Library super.library, super.packageGraph)
-      : _isInherited = false {
+    : _isInherited = false {
     _calcTypeParameters();
   }
 
-  Method.inherited(this.element, this._enclosingContainer,
-      Library super.library, super.packageGraph,
-      {ExecutableElement? super.originalElement})
-      : _isInherited = true {
+  Method.inherited(
+    this.element,
+    this._enclosingContainer,
+    Library super.library,
+    super.packageGraph, {
+    ExecutableElement? super.originalElement,
+  }) : _isInherited = true {
     _calcTypeParameters();
   }
 
@@ -43,9 +46,11 @@ class Method extends ModelElement
   }
 
   void _calcTypeParameters() {
-    typeParameters = element.typeParameters.map((f) {
-      return getModelFor(f, library) as TypeParameter;
-    }).toList(growable: false);
+    typeParameters = element.typeParameters
+        .map((f) {
+          return getModelFor(f, library) as TypeParameter;
+        })
+        .toList(growable: false);
   }
 
   @override
@@ -67,8 +72,10 @@ class Method extends ModelElement
 
   @override
   String? get href {
-    assert(!identical(canonicalModelElement, this) ||
-        canonicalEnclosingContainer == enclosingElement);
+    assert(
+      !identical(canonicalModelElement, this) ||
+          canonicalEnclosingContainer == enclosingElement,
+    );
     return super.href;
   }
 
@@ -85,9 +92,9 @@ class Method extends ModelElement
 
   @override
   Set<Attribute> get attributes => {
-        ...super.attributes,
-        if (isInherited) Attribute.inherited,
-      };
+    ...super.attributes,
+    if (isInherited) Attribute.inherited,
+  };
 
   bool get isStatic => element.isStatic;
 
@@ -151,7 +158,7 @@ extension on Iterable<ElementType> {
   /// The [ModelElement] associated with each type, for each type that is a
   /// [DefinedElementType].
   List<ModelElement> get modelElements => [
-        for (var type in this)
-          if (type is DefinedElementType) type.modelElement,
-      ];
+    for (var type in this)
+      if (type is DefinedElementType) type.modelElement,
+  ];
 }

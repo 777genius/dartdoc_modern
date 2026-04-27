@@ -81,11 +81,14 @@ abstract class Typedef extends ModelElement with TypeParameters, HasLibrary {
 
     final buffer = StringBuffer('&lt;<wbr><span class="type-parameter">');
     buffer.writeAll(
-        typeParameters.map((t) => [
-              ...t.annotations.map((a) => a.linkedNameWithParameters),
-              isLinked ? t.linkedName : t.name,
-            ].join(' ')),
-        '</span>, <span class="type-parameter">');
+      typeParameters.map(
+        (t) => [
+          ...t.annotations.map((a) => a.linkedNameWithParameters),
+          isLinked ? t.linkedName : t.name,
+        ].join(' '),
+      ),
+      '</span>, <span class="type-parameter">',
+    );
     buffer.write('</span>&gt;');
 
     return buffer.toString();
@@ -123,11 +126,12 @@ class ClassTypedef extends Typedef {
 class FunctionTypedef extends Typedef {
   FunctionTypedef(super.element, super.library, super.packageGraph) {
     assert(
-        isCallable,
-        'Expected callable but: ${element.runtimeType} is FunctionTypedElement '
-        '|| (${element.runtimeType} is TypeAliasElement && '
-        '${element.aliasedType.runtimeType} is FunctionType) is not true for '
-        '"${element.name}" in "${element.library}"');
+      isCallable,
+      'Expected callable but: ${element.runtimeType} is FunctionTypedElement '
+      '|| (${element.runtimeType} is TypeAliasElement && '
+      '${element.aliasedType.runtimeType} is FunctionType) is not true for '
+      '"${element.name}" in "${element.library}"',
+    );
   }
 
   @override

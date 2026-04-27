@@ -61,7 +61,7 @@ extension Ex on C<int> {}
   }
 
   void
-      test_applicability_extensionOnClass_couldApplyToSubclassInstantiation() async {
+  test_applicability_extensionOnClass_couldApplyToSubclassInstantiation() async {
     var library = await bootPackageWithLibrary('''
 class C<T> {}
 class D<T> extends C<T> {}
@@ -72,7 +72,7 @@ extension Ex on C<int> {}
   }
 
   void
-      test_applicability_extensionOnClass_couldApplyToSubclassInstantiation2() async {
+  test_applicability_extensionOnClass_couldApplyToSubclassInstantiation2() async {
     var library = await bootPackageWithLibrary('''
 class C<T> {}
 class D extends C<String> {}
@@ -153,7 +153,7 @@ class C {}
   }
 
   void
-      test_applicability_extensionOnTypeVariableWithBound_couldApplyToSubtypeOfBound() async {
+  test_applicability_extensionOnTypeVariableWithBound_couldApplyToSubtypeOfBound() async {
     var library = await bootPackageWithLibrary('''
 class C {}
 class D extends C {}
@@ -164,7 +164,7 @@ extension Ex<T extends C> on T {}
   }
 
   void
-      test_applicability_extensionOnTypeVariableWithBound_couldApplyToUnrelated() async {
+  test_applicability_extensionOnTypeVariableWithBound_couldApplyToUnrelated() async {
     var library = await bootPackageWithLibrary('''
 extension Ex<T extends num> on T {}
 class C {}
@@ -274,14 +274,22 @@ class ExtensionMethodsExportTest extends DartdocTestBase {
   /// Verifies that comment reference text, [referenceText] attached to the
   /// function, `f`, is resolved to [expected], and links to [href].
   void expectReferenceValidFromF(
-      String referenceText, ModelElement expected, String href) {
+    String referenceText,
+    ModelElement expected,
+    String href,
+  ) {
     var fFunction = package.functions.named('f');
-    var reference = getMatchingLinkElement(referenceText, fFunction).referable
-        as ModelElement;
-    expect(identical(reference.canonicalModelElement, expected), isTrue,
-        reason: '$expected (${expected.hashCode}) is not '
-            '${reference.canonicalModelElement} '
-            '(${reference.canonicalModelElement.hashCode})');
+    var reference =
+        getMatchingLinkElement(referenceText, fFunction).referable
+            as ModelElement;
+    expect(
+      identical(reference.canonicalModelElement, expected),
+      isTrue,
+      reason:
+          '$expected (${expected.hashCode}) is not '
+          '${reference.canonicalModelElement} '
+          '(${reference.canonicalModelElement.hashCode})',
+    );
     expect(expected.isCanonical, isTrue);
     expect(expected.href, endsWith(href));
   }
@@ -310,7 +318,7 @@ extension Ex on C {
 /// Comment.
 var f() {}
 '''),
-      ])
+      ]),
     ]);
     package = packageGraph.defaultPackage;
   }

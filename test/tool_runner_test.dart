@@ -30,14 +30,15 @@ void main() {
     var snapshotFile = path.join(tempDir.path, 'drill.snapshot');
     try {
       result = Process.runSync(
-          Platform.resolvedExecutable,
-          [
-            '--snapshot=$snapshotFile',
-            '--snapshot-kind=app-jit',
-            'bin/drill.dart'
-          ],
-          workingDirectory: pubPackageMetaProvider.resourceProvider.pathContext
-              .absolute(_testPackageDir.path));
+        Platform.resolvedExecutable,
+        [
+          '--snapshot=$snapshotFile',
+          '--snapshot-kind=app-jit',
+          'bin/drill.dart',
+        ],
+        workingDirectory: pubPackageMetaProvider.resourceProvider.pathContext
+            .absolute(_testPackageDir.path),
+      );
     } on ProcessException catch (exception) {
       stderr.writeln('Unable to make snapshot of tool: $exception');
       expect(result?.exitCode, equals(0));
@@ -49,11 +50,14 @@ void main() {
     expect(result?.exitCode, equals(0));
     setupFile = File(path.join(tempDir.path, 'setup.stamp'));
     var nonDartName = Platform.isWindows ? 'non_dart.bat' : 'non_dart.sh';
-    var nonDartExecutable =
-        path.join(_toolExecutableDir.absolute.path, nonDartName);
+    var nonDartExecutable = path.join(
+      _toolExecutableDir.absolute.path,
+      nonDartName,
+    );
     // Have to replace backslashes on Windows with double-backslashes, to
     // escape them for YAML parser.
-    var yamlMap = '''
+    var yamlMap =
+        '''
 drill:
   command: ["bin/drill.dart"]
   description: "Puts holes in things."
@@ -75,10 +79,12 @@ echo:
   description: 'Works on everything'
 ''';
     toolMap = ToolConfiguration.fromYamlMap(
-        loadYaml(yamlMap) as YamlMap,
-        pubPackageMetaProvider.resourceProvider.pathContext
-            .absolute(_testPackageDir.path),
-        pubPackageMetaProvider.resourceProvider);
+      loadYaml(yamlMap) as YamlMap,
+      pubPackageMetaProvider.resourceProvider.pathContext.absolute(
+        _testPackageDir.path,
+      ),
+      pubPackageMetaProvider.resourceProvider,
+    );
     // This shouldn't really happen, but if you didn't load the config from a
     // yaml map (which would fail on a missing executable), or a file is deleted
     // during execution,it might, so we test it.
@@ -92,8 +98,9 @@ echo:
 
   tearDownAll(() {
     tempDir.deleteSync(recursive: true);
-    SnapshotCache.instanceFor(pubPackageMetaProvider.resourceProvider)
-        .dispose();
+    SnapshotCache.instanceFor(
+      pubPackageMetaProvider.resourceProvider,
+    ).dispose();
   });
 
   group('ToolRunner', () {
@@ -179,7 +186,9 @@ echo:
       );
       expect(errors, isNotEmpty);
       expect(
-          errors[0], contains('Unable to find definition for tool "hammer"'));
+        errors[0],
+        contains('Unable to find definition for tool "hammer"'),
+      );
       expect(result, isEmpty);
     });
     test('fails if tool returns non-zero status', () async {
@@ -199,8 +208,10 @@ echo:
         toolErrorCallback: errorCallback,
       );
       expect(errors, isNotEmpty);
-      expect(errors[0],
-          contains('Failed to run tool "missing" as "/a/missing/executable"'));
+      expect(
+        errors[0],
+        contains('Failed to run tool "missing" as "/a/missing/executable"'),
+      );
       expect(result, isEmpty);
     });
   });

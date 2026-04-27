@@ -45,14 +45,15 @@ export 'dart:async' show Future;
   /// Tests that re-exported SDK elements are documented locally when the SDK
   /// is not documented (missing).
   Future<void> test_reexportFuture_noRemote() async {
-    var packageGraph = await bootPackageFromFiles([
-      d.file('lib/reexport.dart', '''
+    var packageGraph = await bootPackageFromFiles(
+      [
+        d.file('lib/reexport.dart', '''
 library reexport;
 export 'dart:async' show Future;
 '''),
-    ], additionalArguments: [
-      '--no-link-to-remote'
-    ]);
+      ],
+      additionalArguments: ['--no-link-to-remote'],
+    );
 
     var reexportLib = packageGraph.libraries.named('reexport');
     var future = reexportLib.classes.named('Future');

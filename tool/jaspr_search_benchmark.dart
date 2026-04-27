@@ -29,8 +29,9 @@ void main(List<String> args) {
   final entries = _loadEntries(file, payload);
   parseWatch.stop();
 
-  final queries =
-      args.length > 1 ? args.skip(1).toList() : _defaultQueries(entries);
+  final queries = args.length > 1
+      ? args.skip(1).toList()
+      : _defaultQueries(entries);
 
   stdout.writeln('entries: ${entries.length}');
   stdout.writeln('size_bytes: ${file.lengthSync()}');
@@ -65,14 +66,13 @@ void main(List<String> args) {
   }
 }
 
-List<_SearchEntry> _loadEntries(
-  File file,
-  Map<String, Object?> payload,
-) {
+List<_SearchEntry> _loadEntries(File file, Map<String, Object?> payload) {
   final directEntries = payload['entries'] as List<Object?>?;
   if (directEntries != null) {
     final version = payload['version'];
-    final pages = version == 3 || version == 4 ? _loadSiblingPageEntries(file) : null;
+    final pages = version == 3 || version == 4
+        ? _loadSiblingPageEntries(file)
+        : null;
     return directEntries
         .map((entry) => _SearchEntry.fromJson(entry, pages: pages))
         .toList(growable: false);
@@ -85,15 +85,21 @@ List<_SearchEntry> _loadEntries(
   for (final key in ['pages', 'sections', 'sectionsContent']) {
     final relativePath = payload[key] as String?;
     if (relativePath == null || relativePath.isEmpty) continue;
-    final normalizedPath =
-        relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
+    final normalizedPath = relativePath.startsWith('/')
+        ? relativePath.substring(1)
+        : relativePath;
     final chunkFile = File('${parent.parent.path}/$normalizedPath');
     if (!chunkFile.existsSync()) continue;
-    final chunkPayload = jsonDecode(chunkFile.readAsStringSync())
-        as Map<String, Object?>;
+    final chunkPayload =
+        jsonDecode(chunkFile.readAsStringSync()) as Map<String, Object?>;
     final chunkVersion = chunkPayload['version'];
     final chunkEntries = (chunkPayload['entries'] as List<Object?>? ?? const [])
-        .map((entry) => _SearchEntry.fromJson(entry, pages: chunkVersion == 3 || chunkVersion == 4 ? pages : null))
+        .map(
+          (entry) => _SearchEntry.fromJson(
+            entry,
+            pages: chunkVersion == 3 || chunkVersion == 4 ? pages : null,
+          ),
+        )
         .toList(growable: false);
     if (key == 'sectionsContent' && sections != null) {
       _mergeSectionContent(sections, chunkEntries);
@@ -112,7 +118,8 @@ List<_SearchEntry> _loadEntries(
 List<_SearchEntry> _loadSiblingPageEntries(File file) {
   final sibling = File('${file.parent.path}/search_pages.json');
   if (!sibling.existsSync()) return const [];
-  final payload = jsonDecode(sibling.readAsStringSync()) as Map<String, Object?>;
+  final payload =
+      jsonDecode(sibling.readAsStringSync()) as Map<String, Object?>;
   final entries = payload['entries'] as List<Object?>? ?? const [];
   return entries.map(_SearchEntry.fromJson).toList(growable: false);
 }
@@ -121,9 +128,7 @@ void _mergeSectionContent(
   List<_SearchEntry> sections,
   List<_SearchEntry> contentEntries,
 ) {
-  final byUrl = {
-    for (final entry in contentEntries) entry.url: entry,
-  };
+  final byUrl = {for (final entry in contentEntries) entry.url: entry};
   for (final section in sections) {
     final contentEntry = byUrl[section.url];
     if (contentEntry == null || contentEntry.searchText.isEmpty) continue;
@@ -173,16 +178,22 @@ List<_SearchEntry> _search(List<_SearchEntry> entries, String query) {
     final phraseIndex = compactTitle.toLowerCase().indexOf(phrase);
     final charAfterPhrase =
         phraseIndex >= 0 && phraseIndex + phrase.length < compactTitle.length
-            ? compactTitle[phraseIndex + phrase.length]
-            : '';
+        ? compactTitle[phraseIndex + phrase.length]
+        : '';
     final hasUppercaseBoundaryAfterPhrase =
-        charAfterPhrase.isNotEmpty && RegExp(r'[A-Z]').hasMatch(charAfterPhrase);
+        charAfterPhrase.isNotEmpty &&
+        RegExp(r'[A-Z]').hasMatch(charAfterPhrase);
     final hasLowercaseContinuationAfterPhrase =
-        charAfterPhrase.isNotEmpty && RegExp(r'[a-z]').hasMatch(charAfterPhrase);
+        charAfterPhrase.isNotEmpty &&
+        RegExp(r'[a-z]').hasMatch(charAfterPhrase);
     final titleWordCount = _camelWordCount(compactTitle);
-    final extraTitleChars = (entry.titleStem.length - phrase.length).clamp(0, 999);
-    final looksLikeConstantTitle =
-        RegExp(r'[A-Z0-9]+_[A-Z0-9_]+').hasMatch(entry.title);
+    final extraTitleChars = (entry.titleStem.length - phrase.length).clamp(
+      0,
+      999,
+    );
+    final looksLikeConstantTitle = RegExp(
+      r'[A-Z0-9]+_[A-Z0-9_]+',
+    ).hasMatch(entry.title);
     if (entry.section == null) score += 120;
     if (entry.titleText == phrase) score += 140;
     if (entry.titleStem == phrase) score += 130;
@@ -250,10 +261,10 @@ List<_SearchEntry> _search(List<_SearchEntry> entries, String query) {
   }
 
   ranked.sort((a, b) => b.score.compareTo(a.score));
-  return _dedupeRankedResults(ranked, phrase)
-      .take(20)
-      .map(_entryOf)
-      .toList(growable: false);
+  return _dedupeRankedResults(
+    ranked,
+    phrase,
+  ).take(20).map(_entryOf).toList(growable: false);
 }
 
 _SearchEntry _entryOf(({double score, _SearchEntry entry}) item) => item.entry;
@@ -322,9 +333,7 @@ String _normalizeTitleStem(String value) {
 }
 
 double _frameworkUrlBoost(String url, {bool shortSingle = false}) {
-  if (RegExp(
-    r'^/api/(widgets|material|cupertino|foundation)/',
-  ).hasMatch(url)) {
+  if (RegExp(r'^/api/(widgets|material|cupertino|foundation)/').hasMatch(url)) {
     return shortSingle ? 158 : 32;
   }
   if (RegExp(
@@ -365,10 +374,7 @@ class _SearchEntry {
     refreshDerivedFields();
   }
 
-  factory _SearchEntry.fromJson(
-    Object? json, {
-    List<_SearchEntry>? pages,
-  }) {
+  factory _SearchEntry.fromJson(Object? json, {List<_SearchEntry>? pages}) {
     if (json is List<Object?>) {
       if (json.isNotEmpty && json.first is int) {
         final page = pages != null && (json.first as int) < pages.length
@@ -428,12 +434,7 @@ class _SearchEntry {
     summaryText = _normalize(summary);
     searchTextText = _normalize(searchText);
     combined = _normalize(
-      [
-        title,
-        if (section != null) section,
-        summary,
-        searchText,
-      ].join(' '),
+      [title, if (section != null) section, summary, searchText].join(' '),
     );
   }
 }

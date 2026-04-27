@@ -39,8 +39,11 @@ final PackageMetaProvider pubPackageMetaProvider = PackageMetaProvider(
   PubPackageMeta.fromDir,
   PhysicalResourceProvider.INSTANCE,
   PhysicalResourceProvider.INSTANCE
-      .getFile(PhysicalResourceProvider.INSTANCE.pathContext
-          .absolute(Platform.resolvedExecutable))
+      .getFile(
+        PhysicalResourceProvider.INSTANCE.pathContext.absolute(
+          Platform.resolvedExecutable,
+        ),
+      )
       .parent
       .parent,
   Platform.environment,
@@ -56,7 +59,7 @@ final PackageMetaProvider pubPackageMetaProvider = PackageMetaProvider(
 /// [PackageMeta] objects are built.
 class PackageMetaProvider {
   final PackageMeta? Function(LibraryElement, String, ResourceProvider)
-      _fromElement;
+  _fromElement;
   final PackageMeta? Function(String, ResourceProvider) _fromFilename;
   final PackageMeta? Function(Folder, ResourceProvider) _fromDir;
 
@@ -172,15 +175,19 @@ abstract class PubPackageMeta extends PackageMeta {
   /// If [folder] is inside a Dart SDK, returns the directory of the SDK, and
   /// `null` otherwise.
   static Folder? sdkDirParent(
-      Folder folder, ResourceProvider resourceProvider) {
+    Folder folder,
+    ResourceProvider resourceProvider,
+  ) {
     var pathContext = resourceProvider.pathContext;
     var dirPathCanonical = pathContext.canonicalize(folder.path);
     if (!_sdkDirParent.containsKey(dirPathCanonical)) {
       _sdkDirParent[dirPathCanonical] = null;
       for (var dir in folder.withAncestors) {
         if (_sdkDirFilePaths.every((List<String> l) {
-          return l.any((f) =>
-              resourceProvider.getFile(pathContext.join(dir.path, f)).exists);
+          return l.any(
+            (f) =>
+                resourceProvider.getFile(pathContext.join(dir.path, f)).exists,
+          );
         })) {
           _sdkDirParent[dirPathCanonical] = dir;
           break;
@@ -191,15 +198,21 @@ abstract class PubPackageMeta extends PackageMeta {
   }
 
   /// Use this instead of [fromDir] where possible.
-  static PackageMeta? fromElement(LibraryElement libraryElement, String sdkDir,
-      ResourceProvider resourceProvider) {
+  static PackageMeta? fromElement(
+    LibraryElement libraryElement,
+    String sdkDir,
+    ResourceProvider resourceProvider,
+  ) {
     if (libraryElement.isInSdk) {
       return PubPackageMeta.fromDir(
-          resourceProvider.getFolder(sdkDir), resourceProvider);
+        resourceProvider.getFolder(sdkDir),
+        resourceProvider,
+      );
     }
     final pathContext = resourceProvider.pathContext;
-    final sourcePath =
-        pathContext.canonicalize(libraryElement.firstFragment.source.fullName);
+    final sourcePath = pathContext.canonicalize(
+      libraryElement.firstFragment.source.fullName,
+    );
     final sourceFile = resourceProvider.getFile(sourcePath);
 
     if (sourceFile.exists) {
@@ -219,9 +232,13 @@ abstract class PubPackageMeta extends PackageMeta {
   }
 
   static PackageMeta? fromFilename(
-      String filename, ResourceProvider resourceProvider) {
+    String filename,
+    ResourceProvider resourceProvider,
+  ) {
     return PubPackageMeta.fromDir(
-        resourceProvider.getFile(filename).parent, resourceProvider);
+      resourceProvider.getFile(filename).parent,
+      resourceProvider,
+    );
   }
 
   /// This factory is guaranteed to return the same object for any given
@@ -229,7 +246,9 @@ abstract class PubPackageMeta extends PackageMeta {
   /// same object if they are part of the same package.  Returns `null` if the
   /// directory is not part of a known package.
   static PackageMeta? fromDir(
-      Folder folder, ResourceProvider resourceProvider) {
+    Folder folder,
+    ResourceProvider resourceProvider,
+  ) {
     var pathContext = resourceProvider.pathContext;
     folder = resourceProvider.getFolder(pathContext.absolute(folder.path));
     if (!folder.exists) {
@@ -246,8 +265,9 @@ abstract class PubPackageMeta extends PackageMeta {
         return _SdkMeta(parentSdkDir, resourceProvider);
       } else {
         for (var dir in folder.withAncestors) {
-          var pubspec = resourceProvider
-              .getFile(pathContext.join(dir.path, 'pubspec.yaml'));
+          var pubspec = resourceProvider.getFile(
+            pathContext.join(dir.path, 'pubspec.yaml'),
+          );
           if (pubspec.exists) {
             try {
               return _FilePackageMeta(dir, resourceProvider);
@@ -277,8 +297,9 @@ abstract class PubPackageMeta extends PackageMeta {
 
       /// Don't include examples or other non-SDK components as being the
       /// "Flutter SDK".
-      var canonicalizedDir = _pathContext
-          .canonicalize(resourceProvider.pathContext.absolute(dir.path));
+      var canonicalizedDir = _pathContext.canonicalize(
+        resourceProvider.pathContext.absolute(dir.path),
+      );
       if (_pathContext.isWithin(flutterPackages, canonicalizedDir) ||
           _pathContext.isWithin(flutterBinCache, canonicalizedDir)) {
         return 'Flutter';
@@ -297,9 +318,9 @@ class _FilePackageMeta extends PubPackageMeta {
   final Map<dynamic, dynamic> _pubspec;
 
   _FilePackageMeta(super.dir, super.resourceProvider)
-      : _pubspec = loadYaml(
-                dir.getChildAssumingFile('pubspec.yaml').readAsStringSync())
-            as YamlMap;
+    : _pubspec =
+          loadYaml(dir.getChildAssumingFile('pubspec.yaml').readAsStringSync())
+              as YamlMap;
 
   @override
   late final String? hostedAt = () {
@@ -368,7 +389,8 @@ class _FilePackageMeta extends PubPackageMeta {
   List<String> getInvalidReasons() {
     return [
       if (_pubspec.isEmpty) 'no pubspec.yaml found',
-      if (!_pubspec.containsKey('name')) "no 'name' field found in pubspec.yaml"
+      if (!_pubspec.containsKey('name'))
+        "no 'name' field found in pubspec.yaml",
     ];
   }
 }
@@ -388,8 +410,11 @@ File? _locate(Folder dir, List<String> fileNames) {
 }
 
 class _SdkMeta extends PubPackageMeta {
-  late final String sdkReadmePath =
-      resourceProvider.pathContext.join(dir.path, 'lib', 'api_readme.md');
+  late final String sdkReadmePath = resourceProvider.pathContext.join(
+    dir.path,
+    'lib',
+    'api_readme.md',
+  );
 
   _SdkMeta(super.dir, super.resourceProvider);
 
@@ -407,8 +432,9 @@ class _SdkMeta extends PubPackageMeta {
 
   @override
   String get version {
-    var versionFile = resourceProvider
-        .getFile(resourceProvider.pathContext.join(dir.path, 'version'));
+    var versionFile = resourceProvider.getFile(
+      resourceProvider.pathContext.join(dir.path, 'version'),
+    );
     if (versionFile.exists) return versionFile.readAsStringSync().trim();
     return 'unknown';
   }
@@ -425,10 +451,12 @@ class _SdkMeta extends PubPackageMeta {
   @override
   File? getReadmeContents() {
     var f = resourceProvider.getFile(
-        resourceProvider.pathContext.join(dir.path, 'lib', 'api_readme.md'));
+      resourceProvider.pathContext.join(dir.path, 'lib', 'api_readme.md'),
+    );
     if (!f.exists) {
       f = resourceProvider.getFile(
-          resourceProvider.pathContext.join(dir.path, 'api_readme.md'));
+        resourceProvider.pathContext.join(dir.path, 'api_readme.md'),
+      );
     }
     return f.exists ? f : null;
   }

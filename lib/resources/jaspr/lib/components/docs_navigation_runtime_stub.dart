@@ -6,10 +6,7 @@ class DocsNavigationRuntime extends StatelessComponent {
 
   @override
   Component build(BuildContext context) => span(
-        attributes: {
-          'hidden': 'hidden',
-          'data-docs-nav-runtime': '',
-        },
-        const [],
-      );
+    attributes: {'hidden': 'hidden', 'data-docs-nav-runtime': ''},
+    const [],
+  );
 }

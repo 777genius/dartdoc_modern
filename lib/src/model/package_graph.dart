@@ -56,10 +56,10 @@ class PackageGraph with Referable {
     this.hasEmbedderSdk,
     this.packageMetaProvider,
     this._analysisContext,
-  )   : packageMeta = config.topLevelPackageMeta,
-        sdkLibrarySources = {
-          for (var lib in sdk.sdkLibraries) sdk.mapDartUri(lib.shortName): lib
-        } {
+  ) : packageMeta = config.topLevelPackageMeta,
+      sdkLibrarySources = {
+        for (var lib in sdk.sdkLibraries) sdk.mapDartUri(lib.shortName): lib,
+      } {
     // Make sure the default package exists, even if it has no libraries.
     // This can happen for packages that only contain embedder SDKs.
     Package.fromPackageMeta(packageMeta, this);
@@ -94,17 +94,20 @@ class PackageGraph with Referable {
   void addLibraryToGraph(DartDocResolvedLibrary resolvedLibrary) {
     assert(!allLibrariesAdded);
     var libraryElement2 = resolvedLibrary.element;
-    var packageMeta =
-        packageMetaProvider.fromElement(libraryElement2, config.sdkDir);
+    var packageMeta = packageMetaProvider.fromElement(
+      libraryElement2,
+      config.sdkDir,
+    );
     if (packageMeta == null) {
       var libraryPath = libraryElement2.firstFragment.source.fullName;
       var dartOrFlutter = config.flutterRoot == null ? 'dart' : 'flutter';
       throw DartdocFailure(
-          "Unknown package for library: '$libraryPath'.  Consider "
-          '`$dartOrFlutter pub get` and/or '
-          '`$dartOrFlutter pub global deactivate dartdoc` followed by '
-          '`$dartOrFlutter pub global activate dartdoc` to fix. Also, be sure '
-          'that `$dartOrFlutter analyze` completes without errors.');
+        "Unknown package for library: '$libraryPath'.  Consider "
+        '`$dartOrFlutter pub get` and/or '
+        '`$dartOrFlutter pub global deactivate dartdoc` followed by '
+        '`$dartOrFlutter pub global activate dartdoc` to fix. Also, be sure '
+        'that `$dartOrFlutter analyze` completes without errors.',
+      );
     }
     var package = Package.fromPackageMeta(packageMeta, this);
     var library = Library.fromLibraryResult(resolvedLibrary, this, package);
@@ -175,8 +178,9 @@ class PackageGraph with Referable {
           e.canonicalModelElement == null ||
           e is Library ||
           e.enclosingElement!.isCanonical) {
-        for (var d
-            in e.documentationFrom.where((d) => d.hasDocumentationComment)) {
+        for (var d in e.documentationFrom.where(
+          (d) => d.hasDocumentationComment,
+        )) {
           if (precachedElements.add(d)) {
             futures.add(d.precacheLocalDocs());
             // [TopLevelVariable]s get their documentation from getters and
@@ -228,13 +232,14 @@ class PackageGraph with Referable {
         // is no harm in grabbing ModelNode for each.
         var commentData = directive.documentationComment?.data;
         _modelNodes.putIfAbsent(
+          resolvedLibrary.element,
+          () => ModelNode(
+            directive,
             resolvedLibrary.element,
-            () => ModelNode(
-                  directive,
-                  resolvedLibrary.element,
-                  _analysisContext,
-                  commentData: commentData,
-                ));
+            _analysisContext,
+            commentData: commentData,
+          ),
+        );
       }
 
       for (var declaration in unit.declarations) {
@@ -351,7 +356,7 @@ class PackageGraph with Referable {
   /// All [ModelElement]s constructed for this package; a superset of
   /// the elements gathered in [_gatherModelElements].
   final Map<ConstructedModelElementsKey, ModelElement>
-      allConstructedModelElements = {};
+  allConstructedModelElements = {};
 
   /// Anything that might be inheritable, place here for later lookup.
   final Map<InheritableElementsKey, Set<ModelElement>> allInheritableElements =
@@ -364,10 +369,11 @@ class PackageGraph with Referable {
   /// includes elements that "implement" or "extend" another element.
   final Map<InheritingContainer, List<InheritingContainer>> _implementers =
       LinkedHashMap<InheritingContainer, List<InheritingContainer>>(
-          equals: (InheritingContainer a, InheritingContainer b) =>
-              a.definingContainer == b.definingContainer,
-          hashCode: (InheritingContainer clazz) =>
-              clazz.definingContainer.hashCode);
+        equals: (InheritingContainer a, InheritingContainer b) =>
+            a.definingContainer == b.definingContainer,
+        hashCode: (InheritingContainer clazz) =>
+            clazz.definingContainer.hashCode,
+      );
 
   /// The public, documented extensions that exist in the package graph.
   final Set<Extension> _extensions = {};
@@ -375,8 +381,10 @@ class PackageGraph with Referable {
   /// Name of the default package.
   String get defaultPackageName => packageMeta.name;
 
-  late final Package defaultPackage =
-      Package.fromPackageMeta(packageMeta, this);
+  late final Package defaultPackage = Package.fromPackageMeta(
+    packageMeta,
+    this,
+  );
 
   bool get hasFooterVersion => !config.excludeFooterVersion;
 
@@ -409,12 +417,15 @@ class PackageGraph with Referable {
       PackageWarningCounter(this);
 
   final Set<(Element? element, PackageWarning packageWarning, String? message)>
-      _warnAlreadySeen = {};
+  _warnAlreadySeen = {};
 
-  void warnOnElement(Warnable? warnable, PackageWarning kind,
-      {String? message,
-      Iterable<Warnable> referredFrom = const [],
-      Iterable<String> extendedDebug = const []}) {
+  void warnOnElement(
+    Warnable? warnable,
+    PackageWarning kind, {
+    String? message,
+    Iterable<Warnable> referredFrom = const [],
+    Iterable<String> extendedDebug = const [],
+  }) {
     var newEntry = (warnable?.element, kind, message);
     if (_warnAlreadySeen.contains(newEntry)) {
       return;
@@ -422,17 +433,23 @@ class PackageGraph with Referable {
     // Warnings can cause other warnings.  Queue them up via the stack but don't
     // allow warnings we're already working on to get in there.
     _warnAlreadySeen.add(newEntry);
-    _warnOnElement(warnable, kind,
-        message: message ?? '',
-        referredFrom: referredFrom,
-        extendedDebug: extendedDebug);
+    _warnOnElement(
+      warnable,
+      kind,
+      message: message ?? '',
+      referredFrom: referredFrom,
+      extendedDebug: extendedDebug,
+    );
     _warnAlreadySeen.remove(newEntry);
   }
 
-  void _warnOnElement(Warnable? warnable, PackageWarning kind,
-      {required String message,
-      Iterable<Warnable> referredFrom = const [],
-      Iterable<String> extendedDebug = const []}) {
+  void _warnOnElement(
+    Warnable? warnable,
+    PackageWarning kind, {
+    required String message,
+    Iterable<Warnable> referredFrom = const [],
+    Iterable<String> extendedDebug = const [],
+  }) {
     if (warnable is ModelElement && kind == PackageWarning.ambiguousReexport) {
       // This sort of warning is only applicable to top level elements.
       var enclosingElement = warnable.enclosingElement;
@@ -465,12 +482,15 @@ class PackageGraph with Referable {
     final warnableName = warnable.safeWarnableName;
 
     var warningMessage = switch (kind) {
-      PackageWarning.ambiguousReexport =>
-        kind.messageFor([warnableName, message]),
+      PackageWarning.ambiguousReexport => kind.messageFor([
+        warnableName,
+        message,
+      ]),
       PackageWarning.noCanonicalFound => kind.messageFor([warnableName]),
       PackageWarning.noLibraryLevelDocs ||
-      PackageWarning.noDocumentableLibrariesInPackage =>
-        kind.messageFor([warnable!.fullyQualifiedName]),
+      PackageWarning.noDocumentableLibrariesInPackage => kind.messageFor([
+        warnable!.fullyQualifiedName,
+      ]),
       PackageWarning.ambiguousDocReference ||
       PackageWarning.ignoredCanonicalFor ||
       PackageWarning.packageOrderGivesMissingPackageName ||
@@ -487,8 +507,7 @@ class PackageGraph with Referable {
       PackageWarning.typeAsHtml ||
       PackageWarning.invalidParameter ||
       PackageWarning.toolError ||
-      PackageWarning.deprecated =>
-        kind.messageFor([message])
+      PackageWarning.deprecated => kind.messageFor([message]),
     };
 
     var fullMessage = [
@@ -496,7 +515,7 @@ class PackageGraph with Referable {
       if (warnable != null) kind.messageForWarnable(warnable),
       for (var referral in referredFrom)
         if (referral != warnable) kind.messageForReferral(referral),
-      if (config.verboseWarnings) ...extendedDebug.map((s) => '    $s')
+      if (config.verboseWarnings) ...extendedDebug.map((s) => '    $s'),
     ].join('\n    ');
 
     packageWarningCounter.addWarning(warnable, kind, message, fullMessage);
@@ -510,8 +529,11 @@ class PackageGraph with Referable {
     var packageNames = packages.map((p) => p.name).toSet();
     for (var packageName in config.packageOrder) {
       if (!packageNames.contains(packageName)) {
-        warnOnElement(null, PackageWarning.packageOrderGivesMissingPackageName,
-            message: "$packageName, packages: ${packageNames.join(',')}");
+        warnOnElement(
+          null,
+          PackageWarning.packageOrderGivesMissingPackageName,
+          message: "$packageName, packages: ${packageNames.join(',')}",
+        );
       }
     }
     return packages.where((p) => p.isPublic).toList(growable: false)..sort();
@@ -551,8 +573,11 @@ class PackageGraph with Referable {
         if (exportedLibrary != null) {
           // Follow the exports down; as `publicLibrary` exports `libraryElement`,
           // it also exports each `exportedLibrary`.
-          _tagExportsFor(publicLibrary, exportedLibrary,
-              alreadyTagged: alreadyTagged);
+          _tagExportsFor(
+            publicLibrary,
+            exportedLibrary,
+            alreadyTagged: alreadyTagged,
+          );
         }
       }
     }
@@ -621,11 +646,14 @@ class PackageGraph with Referable {
     var privates = <InheritingContainer>[];
 
     void checkAndAddContainer(
-        InheritingContainer implemented, InheritingContainer implementer) {
+      InheritingContainer implemented,
+      InheritingContainer implementer,
+    ) {
       if (!implemented.isPublic) {
         privates.add(implemented);
       }
-      implemented = implemented.canonicalModelElement as InheritingContainer? ??
+      implemented =
+          implemented.canonicalModelElement as InheritingContainer? ??
           implemented;
       var list = _implementers.putIfAbsent(implemented, () => []);
       // TODO(srawlins): This would be more efficient if we created a
@@ -639,7 +667,9 @@ class PackageGraph with Referable {
       var supertype = container.supertype;
       if (supertype != null) {
         checkAndAddContainer(
-            supertype.modelElement as InheritingContainer, container);
+          supertype.modelElement as InheritingContainer,
+          container,
+        );
       }
       if (container is Class) {
         for (var modelElement in container.mixedInTypes.modelElements) {
@@ -666,7 +696,6 @@ class PackageGraph with Referable {
   }
 
   @visibleForTesting
-
   /// The set of all libraries (public and implementation) found across all
   /// [packages].
   late final List<Library> libraries =
@@ -692,7 +721,8 @@ class PackageGraph with Referable {
   }();
 
   /// The String name representing the `Object` type.
-  late final String dartCoreObject = libraries
+  late final String dartCoreObject =
+      libraries
           .firstWhereOrNull((library) => library.name == 'dart:core')
           ?.classes
           .firstWhereOrNull((c) => c.name == 'Object')
@@ -708,8 +738,10 @@ class PackageGraph with Referable {
     buffer.writeln();
     for (final name in packageMap.keys) {
       final package = packageMap[name]!;
-      buffer.write('Package $name documented at ${package.documentedWhere} '
-          'with libraries: ');
+      buffer.write(
+        'Package $name documented at ${package.documentedWhere} '
+        'with libraries: ',
+      );
       buffer.writeAll(package.allLibraries);
       buffer.writeln();
     }
@@ -725,8 +757,10 @@ class PackageGraph with Referable {
   /// This can return `null` in a few ways: if [modelElement] is `null`, or if
   /// it has no canonical library, or if a possible canonical model element has
   /// a `false` value for `isCanonical`.
-  ModelElement? findCanonicalModelElementFor(ModelElement? modelElement,
-      {Container? preferredClass}) {
+  ModelElement? findCanonicalModelElementFor(
+    ModelElement? modelElement, {
+    Container? preferredClass,
+  }) {
     assert(allLibrariesAdded);
     if (modelElement == null) return null;
     var e = modelElement.element;
@@ -762,17 +796,25 @@ class PackageGraph with Referable {
       var declarationModelElement = getModelForElement(declaration);
       e = declarationModelElement.element;
       canonicalModelElement = _findCanonicalModelElementForAmbiguous(
-          declarationModelElement, library,
-          preferredClass: preferredClass as InheritingContainer?);
+        declarationModelElement,
+        library,
+        preferredClass: preferredClass as InheritingContainer?,
+      );
     } else {
       if (library != null) {
         if (e case PropertyInducingElement(:var getter, :var setter)) {
-          var getterElement =
-              getter == null ? null : getModelFor(getter, library) as Accessor;
-          var setterElement =
-              setter == null ? null : getModelFor(setter, library) as Accessor;
-          canonicalModelElement = getModelForPropertyInducingElement(e, library,
-              getter: getterElement, setter: setterElement);
+          var getterElement = getter == null
+              ? null
+              : getModelFor(getter, library) as Accessor;
+          var setterElement = setter == null
+              ? null
+              : getModelFor(setter, library) as Accessor;
+          canonicalModelElement = getModelForPropertyInducingElement(
+            e,
+            library,
+            getter: getterElement,
+            setter: setterElement,
+          );
         } else {
           canonicalModelElement = getModelFor(e, library);
         }
@@ -790,8 +832,10 @@ class PackageGraph with Referable {
   }
 
   ModelElement? _findCanonicalModelElementForAmbiguous(
-      ModelElement modelElement, Library? lib,
-      {InheritingContainer? preferredClass}) {
+    ModelElement modelElement,
+    Library? lib, {
+    InheritingContainer? preferredClass,
+  }) {
     var elem = modelElement.element;
     var candidates = <ModelElement>{};
     if (lib != null) {
@@ -800,24 +844,32 @@ class PackageGraph with Referable {
       if (constructedWithKey != null) {
         candidates.add(constructedWithKey);
       }
-      var constructedWithKeyWithClass = allConstructedModelElements[
-          ConstructedModelElementsKey(elem, preferredClass)];
+      var constructedWithKeyWithClass =
+          allConstructedModelElements[ConstructedModelElementsKey(
+            elem,
+            preferredClass,
+          )];
       if (constructedWithKeyWithClass != null) {
         candidates.add(constructedWithKeyWithClass);
       }
       if (candidates.isEmpty) {
         candidates = {
-          ...?allInheritableElements[InheritableElementsKey(elem, lib)]
-              ?.where((me) => me.isCanonical),
+          ...?allInheritableElements[InheritableElementsKey(elem, lib)]?.where(
+            (me) => me.isCanonical,
+          ),
         };
       }
     }
 
-    var canonicalClass =
-        findCanonicalModelElementFor(modelElement.enclosingElement);
+    var canonicalClass = findCanonicalModelElementFor(
+      modelElement.enclosingElement,
+    );
     if (canonicalClass is InheritingContainer) {
-      candidates.addAll(canonicalClass.allCanonicalModelElements
-          .where((m) => m.element == elem));
+      candidates.addAll(
+        canonicalClass.allCanonicalModelElements.where(
+          (m) => m.element == elem,
+        ),
+      );
     }
 
     var matches = {...candidates.where((me) => me.isCanonical)};
@@ -878,7 +930,9 @@ class PackageGraph with Referable {
     var allElements = <ModelElement>[];
     var completedPackages = <Package>{};
     var libraryCount = packages.fold(
-        0, (previous, package) => previous + package.allLibraries.length);
+      0,
+      (previous, package) => previous + package.allLibraries.length,
+    );
     progressBarStart(libraryCount);
     for (var package in packages) {
       if (completedPackages.contains(package)) {
@@ -946,17 +1000,19 @@ class PackageGraph with Referable {
       // confusing than doing so with libraries.
       ...sortedDocumentedPackages
           .expand((p) => p.publicLibrariesSorted)
-          .expand((l) => [
-                ...l.constants.wherePublic,
-                ...l.functions.wherePublic,
-                ...l.properties.wherePublic,
-                ...l.typedefs.wherePublic,
-                ...l.extensions.wherePublic,
-                ...l.extensionTypes.wherePublic,
-                ...l.classes.wherePublic,
-                ...l.enums.wherePublic,
-                ...l.mixins.wherePublic,
-              ])
+          .expand(
+            (l) => [
+              ...l.constants.wherePublic,
+              ...l.functions.wherePublic,
+              ...l.properties.wherePublic,
+              ...l.typedefs.wherePublic,
+              ...l.extensions.wherePublic,
+              ...l.extensionTypes.wherePublic,
+              ...l.classes.wherePublic,
+              ...l.enums.wherePublic,
+              ...l.mixins.wherePublic,
+            ],
+          )
           .asMapByName,
 
       // Libraries are next.
@@ -1007,7 +1063,9 @@ extension on Comment {
     for (var docImport in docImports) {
       docImportsData.add(
         CommentDocImportData(
-            offset: docImport.offset, end: docImport.import.end),
+          offset: docImport.offset,
+          end: docImport.import.end,
+        ),
       );
     }
 
@@ -1041,6 +1099,9 @@ extension on Comment {
       }
     }
     return CommentData(
-        offset: offset, docImports: docImportsData, references: referencesData);
+      offset: offset,
+      docImports: docImportsData,
+      references: referencesData,
+    );
   }
 }

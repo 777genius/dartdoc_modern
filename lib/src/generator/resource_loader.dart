@@ -104,8 +104,8 @@ Uri _resolvePackageUriAot(Uri packageUri) {
     packageUri,
     'uri',
     'Could not resolve package URI in AOT mode. '
-    'Set DARTDOC_MODERN_ROOT to the dartdoc-modern source directory, '
-    'or run from within the source tree.',
+        'Set DARTDOC_MODERN_ROOT to the dartdoc-modern source directory, '
+        'or run from within the source tree.',
   );
 }
 
@@ -143,7 +143,9 @@ String? _findPackageRoot(io.File configFile, String packageName) {
 
 String _parentDir(String path) {
   final sep = io.Platform.pathSeparator;
-  final trimmed = path.endsWith(sep) ? path.substring(0, path.length - 1) : path;
+  final trimmed = path.endsWith(sep)
+      ? path.substring(0, path.length - 1)
+      : path;
   final lastSep = trimmed.lastIndexOf(sep);
   return lastSep > 0 ? trimmed.substring(0, lastSep) : trimmed;
 }

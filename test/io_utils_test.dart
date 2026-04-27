@@ -23,27 +23,35 @@ void main() {
     test('no deadlock when delayed exceptions fire in closures', () async {
       var sharedTracker = TaskQueue(maxJobs: 2);
       expect(() async {
-        var t =
-            Future.delayed(Duration(milliseconds: 10), () => throw Exception());
+        var t = Future.delayed(
+          Duration(milliseconds: 10),
+          () => throw Exception(),
+        );
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<Exception>()));
       expect(() async {
-        var t =
-            Future.delayed(Duration(milliseconds: 10), () => throw Exception());
+        var t = Future.delayed(
+          Duration(milliseconds: 10),
+          () => throw Exception(),
+        );
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<Exception>()));
       expect(() async {
-        var t =
-            Future.delayed(Duration(milliseconds: 10), () => throw Exception());
+        var t = Future.delayed(
+          Duration(milliseconds: 10),
+          () => throw Exception(),
+        );
         // ignore: empty_catches
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<Exception>()));
       expect(() async {
-        var t =
-            Future.delayed(Duration(milliseconds: 10), () => throw Exception());
+        var t = Future.delayed(
+          Duration(milliseconds: 10),
+          () => throw Exception(),
+        );
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<Exception>()));

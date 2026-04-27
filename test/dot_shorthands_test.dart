@@ -52,10 +52,7 @@ class C {
     var m = library.classes.named('C').instanceMethods.named('m');
 
     expect(m.hasDocumentationComment, true);
-    expect(
-      m.documentationAsHtml,
-      '<p>Cannot link <code>.c()</code></p>',
-    );
+    expect(m.documentationAsHtml, '<p>Cannot link <code>.c()</code></p>');
   }
 
   void test_doc_dot_shorthand_method_invocation_success() async {
@@ -71,10 +68,7 @@ class C {
     var m = library.classes.named('C').instanceMethods.named('m');
 
     expect(m.hasDocumentationComment, true);
-    expect(
-      m.documentationAsHtml,
-      '<p>Cannot link <code>.f()</code></p>',
-    );
+    expect(m.documentationAsHtml, '<p>Cannot link <code>.f()</code></p>');
   }
 
   void test_doc_dot_shorthand_default_values_success() async {

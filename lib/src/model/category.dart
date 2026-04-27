@@ -54,10 +54,10 @@ final class Category extends LibraryContainer
   final CategoryDefinition _categoryDefinition;
 
   Category(this._name, this.package, this.config)
-      : _categoryDefinition =
-            config.categories.categoryDefinitions[_name.orDefault] ??
-                CategoryDefinition(_name, null, null),
-        super(isSdk: false, enclosingName: package.name);
+    : _categoryDefinition =
+          config.categories.categoryDefinitions[_name.orDefault] ??
+          CategoryDefinition(_name, null, null),
+      super(isSdk: false, enclosingName: package.name);
 
   Iterable<ExternalItem> get externalItems => _categoryDefinition.externalItems;
 
@@ -139,8 +139,10 @@ final class Category extends LibraryContainer
     if (isDocumented) {
       final href = this.href;
       if (href == null) {
-        throw StateError("Requesting the 'linkedName' of a non-canonical "
-            "category: '$name'");
+        throw StateError(
+          "Requesting the 'linkedName' of a non-canonical "
+          "category: '$name'",
+        );
       }
       return '<a href="$href">$unbrokenName</a>';
     } else {
@@ -192,11 +194,8 @@ class ExternalItem {
   final String url;
   final String docs;
 
-  ExternalItem({
-    required this.name,
-    required this.url,
-    required String? docs,
-  }) : docs = docs ?? '';
+  ExternalItem({required this.name, required this.url, required String? docs})
+    : docs = docs ?? '';
 
   @override
   String toString() => '$name $url';

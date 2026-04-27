@@ -81,10 +81,7 @@ class DocsNavLink extends StatelessComponent {
       classes: classes,
       attributes: mergedAttributes,
       events: events,
-      [
-        if (child != null) child!,
-        ...?children,
-      ],
+      [if (child != null) child!, ...?children],
     );
   }
 

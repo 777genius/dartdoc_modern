@@ -36,38 +36,46 @@ final _pathContext = _resourceProvider.pathContext;
 final String platformVersionString = Platform.version.split(' ').first;
 final Version platformVersion = Version.parse(platformVersionString);
 
-final Folder testPackageToolError = _resourceProvider.getFolder(_pathContext
-    .absolute(_pathContext.normalize('testing/test_package_tool_error')));
+final Folder testPackageToolError = _resourceProvider.getFolder(
+  _pathContext.absolute(
+    _pathContext.normalize('testing/test_package_tool_error'),
+  ),
+);
 
 /// Convenience factory to build a [DartdocOptionContext] and associate it with a
 /// [DartdocOptionSet] based on the current working directory.
 Future<DartdocOptionContext> contextFromArgv(
-    List<String> argv, PackageMetaProvider packageMetaProvider) async {
-  var optionSet = DartdocOptionRoot.fromOptionGenerators(
-      'dartdoc', [createDartdocOptions], packageMetaProvider);
+  List<String> argv,
+  PackageMetaProvider packageMetaProvider,
+) async {
+  var optionSet = DartdocOptionRoot.fromOptionGenerators('dartdoc', [
+    createDartdocOptions,
+  ], packageMetaProvider);
   optionSet.parseArguments(argv);
   return DartdocOptionContext.fromDefaultContextLocation(
-      optionSet, packageMetaProvider.resourceProvider);
+    optionSet,
+    packageMetaProvider.resourceProvider,
+  );
 }
 
 /// Convenience factory to build a [DartdocGeneratorOptionContext] and
 /// associate it with a [DartdocOptionSet] based on the current working
 /// directory and/or the '--input' flag.
 DartdocGeneratorOptionContext generatorContextFromArgv(
-    List<String> argv, PackageMetaProvider packageMetaProvider) {
-  var optionSet = DartdocOptionRoot.fromOptionGenerators(
-    'dartdoc',
-    [
-      createDartdocProgramOptions,
-      createLoggingOptions,
-      createDartdocOptions,
-      createGeneratorOptions,
-    ],
-    packageMetaProvider,
-  );
+  List<String> argv,
+  PackageMetaProvider packageMetaProvider,
+) {
+  var optionSet = DartdocOptionRoot.fromOptionGenerators('dartdoc', [
+    createDartdocProgramOptions,
+    createLoggingOptions,
+    createDartdocOptions,
+    createGeneratorOptions,
+  ], packageMetaProvider);
   optionSet.parseArguments(argv);
   return DartdocGeneratorOptionContext.fromDefaultContextLocation(
-      optionSet, packageMetaProvider.resourceProvider);
+    optionSet,
+    packageMetaProvider.resourceProvider,
+  );
 }
 
 void runPubGet(String dirPath) {
@@ -75,11 +83,10 @@ void runPubGet(String dirPath) {
   if (Platform.isWindows) {
     binPath += '.exe';
   }
-  var result = Process.runSync(
-    binPath,
-    ['pub', 'get'],
-    workingDirectory: dirPath,
-  );
+  var result = Process.runSync(binPath, [
+    'pub',
+    'get',
+  ], workingDirectory: dirPath);
 
   if (result.exitCode != 0) {
     var buf = StringBuffer();
@@ -102,8 +109,11 @@ Future<PackageGraph> bootBasicPackage(
   if (resourceProvider == PhysicalResourceProvider.INSTANCE) {
     runPubGet(dirPath);
   }
-  final dir = resourceProvider.getFolder(resourceProvider.pathContext
-      .absolute(resourceProvider.pathContext.normalize(dirPath)));
+  final dir = resourceProvider.getFolder(
+    resourceProvider.pathContext.absolute(
+      resourceProvider.pathContext.normalize(dirPath),
+    ),
+  );
   return PubPackageBuilder(
     await contextFromArgv([
       '--input',
@@ -125,12 +135,10 @@ PackageMetaProvider get testPackageMetaProvider {
   var resourceProvider = MemoryResourceProvider();
   final sdkRoot = resourceProvider.getFolder(
     resourceProvider.pathContext.canonicalize(
-        ResourceProviderExtension(resourceProvider).convertPath('/sdk')),
+      ResourceProviderExtension(resourceProvider).convertPath('/sdk'),
+    ),
   );
-  createMockSdk(
-    resourceProvider: resourceProvider,
-    root: sdkRoot,
-  );
+  createMockSdk(resourceProvider: resourceProvider, root: sdkRoot);
   writeMockSdkFiles(sdkRoot);
 
   return PackageMetaProvider(
@@ -149,8 +157,11 @@ PackageMetaProvider get testPackageMetaProvider {
 /// Included is a "version" file and an "api_readme.md" file.
 void writeMockSdkFiles(Folder sdkFolder) {
   sdkFolder.getChildAssumingFile('version').writeAsStringSync('3.10.6');
-  sdkFolder.getChildAssumingFile('api_readme.md').writeAsStringSync(
-      'Welcome to the [Dart](https://dart.dev/) API reference documentation');
+  sdkFolder
+      .getChildAssumingFile('api_readme.md')
+      .writeAsStringSync(
+        'Welcome to the [Dart](https://dart.dev/) API reference documentation',
+      );
 
   _writeMockSdkBinFiles(sdkFolder);
 }
@@ -175,14 +186,18 @@ Folder writePackage(
   String? pubspecContent,
   Map<String, String> dependencies = const {},
 }) {
-  pubspecContent ??= '''
+  pubspecContent ??=
+      '''
 name: $packageName
 version: 0.0.1
 homepage: https://github.com/dart-lang
 ''';
   var pathContext = resourceProvider.pathContext;
-  var projectsFolder = resourceProvider.getFolder(pathContext.canonicalize(
-      ResourceProviderExtension(resourceProvider).convertPath('/projects')));
+  var projectsFolder = resourceProvider.getFolder(
+    pathContext.canonicalize(
+      ResourceProviderExtension(resourceProvider).convertPath('/projects'),
+    ),
+  );
   var projectFolder = projectsFolder.getChildAssumingFolder(packageName)
     ..create();
   projectFolder
@@ -272,7 +287,9 @@ Future<void> writeDartdocResources(ResourceProvider resourceProvider) async {
     'typedef',
   ]) {
     await resourceProvider.writeDartdocResource(
-        'templates/$template.html', 'CONTENT');
+      'templates/$template.html',
+      'CONTENT',
+    );
   }
 
   for (var resource in [
@@ -288,7 +305,9 @@ Future<void> writeDartdocResources(ResourceProvider resourceProvider) async {
     'styles.css',
   ]) {
     await resourceProvider.writeDartdocResource(
-        'resources/$resource', 'CONTENT');
+      'resources/$resource',
+      'CONTENT',
+    );
   }
 }
 
@@ -313,37 +332,40 @@ MatchingLinkResult referenceLookup(Warnable element, String codeRef) =>
 
 /// Returns a matcher which compresses consecutive whitespace in [text] into a
 /// single space.
-Matcher matchesCompressed(String text) => matches(RegExp(
-      text.replaceAll(RegExp(r'\s\s+', multiLine: true), r'\s*'),
-    ));
+Matcher matchesCompressed(String text) =>
+    matches(RegExp(text.replaceAll(RegExp(r'\s\s+', multiLine: true), r'\s*')));
 
 // We can not use `ExperimentalFeature.releaseVersion` or even
 // `ExperimentalFeature.experimentalReleaseVersion` as these are set to `null`
 // even when partial analyzer implementations are available.
-bool get namedArgumentsAnywhereAllowed =>
-    VersionRange(min: Version.parse('2.17.0-0'), includeMin: true)
-        .allows(platformVersion);
+bool get namedArgumentsAnywhereAllowed => VersionRange(
+  min: Version.parse('2.17.0-0'),
+  includeMin: true,
+).allows(platformVersion);
 
 // We can not use `ExperimentalFeature.releaseVersion` or even
 // `ExperimentalFeature.experimentalReleaseVersion` as these are set to `null`
 // even when partial analyzer implementations are available.
-bool get recordsAllowed =>
-    VersionRange(min: Version.parse('2.19.0-0'), includeMin: true)
-        .allows(platformVersion);
+bool get recordsAllowed => VersionRange(
+  min: Version.parse('2.19.0-0'),
+  includeMin: true,
+).allows(platformVersion);
 
 // We can not use `ExperimentalFeature.releaseVersion` or even
 // `ExperimentalFeature.experimentalReleaseVersion` as these are set to `null`
 // even when partial analyzer implementations are available.
-bool get extensionTypesAllowed =>
-    VersionRange(min: Version.parse('3.2.0-0.0-dev'), includeMin: true)
-        .allows(platformVersion);
+bool get extensionTypesAllowed => VersionRange(
+  min: Version.parse('3.2.0-0.0-dev'),
+  includeMin: true,
+).allows(platformVersion);
 
 // We can not use `ExperimentalFeature.releaseVersion` or even
 // `ExperimentalFeature.experimentalReleaseVersion` as these are set to `null`
 // even when partial analyzer implementations are available.
-bool get classModifiersAllowed =>
-    VersionRange(min: Version.parse('3.0.0-0.0-dev'), includeMin: true)
-        .allows(platformVersion);
+bool get classModifiersAllowed => VersionRange(
+  min: Version.parse('3.0.0-0.0-dev'),
+  includeMin: true,
+).allows(platformVersion);
 
 extension ModelElementIterableExtension<T extends ModelElement> on Iterable<T> {
   T named(String name) {
@@ -363,9 +385,9 @@ extension ModelElementIterableExtension<T extends ModelElement> on Iterable<T> {
 
 extension IterableStringExtension on Iterable<String> {
   /// The main content line of `this`.
-  Iterable<String> get mainContent =>
-      skipWhile((line) => !line.contains('"dartdoc-main-content"'))
-          .takeWhile((line) => !line.contains('/.main-content'));
+  Iterable<String> get mainContent => skipWhile(
+    (line) => !line.contains('"dartdoc-main-content"'),
+  ).takeWhile((line) => !line.contains('/.main-content'));
 
   /// Verifies that [mainContent] contains [matchers] in order.
   void expectMainContentContainsAllInOrder(Iterable<Object?> matchers) {
@@ -388,19 +410,22 @@ extension IterableStringExtension on Iterable<String> {
 
 extension PackageExtension on Package {
   /// Gathers all extensions found across a package.
-  Iterable<Extension> get extensions => libraries.wherePublic
-      .expand((library) => library.extensions.whereDocumented);
+  Iterable<Extension> get extensions => libraries.wherePublic.expand(
+    (library) => library.extensions.whereDocumented,
+  );
 
   /// Gathers all functions found across a package.
-  Iterable<ModelFunction> get functions => libraries.wherePublic
-      .expand((library) => library.functions.whereDocumented);
+  Iterable<ModelFunction> get functions => libraries.wherePublic.expand(
+    (library) => library.functions.whereDocumented,
+  );
 }
 
 /// Extension methods just for tests.
 extension on ResourceProvider {
   Future<void> writeDartdocResource(String resourcePath, String content) async {
-    var fileUri =
-        await resolveResourceUri(Uri.parse('package:dartdoc_modern/$resourcePath'));
+    var fileUri = await resolveResourceUri(
+      Uri.parse('package:dartdoc_modern/$resourcePath'),
+    );
     getFile(fileUri.toFilePath()).writeAsStringSync(content);
   }
 }

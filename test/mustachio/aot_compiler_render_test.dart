@@ -88,10 +88,12 @@ import 'annotations.dart';
       additionalAssets: additionalAssets,
     );
     var generatedContent = await File(
-            '${d.sandbox}/foo_package/lib/foo.aot_renderers_for_html.dart')
-        .readAsString();
+      '${d.sandbox}/foo_package/lib/foo.aot_renderers_for_html.dart',
+    ).readAsString();
     generatedContent = generatedContent.replaceFirst(
-        "import 'foo.dart';", "import 'package:foo/foo.dart';");
+      "import 'foo.dart';",
+      "import 'package:foo/foo.dart';",
+    );
     renderScript.writeAsStringSync('''
 import 'dart:io';
 
@@ -105,12 +107,13 @@ $mainCode
         Uri.directory(tempDir.path),
         packageUriRoot: Uri.directory(path.join(tempDir.path, 'lib')),
         languageVersion: LanguageVersion(2, 12),
-      )
+      ),
     ]);
     var dartToolDir = Directory(path.join(tempDir.path, '.dart_tool'))
       ..createSync();
-    File(path.join(dartToolDir.path, 'package_config.json'))
-        .writeAsStringSync(json.encode(PackageConfig.toJson(packageConfig)));
+    File(
+      path.join(dartToolDir.path, 'package_config.json'),
+    ).writeAsStringSync(json.encode(PackageConfig.toJson(packageConfig)));
     var fooLibDir = Directory(path.join(tempDir.path, 'lib'))..createSync();
     File(path.join(fooLibDir.path, 'foo.dart')).writeAsStringSync(fooCode);
   }
@@ -163,7 +166,9 @@ void main() {
       ..b1 = false
       ..l1 = [1, 2, 3];
     var rendered = generated.renderFoo(foo);
-    expect(rendered, equals('''
+    expect(
+      rendered,
+      equals('''
 <div>
     <div class="partial">
     l1: [1, 2, 3]
@@ -172,7 +177,8 @@ void main() {
     b1? no
     l1:item: 1item: 2item: 3
     baz:baz is null
-</div>'''));
+</div>'''),
+    );
   });
 
   test('Renderer renders a non-bool variable node, escaped', () async {
@@ -218,8 +224,9 @@ void main() {
   test('Renderer renders a conditional section node', () async {
     var output = await renderFoo(
       () => [
-        d.dir('lib/templates',
-            [d.file('foo.html', 'Text {{#b1}}Section{{/b1}}')]),
+        d.dir('lib/templates', [
+          d.file('foo.html', 'Text {{#b1}}Section{{/b1}}'),
+        ]),
       ],
       'Foo()..b1 = true',
     );
@@ -229,8 +236,9 @@ void main() {
   test('Renderer renders a conditional section node as blank', () async {
     var output = await renderFoo(
       () => [
-        d.dir('lib/templates',
-            [d.file('foo.html', 'Text {{#b1}}Section{{/b1}}')]),
+        d.dir('lib/templates', [
+          d.file('foo.html', 'Text {{#b1}}Section{{/b1}}'),
+        ]),
       ],
       'Foo()..b1 = false',
     );
@@ -240,31 +248,36 @@ void main() {
   test('Renderer renders a false conditional section node as blank', () async {
     var output = await renderFoo(
       () => [
-        d.dir('lib/templates',
-            [d.file('foo.html', 'Text {{#b1}}Section{{/b1}}')]),
+        d.dir('lib/templates', [
+          d.file('foo.html', 'Text {{#b1}}Section{{/b1}}'),
+        ]),
       ],
       'Foo()..b1 = false',
     );
     expect(output, equals('Text '));
   });
 
-  test('Renderer renders an inverted conditional section node as empty',
-      () async {
-    var output = await renderFoo(
-      () => [
-        d.dir('lib/templates',
-            [d.file('foo.html', 'Text {{^b1}}Section{{/b1}}')]),
-      ],
-      'Foo()..b1 = true',
-    );
-    expect(output, equals('Text '));
-  });
+  test(
+    'Renderer renders an inverted conditional section node as empty',
+    () async {
+      var output = await renderFoo(
+        () => [
+          d.dir('lib/templates', [
+            d.file('foo.html', 'Text {{^b1}}Section{{/b1}}'),
+          ]),
+        ],
+        'Foo()..b1 = true',
+      );
+      expect(output, equals('Text '));
+    },
+  );
 
   test('Renderer renders an inverted false conditional section node', () async {
     var output = await renderFoo(
       () => [
-        d.dir('lib/templates',
-            [d.file('foo.html', 'Text {{^b1}}Section{{/b1}}')]),
+        d.dir('lib/templates', [
+          d.file('foo.html', 'Text {{^b1}}Section{{/b1}}'),
+        ]),
       ],
       'Foo()..b1 = false',
     );
@@ -274,31 +287,36 @@ void main() {
   test('Renderer renders a repeated section node', () async {
     var output = await renderFoo(
       () => [
-        d.dir('lib/templates',
-            [d.file('foo.html', 'Text {{#l1}}Num {{.}}, {{/l1}}')]),
+        d.dir('lib/templates', [
+          d.file('foo.html', 'Text {{#l1}}Num {{.}}, {{/l1}}'),
+        ]),
       ],
       'Foo()..l1 = [1, 2, 3]',
     );
     expect(output, equals('Text Num 1, Num 2, Num 3, '));
   });
 
-  test('Renderer renders a repeated section node with a multi-name key',
-      () async {
-    var output = await renderBar(
-      () => [
-        d.dir('lib/templates',
-            [d.file('bar.html', 'Text {{#foo.l1}}Num {{.}}, {{/foo.l1}}')]),
-      ],
-      'Bar()..foo = (Foo()..l1 = [1, 2, 3])',
-    );
-    expect(output, equals('Text Num 1, Num 2, Num 3, '));
-  });
+  test(
+    'Renderer renders a repeated section node with a multi-name key',
+    () async {
+      var output = await renderBar(
+        () => [
+          d.dir('lib/templates', [
+            d.file('bar.html', 'Text {{#foo.l1}}Num {{.}}, {{/foo.l1}}'),
+          ]),
+        ],
+        'Bar()..foo = (Foo()..l1 = [1, 2, 3])',
+      );
+      expect(output, equals('Text Num 1, Num 2, Num 3, '));
+    },
+  );
 
   test('Renderer renders an empty repeated section node as blank', () async {
     var output = await renderFoo(
       () => [
-        d.dir('lib/templates',
-            [d.file('foo.html', 'Text {{#l1}}Num {{.}}, {{/l1}}')]),
+        d.dir('lib/templates', [
+          d.file('foo.html', 'Text {{#l1}}Num {{.}}, {{/l1}}'),
+        ]),
       ],
       'Foo()..l1 = []',
     );
@@ -308,8 +326,9 @@ void main() {
   test('Renderer renders an empty inverted repeated section node', () async {
     var output = await renderFoo(
       () => [
-        d.dir(
-            'lib/templates', [d.file('foo.html', 'Text {{^l1}}Empty{{/l1}}')]),
+        d.dir('lib/templates', [
+          d.file('foo.html', 'Text {{^l1}}Empty{{/l1}}'),
+        ]),
       ],
       'Foo()..l1 = []',
     );
@@ -319,8 +338,9 @@ void main() {
   test('Renderer renders an inverted repeated section node as blank', () async {
     var output = await renderFoo(
       () => [
-        d.dir(
-            'lib/templates', [d.file('foo.html', 'Text {{^l1}}Empty{{/l1}}')]),
+        d.dir('lib/templates', [
+          d.file('foo.html', 'Text {{^l1}}Empty{{/l1}}'),
+        ]),
       ],
       'Foo()..l1 = [1, 2, 3]',
     );
@@ -330,31 +350,36 @@ void main() {
   test('Renderer renders a value section node', () async {
     var output = await renderBar(
       () => [
-        d.dir('lib/templates',
-            [d.file('bar.html', 'Text {{#foo}}Foo: {{s1}}{{/foo}}')]),
+        d.dir('lib/templates', [
+          d.file('bar.html', 'Text {{#foo}}Foo: {{s1}}{{/foo}}'),
+        ]),
       ],
       'Bar()..foo = (Foo()..s1 = "hello")',
     );
     expect(output, equals('Text Foo: hello'));
   });
 
-  test('Renderer renders a value section node keyed lower in the stack',
-      () async {
-    var output = await renderBar(
-      () => [
-        d.dir('lib/templates',
-            [d.file('bar.html', 'Text {{#foo}}One {{#s2}}Two{{/s2}}{{/foo}}')]),
-      ],
-      'Bar()..foo = Foo()..s2 = "hello"',
-    );
-    expect(output, equals('Text One Two'));
-  });
+  test(
+    'Renderer renders a value section node keyed lower in the stack',
+    () async {
+      var output = await renderBar(
+        () => [
+          d.dir('lib/templates', [
+            d.file('bar.html', 'Text {{#foo}}One {{#s2}}Two{{/s2}}{{/foo}}'),
+          ]),
+        ],
+        'Bar()..foo = Foo()..s2 = "hello"',
+      );
+      expect(output, equals('Text One Two'));
+    },
+  );
 
   test('Renderer renders a null value section node as blank', () async {
     var output = await renderFoo(
       () => [
-        d.dir('lib/templates',
-            [d.file('foo.html', 'Text {{#s1}}"{{.}}" ({{length}}){{/s1}}')]),
+        d.dir('lib/templates', [
+          d.file('foo.html', 'Text {{#s1}}"{{.}}" ({{length}}){{/s1}}'),
+        ]),
       ],
       'Foo()..s1 = null',
     );
@@ -364,8 +389,9 @@ void main() {
   test('Renderer renders an inverted value section node as blank', () async {
     var output = await renderFoo(
       () => [
-        d.dir('lib/templates',
-            [d.file('foo.html', 'Text {{^s1}}Section{{/s1}}')]),
+        d.dir('lib/templates', [
+          d.file('foo.html', 'Text {{^s1}}Section{{/s1}}'),
+        ]),
       ],
       'Foo()..s1 = "hello"',
     );
@@ -375,8 +401,9 @@ void main() {
   test('Renderer renders an inverted null value section node', () async {
     var output = await renderFoo(
       () => [
-        d.dir('lib/templates',
-            [d.file('foo.html', 'Text {{^s1}}Section{{/s1}}')]),
+        d.dir('lib/templates', [
+          d.file('foo.html', 'Text {{^s1}}Section{{/s1}}'),
+        ]),
       ],
       'Foo()..s1 = null',
     );
@@ -386,25 +413,29 @@ void main() {
   test('Renderer resolves variable inside a value section', () async {
     var output = await renderBar(
       () => [
-        d.dir('lib/templates',
-            [d.file('bar.html', 'Text {{#foo}}{{s1}}{{/foo}}')]),
+        d.dir('lib/templates', [
+          d.file('bar.html', 'Text {{#foo}}{{s1}}{{/foo}}'),
+        ]),
       ],
       'Bar()..foo = (Foo()..s1 = "hello")',
     );
     expect(output, equals('Text hello'));
   });
 
-  test('Renderer resolves variable from outer context inside a value section',
-      () async {
-    var output = await renderBar(
-      () => [
-        d.dir('lib/templates',
-            [d.file('bar.html', 'Text {{#foo}}{{s2}}{{/foo}}')]),
-      ],
-      'Bar()..foo = (Foo()..s1 = "hello")..s2 = "goodbye"',
-    );
-    expect(output, equals('Text goodbye'));
-  });
+  test(
+    'Renderer resolves variable from outer context inside a value section',
+    () async {
+      var output = await renderBar(
+        () => [
+          d.dir('lib/templates', [
+            d.file('bar.html', 'Text {{#foo}}{{s2}}{{/foo}}'),
+          ]),
+        ],
+        'Bar()..foo = (Foo()..s1 = "hello")..s2 = "goodbye"',
+      );
+      expect(output, equals('Text goodbye'));
+    },
+  );
 
   test('Renderer resolves variable with key with multiple names', () async {
     var output = await renderBar(
@@ -426,24 +457,27 @@ void main() {
     expect(output, equals('Text hello'));
   });
 
-  test('Renderer resolves variable with mixin properties not in @Renderer',
-      () async {
-    var output = await renderFoo(
-      () => [
-        d.dir('lib/templates', [d.file('foo.html', 'Text {{p1.p2.p3.s}}')]),
-      ],
-      'Foo()'
-      '..p1 = (Property1()'
-      '..p2 = (Property2()..p3 = (Property3()..s = "hello")))',
-    );
-    expect(output, equals('Text hello'));
-  });
+  test(
+    'Renderer resolves variable with mixin properties not in @Renderer',
+    () async {
+      var output = await renderFoo(
+        () => [
+          d.dir('lib/templates', [d.file('foo.html', 'Text {{p1.p2.p3.s}}')]),
+        ],
+        'Foo()'
+        '..p1 = (Property1()'
+        '..p2 = (Property2()..p3 = (Property3()..s = "hello")))',
+      );
+      expect(output, equals('Text hello'));
+    },
+  );
 
   test('Renderer resolves outer variable with key with two names', () async {
     var output = await renderBar(
       () => [
-        d.dir('lib/templates',
-            [d.file('bar.html', 'Text {{#foo}}{{foo.s1}}{{/foo}}')]),
+        d.dir('lib/templates', [
+          d.file('bar.html', 'Text {{#foo}}{{foo.s1}}{{/foo}}'),
+        ]),
       ],
       'Bar()..foo = (Foo()..s1 = "hello")..s2 = "goodbye"',
     );
@@ -453,27 +487,33 @@ void main() {
   test('Renderer resolves outer variable with key with three names', () async {
     var output = await renderBaz(
       () => [
-        d.dir('lib/templates',
-            [d.file('baz.html', 'Text {{#bar}}{{bar.foo.s1}}{{/bar}}')]),
+        d.dir('lib/templates', [
+          d.file('baz.html', 'Text {{#bar}}{{bar.foo.s1}}{{/bar}}'),
+        ]),
       ],
       'Baz()..bar = (Bar()..foo = (Foo()..s1 = "hello"))',
     );
     expect(output, equals('Text hello'));
   });
 
-  test('Renderer resolves outer variable with key with more than three names',
-      () async {
-    var output = await renderBaz(
-      () => [
-        d.dir('lib/templates', [
-          d.file('baz.html', 'Text {{#bar}}{{bar.foo.baz.bar.foo.s1}}{{/bar}}')
-        ]),
-      ],
-      'Baz()..bar = (Bar()..foo = (Foo()..s1 = "hello"));'
-      'baz.bar!.foo!.baz = baz',
-    );
-    expect(output, equals('Text hello'));
-  });
+  test(
+    'Renderer resolves outer variable with key with more than three names',
+    () async {
+      var output = await renderBaz(
+        () => [
+          d.dir('lib/templates', [
+            d.file(
+              'baz.html',
+              'Text {{#bar}}{{bar.foo.baz.bar.foo.s1}}{{/bar}}',
+            ),
+          ]),
+        ],
+        'Baz()..bar = (Bar()..foo = (Foo()..s1 = "hello"));'
+        'baz.bar!.foo!.baz = baz',
+      );
+      expect(output, equals('Text hello'));
+    },
+  );
 
   test('Renderer renders a partial in the same directory', () async {
     var output = await renderBar(
@@ -492,9 +532,7 @@ void main() {
     var output = await renderBar(
       () => [
         d.dir('lib/templates', [
-          d.dir('dir', [
-            d.file('_foo.mustache.html', 'Partial {{s1}}'),
-          ]),
+          d.dir('dir', [d.file('_foo.mustache.html', 'Partial {{s1}}')]),
           d.file('bar.html', 'Text {{#foo}}{{>dir/foo.mustache}}{{/foo}}'),
         ]),
       ],
@@ -526,7 +564,9 @@ void main() {
         d.dir('lib/templates', [
           d.file('bar.html', 'Text, {{#foo}}{{>foo.mustache}}{{/foo}}'),
           d.file(
-              '_foo.mustache.html', 'p1, {{#l1}}{{>foo_l1.mustache}}{{/l1}}'),
+            '_foo.mustache.html',
+            'p1, {{#l1}}{{>foo_l1.mustache}}{{/l1}}',
+          ),
           d.file('_foo_l1.mustache.html', 'p2 {{.}}, '),
         ]),
       ],
@@ -535,8 +575,7 @@ void main() {
     expect(output, equals('Text, p1, p2 1, p2 2, p2 3, '));
   });
 
-  test('Renderer renders a partial with a heterogeneous context chain',
-      () async {
+  test('Renderer renders a partial with a heterogeneous context chain', () async {
     // TODO(srawlins): To get this concept to work (see associated test in
     // `runtime_renderer_render_test.dart`), we'd need to restructure partial
     // render functions to accept a stack (List) instead of multiple parameters.
@@ -554,13 +593,18 @@ void main() {
         ],
         'Foo()',
       ),
-      throwsA(const TypeMatcher<MustachioResolutionException>()
-          .having((e) => e.message, 'message', contains('''
+      throwsA(
+        const TypeMatcher<MustachioResolutionException>().having(
+          (e) => e.message,
+          'message',
+          contains('''
 line 1, column 8 of lib/templates/foo.html: Failed to resolve '[s2]' as a property on any types in the context chain: [Foo]
   ╷
 1 │ Text {{s2}}
   │        ^^
-  ╵'''))),
+  ╵'''),
+        ),
+      ),
     );
   });
 
@@ -568,59 +612,80 @@ line 1, column 8 of lib/templates/foo.html: Failed to resolve '[s2]' as a proper
     expect(
       () async => await renderFoo(
         () => [
-          d.dir('lib/templates',
-              [d.file('foo.html', 'Text {{#s2}}Section{{/s2}}')]),
+          d.dir('lib/templates', [
+            d.file('foo.html', 'Text {{#s2}}Section{{/s2}}'),
+          ]),
         ],
         'Foo()',
       ),
-      throwsA(const TypeMatcher<MustachioResolutionException>()
-          .having((e) => e.message, 'message', contains('''
+      throwsA(
+        const TypeMatcher<MustachioResolutionException>().having(
+          (e) => e.message,
+          'message',
+          contains('''
 line 1, column 9 of lib/templates/foo.html: Failed to resolve '[s2]' as a property on any types in the context chain: [Foo]
   ╷
 1 │ Text {{#s2}}Section{{/s2}}
   │         ^^
-  ╵'''))),
+  ╵'''),
+        ),
+      ),
     );
   });
 
-  test('Renderer throws when it cannot resolve a multi-name variable key',
-      () async {
-    expect(
-      () async => await renderFoo(
-        () => [
-          d.dir('lib/templates', [d.file('bar.html', 'Text {{foo.x}}')]),
-        ],
-        'Bar()..foo = Foo()',
-      ),
-      throwsA(const TypeMatcher<MustachioResolutionException>()
-          .having((e) => e.message, 'message', contains('''
+  test(
+    'Renderer throws when it cannot resolve a multi-name variable key',
+    () async {
+      expect(
+        () async => await renderFoo(
+          () => [
+            d.dir('lib/templates', [d.file('bar.html', 'Text {{foo.x}}')]),
+          ],
+          'Bar()..foo = Foo()',
+        ),
+        throwsA(
+          const TypeMatcher<MustachioResolutionException>().having(
+            (e) => e.message,
+            'message',
+            contains('''
 line 1, column 8 of lib/templates/bar.html: Failed to resolve 'x' on Bar while resolving [x] as a property chain on any types in the context chain: context0.foo, after first resolving 'foo' to a property on Foo?
   ╷
 1 │ Text {{foo.x}}
   │        ^^^^^
-  ╵'''))),
-    );
-  });
+  ╵'''),
+          ),
+        ),
+      );
+    },
+  );
 
-  test('Renderer throws when it cannot resolve a multi-name section key',
-      () async {
-    expect(
-      () async => await renderBar(
-        () => [
-          d.dir('lib/templates',
-              [d.file('bar.html', 'Text {{#foo.x}}Section{{/foo.x}}')]),
-        ],
-        'Bar()..foo = Foo()',
-      ),
-      throwsA(const TypeMatcher<MustachioResolutionException>()
-          .having((e) => e.message, 'message', contains('''
+  test(
+    'Renderer throws when it cannot resolve a multi-name section key',
+    () async {
+      expect(
+        () async => await renderBar(
+          () => [
+            d.dir('lib/templates', [
+              d.file('bar.html', 'Text {{#foo.x}}Section{{/foo.x}}'),
+            ]),
+          ],
+          'Bar()..foo = Foo()',
+        ),
+        throwsA(
+          const TypeMatcher<MustachioResolutionException>().having(
+            (e) => e.message,
+            'message',
+            contains('''
 line 1, column 13 of lib/templates/bar.html: Failed to resolve '[x]' as a property on any types in the context chain: [Foo, Bar]
   ╷
 1 │ Text {{#foo.x}}Section{{/foo.x}}
   │             ^
-  ╵'''))),
-    );
-  });
+  ╵'''),
+          ),
+        ),
+      );
+    },
+  );
 
   test('Template parser throws when it cannot read a template', () async {
     // TODO(srawlins): Implement this test.
@@ -631,7 +696,7 @@ line 1, column 13 of lib/templates/bar.html: Failed to resolve '[x]' as a proper
       () async => await renderBar(
         () => [
           d.dir('lib/templates', [
-            d.file('bar.html', 'Text {{#foo}}{{>missing.mustache}}{{/foo}}')
+            d.file('bar.html', 'Text {{#foo}}{{>missing.mustache}}{{/foo}}'),
           ]),
         ],
         'Bar()',

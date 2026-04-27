@@ -77,13 +77,12 @@ mixin Referable {
     Element element,
     Library? library, {
     Container? enclosingContainer,
-  }) =>
-      ModelElement.for_(
-        element,
-        library,
-        packageGraph,
-        enclosingContainer: enclosingContainer,
-      );
+  }) => ModelElement.for_(
+    element,
+    library,
+    packageGraph,
+    enclosingContainer: enclosingContainer,
+  );
 
   /// Returns the [ModelElement] for [element], instantiating it if needed.
   ///
@@ -105,15 +104,14 @@ mixin Referable {
     required Accessor? getter,
     required Accessor? setter,
     Container? enclosingContainer,
-  }) =>
-      ModelElement.forPropertyInducingElement(
-        element,
-        library,
-        packageGraph,
-        getter: getter,
-        setter: setter,
-        enclosingContainer: enclosingContainer,
-      );
+  }) => ModelElement.forPropertyInducingElement(
+    element,
+    library,
+    packageGraph,
+    getter: getter,
+    setter: setter,
+    enclosingContainer: enclosingContainer,
+  );
 
   /// Returns the [ElementType] for [type], instantiating it if needed.
   ElementType getTypeFor(DartType type, Library? library) =>
@@ -225,7 +223,10 @@ mixin Referable {
         resultElement.kind != ElementKind.DYNAMIC &&
         resultElement.kind != ElementKind.NEVER) {
       packageGraph.warnOnElement(
-        switch (this) { Warnable w => w, _ => null },
+        switch (this) {
+          Warnable w => w,
+          _ => null,
+        },
         PackageWarning.internalError,
         message: 'Unable to find library for element $resultElement',
       );
@@ -261,11 +262,17 @@ mixin Referable {
   }) {
     Referable? returnValue = result;
     if (referenceLookup.remaining.isNotEmpty) {
-      returnValue = result.referenceBy(referenceLookup.remaining,
-          tryParents: false, filter: filter);
+      returnValue = result.referenceBy(
+        referenceLookup.remaining,
+        tryParents: false,
+        filter: filter,
+      );
     } else if (!filter(result)) {
-      returnValue = result.referenceBy([referenceLookup.lookup],
-          tryParents: false, filter: filter);
+      returnValue = result.referenceBy(
+        [referenceLookup.lookup],
+        tryParents: false,
+        filter: filter,
+      );
     }
     if (!filter(returnValue)) {
       returnValue = null;
@@ -280,9 +287,12 @@ mixin Referable {
   /// [referenceBy] stops at the first one found.
   Iterable<_ReferenceChildrenLookup> _childLookups(List<String> reference) =>
       reference
-          .mapIndexed((index, _) => _ReferenceChildrenLookup(
+          .mapIndexed(
+            (index, _) => _ReferenceChildrenLookup(
               reference.sublist(0, index + 1).join('.'),
-              reference.sublist(index + 1)))
+              reference.sublist(index + 1),
+            ),
+          )
           .toList(growable: false);
 
   /// Map of [referenceName] to the elements that are a member of `this`, but
@@ -347,23 +357,21 @@ extension ReferableEntryGenerators<T extends Referable> on Iterable<T> {
   /// If there is a conflict with [referable], the included [MapEntry] uses
   /// [referable]'s [Referable.referenceName] as a prefix.
   Map<String, T> explicitOnCollisionWith(Referable referable) => {
-        for (var r in this)
-          if (r.referenceName == referable.referenceName)
-            '${referable.referenceName}.${r.referenceName}': r
-          else
-            r.referenceName: r,
-      };
+    for (var r in this)
+      if (r.referenceName == referable.referenceName)
+        '${referable.referenceName}.${r.referenceName}': r
+      else
+        r.referenceName: r,
+  };
 
   /// A mapping from each [Referable]'s name to itself.
-  Map<String, T> get asMapByName => {
-        for (var r in this) r.referenceName: r,
-      };
+  Map<String, T> get asMapByName => {for (var r in this) r.referenceName: r};
 
   /// Returns all values not of this type.
   List<T> whereNotType<U>() => [
-        for (var referable in this)
-          if (referable is! U) referable,
-      ];
+    for (var referable in this)
+      if (referable is! U) referable,
+  ];
 }
 
 class _ReferenceChildrenLookup {

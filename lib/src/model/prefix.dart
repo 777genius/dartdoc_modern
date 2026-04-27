@@ -24,31 +24,23 @@ class Prefix extends ModelElement with HasLibrary, HasNoPage {
 
   // TODO(jcollins-g): consider connecting PrefixElement to the imported library
   // in analyzer?
-  late final Library associatedLibrary =
-      getModelForElement(_importedLibraryElement) as Library;
+  late final Library? associatedLibrary = switch (_importedLibraryElement) {
+    var importedLibrary? => getModelForElement(importedLibrary) as Library,
+    null => null,
+  };
 
-  LibraryElement get _importedLibraryElement {
-    final importLists =
-        library.element.fragments.map((fragment) => fragment.libraryImports);
+  LibraryElement? get _importedLibraryElement {
+    final importLists = library.element.fragments.map(
+      (fragment) => fragment.libraryImports,
+    );
     var libraryImport = importLists
         .expand((import) => import)
         .firstWhere((i) => i.prefix?.element == element);
-    var importedLibrary = libraryImport.importedLibrary;
-    if (importedLibrary == null) {
-      var message = 'Unexpected null LibraryElement2 for imported library at '
-          '${library.element.firstFragment.source.uri}, at offset '
-          '${libraryImport.importKeywordOffset}';
-      var directiveUri = libraryImport.uri;
-      if (directiveUri is DirectiveUriWithRelativeUriString) {
-        message += 'for import URI: "${directiveUri.relativeUriString}"';
-      }
-      throw StateError(message);
-    }
-    return importedLibrary;
+    return libraryImport.importedLibrary;
   }
 
   @override
-  Library? get canonicalModelElement => associatedLibrary.canonicalLibrary;
+  Library? get canonicalModelElement => associatedLibrary?.canonicalLibrary;
 
   @override
   Scope get scope => element.scope;

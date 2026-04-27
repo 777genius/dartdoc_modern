@@ -24,8 +24,12 @@ class Accessor extends ModelElement with HasLibrary {
   // initialized by code inside this library.
   late final GetterSetterCombo enclosingCombo;
 
-  Accessor(this.element, Library super.library, super.packageGraph,
-      {ExecutableElement? super.originalElement});
+  Accessor(
+    this.element,
+    Library super.library,
+    super.packageGraph, {
+    ExecutableElement? super.originalElement,
+  });
 
   @override
   ExecutableElement? get originalMember =>
@@ -97,18 +101,21 @@ class Accessor extends ModelElement with HasLibrary {
     Iterable<Warnable> referredFrom = const [],
     Iterable<String> extendedDebug = const [],
   }) {
-    enclosingCombo.warn(kind,
-        message: message,
-        referredFrom: referredFrom,
-        extendedDebug: extendedDebug);
+    enclosingCombo.warn(
+      kind,
+      message: message,
+      referredFrom: referredFrom,
+      extendedDebug: extendedDebug,
+    );
   }
 
   @override
   ModelElement get enclosingElement => switch (element.enclosingElement) {
-        LibraryFragment enclosingCompilationUnit =>
-          getModelForElement(enclosingCompilationUnit.element),
-        _ => getModelFor(element.enclosingElement, library)
-      };
+    LibraryFragment enclosingCompilationUnit => getModelForElement(
+      enclosingCompilationUnit.element,
+    ),
+    _ => getModelFor(element.enclosingElement, library),
+  };
 
   @override
   String get filePath => enclosingCombo.filePath;
@@ -120,8 +127,9 @@ class Accessor extends ModelElement with HasLibrary {
       Container() => enclosingElement.sidebarPath,
       Library() => enclosingElement.sidebarPath,
       _ => throw StateError(
-          'Enclosing element of $this should be Container or Library, but was '
-          '${enclosingElement.runtimeType}')
+        'Enclosing element of $this should be Container or Library, but was '
+        '${enclosingElement.runtimeType}',
+      ),
     };
   }
 
@@ -160,16 +168,22 @@ class ContainerAccessor extends Accessor with ContainerMember, Inheritable {
   @override
   final bool isInherited;
 
-  ContainerAccessor(super.element, super.library, super.packageGraph,
-      [Container? enclosingElement])
-      : isInherited = false {
+  ContainerAccessor(
+    super.element,
+    super.library,
+    super.packageGraph, [
+    Container? enclosingElement,
+  ]) : isInherited = false {
     _enclosingElement = enclosingElement ?? super.enclosingElement as Container;
   }
 
   ContainerAccessor.inherited(
-      super.element, super.library, super.packageGraph, this._enclosingElement,
-      {super.originalElement})
-      : isInherited = true;
+    super.element,
+    super.library,
+    super.packageGraph,
+    this._enclosingElement, {
+    super.originalElement,
+  }) : isInherited = true;
 
   @override
   bool get isCovariant => isSetter && parameters.first.isCovariant;
@@ -187,21 +201,23 @@ class ContainerAccessor extends Accessor with ContainerMember, Inheritable {
     for (final supertype in parent.allSupertypes) {
       var accessor = isGetter
           ? supertype.getters
-              .firstWhereOrNull((e) => e.lookupName == element.lookupName)
-              ?.baseElement
+                .firstWhereOrNull((e) => e.lookupName == element.lookupName)
+                ?.baseElement
           : supertype.setters
-              .firstWhereOrNull((e) => e.lookupName == element.lookupName)
-              ?.baseElement;
+                .firstWhereOrNull((e) => e.lookupName == element.lookupName)
+                ?.baseElement;
       if (accessor == null) {
         continue;
       }
       final parentContainer =
           getModelForElement(supertype.element) as InheritingContainer;
-      final possibleFields =
-          parentContainer.declaredFields.where((f) => !f.isStatic);
+      final possibleFields = parentContainer.declaredFields.where(
+        (f) => !f.isStatic,
+      );
       final fieldName = accessor.lookupName?.replaceFirst('=', '');
-      final foundField =
-          possibleFields.firstWhereOrNull((f) => f.element.name == fieldName);
+      final foundField = possibleFields.firstWhereOrNull(
+        (f) => f.element.name == fieldName,
+      );
       if (foundField == null) {
         continue;
       }

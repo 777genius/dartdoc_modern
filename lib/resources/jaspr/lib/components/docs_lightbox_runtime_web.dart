@@ -7,10 +7,7 @@ class DocsLightboxRuntime extends StatelessComponent {
 
   @override
   Component build(BuildContext context) => span(
-        attributes: {
-          'hidden': 'hidden',
-          'data-docs-lightbox-runtime': '',
-        },
-        const [],
-      );
+    attributes: {'hidden': 'hidden', 'data-docs-lightbox-runtime': ''},
+    const [],
+  );
 }

@@ -16,20 +16,21 @@ class SubprocessLauncher {
   /// [output] and a returned String.
   ///
   /// This is borrowed from flutter:dev/tools/dartdoc.dart; modified.
-  static Future<String> _printStream(Stream<List<int>> stream, Stdout output,
-          {required Iterable<String> Function(String line) filter,
-          String prefix = ''}) =>
-      stream
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .expand(filter)
-          .map(
-        (String line) {
-          final value = '${'$prefix$line'.trim()}\n';
-          output.write(value);
-          return value;
-        },
-      ).join();
+  static Future<String> _printStream(
+    Stream<List<int>> stream,
+    Stdout output, {
+    required Iterable<String> Function(String line) filter,
+    String prefix = '',
+  }) => stream
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .expand(filter)
+      .map((String line) {
+        final value = '${'$prefix$line'.trim()}\n';
+        output.write(value);
+        return value;
+      })
+      .join();
 
   SubprocessLauncher(this.context, [this.defaultEnvironment = const {}]);
 
@@ -84,13 +85,17 @@ class SubprocessLauncher {
     stderr.write('$prefix+ ');
     if (workingDirectory != null) stderr.write('(cd "$workingDirectory" && ');
     if (environment.isNotEmpty) {
-      stderr.write(environment.entries.map((MapEntry<String, String> entry) {
-        if (entry.key.contains(_quotables)) {
-          return "${entry.key}='${entry.value}'";
-        } else {
-          return '${entry.key}=${entry.value}';
-        }
-      }).join(' '));
+      stderr.write(
+        environment.entries
+            .map((MapEntry<String, String> entry) {
+              if (entry.key.contains(_quotables)) {
+                return "${entry.key}='${entry.value}'";
+              } else {
+                return '${entry.key}=${entry.value}';
+              }
+            })
+            .join(' '),
+      );
       stderr.write(' ');
     }
     stderr.write(executable);
@@ -115,17 +120,31 @@ class SubprocessLauncher {
       (executable, arguments) = _wrapWithStdbuf(executable, arguments);
     }
 
-    var process = await Process.start(executable, arguments,
-        workingDirectory: workingDirectory,
-        environment: environment,
-        includeParentEnvironment: includeParentEnvironment);
+    var process = await Process.start(
+      executable,
+      arguments,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+    );
     // Stream stdout and stderr to _this_ process's stdout and stderr.
-    var stdoutFuture = _printStream(process.stdout, stdout,
-        prefix: prefix, filter: jsonCallback);
-    var stderrFuture = _printStream(process.stderr, stderr,
-        prefix: prefix, filter: jsonCallback);
-    var (_, _, exitCode) =
-        await (stdoutFuture, stderrFuture, process.exitCode).wait;
+    var stdoutFuture = _printStream(
+      process.stdout,
+      stdout,
+      prefix: prefix,
+      filter: jsonCallback,
+    );
+    var stderrFuture = _printStream(
+      process.stderr,
+      stderr,
+      prefix: prefix,
+      filter: jsonCallback,
+    );
+    var (_, _, exitCode) = await (
+      stdoutFuture,
+      stderrFuture,
+      process.exitCode,
+    ).wait;
 
     if (exitCode != 0) {
       throw SubprocessException(
@@ -157,8 +176,9 @@ class SubprocessLauncher {
 
   /// Wraps [command] and [args] with a command to `time`.
   static (String, List<String>) wrapWithTime(
-          String command, List<String> args) =>
-      ('/usr/bin/time', ['-l', command, ...args]);
+    String command,
+    List<String> args,
+  ) => ('/usr/bin/time', ['-l', command, ...args]);
 
   Future<Iterable<Map<String, Object?>>> runStreamedDartCommand(
     List<String> arguments, {
@@ -166,15 +186,14 @@ class SubprocessLauncher {
     Map<String, String>? environment,
     bool includeParentEnvironment = true,
     bool withStats = false,
-  }) async =>
-      await runStreamed(
-        Platform.executable,
-        arguments,
-        workingDirectory: workingDirectory,
-        environment: environment,
-        includeParentEnvironment: includeParentEnvironment,
-        withStats: withStats,
-      );
+  }) async => await runStreamed(
+    Platform.executable,
+    arguments,
+    workingDirectory: workingDirectory,
+    environment: environment,
+    includeParentEnvironment: includeParentEnvironment,
+    withStats: withStats,
+  );
 
   static final _quotables = RegExp(r'[ "\r\n\$]');
 }
@@ -194,7 +213,8 @@ class SubprocessException implements Exception {
   });
 
   @override
-  String toString() => 'SubprocessException['
+  String toString() =>
+      'SubprocessException['
       'command: "$command", '
       'workingDirectory: "${workingDirectory ?? '(null)'}", '
       'exitCode: $exitCode, '

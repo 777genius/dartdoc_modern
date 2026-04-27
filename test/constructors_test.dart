@@ -189,8 +189,10 @@ extension type ET(int it) {
   ET.named(this.it);
 }
 ''');
-    var etNamed =
-        library.extensionTypes.named('ET').constructors.named('ET.named');
+    var etNamed = library.extensionTypes
+        .named('ET')
+        .constructors
+        .named('ET.named');
     expect(etNamed.fullyQualifiedName, 'constructors.ET.named');
     expect(etNamed.isPublic, isTrue);
     expect(etNamed.documentationAsHtml, '<p>Constructor.</p>');
@@ -200,8 +202,10 @@ extension type ET(int it) {
     var library = await bootPackageWithLibrary('''
 extension type ET.named(int it) {}
 ''');
-    var etNamed =
-        library.extensionTypes.named('ET').constructors.named('ET.named');
+    var etNamed = library.extensionTypes
+        .named('ET')
+        .constructors
+        .named('ET.named');
     expect(etNamed.fullyQualifiedName, 'constructors.ET.named');
     expect(etNamed.isPublic, isTrue);
   }
@@ -222,8 +226,10 @@ extension type ET.named(int it) {
   ET(this.it);
 }
 ''');
-    var etNamed =
-        library.extensionTypes.named('ET').constructors.named('ET.new');
+    var etNamed = library.extensionTypes
+        .named('ET')
+        .constructors
+        .named('ET.new');
     expect(etNamed.fullyQualifiedName, 'constructors.ET.new');
     expect(etNamed.isPublic, isTrue);
     expect(etNamed.documentationAsHtml, '<p>Constructor.</p>');

@@ -30,11 +30,11 @@ mixin Inheritable on ContainerMember {
 
   @override
   Set<Attribute> get attributes => {
-        ...super.attributes,
-        if (isOverride) Attribute.override_,
-        if (isInherited) Attribute.inherited,
-        if (isCovariant) Attribute.covariant,
-      };
+    ...super.attributes,
+    if (isOverride) Attribute.override_,
+    if (isInherited) Attribute.inherited,
+    if (isCovariant) Attribute.covariant,
+  };
 
   @override
   List<ModelElement> get documentationFrom {
@@ -57,9 +57,11 @@ mixin Inheritable on ContainerMember {
   // ignore: overridden_fields
   late final ModelElement? canonicalModelElement = canonicalEnclosingContainer
       ?.allCanonicalModelElements
-      .firstWhereOrNull((m) =>
-          m.name == name &&
-          m is PropertyAccessorElement == this is PropertyAccessorElement);
+      .firstWhereOrNull(
+        (m) =>
+            m.name == name &&
+            m is PropertyAccessorElement == this is PropertyAccessorElement,
+      );
 
   @override
   Container? computeCanonicalEnclosingContainer() {
@@ -74,7 +76,8 @@ mixin Inheritable on ContainerMember {
     for (var i = 0; i < candidates.length; i++) {
       var container = candidates[i];
       if (container.containsElement(searchElement)) {
-        var thisIsHiddenAndDefining = _isHiddenInterface(container) &&
+        var thisIsHiddenAndDefining =
+            _isHiddenInterface(container) &&
             container == definingEnclosingContainer;
 
         if (thisIsHiddenAndDefining) {
@@ -195,7 +198,7 @@ mixin Inheritable on ContainerMember {
     // The container in which this element was defined, canonical if available.
     final definingCanonical =
         definingEnclosingContainer.canonicalModelElement as Container? ??
-            definingEnclosingContainer;
+        definingEnclosingContainer;
     if (enclosingCanonical != definingCanonical) {
       // The defining class and the enclosing class for this element must be the
       // same (element is defined here).

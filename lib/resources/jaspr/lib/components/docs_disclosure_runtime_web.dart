@@ -50,13 +50,13 @@ class _DocsDisclosureRuntimeState extends State<DocsDisclosureRuntime> {
 
   @override
   Component build(BuildContext context) => span(
-        attributes: {
-          'data-docs-disclosure-runtime': '',
-          'hidden': 'hidden',
-          'aria-hidden': 'true',
-        },
-        const [],
-      );
+    attributes: {
+      'data-docs-disclosure-runtime': '',
+      'hidden': 'hidden',
+      'aria-hidden': 'true',
+    },
+    const [],
+  );
 
   void _enhanceAll() {
     final disclosures = web.document.querySelectorAll('.content details');
@@ -88,9 +88,11 @@ class _DocsDisclosureRuntimeState extends State<DocsDisclosureRuntime> {
       ..className = 'docs-disclosure-inner';
 
     final toMove = <web.Node>[];
-    for (web.Node? node = summary.nextSibling;
-        node != null;
-        node = summary.nextSibling) {
+    for (
+      web.Node? node = summary.nextSibling;
+      node != null;
+      node = summary.nextSibling
+    ) {
       toMove.add(node);
       summary.parentNode?.removeChild(node);
     }
@@ -106,9 +108,11 @@ class _DocsDisclosureRuntimeState extends State<DocsDisclosureRuntime> {
   }
 
   web.HTMLElement? _findSummary(web.HTMLDetailsElement details) {
-    for (web.Element? child = details.firstElementChild;
-        child != null;
-        child = child.nextElementSibling) {
+    for (
+      web.Element? child = details.firstElementChild;
+      child != null;
+      child = child.nextElementSibling
+    ) {
       if (child is web.HTMLElement &&
           child.localName.toLowerCase() == 'summary') {
         return child;
@@ -118,9 +122,11 @@ class _DocsDisclosureRuntimeState extends State<DocsDisclosureRuntime> {
   }
 
   web.HTMLDivElement? _findBody(web.HTMLDetailsElement details) {
-    for (web.Element? child = details.firstElementChild;
-        child != null;
-        child = child.nextElementSibling) {
+    for (
+      web.Element? child = details.firstElementChild;
+      child != null;
+      child = child.nextElementSibling
+    ) {
       if (child is web.HTMLDivElement &&
           child.classList.contains('docs-disclosure-body')) {
         return child;
@@ -130,9 +136,11 @@ class _DocsDisclosureRuntimeState extends State<DocsDisclosureRuntime> {
   }
 
   web.HTMLDivElement? _findInner(web.HTMLDivElement body) {
-    for (web.Element? child = body.firstElementChild;
-        child != null;
-        child = child.nextElementSibling) {
+    for (
+      web.Element? child = body.firstElementChild;
+      child != null;
+      child = child.nextElementSibling
+    ) {
       if (child is web.HTMLDivElement &&
           child.classList.contains('docs-disclosure-inner')) {
         return child;

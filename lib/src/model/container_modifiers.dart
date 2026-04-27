@@ -23,8 +23,8 @@ class ContainerModifier implements Comparable<ContainerModifier> {
     this.url,
     String? displayName,
     Set<ContainerModifier>? hideIfPresent,
-  })  : displayName = displayName ?? name,
-        hideIfPresent = hideIfPresent ?? const <ContainerModifier>{};
+  }) : displayName = displayName ?? name,
+       hideIfPresent = hideIfPresent ?? const <ContainerModifier>{};
 
   @override
   String toString() => displayName;
@@ -32,33 +32,45 @@ class ContainerModifier implements Comparable<ContainerModifier> {
   @override
   int compareTo(ContainerModifier a) => order.compareTo(a.order);
 
-  static const ContainerModifier sealed = ContainerModifier._('sealed',
-      description:
-          'The direct subtypes of this class will be checked for exhaustiveness in switches.',
-      url: 'https://dart.dev/language/class-modifiers#sealed',
-      order: 0);
-  static const ContainerModifier abstract = ContainerModifier._('abstract',
-      description: 'This type can not be directly constructed.',
-      url: 'https://dart.dev/language/class-modifiers#abstract',
-      order: 0,
-      hideIfPresent: {sealed});
-  static const ContainerModifier base = ContainerModifier._('base',
-      description:
-          'This class or mixin can only be extended (not implemented or mixed in).',
-      url: 'https://dart.dev/language/class-modifiers#base',
-      order: 1);
-  static const ContainerModifier interface = ContainerModifier._('interface',
-      description:
-          'This class can only be implemented (not extended or mixed in).',
-      url: 'https://dart.dev/language/class-modifiers#interface',
-      order: 2);
-  static const ContainerModifier finalModifier = ContainerModifier._('final',
-      description:
-          'This class can neither be extended, implemented, nor mixed in.',
-      url: 'https://dart.dev/language/class-modifiers#final',
-      order: 3);
-  static const ContainerModifier mixin = ContainerModifier._('mixin',
-      description: 'This class can be used as a class and a mixin.',
-      url: 'https://dart.dev/language/mixins',
-      order: 4);
+  static const ContainerModifier sealed = ContainerModifier._(
+    'sealed',
+    description:
+        'The direct subtypes of this class will be checked for exhaustiveness in switches.',
+    url: 'https://dart.dev/language/class-modifiers#sealed',
+    order: 0,
+  );
+  static const ContainerModifier abstract = ContainerModifier._(
+    'abstract',
+    description: 'This type can not be directly constructed.',
+    url: 'https://dart.dev/language/class-modifiers#abstract',
+    order: 0,
+    hideIfPresent: {sealed},
+  );
+  static const ContainerModifier base = ContainerModifier._(
+    'base',
+    description:
+        'This class or mixin can only be extended (not implemented or mixed in).',
+    url: 'https://dart.dev/language/class-modifiers#base',
+    order: 1,
+  );
+  static const ContainerModifier interface = ContainerModifier._(
+    'interface',
+    description:
+        'This class can only be implemented (not extended or mixed in).',
+    url: 'https://dart.dev/language/class-modifiers#interface',
+    order: 2,
+  );
+  static const ContainerModifier finalModifier = ContainerModifier._(
+    'final',
+    description:
+        'This class can neither be extended, implemented, nor mixed in.',
+    url: 'https://dart.dev/language/class-modifiers#final',
+    order: 3,
+  );
+  static const ContainerModifier mixin = ContainerModifier._(
+    'mixin',
+    description: 'This class can be used as a class and a mixin.',
+    url: 'https://dart.dev/language/mixins',
+    order: 4,
+  );
 }
