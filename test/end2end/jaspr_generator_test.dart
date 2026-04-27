@@ -390,7 +390,7 @@ void main() {
           contains("import 'template_engine/docs_template_engine.dart';"),
         );
         expect(
-          content,
+          content.replaceAll(RegExp(r'\s+'), ' '),
           contains(
             "href: '\${withDocsBasePath('/generated/api_styles.css')}?v=\$assetVersion'",
           ),

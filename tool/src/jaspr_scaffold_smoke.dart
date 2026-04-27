@@ -153,10 +153,22 @@ class JasprScaffoldSmokeChecker {
     for (final line in pubspec) {
       final trimmed = line.trim();
       if (trimmed.startsWith('name:')) {
-        return trimmed.substring('name:'.length).trim();
+        return _stripYamlScalarQuotes(trimmed.substring('name:'.length));
       }
     }
     throw StateError('Could not find package name in pubspec.yaml');
+  }
+
+  String _stripYamlScalarQuotes(String value) {
+    final trimmed = value.trim();
+    if (trimmed.length >= 2) {
+      final quote = trimmed.codeUnitAt(0);
+      final last = trimmed.codeUnitAt(trimmed.length - 1);
+      if ((quote == 0x22 || quote == 0x27) && last == quote) {
+        return trimmed.substring(1, trimmed.length - 1);
+      }
+    }
+    return trimmed;
   }
 
   void _requireDirectory(String path) {

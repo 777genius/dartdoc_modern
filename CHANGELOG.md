@@ -1,3 +1,9 @@
+## 1.1.7
+
+* Rebuild generated HTML renderers and web frontend signatures for CI release
+  validation.
+* Fix Jaspr scaffold smoke validation for quoted generated package names.
+
 ## 1.1.6
 
 * Fix `@docImport` stripping when analyzer doc-import offsets do not match
