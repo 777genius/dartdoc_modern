@@ -124,6 +124,33 @@ jobs:
         run: dart run tool/task.dart validate jaspr-theme-visual
         env:
           PLAYWRIGHT_DIR: /tmp/pw-run
+      - name: Pixel golden regression check (Jaspr themes)
+        if: runner.os == 'Linux'
+        run: dart run tool/task.dart validate jaspr-theme-golden
+        env:
+          PLAYWRIGHT_DIR: /tmp/pw-run
+      - name: Standalone AOT E2E from outside the source tree
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart pub get --directory testing/test_package_with_docs
+          dart compile exe bin/dartdoc_modern.dart -o "$RUNNER_TEMP/dartdoc_modern"
+          mkdir -p "$RUNNER_TEMP/aot-smoke-cwd"
+          cd "$RUNNER_TEMP/aot-smoke-cwd"
+          fixture="$GITHUB_WORKSPACE/testing/test_package_with_docs"
+          # HTML must work with bundled resources and no source-root variable.
+          env -u DARTDOC_MODERN_ROOT "$RUNNER_TEMP/dartdoc_modern" \
+            --format html --input "$fixture" --output "$RUNNER_TEMP/aot-html"
+          test -s "$RUNNER_TEMP/aot-html/index.html"
+          test -s "$RUNNER_TEMP/aot-html/static-assets/styles.css"
+          # The fork's modern backends also support the explicit root fallback.
+          DARTDOC_MODERN_ROOT="$GITHUB_WORKSPACE" "$RUNNER_TEMP/dartdoc_modern" \
+            --format jaspr --input "$fixture" --output "$RUNNER_TEMP/aot-jaspr"
+          test -s "$RUNNER_TEMP/aot-jaspr/pubspec.yaml"
+          DARTDOC_MODERN_ROOT="$GITHUB_WORKSPACE" "$RUNNER_TEMP/dartdoc_modern" \
+            --format vitepress --input "$fixture" --output "$RUNNER_TEMP/aot-vitepress"
+          test -s "$RUNNER_TEMP/aot-vitepress/package.json"
       - name: Confirm HTML, Jaspr and VitePress tests are all present
         if: runner.os == 'Linux'
         shell: bash
