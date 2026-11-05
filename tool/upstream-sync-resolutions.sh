@@ -62,6 +62,13 @@ git rm --force --ignore-unmatch -- .github/workflows/scorecards-analysis.yml
 # PR publish validation and is not configured for this fork.
 git rm --force --ignore-unmatch -- .github/workflows/health.yaml
 
+# Keep the fork's original post-summaries workflow. The upstream copy switches
+# from "Publish" to the upstream-only "Health" workflow, which is intentionally
+# not imported here. A clean auto-merge otherwise changes this file and breaks
+# PR comments and exceeds GITHUB_TOKEN's workflow-file write permissions.
+git restore --source=HEAD --staged --worktree -- \
+  .github/workflows/post_summaries.yaml
+
 # Source files added by upstream still refer to the old package name. Normalize
 # package URI prefixes in Dart source, leaving other identifiers intact.
 python3 - <<'PY'
