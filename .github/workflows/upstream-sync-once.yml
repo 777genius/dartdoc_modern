@@ -125,6 +125,27 @@ jobs:
         run: dart run tool/task.dart validate jaspr-theme-visual
         env:
           PLAYWRIGHT_DIR: /tmp/pw-run
+      - name: Ensure ImageMagick is available for golden checks
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v magick >/dev/null 2>&1; then
+            exit 0
+          fi
+          if ! command -v compare >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y imagemagick
+          fi
+          # Ubuntu 24.04 ships ImageMagick 6 (compare); the golden script
+          # uses the ImageMagick 7 spelling (magick compare).
+          mkdir -p "$RUNNER_TEMP/imagemagick-compat"
+          cat > "$RUNNER_TEMP/imagemagick-compat/magick" <<'EOF'
+          #!/bin/sh
+          exec "$@"
+          EOF
+          chmod +x "$RUNNER_TEMP/imagemagick-compat/magick"
+          echo "$RUNNER_TEMP/imagemagick-compat" >> "$GITHUB_PATH"
       - name: Pixel golden regression check (Jaspr themes)
         if: runner.os == 'Linux'
         run: dart run tool/task.dart validate jaspr-theme-golden
