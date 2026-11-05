@@ -102,6 +102,14 @@ void f(int _) {}
     expect(f.documentationAsHtml, '<p>Text <code>_</code>.</p>');
   }
 
+  void test_functionTypeNestedAnnotationsRespectShowMetadata() async {
+    var library = await bootPackageWithLibrary('''
+void use(void Function(@deprecated int value) callback) {}
+''');
+    var method = library.functions.named('use');
+    expect(method.linkedParams, contains('deprecated'));
+    expect(method.linkedParamsNoMetadata, isNot(contains('deprecated')));
+  }
   void test_formalParameter_generic_method() async {
     var library = await bootPackageWithLibrary('''
 class C {

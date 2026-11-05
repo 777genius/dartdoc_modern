@@ -202,7 +202,8 @@ abstract class ParameterRenderer {
     if (param.isCovariant) {
       buffer.write('${covariant('covariant')} ');
     }
-    final linkedTypeName = modelType.linkedName;
+    final linkedTypeName =
+        showMetadata ? modelType.linkedName : modelType.linkedNameNoMetadata;
     if (linkedTypeName.isNotEmpty) {
       buffer.write(typeName(linkedTypeName));
       if (param.name.isNotEmpty) {

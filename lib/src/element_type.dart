@@ -55,6 +55,9 @@ abstract class ElementType with Referable {
 
   String get linkedName;
 
+  /// Signature without parameter annotations, including nested function types.
+  String get linkedNameNoMetadata => linkedName;
+
   /// Name with generics and nullability indication, in HTML tags.
   String get nameWithGenerics;
 
@@ -151,6 +154,11 @@ class FunctionTypeElementType extends UndefinedElementType
 
   @override
   String get name => 'Function';
+
+  @override
+  String get linkedNameNoMetadata =>
+      const FunctionTypeElementTypeRendererHtml()
+          .renderLinkedNameWithMetadata(this, showMetadata: false);
 
   @override
   ElementTypeRenderer get _renderer =>

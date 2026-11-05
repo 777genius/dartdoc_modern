@@ -81,7 +81,13 @@ class FunctionTypeElementTypeRendererHtml
   const FunctionTypeElementTypeRendererHtml();
 
   @override
-  String renderLinkedName(FunctionTypeElementType elementType) {
+  String renderLinkedName(FunctionTypeElementType elementType) =>
+      renderLinkedNameWithMetadata(elementType);
+
+  String renderLinkedNameWithMetadata(
+    FunctionTypeElementType elementType, {
+    bool showMetadata = true,
+  }) {
     var buffer = StringBuffer()
       ..write(elementType.returnType.linkedName)
       ..write(' ')
@@ -90,6 +96,7 @@ class FunctionTypeElementTypeRendererHtml
       ..write(
         const ParameterRendererHtml().renderLinkedParams(
           elementType.parameters,
+          showMetadata: showMetadata,
         ),
       )
       ..write(')</span>');
