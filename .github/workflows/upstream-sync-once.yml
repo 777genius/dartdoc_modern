@@ -43,7 +43,8 @@ jobs:
             git diff --name-only --diff-filter=U
             exit 1
           fi
-          git diff --cached --check
+          # Co19 comment-placement fixtures intentionally contain trailing whitespace.
+          git diff --cached --check -- . ':(exclude)test/co19/placement_enums_test.dart'
           git status --short
           git commit -m "chore(sync): merge dart-lang/dartdoc upstream 03ec6df"
           git push origin HEAD:refs/heads/chore/upstream-sync-2026-11-05
@@ -59,7 +60,7 @@ jobs:
           dart format bin lib test tool web
           dart run tool/task.dart build
           git add -u
-          git diff --cached --check
+          git diff --cached --check -- . ':(exclude)test/co19/placement_enums_test.dart'
           if ! git diff --cached --quiet; then
             git commit -m "chore(sync): regenerate resources and format merged sources"
             git push origin HEAD:refs/heads/chore/upstream-sync-2026-11-05

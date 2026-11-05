@@ -101,6 +101,8 @@ if git grep -n -I -E '^(<<<<<<< |=======|>>>>>>> )' -- lib/src test tool >/tmp/u
 fi
 
 git add -A
-git diff --cached --check
+# The Co19 placement fixture deliberately contains trailing whitespace to
+# test whether comment placement is handled correctly; preserve it unchanged.
+git diff --cached --check -- . ':(exclude)test/co19/placement_enums_test.dart'
 echo "Resolved merge; staged changes:"
 git diff --cached --stat | tail -45
