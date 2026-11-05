@@ -48,6 +48,9 @@
   --alert-warning-fgColor: #955d00;
   --alert-error-fgColor: #c43131;
 
+  --tooltip-bg-color: #e0e0e0;
+  --tooltip-text-color: #424242;
+
   color-scheme: light;
 
   #light-theme-button {
@@ -58,6 +61,8 @@
   img[src$="#gh-dark-mode-only"] {
     display: none;
   }
+
+  --callout-box-bg-color: rgb(215, 235, 252);
 }
 
 .dark-theme {
@@ -99,6 +104,9 @@
   --alert-warning-fgColor: #cea11f;
   --alert-error-fgColor: #ff6666;
 
+  --tooltip-bg-color: #e0e0e0;
+  --tooltip-text-color: #424242;
+
   color-scheme: dark;
 
   #dark-theme-button {
@@ -109,6 +117,8 @@
   img[src$="#gh-light-mode-only"] {
     display: none;
   }
+
+  --callout-box-bg-color: rgb(30, 40, 51);
 }
 
 #theme-button {
