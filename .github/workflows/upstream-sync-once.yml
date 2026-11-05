@@ -124,6 +124,20 @@ jobs:
                               hunks.append("\n".join(lines[max(0,i-3): min(len(lines),i+48)]))
                           if len(hunks) >= 2: break
                       print(f"CONTEXT {path}:\n" + "\n---\n".join(hunks)[:3600])
+              # Surface bounded non-Dart conflict hunks for deliberate decisions.
+              for path in pending:
+                  if path.endswith((".dart", ".js", ".js.map")):
+                      continue
+                  try:
+                      lines = pathlib.Path(path).read_text(errors="replace").splitlines()
+                  except OSError as exc:
+                      print(f"READ_ERROR {path}: {exc}")
+                      continue
+                  starts = [i for i, line in enumerate(lines) if line.startswith("<<<<<<< ")]
+                  for i in starts[:2]:
+                      print(f"TEXT_CONFLICT {path}:{i+1}:\n" + "\n".join(
+                          lines[max(0, i - 3):min(len(lines), i + 65)]
+                      )[:3800])
               sys.exit(1)
           PY
           if test -n "$(git diff --name-only --diff-filter=U)"; then
