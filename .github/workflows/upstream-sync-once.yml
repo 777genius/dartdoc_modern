@@ -47,3 +47,71 @@ jobs:
           git status --short
           git commit -m "chore(sync): merge dart-lang/dartdoc upstream 03ec6df"
           git push origin HEAD:refs/heads/chore/upstream-sync-2026-11-05
+
+  verify:
+    needs: merge
+    # GitHub Actions' GITHUB_TOKEN pushes do not trigger fresh PR workflows.
+    # Verify the branch just pushed by the merge job in this same run.
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          ref: chore/upstream-sync-2026-11-05
+          fetch-depth: 0
+      - name: Verify upstream ancestry and sync source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 03ec6df6228ac8257a737261d17e746c665b1e13 HEAD
+          echo "Verified branch HEAD: $(git rev-parse HEAD)"
+      - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
+        with:
+          sdk: 3.11.0
+      - uses: actions/setup-node@v4
+        if: runner.os != 'Windows'
+        with:
+          node-version: '22'
+      - name: Install Playwright chromium for browser E2E
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pw-run
+          cd /tmp/pw-run
+          npm init -y
+          npm install playwright@1.59.1
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            npx playwright install --with-deps chromium
+          else
+            npx playwright install chromium
+          fi
+      - name: Resolve dependencies
+        run: dart pub get
+      - name: Full Dart buildbot gate
+        run: dart run tool/task.dart buildbot
+        env:
+          PLAYWRIGHT_DIR: /tmp/pw-run
+      - name: Modern backends release-level E2E
+        if: runner.os == 'Linux'
+        run: dart run tool/task.dart validate package-release
+        env:
+          PLAYWRIGHT_DIR: /tmp/pw-run
+      - name: Jaspr visual checks
+        if: runner.os == 'Linux'
+        run: dart run tool/task.dart validate jaspr-theme-visual
+        env:
+          PLAYWRIGHT_DIR: /tmp/pw-run
+      - name: Confirm HTML, Jaspr and VitePress tests are all present
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          test -f test/end2end/vitepress_generator_test.dart
+          test -f test/end2end/jaspr_generator_test.dart
+          test -f lib/src/generator/html_generator_backend.dart
+          git diff --check
