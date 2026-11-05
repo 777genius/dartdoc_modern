@@ -47,6 +47,23 @@ jobs:
           git status --short
           git commit -m "chore(sync): merge dart-lang/dartdoc upstream 03ec6df"
           git push origin HEAD:refs/heads/chore/upstream-sync-2026-11-05
+      - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
+        with:
+          sdk: 3.11.0
+      - name: Regenerate and format merged documentation assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor 03ec6df6228ac8257a737261d17e746c665b1e13 HEAD
+          dart pub get
+          dart format bin lib test tool web
+          dart run tool/task.dart build
+          git add -u
+          git diff --cached --check
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(sync): regenerate resources and format merged sources"
+            git push origin HEAD:refs/heads/chore/upstream-sync-2026-11-05
+          fi
 
   verify:
     needs: merge
