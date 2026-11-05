@@ -33,24 +33,107 @@ jobs:
             echo "Upstream is already an ancestor; nothing to merge."
             exit 0
           fi
-          if ! git merge --no-commit --no-ff "$UPSTREAM_SHA"; then
-            echo "::error::Upstream merge has conflicts. No commit or push performed."
-            git status --short
-            echo "Conflicted paths:"
-            git diff --name-only --diff-filter=U
-            echo "First conflict markers (source files):"
-            git grep -n -m 2 '^<<<<<<< ' -- 'lib/*.dart' 'lib/**/*.dart' 'tool/**/*.dart' 'test/**/*.dart' || true
-            exit 1
-          fi
-          # Allow narrow and reviewed resolutions in later workflow revisions.
-          if test -f tool/upstream-sync-resolutions.sh; then
-            bash tool/upstream-sync-resolutions.sh
-          fi
+          # Merge with actual Git ancestry. Inspect conflict stages rather than
+          # selecting 'ours' or 'theirs' for entire source files.
+          git merge --no-commit --no-ff "$UPSTREAM_SHA" || true
+          python3 - <<'PY'
+          import pathlib
+          import subprocess
+          import tempfile
+          import os
+          import sys
+
+          def git(*args, check=True):
+              return subprocess.run(
+                  ["git", *args], stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE, check=check,
+              )
+
+          def normalized_imports(contents):
+              # Fork rename from package:dartdoc/ to package:dartdoc_modern/.
+              # Rewrite only Dart package URIs, never arbitrary identifiers.
+              return contents.replace(
+                  b"package:dartdoc/", b"package:dartdoc_modern/"
+              )
+
+          conflicted = git(
+              "diff", "--name-only", "--diff-filter=U",
+          ).stdout.decode().splitlines()
+          print(f"Unmerged paths before normalization: {len(conflicted)}")
+          resolved, pending = [], []
+          for file_path in conflicted:
+              # Deliberate deleted workflow in the fork; do not revive it.
+              if file_path == ".github/workflows/scorecards-analysis.yml":
+                  git("rm", "-f", "--", file_path)
+                  resolved.append((file_path, "preserve fork's CI deletion"))
+                  continue
+              if not file_path.endswith(".dart"):
+                  pending.append(file_path)
+                  continue
+              ours = git("show", f":2:{file_path}", check=False)
+              ancestor = git("show", f":1:{file_path}", check=False)
+              upstream = git("show", f":3:{file_path}", check=False)
+              if any(r.returncode != 0 for r in (ours, ancestor, upstream)):
+                  pending.append(file_path)
+                  continue
+              with tempfile.TemporaryDirectory() as td:
+                  paths = [pathlib.Path(td) / name for name in ("ours", "base", "upstream")]
+                  for p, content in zip(paths, (
+                      ours.stdout,
+                      normalized_imports(ancestor.stdout),
+                      normalized_imports(upstream.stdout),
+                  )):
+                      p.write_bytes(content)
+                  merger = subprocess.run(
+                      ["git", "merge-file", "-p", *map(str, paths)],
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE,
+                  )
+              if merger.returncode == 0 and b"<<<<<<<" not in merger.stdout:
+                  pathlib.Path(file_path).write_bytes(merger.stdout)
+                  git("add", "--", file_path)
+                  resolved.append((file_path, "3-way merge after namespace normalization"))
+              else:
+                  pending.append(file_path)
+
+          print(f"Safe auto-resolutions: {len(resolved)}")
+          for path, how in resolved:
+              print(f"RESOLVED {path}: {how}")
+          print(f"Still unresolved: {len(pending)}")
+          for path in pending:
+              print(f"UNRESOLVED {path}")
+          if pending:
+              for path in pending:
+                  # Output only a small bounded context for review.
+                  if not path.endswith(".dart"):
+                      continue
+                  b = git("show", f":1:{path}", check=False)
+                  o = git("show", f":2:{path}", check=False)
+                  t = git("show", f":3:{path}", check=False)
+                  if any(v.returncode for v in (b, o, t)):
+                      continue
+                  with tempfile.TemporaryDirectory() as td:
+                      paths = [pathlib.Path(td) / name for name in ("ours", "base", "upstream")]
+                      for p, content in zip(paths, (o.stdout, normalized_imports(b.stdout), normalized_imports(t.stdout))):
+                          p.write_bytes(content)
+                      mer = subprocess.run(["git","merge-file","-p",*map(str,paths)],capture_output=True)
+                      lines = mer.stdout.decode(errors="replace").splitlines()
+                      hunks = []
+                      for i, line in enumerate(lines):
+                          if line.startswith("<<<<<<< "):
+                              hunks.append("\n".join(lines[max(0,i-3): min(len(lines),i+48)]))
+                          if len(hunks) >= 2: break
+                      print(f"CONTEXT {path}:\n" + "\n---\n".join(hunks)[:3600])
+              sys.exit(1)
+          PY
           if test -n "$(git diff --name-only --diff-filter=U)"; then
-            echo "::error::Merge still contains unresolved conflicts."
-            git diff --name-only --diff-filter=U
+            echo "::error::Merge still has conflicts"
             exit 1
           fi
+          # The integration must be tested before enabling an automated push.
+          echo "::notice::Conflict-free merge; review and verify before commit."
+          git diff --cached --stat
+          exit 1
           git diff --cached --check
           git commit -m "chore(sync): merge dart-lang/dartdoc upstream 2026-11-05"
           git push origin "HEAD:refs/heads/chore/upstream-sync-2026-11-05"
