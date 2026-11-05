@@ -309,12 +309,7 @@ class PackageGraph with Referable {
       }
       _modelNodes.putIfAbsent(
         e,
-        () => ModelNode(
-          declaration,
-          e,
-          _analysisContext,
-          comment: comment,
-        ),
+        () => ModelNode(declaration, e, _analysisContext, comment: comment),
       );
     }
 
@@ -1073,4 +1068,3 @@ class InheritableElementsKey {
 
   InheritableElementsKey(this.element, this.library);
 }
-

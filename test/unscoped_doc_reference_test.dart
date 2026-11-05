@@ -23,15 +23,17 @@ class UnscopedDocReferenceTest extends DartdocTestBase {
   @override
   String get libraryName => 'unscoped';
 
-  bool _hasUnscopedWarning(Warnable warnable, String reference) =>
-      warnable.packageGraph.packageWarningCounter
-          .hasWarning(warnable, PackageWarning.unscopedDocReference, reference);
+  bool _hasUnscopedWarning(Warnable warnable, String reference) => warnable
+      .packageGraph
+      .packageWarningCounter
+      .hasWarning(warnable, PackageWarning.unscopedDocReference, reference);
 
   void test_isIgnoredByDefault() async {
     var library = await bootPackageWithLibrary('int x = 0;');
     expect(
-      library.config.packageWarningOptions
-          .getMode(PackageWarning.unscopedDocReference),
+      library.config.packageWarningOptions.getMode(
+        PackageWarning.unscopedDocReference,
+      ),
       PackageWarningMode.ignore,
     );
   }
@@ -97,8 +99,11 @@ int x = 0;
     expect(x.documentationAsHtml, isNotEmpty);
     expect(_hasUnscopedWarning(x, 'Nothing'), isFalse);
     expect(
-      x.packageGraph.packageWarningCounter
-          .hasWarning(x, PackageWarning.unresolvedDocReference, 'Nothing'),
+      x.packageGraph.packageWarningCounter.hasWarning(
+        x,
+        PackageWarning.unresolvedDocReference,
+        'Nothing',
+      ),
       isTrue,
     );
   }

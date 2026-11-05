@@ -17,7 +17,8 @@ import 'dart:isolate' show Isolate;
 import 'dart:typed_data';
 
 import 'package:analyzer/file_system/file_system.dart';
-import 'package:dartdoc_modern/src/generator/html_resources.g.dart' as resources;
+import 'package:dartdoc_modern/src/generator/html_resources.g.dart'
+    as resources;
 import 'package:meta/meta.dart';
 
 Future<Uri?>? _resourcesPackageUriFuture;
@@ -46,8 +47,8 @@ extension ResourceLoader on ResourceProvider {
   /// bytes from [resources.bundledResourcesBase64].
   Future<Uint8List> loadResourceBytes(String resourceFileName) async {
     final uri = Uri.parse('package:dartdoc_modern/resources');
-    var resolvedUri =
-        await (_resourcesPackageUriFuture ??= Isolate.resolvePackageUri(uri));
+    var resolvedUri = await (_resourcesPackageUriFuture ??=
+        Isolate.resolvePackageUri(uri));
     if (resolvedUri == null) {
       try {
         // Keep the fork's explicit AOT root and package-config lookup.

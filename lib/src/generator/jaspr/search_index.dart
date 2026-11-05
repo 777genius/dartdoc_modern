@@ -312,7 +312,9 @@ class _ParsedPage {
 
     for (final line in bodyLines) {
       currentFence = _nextFence(line, currentFence);
-      final headingMatch = currentFence == null ? _heading.firstMatch(line) : null;
+      final headingMatch = currentFence == null
+          ? _heading.firstMatch(line)
+          : null;
       if (headingMatch != null) {
         final level = headingMatch.group(1)!.length;
         final rawHeading = headingMatch.group(2)!.trim();

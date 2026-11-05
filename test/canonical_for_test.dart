@@ -110,11 +110,13 @@ String get myGetter => 'hello';
     var httpServing = packageGraph.libraries.named('http_serving');
 
     expect(
-        packageGraph.packageWarningCounter.hasWarning(
-            httpServing,
-            PackageWarning.ignoredCanonicalFor,
-            'wrong_library.myGetter (did you mean'),
-        isTrue);
+      packageGraph.packageWarningCounter.hasWarning(
+        httpServing,
+        PackageWarning.ignoredCanonicalFor,
+        'wrong_library.myGetter (did you mean',
+      ),
+      isTrue,
+    );
   }
 
   /// Tests that @canonicalFor suggests close matches when a library name has multiple dots.
@@ -138,11 +140,13 @@ String get myGetter => 'hello';
     var httpServing = packageGraph.libraries.named('http_serving');
 
     expect(
-        packageGraph.packageWarningCounter.hasWarning(
-            httpServing,
-            PackageWarning.ignoredCanonicalFor,
-            'some.nested.library.myGetter (did you mean'),
-        isTrue);
+      packageGraph.packageWarningCounter.hasWarning(
+        httpServing,
+        PackageWarning.ignoredCanonicalFor,
+        'some.nested.library.myGetter (did you mean',
+      ),
+      isTrue,
+    );
   }
 
   /// Tests that @canonicalFor works for explicit getters even when they are

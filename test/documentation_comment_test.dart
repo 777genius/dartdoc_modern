@@ -299,11 +299,13 @@ Three.'''),
     // Force \r\n line endings to simulate index drift if the analyzer normalizes it to \n.
     // We use many lines to ensure the shift overshoots the string length and throws RangeError.
     var lines = List.generate(50, (i) => '/// Line $i').join('\n');
-    await writePackageWithCommentedLibrary('''
+    await writePackageWithCommentedLibrary(
+      '''
 $lines
 /// @docImport 'dart:async' as async;
 '''
-        .replaceAll('\n', '\r\n'));
+          .replaceAll('\n', '\r\n'),
+    );
     var doc = libraryModel.documentation;
 
     expect(doc, List.generate(50, (i) => 'Line $i').join('\n'));

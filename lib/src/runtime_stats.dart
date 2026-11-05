@@ -63,12 +63,18 @@ class _RuntimeStats {
     final report = StringBuffer();
     report.writeln('\nReference Counts:');
     report.writeln('  total references: $totalReferences');
-    report.writeln('  resolved references:  '
-        '${_valueAndPercent(resolvedReferences)}');
-    report.writeln('  resolved, but not in scope for the analyzer:  '
-        '${_valueAndPercent(unscopedReferences)}');
-    report.writeln('  resolved to a different element than the analyzer:  '
-        '${_valueAndPercent(differentTargetReferences)}');
+    report.writeln(
+      '  resolved references:  '
+      '${_valueAndPercent(resolvedReferences)}',
+    );
+    report.writeln(
+      '  resolved, but not in scope for the analyzer:  '
+      '${_valueAndPercent(unscopedReferences)}',
+    );
+    report.writeln(
+      '  resolved to a different element than the analyzer:  '
+      '${_valueAndPercent(differentTargetReferences)}',
+    );
 
     if (perfTasks.isNotEmpty) {
       report.writeln('\nRuntime performance:');

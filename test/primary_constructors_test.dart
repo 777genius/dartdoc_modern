@@ -100,8 +100,10 @@ class PrimaryConstructorTest extends DartdocTestBase {
     expect(field2.documentation, 'The second parameter.');
 
     var field4 = cClass.instanceFields.named('field4');
-    expect(field4.hasAnnotations,
-        false); // Does not get annotation from parameter.
+    expect(
+      field4.hasAnnotations,
+      false,
+    ); // Does not get annotation from parameter.
     expect(field4.hasDocumentation, false);
   }
 }

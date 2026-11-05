@@ -41,13 +41,17 @@ final PackageMetaProvider pubPackageMetaProvider = PackageMetaProvider(
   PhysicalResourceProvider.INSTANCE,
   switch (cli_util.sdkPath) {
     final sdk? => PhysicalResourceProvider.INSTANCE.getFolder(
-        PhysicalResourceProvider.INSTANCE.pathContext.absolute(sdk),
-      ),
-    null => PhysicalResourceProvider.INSTANCE
-        .getFile(PhysicalResourceProvider.INSTANCE.pathContext
-            .absolute(Platform.resolvedExecutable))
-        .parent
-        .parent,
+      PhysicalResourceProvider.INSTANCE.pathContext.absolute(sdk),
+    ),
+    null =>
+      PhysicalResourceProvider.INSTANCE
+          .getFile(
+            PhysicalResourceProvider.INSTANCE.pathContext.absolute(
+              Platform.resolvedExecutable,
+            ),
+          )
+          .parent
+          .parent,
   },
   Platform.environment,
 );
@@ -322,8 +326,7 @@ class _FilePackageMeta extends PubPackageMeta {
 
   _FilePackageMeta(super.dir, super.resourceProvider)
     : _pubspec =
-          loadYaml(dir.getFile('pubspec.yaml').readAsStringSync())
-              as YamlMap;
+          loadYaml(dir.getFile('pubspec.yaml').readAsStringSync()) as YamlMap;
 
   @override
   late final String? hostedAt = () {

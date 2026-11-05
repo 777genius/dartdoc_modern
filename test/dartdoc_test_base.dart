@@ -47,10 +47,7 @@ abstract class DartdocTestBase {
   /// These are written out to a pubspec file using `path` keys.
   Map<String, String> get pubDependencyPaths => const {};
 
-  List<String> get experiments => [
-        'enhanced-parts',
-        'primary-constructors',
-      ];
+  List<String> get experiments => ['enhanced-parts', 'primary-constructors'];
 
   bool get skipUnreachableSdkLibraries => true;
 

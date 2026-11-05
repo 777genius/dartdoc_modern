@@ -127,6 +127,7 @@ int x = 0;
       '<a href="$dartAsyncUrlPrefix/Future-class.html">p.Future</a>.</p>',
     );
   }
+
   void test_referenced_unresolvedImportedLibrary() async {
     var library = await bootPackageWithLibrary(
       '''

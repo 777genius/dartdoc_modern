@@ -158,9 +158,9 @@ Future<void> runBuild(ArgResults commandResults) async {
       'resources' => buildResources(),
       'dartdoc-options' => buildDartdocOptions(),
       'web' => () async {
-          await buildWeb(debug: debug);
-          await buildResources();
-        }(),
+        await buildWeb(debug: debug);
+        await buildResources();
+      }(),
       _ => throw UnimplementedError('Unknown build target: "$target"'),
     };
   }
@@ -220,7 +220,8 @@ Future<void> buildResources() async {
     ..writeln('];')
     ..writeln()
     ..writeln(
-        '/// Base64-encoded contents of each resource in `lib/resources/`.')
+      '/// Base64-encoded contents of each resource in `lib/resources/`.',
+    )
     ..writeln('const Map<String, String> bundledResourcesBase64 = {');
   for (var file in resourceFiles) {
     var name = path.basename(file.path);

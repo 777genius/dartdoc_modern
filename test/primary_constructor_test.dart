@@ -166,8 +166,9 @@ class C(
 
     var c = library.classes.named('C');
     var xField = c.instanceFields.named('x');
-    var xParam =
-        c.constructors.first.parameters.firstWhere((p) => p.name == 'x');
+    var xParam = c.constructors.first.parameters.firstWhere(
+      (p) => p.name == 'x',
+    );
 
     expect(xField.hasAnnotations, isTrue);
     var annotation = xField.annotations.single;
@@ -215,8 +216,10 @@ extension type Id(
   // ---------------------------------------------------------------------------
 
   @FailingTest(
-      reason: 'dartdoc currently resolves primary constructor parameters '
-          'from class-level comments')
+    reason:
+        'dartdoc currently resolves primary constructor parameters '
+        'from class-level comments',
+  )
   void test_metadata_commentReference_nonDeclaring() async {
     var library = await bootPackageWithLibrary('''
 /// Points to [x].
@@ -253,8 +256,10 @@ class C(var int x);
   }
 
   @FailingTest(
-      reason: 'dartdoc currently resolves primary constructor parameters from '
-          'class-level comments')
+    reason:
+        'dartdoc currently resolves primary constructor parameters from '
+        'class-level comments',
+  )
   void test_metadata_commentReference_super_nonDeclaring() async {
     var library = await bootPackageWithLibrary('''
 class Base(int x);
@@ -298,15 +303,12 @@ class Derived(super.x) extends Base;
   // ---------------------------------------------------------------------------
 
   void test_privateNamedParameter_becomesPublic() async {
-    var library = await bootPackageWithLibrary(
-      '''
+    var library = await bootPackageWithLibrary('''
 class C({
      /// Points to [_name].
     required var String _name
 });
-''',
-      libraryPreamble: '// @dart=3.12',
-    );
+''', libraryPreamble: '// @dart=3.12');
 
     var c = library.classes.named('C');
 
@@ -336,8 +338,10 @@ class C(int x) {
     var c = library.classes.named('C');
     var constructor = c.constructors.first;
 
-    expect(constructor.documentation,
-        contains('Docs for the primary constructor.'));
+    expect(
+      constructor.documentation,
+      contains('Docs for the primary constructor.'),
+    );
   }
 
   void test_primaryConstructorBody_commentReference() async {
@@ -386,25 +390,18 @@ class MyClass {
     var c = library.classes.named('MyClass');
     expect(
       c.constructors.map((cons) => cons.name),
-      unorderedEquals([
-        'MyClass.new',
-        'MyClass.name',
-        'MyClass.redir',
-      ]),
+      unorderedEquals(['MyClass.new', 'MyClass.name', 'MyClass.redir']),
     );
   }
 
   void test_secondaryConstructors_factory() async {
-    var library = await bootPackageWithLibrary(
-      '''
+    var library = await bootPackageWithLibrary('''
 class MyClass {
   const new();
   factory fact() => .new();
   const factory redirFact() = MyClass;
 }
-''',
-      libraryPreamble: '// @dart=3.12',
-    );
+''', libraryPreamble: '// @dart=3.12');
 
     var c = library.classes.named('MyClass');
     expect(

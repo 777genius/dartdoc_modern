@@ -26,13 +26,17 @@ class DocReferenceTargetDiffersTest extends DartdocTestBase {
 
   bool _hasDiffersWarning(Warnable warnable, String reference) =>
       warnable.packageGraph.packageWarningCounter.hasWarning(
-          warnable, PackageWarning.docReferenceTargetDiffers, reference);
+        warnable,
+        PackageWarning.docReferenceTargetDiffers,
+        reference,
+      );
 
   void test_isIgnoredByDefault() async {
     var library = await bootPackageWithLibrary('int x = 0;');
     expect(
-      library.config.packageWarningOptions
-          .getMode(PackageWarning.docReferenceTargetDiffers),
+      library.config.packageWarningOptions.getMode(
+        PackageWarning.docReferenceTargetDiffers,
+      ),
       PackageWarningMode.ignore,
     );
   }
@@ -58,8 +62,10 @@ class B extends A {
     // Dartdoc re-resolves the inherited comment in `B`, linking `B.parse`; the
     // analyzer resolved `[parse]` where the comment was written, to `A.parse`.
     expect(bProcess.documentationAsHtml, contains('B/parse.html'));
-    expect(_hasDiffersWarning(bProcess, '[parse] links to target.B.parse'),
-        isTrue);
+    expect(
+      _hasDiffersWarning(bProcess, '[parse] links to target.B.parse'),
+      isTrue,
+    );
     expect(_hasDiffersWarning(bProcess, 'A.parse'), isTrue);
     // At the definition site both agree.
     var aProcess = library.classes.named('A').instanceMethods.named('process');
@@ -213,8 +219,11 @@ int x = 0;
     expect(x.documentationAsHtml, contains('<a href='));
     expect(_hasDiffersWarning(x, 'Other'), isFalse);
     expect(
-      x.packageGraph.packageWarningCounter
-          .hasWarning(x, PackageWarning.unscopedDocReference, 'Other'),
+      x.packageGraph.packageWarningCounter.hasWarning(
+        x,
+        PackageWarning.unscopedDocReference,
+        'Other',
+      ),
       isTrue,
     );
   }

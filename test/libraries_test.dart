@@ -236,9 +236,7 @@ library;
 /// Not library docs.
 import 'dart:async';
 '''),
-    ]))
-        .libraries
-        .named('lib1');
+    ])).libraries.named('lib1');
 
     expect(library.hasDocumentationComment, isTrue);
     expect(library.documentation, 'Docs for the library.');
@@ -250,9 +248,7 @@ import 'dart:async';
 /// Docs for the library.
 library lib1;
 '''),
-    ]))
-        .libraries
-        .named('lib1');
+    ])).libraries.named('lib1');
 
     expect(library.documentation, 'Docs for the library.');
   }
@@ -268,9 +264,7 @@ import 'dart:async';
 
 class C {}
 '''),
-    ]))
-        .libraries
-        .named('lib1');
+    ])).libraries.named('lib1');
 
     expect(library.hasDocumentationComment, isFalse);
     expect(library.documentationComment, isNull);
@@ -284,9 +278,7 @@ class C {}
 /** Not library docs. */
 export 'dart:async' show Future;
 '''),
-    ]))
-        .libraries
-        .named('lib1');
+    ])).libraries.named('lib1');
 
     expect(library.hasDocumentationComment, isFalse);
     expect(library.documentation, isEmpty);
@@ -301,9 +293,7 @@ part 'lib1_part.dart';
       d.file('lib/lib1_part.dart', '''
 part of 'lib1.dart';
 '''),
-    ]))
-        .libraries
-        .named('lib1');
+    ])).libraries.named('lib1');
 
     expect(library.hasDocumentationComment, isFalse);
     expect(library.documentation, isEmpty);
@@ -315,9 +305,7 @@ part of 'lib1.dart';
 /// Docs for C.
 class C {}
 '''),
-    ]))
-        .libraries
-        .named('lib1');
+    ])).libraries.named('lib1');
 
     expect(library.hasDocumentationComment, isFalse);
     expect(library.documentation, isEmpty);

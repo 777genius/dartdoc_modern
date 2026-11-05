@@ -23,28 +23,30 @@ void init() {
     int? timeoutId;
 
     button.addEventListener(
-        'click',
-        (Event _) {
-          final codeBlock = pre.querySelector('code') as HTMLElement?;
-          final text = codeBlock?.textContent ?? '';
+      'click',
+      (Event _) {
+        final codeBlock = pre.querySelector('code') as HTMLElement?;
+        final text = codeBlock?.textContent ?? '';
 
-          window.navigator.clipboard.writeText(text);
+        window.navigator.clipboard.writeText(text);
 
-          iconSpan.textContent = 'check';
-          button.classList.add('copied');
+        iconSpan.textContent = 'check';
+        button.classList.add('copied');
 
-          if (timeoutId != null) {
-            window.clearTimeout(timeoutId!);
-          }
+        if (timeoutId != null) {
+          window.clearTimeout(timeoutId!);
+        }
 
-          timeoutId = window.setTimeout(
-              () {
-                iconSpan.textContent = 'content_copy';
-                button.classList.remove('copied');
-                timeoutId = null;
-              }.toJS,
-              2000.toJS);
-        }.toJS);
+        timeoutId = window.setTimeout(
+          () {
+            iconSpan.textContent = 'content_copy';
+            button.classList.remove('copied');
+            timeoutId = null;
+          }.toJS,
+          2000.toJS,
+        );
+      }.toJS,
+    );
 
     pre.insertBefore(button, pre.firstChild);
   }

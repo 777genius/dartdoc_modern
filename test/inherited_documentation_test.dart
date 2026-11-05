@@ -90,8 +90,9 @@ class C extends B {
 ''');
     var cM = library.classes.named('C').instanceMethods.named('m');
     expect(cM.hasInheritedDocumentation, isTrue);
-    expect(cM.inheritedDocumentationFrom.map((e) => e.qualifiedDisplayName),
-        ['A.m']);
+    expect(cM.inheritedDocumentationFrom.map((e) => e.qualifiedDisplayName), [
+      'A.m',
+    ]);
   }
 
   void test_fieldWithOwnAccessorDocumentation_isNotInherited() async {
@@ -127,7 +128,9 @@ class B extends A {
     var source = bX.inheritedDocumentationFrom.single;
     expect(source.qualifiedDisplayName, 'A.x');
     expect(
-        source.linkedQualifiedName, '<a href="$linkPrefix/A/x.html">A.x</a>');
+      source.linkedQualifiedName,
+      '<a href="$linkPrefix/A/x.html">A.x</a>',
+    );
   }
 
   void test_implementedInterfaceMember_isInheritedFromInterface() async {
@@ -145,8 +148,9 @@ class A implements I {
     var aM = library.classes.named('A').instanceMethods.named('m');
     expect(aM.documentationAsHtml, contains('Docs on I.m.'));
     expect(aM.hasInheritedDocumentation, isTrue);
-    expect(aM.inheritedDocumentationFrom.map((e) => e.qualifiedDisplayName),
-        ['I.m']);
+    expect(aM.inheritedDocumentationFrom.map((e) => e.qualifiedDisplayName), [
+      'I.m',
+    ]);
   }
 
   void test_noDocumentationAnywhere_isNotInherited() async {

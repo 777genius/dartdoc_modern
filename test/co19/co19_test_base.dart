@@ -25,7 +25,7 @@ class Co19TestBase extends DocumentationCommentTestBase {
   /// Boots a package with the single library file `lib/co19.dart` whose
   /// content is exactly [content].
   Future<Library> bootLibrary(String content) async =>
-      (await bootPackageFromFiles([d.file('lib/co19.dart', content)]))
-          .libraries
-          .named(libraryName);
+      (await bootPackageFromFiles([
+        d.file('lib/co19.dart', content),
+      ])).libraries.named(libraryName);
 }

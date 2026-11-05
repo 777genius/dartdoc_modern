@@ -76,9 +76,8 @@ class PubPackageBuilder implements PackageBuilder {
           ..warning = false
           ..lint = false;
         if (config.enableExperiment.isNotEmpty) {
-          analysisOptionsBuilder.contextFeatures = FeatureSet.latestLanguageVersion(
-            flags: config.enableExperiment,
-          );
+          analysisOptionsBuilder.contextFeatures =
+              FeatureSet.latestLanguageVersion(flags: config.enableExperiment);
         }
       },
       withFineDependencies: true,

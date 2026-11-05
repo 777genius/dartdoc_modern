@@ -3,7 +3,8 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:analyzer/file_system/physical_file_system.dart';
-import 'package:dartdoc_modern/src/generator/html_resources.g.dart' as resources;
+import 'package:dartdoc_modern/src/generator/html_resources.g.dart'
+    as resources;
 import 'package:dartdoc_modern/src/generator/resource_loader.dart';
 import 'package:dartdoc_modern/src/io_utils.dart';
 import 'package:test/test.dart';
@@ -27,21 +28,26 @@ void main() {
       );
     });
 
-    test('loadResourceBytes loads package:dartdoc_modern/resources files', () async {
-      var provider = PhysicalResourceProvider.INSTANCE;
-      var bytes = await provider.loadResourceBytes('docs.dart.js');
-      expect(bytes, isNotEmpty);
-    });
+    test(
+      'loadResourceBytes loads package:dartdoc_modern/resources files',
+      () async {
+        var provider = PhysicalResourceProvider.INSTANCE;
+        var bytes = await provider.loadResourceBytes('docs.dart.js');
+        expect(bytes, isNotEmpty);
+      },
+    );
 
-    test('loadBundledResourceBytes matches all files in lib/resources',
-        () async {
-      var provider = PhysicalResourceProvider.INSTANCE;
-      for (var name in resources.resourceNames) {
-        var diskBytes = await provider.loadResourceBytes(name);
-        var bundledBytes = loadBundledResourceBytes(name);
-        expect(bundledBytes, equals(diskBytes), reason: 'Mismatch for $name');
-      }
-    });
+    test(
+      'loadBundledResourceBytes matches all files in lib/resources',
+      () async {
+        var provider = PhysicalResourceProvider.INSTANCE;
+        for (var name in resources.resourceNames) {
+          var diskBytes = await provider.loadResourceBytes(name);
+          var bundledBytes = loadBundledResourceBytes(name);
+          expect(bundledBytes, equals(diskBytes), reason: 'Mismatch for $name');
+        }
+      },
+    );
   });
 
   group('TaskQueue', () {
@@ -51,27 +57,35 @@ void main() {
     test('no deadlock when delayed exceptions fire in closures', () async {
       var sharedTracker = TaskQueue(maxJobs: 2);
       expect(() async {
-        var t =
-            Future.delayed(Duration(milliseconds: 10), () => throw Exception());
+        var t = Future.delayed(
+          Duration(milliseconds: 10),
+          () => throw Exception(),
+        );
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<Exception>()));
       expect(() async {
-        var t =
-            Future.delayed(Duration(milliseconds: 10), () => throw Exception());
+        var t = Future.delayed(
+          Duration(milliseconds: 10),
+          () => throw Exception(),
+        );
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<Exception>()));
       expect(() async {
-        var t =
-            Future.delayed(Duration(milliseconds: 10), () => throw Exception());
+        var t = Future.delayed(
+          Duration(milliseconds: 10),
+          () => throw Exception(),
+        );
         // ignore: empty_catches
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<Exception>()));
       expect(() async {
-        var t =
-            Future.delayed(Duration(milliseconds: 10), () => throw Exception());
+        var t = Future.delayed(
+          Duration(milliseconds: 10),
+          () => throw Exception(),
+        );
         await sharedTracker.add(() => t);
         return t;
       }, throwsA(const TypeMatcher<Exception>()));

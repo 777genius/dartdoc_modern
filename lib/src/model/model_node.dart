@@ -35,8 +35,10 @@ class ModelNode {
     // [TopLevelVariableDeclaration]. (#2401)
     if (sourceNode is VariableDeclaration) {
       sourceNode = sourceNode.parent!.parent!;
-      assert(sourceNode is FieldDeclaration ||
-          sourceNode is TopLevelVariableDeclaration);
+      assert(
+        sourceNode is FieldDeclaration ||
+            sourceNode is TopLevelVariableDeclaration,
+      );
     }
     return ModelNode._(
       element,
@@ -53,8 +55,8 @@ class ModelNode {
     required int sourceEnd,
     required int sourceOffset,
     this.commentData,
-  })  : _sourceEnd = sourceEnd,
-        _sourceOffset = sourceOffset;
+  }) : _sourceEnd = sourceEnd,
+       _sourceOffset = sourceOffset;
 
   bool get _isSynthetic => _sourceEnd < 0 || _sourceOffset < 0;
 
@@ -129,7 +131,7 @@ class CommentReferenceData {
   final int length;
 
   CommentReferenceData(this.element, String? name, this.offset, this.length)
-      : name = name ?? '';
+    : name = name ?? '';
 }
 
 @visibleForTesting
@@ -156,43 +158,49 @@ extension SourceStringExtensions on String {
   /// Strips leading doc comments from the given source code.
   String get stripDocComments {
     var remainder = trimLeft();
-    var lineComments = remainder.startsWith(_tripleSlash) ||
+    var lineComments =
+        remainder.startsWith(_tripleSlash) ||
         remainder.startsWith(_escapedTripleSlash);
-    var blockComments = remainder.startsWith(_slashStarStar) ||
+    var blockComments =
+        remainder.startsWith(_slashStarStar) ||
         remainder.startsWith(_escapedSlashStarStar);
 
-    return split('\n').where((String line) {
-      if (lineComments) {
-        if (line.startsWith(_tripleSlash) ||
-            line.startsWith(_escapedTripleSlash)) {
-          return false;
-        }
-        lineComments = false;
-        return true;
-      } else if (blockComments) {
-        if (line.contains(_starSlash) || line.contains(_escapedStarSlash)) {
-          blockComments = false;
-          return false;
-        }
-        if (line.startsWith(_slashStarStar) ||
-            line.startsWith(_escapedSlashStarStar)) {
-          return false;
-        }
-        return false;
-      }
+    return split('\n')
+        .where((String line) {
+          if (lineComments) {
+            if (line.startsWith(_tripleSlash) ||
+                line.startsWith(_escapedTripleSlash)) {
+              return false;
+            }
+            lineComments = false;
+            return true;
+          } else if (blockComments) {
+            if (line.contains(_starSlash) || line.contains(_escapedStarSlash)) {
+              blockComments = false;
+              return false;
+            }
+            if (line.startsWith(_slashStarStar) ||
+                line.startsWith(_escapedSlashStarStar)) {
+              return false;
+            }
+            return false;
+          }
 
-      return true;
-    }).join('\n');
+          return true;
+        })
+        .join('\n');
   }
 
   /// Strips the common indent from the given source fragment.
   String get stripIndent {
     var remainder = trimLeft();
     var indent = substring(0, length - remainder.length);
-    return split('\n').map((line) {
-      line = line.trimRight();
-      return line.startsWith(indent) ? line.substring(indent.length) : line;
-    }).join('\n');
+    return split('\n')
+        .map((line) {
+          line = line.trimRight();
+          return line.startsWith(indent) ? line.substring(indent.length) : line;
+        })
+        .join('\n');
   }
 }
 
@@ -240,9 +248,17 @@ extension on Comment {
     var docImportSourceRanges = <SourceRange>[];
     for (var docImport in docImports) {
       var start = _fileOffsetToContentOffset(
-          tokenList, tokenContentStarts, normalizedLengths, docImport.offset);
-      var end = _fileOffsetToContentOffset(tokenList, tokenContentStarts,
-          normalizedLengths, docImport.import.end);
+        tokenList,
+        tokenContentStarts,
+        normalizedLengths,
+        docImport.offset,
+      );
+      var end = _fileOffsetToContentOffset(
+        tokenList,
+        tokenContentStarts,
+        normalizedLengths,
+        docImport.import.end,
+      );
       docImportSourceRanges.add(SourceRange(start, end - start));
     }
 
