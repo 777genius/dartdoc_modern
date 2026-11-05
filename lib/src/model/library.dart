@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:analyzer/dart/analysis/features.dart';
+import 'package:analyzer/dart/ast/ast.dart' show LibraryDirective;
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/scope.dart';
 import 'package:dartdoc_modern/src/model/kind.dart';
@@ -24,27 +25,34 @@ class Library extends ModelElement with TopLevelContainer {
 
   final String _restoredUri;
 
+  /// Whether the library's defining compilation unit has a `library` directive.
+  final bool _hasLibraryDirective;
+
   @override
   final Package package;
 
   Library._(
-    this.element,
-    PackageGraph packageGraph,
-    this.package,
-    this._restoredUri,
-    this._localElements,
-    this._exportedElements,
-  ) : super(null, packageGraph);
+      this.element,
+      PackageGraph packageGraph,
+      this.package,
+      this._restoredUri,
+      this._localElements,
+      this._exportedElements,
+      this._hasLibraryDirective)
+      : super(null, packageGraph);
 
-  factory Library.fromLibraryResult(
-    DartDocResolvedLibrary resolvedLibrary,
-    PackageGraph packageGraph,
-    Package package,
-  ) {
+  factory Library.fromLibraryResult(DartDocResolvedLibrary resolvedLibrary,
+      PackageGraph packageGraph, Package package) {
     packageGraph.gatherModelNodes(resolvedLibrary);
 
     var libraryElement = resolvedLibrary.element;
     var firstLibraryFragment = libraryElement.firstFragment;
+    // Empty only for SDK libraries in google3, which are not parsed there;
+    // assume a `library` directive so that their documentation is kept.
+    var units = resolvedLibrary.units;
+    var hasLibraryDirective = units.isEmpty ||
+        units.first.directives
+            .any((directive) => directive is LibraryDirective);
 
     var localElements = <Element>{
       for (var g in firstLibraryFragment.getters) g.element,
@@ -59,7 +67,7 @@ class Library extends ModelElement with TopLevelContainer {
       for (var a in firstLibraryFragment.typeAliases) a.element,
     };
     var exportedElements = {
-      ...libraryElement.exportNamespace.definedNames2.values,
+      ...libraryElement.exportNamespace.definedNames2.values
     }.difference(localElements);
     var library = Library._(
       libraryElement,
@@ -68,11 +76,31 @@ class Library extends ModelElement with TopLevelContainer {
       resolvedLibrary.element.firstFragment.source.uri.toString(),
       localElements,
       exportedElements,
+      hasLibraryDirective,
     );
 
     package.allLibraries.add(library);
     return library;
   }
+
+  /// The documentation comment of this library, or `null` if there is none.
+  ///
+  /// Per the Dart documentation comment specification (sections 3.1 and 3.5),
+  /// a comment documents a library only when it is placed before a `library`
+  /// directive. The analyzer, however, falls back to the comment before the
+  /// first directive of _any_ kind (`import`, `export`, `part`) when there is
+  /// no `library` directive. Ignore that comment here, so that dartdoc follows
+  /// the specification.
+  // TODO(zarah): Remove this override and the one below once
+  // https://github.com/dart-lang/sdk/issues/64700 is fixed and dartdoc requires
+  // an analyzer with the fix.
+  @override
+  String? get documentationComment =>
+      _hasLibraryDirective ? super.documentationComment : null;
+
+  @override
+  bool get hasDocumentationComment =>
+      _hasLibraryDirective && super.hasDocumentationComment;
 
   /// Allow scope for Libraries.
   @override
@@ -100,10 +128,9 @@ class Library extends ModelElement with TopLevelContainer {
     // Private Dart SDK libraries are not public.
     if (elementUri.isScheme('dart')) {
       var segments = elementUri.pathSegments;
-      if (segments case [
-        var firstSegment,
-        ...,
-      ] when firstSegment.startsWith('_') || firstSegment == 'nativewrappers') {
+      if (segments case [var firstSegment, ...]
+          when firstSegment.startsWith('_') ||
+              firstSegment == 'nativewrappers') {
         return false;
       }
     }
@@ -117,9 +144,10 @@ class Library extends ModelElement with TopLevelContainer {
       return false;
     }
     if (
-    // TODO(srawlins): Stop supporting a 'name' here.
-    config.isLibraryExcluded(name) ||
-        config.isLibraryExcluded(element.firstFragment.source.uri.toString())) {
+        // TODO(srawlins): Stop supporting a 'name' here.
+        config.isLibraryExcluded(name) ||
+            config.isLibraryExcluded(
+                element.firstFragment.source.uri.toString())) {
       return false;
     }
     return true;
@@ -280,6 +308,7 @@ class Library extends ModelElement with TopLevelContainer {
   }
 
   @override
+
   /// The path portion of this library's import URI as a 'package:' URI.
   String get breadcrumbName {
     var source = element.firstFragment.source;
@@ -292,15 +321,12 @@ class Library extends ModelElement with TopLevelContainer {
         package.packagePath.contains('/google3/')) {
       // In google3, `fullName` is specified as if the root of google3 was `/`.
       // And `package.packagePath` contains the true google3 root.
-      var root = pathContext.joinAll(
-        pathContext.split(package.packagePath)..removeLast(),
-      );
+      var root = pathContext
+          .joinAll(pathContext.split(package.packagePath)..removeLast());
       fullName = '$root$fullName';
     }
-    var relativePath = pathContext.relative(
-      fullName,
-      from: package.packagePath,
-    );
+    var relativePath =
+        pathContext.relative(fullName, from: package.packagePath);
     assert(relativePath.startsWith('lib${pathContext.separator}'));
     const libDirectoryLength = 'lib/'.length;
     return relativePath.substring(libDirectoryLength);
@@ -310,8 +336,8 @@ class Library extends ModelElement with TopLevelContainer {
   String get packageName => packageMeta?.name ?? '';
 
   /// The real packageMeta, as opposed to the package we are documenting with.
-  late final PackageMeta? packageMeta = packageGraph.packageMetaProvider
-      .fromElement(element, config.sdkDir);
+  late final PackageMeta? packageMeta =
+      packageGraph.packageMetaProvider.fromElement(element, config.sdkDir);
 
   late final List<Class> classesAndExceptions = [
     ..._localElementsOfType<ClassElement, Class>(),
@@ -376,46 +402,44 @@ class Library extends ModelElement with TopLevelContainer {
   ];
 
   Iterable<U>
-  _localElementsOfType<T extends Element, U extends ModelElement>() =>
-      _localElements.whereType<T>().map(
-        (e) => packageGraph.getModelFor(e, this) as U,
-      );
+      _localElementsOfType<T extends Element, U extends ModelElement>() =>
+          _localElements
+              .whereType<T>()
+              .map((e) => packageGraph.getModelFor(e, this) as U);
 
   Iterable<U>
-  _exportedElementsOfType<T extends Element, U extends ModelElement>() =>
-      _exportedElements.whereType<T>().map((e) {
-        var library = e.library;
-        if (library == null) {
-          throw StateError("The library of '$e' is null!");
-        }
-        return packageGraph.getModelFor(
+      _exportedElementsOfType<T extends Element, U extends ModelElement>() =>
+          _exportedElements.whereType<T>().map((e) {
+            var library = e.library;
+            if (library == null) {
+              throw StateError("The library of '$e' is null!");
+            }
+            return packageGraph.getModelFor(
               e,
               packageGraph.getModelForElement(library) as Library,
-            )
-            as U;
-      });
+            ) as U;
+          });
 
   Iterable<TopLevelVariable> get _localVariables {
     return {
       ..._localElements.whereType<TopLevelVariableElement>(),
-      ..._localElements.whereType<PropertyAccessorElement>().map(
-        (a) => a.variable as TopLevelVariableElement,
-      ),
+      ..._localElements
+          .whereType<PropertyAccessorElement>()
+          .map((a) => a.variable as TopLevelVariableElement),
     }.map(_topLevelVariableFor);
   }
 
   Iterable<TopLevelVariable> get _exportedVariables {
     return {
       ..._exportedElements.whereType<TopLevelVariableElement>(),
-      ..._exportedElements.whereType<PropertyAccessorElement>().map(
-        (a) => a.variable as TopLevelVariableElement,
-      ),
+      ..._exportedElements
+          .whereType<PropertyAccessorElement>()
+          .map((a) => a.variable as TopLevelVariableElement),
     }.map(_topLevelVariableFor);
   }
 
   TopLevelVariable _topLevelVariableFor(
-    TopLevelVariableElement topLevelVariableElement,
-  ) {
+      TopLevelVariableElement topLevelVariableElement) {
     Accessor? getter;
     var elementGetter = topLevelVariableElement.getter;
     if (elementGetter != null) {
@@ -426,13 +450,8 @@ class Library extends ModelElement with TopLevelContainer {
     if (elementSetter != null) {
       setter = packageGraph.getModelFor(elementSetter, this) as Accessor;
     }
-    return getModelForPropertyInducingElement(
-          topLevelVariableElement,
-          this,
-          getter: getter,
-          setter: setter,
-        )
-        as TopLevelVariable;
+    return getModelForPropertyInducingElement(topLevelVariableElement, this,
+        getter: getter, setter: setter) as TopLevelVariable;
   }
 
   /// All [ModelElement]s, direct and indirect, which are part of this library's
@@ -460,11 +479,10 @@ class Library extends ModelElement with TopLevelContainer {
   @override
   Map<String, Referable> get referenceChildren {
     var referenceChildrenBuilder = <String, Referable>{};
-    var definedNamesModelElements = element.exportNamespace.definedNames2.values
-        .map(getModelForElement);
-    referenceChildrenBuilder.addAll(
-      definedNamesModelElements.whereNotType<Accessor>().asMapByName,
-    );
+    var definedNamesModelElements =
+        element.exportNamespace.definedNames2.values.map(getModelForElement);
+    referenceChildrenBuilder
+        .addAll(definedNamesModelElements.whereNotType<Accessor>().asMapByName);
     // TODO(jcollins-g): warn and get rid of this case where it shows up.
     // If a user is hiding parts of a prefix import, the user should not
     // refer to hidden members via the prefix, because that can be
@@ -493,7 +511,17 @@ class Library extends ModelElement with TopLevelContainer {
         if (!elementNames.contains(elementName)) elementName,
     };
     for (var notFound in notFoundInAllModelElements) {
-      warn(PackageWarning.ignoredCanonicalFor, message: notFound);
+      var message = notFound;
+      var lastDot = notFound.lastIndexOf('.');
+      if (lastDot != -1 && lastDot < notFound.length - 1) {
+        var suffix = notFound.substring(lastDot);
+        var possibleMatches =
+            elementNames.where((name) => name.endsWith(suffix));
+        if (possibleMatches.isNotEmpty) {
+          message = '$notFound (did you mean ${possibleMatches.join(', ')}?)';
+        }
+      }
+      warn(PackageWarning.ignoredCanonicalFor, message: message);
     }
     // TODO(jcollins-g): warn if a macro/tool generates an unexpected
     // canonicalFor?
@@ -524,7 +552,7 @@ class Library extends ModelElement with TopLevelContainer {
       for (var member in libraryMembers) ...[
         member.originalFullyQualifiedName,
         '$name.${member.qualifiedName}',
-      ],
+      ]
     };
   }();
 }

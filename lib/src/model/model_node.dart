@@ -7,7 +7,9 @@ import 'dart:convert';
 import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/source/source_range.dart';
 import 'package:meta/meta.dart';
 
 /// Stripped down information derived from [AstNode] containing only information
@@ -22,37 +24,27 @@ class ModelNode {
   final CommentData? commentData;
 
   factory ModelNode(
-    AstNode? sourceNode,
+    AstNode sourceNode,
     Element element,
     AnalysisContext analysisContext, {
-    CommentData? commentData,
+    Comment? comment,
   }) {
-    if (sourceNode == null) {
-      return ModelNode._(
-        element,
-        analysisContext,
-        sourceEnd: -1,
-        sourceOffset: -1,
-      );
-    } else {
-      // Get a node higher up the syntax tree that includes the semicolon.
-      // In this case, it is either a [FieldDeclaration] or
-      // [TopLevelVariableDeclaration]. (#2401)
-      if (sourceNode is VariableDeclaration) {
-        sourceNode = sourceNode.parent!.parent!;
-        assert(
-          sourceNode is FieldDeclaration ||
-              sourceNode is TopLevelVariableDeclaration,
-        );
-      }
-      return ModelNode._(
-        element,
-        analysisContext,
-        sourceEnd: sourceNode.end,
-        sourceOffset: sourceNode.offset,
-        commentData: commentData,
-      );
+    var commentData = comment?.data;
+    // Get a node higher up the syntax tree that includes the semicolon.
+    // In this case, it is either a [FieldDeclaration] or
+    // [TopLevelVariableDeclaration]. (#2401)
+    if (sourceNode is VariableDeclaration) {
+      sourceNode = sourceNode.parent!.parent!;
+      assert(sourceNode is FieldDeclaration ||
+          sourceNode is TopLevelVariableDeclaration);
     }
+    return ModelNode._(
+      element,
+      analysisContext,
+      sourceEnd: sourceNode.end,
+      sourceOffset: sourceNode.offset,
+      commentData: commentData,
+    );
   }
 
   ModelNode._(
@@ -61,8 +53,8 @@ class ModelNode {
     required int sourceEnd,
     required int sourceOffset,
     this.commentData,
-  }) : _sourceEnd = sourceEnd,
-       _sourceOffset = sourceOffset;
+  })  : _sourceEnd = sourceEnd,
+        _sourceOffset = sourceOffset;
 
   bool get _isSynthetic => _sourceEnd < 0 || _sourceOffset < 0;
 
@@ -90,15 +82,25 @@ class ModelNode {
 /// Various comment data is not available on the analyzer's Element model, so we
 /// store it in instances of this class after resolving libraries.
 class CommentData {
-  /// The offset of this comment in the source text.
-  final int offset;
-  final List<CommentDocImportData> docImports;
+  /// The source ranges of this comment's tokens.
+  final List<SourceRange> sourceRanges;
+
+  /// The source ranges of this comment's doc-imports.
+  final List<SourceRange> docImportSourceRanges;
+
   final Map<String, CommentReferenceData> references;
 
+  /// The names of this comment's references which the analyzer could not
+  /// resolve.
+  ///
+  /// These are the references reported by the `comment_references` lint.
+  final Set<String> unresolvedReferences;
+
   CommentData({
-    required this.offset,
-    required this.docImports,
+    required this.sourceRanges,
+    required this.docImportSourceRanges,
     required this.references,
+    this.unresolvedReferences = const {},
   });
 }
 
@@ -127,7 +129,7 @@ class CommentReferenceData {
   final int length;
 
   CommentReferenceData(this.element, String? name, this.offset, this.length)
-    : name = name ?? '';
+      : name = name ?? '';
 }
 
 @visibleForTesting
@@ -154,49 +156,43 @@ extension SourceStringExtensions on String {
   /// Strips leading doc comments from the given source code.
   String get stripDocComments {
     var remainder = trimLeft();
-    var lineComments =
-        remainder.startsWith(_tripleSlash) ||
+    var lineComments = remainder.startsWith(_tripleSlash) ||
         remainder.startsWith(_escapedTripleSlash);
-    var blockComments =
-        remainder.startsWith(_slashStarStar) ||
+    var blockComments = remainder.startsWith(_slashStarStar) ||
         remainder.startsWith(_escapedSlashStarStar);
 
-    return split('\n')
-        .where((String line) {
-          if (lineComments) {
-            if (line.startsWith(_tripleSlash) ||
-                line.startsWith(_escapedTripleSlash)) {
-              return false;
-            }
-            lineComments = false;
-            return true;
-          } else if (blockComments) {
-            if (line.contains(_starSlash) || line.contains(_escapedStarSlash)) {
-              blockComments = false;
-              return false;
-            }
-            if (line.startsWith(_slashStarStar) ||
-                line.startsWith(_escapedSlashStarStar)) {
-              return false;
-            }
-            return false;
-          }
+    return split('\n').where((String line) {
+      if (lineComments) {
+        if (line.startsWith(_tripleSlash) ||
+            line.startsWith(_escapedTripleSlash)) {
+          return false;
+        }
+        lineComments = false;
+        return true;
+      } else if (blockComments) {
+        if (line.contains(_starSlash) || line.contains(_escapedStarSlash)) {
+          blockComments = false;
+          return false;
+        }
+        if (line.startsWith(_slashStarStar) ||
+            line.startsWith(_escapedSlashStarStar)) {
+          return false;
+        }
+        return false;
+      }
 
-          return true;
-        })
-        .join('\n');
+      return true;
+    }).join('\n');
   }
 
   /// Strips the common indent from the given source fragment.
   String get stripIndent {
     var remainder = trimLeft();
     var indent = substring(0, length - remainder.length);
-    return split('\n')
-        .map((line) {
-          line = line.trimRight();
-          return line.startsWith(indent) ? line.substring(indent.length) : line;
-        })
-        .join('\n');
+    return split('\n').map((line) {
+      line = line.trimRight();
+      return line.startsWith(indent) ? line.substring(indent.length) : line;
+    }).join('\n');
   }
 }
 
@@ -213,3 +209,125 @@ final String _escapedSlashStarStar = _escape.convert(_slashStarStar);
 const String _starSlash = '*/';
 
 final String _escapedStarSlash = _escape.convert(_starSlash);
+
+extension on Comment {
+  /// A mapping of all comment references to their various data.
+  CommentData get data {
+    var tokenList = tokens.toList();
+    var tokenContentStarts = List<int>.filled(tokenList.length, 0);
+    var normalizedLengths = List<int>.filled(tokenList.length, 0);
+    var currentContentOffset = 0;
+    for (var i = 0; i < tokenList.length; i++) {
+      tokenContentStarts[i] = currentContentOffset;
+      var token = tokenList[i];
+      var hasTrailingNewline =
+          i + 1 < tokenList.length && tokenList[i + 1].offset > token.end;
+      var normalizedLexemeLength = token.lexeme.replaceAll('\r', '').length;
+      normalizedLengths[i] = normalizedLexemeLength;
+      currentContentOffset +=
+          normalizedLexemeLength + (hasTrailingNewline ? 1 : 0);
+    }
+
+    var sourceRanges = <SourceRange>[];
+    for (var i = 0; i < tokenList.length; i++) {
+      var start = tokenContentStarts[i];
+      var end = i + 1 < tokenList.length
+          ? tokenContentStarts[i + 1]
+          : tokenContentStarts[i] + normalizedLengths[i];
+      sourceRanges.add(SourceRange(start, end - start));
+    }
+
+    var docImportSourceRanges = <SourceRange>[];
+    for (var docImport in docImports) {
+      var start = _fileOffsetToContentOffset(
+          tokenList, tokenContentStarts, normalizedLengths, docImport.offset);
+      var end = _fileOffsetToContentOffset(tokenList, tokenContentStarts,
+          normalizedLengths, docImport.import.end);
+      docImportSourceRanges.add(SourceRange(start, end - start));
+    }
+
+    var referencesData = <String, CommentReferenceData>{};
+    var unresolvedReferences = <String>{};
+    for (var reference in references) {
+      var referable = reference.expression;
+      String name;
+      Element? staticElement;
+      if (referable case PropertyAccess(:var propertyName)) {
+        var target = referable.target;
+        if (target is! PrefixedIdentifier) continue;
+        name = '${target.name}.${propertyName.name}';
+        staticElement = propertyName.element;
+      } else if (referable case PrefixedIdentifier(:var identifier)) {
+        name = referable.name;
+        staticElement = identifier.element;
+      } else if (referable case SimpleIdentifier()) {
+        name = referable.name;
+        staticElement = referable.element;
+      } else {
+        continue;
+      }
+
+      if (staticElement == null) {
+        // Mirror the `comment_references` lint, which skips synthetic nodes.
+        if (!reference.isSynthetic && !referable.isSynthetic) {
+          unresolvedReferences.add(name);
+        }
+      } else if (!referencesData.containsKey(name)) {
+        referencesData[name] = CommentReferenceData(
+          staticElement,
+          name,
+          referable.offset,
+          referable.length,
+        );
+      }
+    }
+    return CommentData(
+      sourceRanges: sourceRanges,
+      docImportSourceRanges: docImportSourceRanges,
+      references: referencesData,
+      unresolvedReferences: unresolvedReferences,
+    );
+  }
+
+  /// Converts a file offset to an offset within `element.documentationComment`
+  /// (`content`), accounting for CRLF line ending normalization and gaps
+  /// between comment tokens.
+  int _fileOffsetToContentOffset(
+    List<Token> tokenList,
+    List<int> tokenContentStarts,
+    List<int> normalizedLengths,
+    int fileOffset,
+  ) {
+    var low = 0;
+    var high = tokenList.length - 1;
+    var index = -1;
+    while (low <= high) {
+      var mid = (low + high) >> 1;
+      if (tokenList[mid].offset <= fileOffset) {
+        index = mid;
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    if (index == -1) {
+      return 0;
+    }
+
+    var token = tokenList[index];
+    var contentOffset = tokenContentStarts[index];
+    if (fileOffset <= token.end) {
+      var relativeOffset = fileOffset - token.offset;
+      var rawSlice = token.lexeme.substring(0, relativeOffset);
+      var normalizedSliceLength = rawSlice.replaceAll('\r', '').length;
+      return contentOffset + normalizedSliceLength;
+    }
+
+    var hasTrailingNewline =
+        index + 1 < tokenList.length && tokenList[index + 1].offset > token.end;
+    return contentOffset +
+        normalizedLengths[index] +
+        (hasTrailingNewline ? 1 : 0);
+  }
+}

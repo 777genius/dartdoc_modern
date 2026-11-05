@@ -35,83 +35,52 @@ List<DartdocOption<Object?>> createPackageWarningOptions(
 ) {
   var resourceProvider = packageMetaProvider.resourceProvider;
   return [
-    DartdocOptionArgOnly<bool>(
-      'allowNonLocalWarnings',
-      false,
-      resourceProvider,
-      negatable: true,
-      help: 'Show warnings from packages we are not documenting locally.',
-    ),
+    DartdocOptionArgOnly<bool>('allowNonLocalWarnings', false, resourceProvider,
+        negatable: true,
+        help: 'Show warnings from packages we are not documenting locally.'),
 
     // Options for globally enabling/disabling all warnings and errors
     // for individual packages are command-line only.  This will allow
     // meta-packages like Flutter to control whether warnings are displayed for
     // packages they don't control.
     DartdocOptionArgOnly<List<String>?>(
-      'allowWarningsInPackages',
-      null,
-      resourceProvider,
-      splitCommas: true,
-      help: 'Package names to display warnings for (ignore all others if set)',
-    ),
+        'allowWarningsInPackages', null, resourceProvider,
+        splitCommas: true,
+        help:
+            'Package names to display warnings for (ignore all others if set)'),
     DartdocOptionArgOnly<List<String>?>(
-      'allowErrorsInPackages',
-      null,
-      resourceProvider,
-      splitCommas: true,
-      help: 'Package names to display errors for (ignore all others if set)',
-    ),
+        'allowErrorsInPackages', null, resourceProvider,
+        splitCommas: true,
+        help: 'Package names to display errors for (ignore all others if set)'),
     DartdocOptionArgOnly<List<String>?>(
-      'ignoreWarningsInPackages',
-      null,
-      resourceProvider,
-      splitCommas: true,
-      help:
-          'Package names to ignore warnings for.  Takes priority over '
-          'allow-warnings-in-packages',
-    ),
+        'ignoreWarningsInPackages', null, resourceProvider,
+        splitCommas: true,
+        help: 'Package names to ignore warnings for.  Takes priority over '
+            'allow-warnings-in-packages'),
     DartdocOptionArgOnly<List<String>?>(
-      'ignoreErrorsInPackages',
-      null,
-      resourceProvider,
-      splitCommas: true,
-      help:
-          'Package names to ignore errors for. Takes priority over '
-          'allow-errors-in-packages',
-    ),
+        'ignoreErrorsInPackages', null, resourceProvider,
+        splitCommas: true,
+        help: 'Package names to ignore errors for. Takes priority over '
+            'allow-errors-in-packages'),
     // Options for globally enabling/disabling warnings and errors across
     // packages.  Loaded from dartdoc_options.yaml, but command line arguments
     // will override.
-    DartdocOptionArgFile<List<String>?>(
-      'errors',
-      null,
-      resourceProvider,
-      splitCommas: true,
-      help:
-          'Additional warning names to force as errors. Specify an empty '
-          'list to force defaults (overriding dartdoc_options.yaml)\n'
-          'Defaults:\n${PackageWarningMode.error._warningsListHelpText}',
-    ),
-    DartdocOptionArgFile<List<String>?>(
-      'ignore',
-      null,
-      resourceProvider,
-      splitCommas: true,
-      help:
-          'Additional warning names to ignore. Specify an empty list to '
-          'force defaults (overriding dartdoc_options.yaml).\n'
-          'Defaults:\n${PackageWarningMode.ignore._warningsListHelpText}',
-    ),
-    DartdocOptionArgFile<List<String>?>(
-      'warnings',
-      null,
-      resourceProvider,
-      splitCommas: true,
-      help:
-          'Additional warning names to show as warnings (instead of error or '
-          'ignore, if not warning by default).\n'
-          'Defaults:\n${PackageWarningMode.warn._warningsListHelpText}',
-    ),
+    DartdocOptionArgFile<List<String>?>('errors', null, resourceProvider,
+        splitCommas: true,
+        help: 'Additional warning names to force as errors. Specify an empty '
+            'list to force defaults (overriding dartdoc_options.yaml)\n'
+            'Defaults:\n${PackageWarningMode.error._warningsListHelpText}'),
+    DartdocOptionArgFile<List<String>?>('ignore', null, resourceProvider,
+        splitCommas: true,
+        help: 'Additional warning names to ignore. Specify an empty list to '
+            'force defaults (overriding dartdoc_options.yaml).\n'
+            'Defaults:\n${PackageWarningMode.ignore._warningsListHelpText}'),
+    DartdocOptionArgFile<List<String>?>('warnings', null, resourceProvider,
+        splitCommas: true,
+        help:
+            'Additional warning names to show as warnings (instead of error or '
+            'ignore, if not warning by default).\n'
+            'Defaults:\n${PackageWarningMode.warn._warningsListHelpText}'),
     // Synthetic option uses a factory to build a PackageWarningOptions from all
     // the above flags.
     DartdocOptionSyntheticOnly<PackageWarningOptions>(
@@ -134,13 +103,10 @@ mixin Warnable implements Documentable {
     Iterable<Warnable> referredFrom = const [],
     Iterable<String> extendedDebug = const [],
   }) {
-    packageGraph.warnOnElement(
-      this,
-      kind,
-      message: message,
-      referredFrom: referredFrom,
-      extendedDebug: extendedDebug,
-    );
+    packageGraph.warnOnElement(this, kind,
+        message: message,
+        referredFrom: referredFrom,
+        extendedDebug: extendedDebug);
   }
 
   /// The URI of this [Warnable].
@@ -175,8 +141,7 @@ enum PackageWarning implements Comparable<PackageWarning> {
     shortHelp:
         'A symbol is exported from private to public in more than one library '
         'and dartdoc can not determine which one is canonical',
-    longHelp:
-        "Use {@canonicalFor $_namePlaceholder} in the desired library's "
+    longHelp: "Use {@canonicalFor $_namePlaceholder} in the desired library's "
         "documentation to resolve the ambiguity and/or override dartdoc's "
         'decision, or structure your package so the reexport is less '
         'ambiguous. The symbol will still be referenced in all candidates -- '
@@ -188,7 +153,7 @@ enum PackageWarning implements Comparable<PackageWarning> {
 
   ignoredCanonicalFor(
     'ignored-canonical-for',
-    "library says it is {@canonicalFor {0}} but {0} can't be canonical "
+    "library says it is {@canonicalFor {0}} but it can't be canonical "
         'there',
     shortHelp:
         'A @canonicalFor tag refers to a library which this symbol can not be '
@@ -212,8 +177,7 @@ enum PackageWarning implements Comparable<PackageWarning> {
     '{0} has no documentable libraries',
     shortHelp:
         'The package is to be documented but has no Dart libraries to document',
-    longHelp:
-        'Dartdoc could not find any public libraries to document in '
+    longHelp: 'Dartdoc could not find any public libraries to document in '
         "'$_namePlaceholder', but documentation was requested. This might be "
         'expected for an asset-only package, in which case, disable this '
         'warning in your dartdoc_options.yaml file.',
@@ -238,6 +202,37 @@ enum PackageWarning implements Comparable<PackageWarning> {
         'class, enclosing library, or at the top level of any documented '
         'library with the package',
     referredFromPrefix: 'in documentation inherited from',
+  ),
+  unscopedDocReference(
+    'unscoped-doc-reference',
+    'doc reference [{0}] is not in scope',
+    shortHelp:
+        'A comment reference was resolved by dartdoc, but is not in scope '
+        'according to the analyzer',
+    longHelp: "The reference is only resolved by dartdoc's own lookup, which "
+        'also searches beyond Dart scope (for example, all documented '
+        'libraries, and the parameters of other members). The analyzer, and '
+        'the comment_references lint, do not resolve it. Make the name '
+        'visible in scope, for example with an import or a `@docImport`, or '
+        'qualify the reference. Parameters are never linked; write them in '
+        'backticks instead.',
+    referredFromPrefix: 'in documentation inherited from',
+    defaultWarningMode: PackageWarningMode.ignore,
+  ),
+  docReferenceTargetDiffers(
+    'doc-reference-target-differs',
+    'doc reference {0}',
+    shortHelp:
+        'A comment reference was resolved by dartdoc to a different element '
+        'than the analyzer resolves it to',
+    longHelp: "Dartdoc's own lookup links the reference to one element, but "
+        'the analyzer resolves the same reference, in the scope where the '
+        'comment is written, to another. This happens for example when '
+        'inherited documentation names a member that the inheriting class '
+        'overrides, or when a name in an enclosing scope shadows the intended '
+        'one. Qualify the reference to name the intended element.',
+    referredFromPrefix: 'in documentation inherited from',
+    defaultWarningMode: PackageWarningMode.ignore,
   ),
   unknownMacro(
     'unknown-macro',
@@ -296,8 +291,7 @@ enum PackageWarning implements Comparable<PackageWarning> {
   missingFromSearchIndex(
     'missing-from-search-index',
     'dartdoc generated a file not in the search index: {0}',
-    shortHelp:
-        'A file generated by dartdoc is not present in the generated '
+    shortHelp: 'A file generated by dartdoc is not present in the generated '
         'index.json file',
   ),
   missingExampleFile(
@@ -305,6 +299,13 @@ enum PackageWarning implements Comparable<PackageWarning> {
     'example file not found: {0}',
     shortHelp:
         'An example file referenced by a dartdoc directive was not found',
+  ),
+
+  missingExampleRegion(
+    'missing-example-region',
+    'example region not found: {0}',
+    shortHelp:
+        'An example region referenced by a dartdoc directive was not found',
   ),
 
   // The message for this warning can contain many punctuation and other
@@ -365,12 +366,12 @@ enum PackageWarning implements Comparable<PackageWarning> {
     String referredFromPrefix = 'referred to by',
     bool isDeprecated = false,
     PackageWarningMode defaultWarningMode = PackageWarningMode.warn,
-  }) : _shortHelp = shortHelp,
-       _longHelp = longHelp,
-       _warnablePrefix = warnablePrefix,
-       _referredFromPrefix = referredFromPrefix,
-       _isDeprecated = isDeprecated,
-       _defaultWarningMode = defaultWarningMode;
+  })  : _shortHelp = shortHelp,
+        _longHelp = longHelp,
+        _warnablePrefix = warnablePrefix,
+        _referredFromPrefix = referredFromPrefix,
+        _isDeprecated = isDeprecated,
+        _defaultWarningMode = defaultWarningMode;
 
   static PackageWarning? _byName(String name) =>
       PackageWarning.values.firstWhereOrNull((w) => w._flagName == name);
@@ -418,7 +419,9 @@ enum PackageWarningMode {
 /// check.
 const Set<PackageWarning> skipWarningIfNotDocumentedFor = {
   PackageWarning.unresolvedDocReference,
-  PackageWarning.typeAsHtml,
+  PackageWarning.unscopedDocReference,
+  PackageWarning.docReferenceTargetDiffers,
+  PackageWarning.typeAsHtml
 };
 
 class PackageWarningOptions {
@@ -476,22 +479,14 @@ class PackageWarningOptions {
     }
 
     // Check whether warnings are allowed at all in this package.
-    var allowWarningsInPackages = option.parent.getValueAs<List<String>?>(
-      'allowWarningsInPackages',
-      dir,
-    );
-    var allowErrorsInPackages = option.parent.getValueAs<List<String>?>(
-      'allowErrorsInPackages',
-      dir,
-    );
-    var ignoreWarningsInPackages = option.parent.getValueAs<List<String>?>(
-      'ignoreWarningsInPackages',
-      dir,
-    );
-    var ignoreErrorsInPackages = option.parent.getValueAs<List<String>?>(
-      'ignoreErrorsInPackages',
-      dir,
-    );
+    var allowWarningsInPackages =
+        option.parent.getValueAs<List<String>?>('allowWarningsInPackages', dir);
+    var allowErrorsInPackages =
+        option.parent.getValueAs<List<String>?>('allowErrorsInPackages', dir);
+    var ignoreWarningsInPackages = option.parent
+        .getValueAs<List<String>?>('ignoreWarningsInPackages', dir);
+    var ignoreErrorsInPackages =
+        option.parent.getValueAs<List<String>?>('ignoreErrorsInPackages', dir);
 
     void ignoreWarning(PackageWarning kind) {
       newOptions.ignore(kind);
@@ -553,20 +548,15 @@ class PackageWarningCounter {
   /// An unmodifiable map view of all counted warnings related by their element,
   /// warning type, and message.
   UnmodifiableMapView<Element?, Map<PackageWarning, Set<String>>>
-  get countedWarnings => UnmodifiableMapView(_countedWarnings);
+      get countedWarnings => UnmodifiableMapView(_countedWarnings);
 
   PackageWarningCounter(this.packageGraph);
 
   /// Logs [packageWarning].
   ///
   /// Assumes it is already counted with [addWarning].
-  void _writeWarning(
-    PackageWarning packageWarning,
-    PackageWarningMode? mode,
-    bool verboseWarnings,
-    String name,
-    String fullMessage,
-  ) {
+  void _writeWarning(PackageWarning packageWarning, PackageWarningMode? mode,
+      bool verboseWarnings, String name, String fullMessage) {
     if (mode == PackageWarningMode.ignore) {
       return;
     }
@@ -577,9 +567,8 @@ class PackageWarningCounter {
     };
     if (type != null) {
       var entry = '  $type: $fullMessage';
-      var displayedWarningCount = _displayedWarningCounts.increment(
-        packageWarning,
-      );
+      var displayedWarningCount =
+          _displayedWarningCounts.increment(packageWarning);
       if (displayedWarningCount == 1 &&
           verboseWarnings &&
           packageWarning._longHelp.isNotEmpty) {
@@ -587,10 +576,8 @@ class PackageWarningCounter {
         var longHelpLines = packageWarning._longHelp
             .split('\n')
             .map((line) => line.replaceAll(_namePlaceholder, name))
-            .map(
-              (line) =>
-                  _wrapText(line, prefix: '        ', width: _messageWidth),
-            );
+            .map((line) =>
+                _wrapText(line, prefix: '        ', width: _messageWidth));
         var verboseOut = longHelpLines.join('\n');
         entry = '$entry\n$verboseOut';
       }
@@ -624,11 +611,7 @@ class PackageWarningCounter {
   /// Adds the warning to the counter, and writes out the fullMessage string
   /// if configured to do so.
   void addWarning(
-    Warnable? e,
-    PackageWarning kind,
-    String message,
-    String fullMessage,
-  ) {
+      Warnable? e, PackageWarning kind, String message, String fullMessage) {
     assert(!hasWarning(e, kind, message));
     // TODO(jcollins-g): Make addWarning not accept nulls for element.
     PackageWarningOptionContext config =
@@ -716,9 +699,8 @@ String _wrapText(String text, {required int width, String prefix = ''}) {
 ///
 /// If `stdout` has a terminal, use that terminal's width capped to 120
 /// characters wide. Otherwise, use a width of 80.
-final _messageWidth = stdout.hasTerminal
-    ? math.min(stdout.terminalColumns, 120)
-    : 80;
+final _messageWidth =
+    stdout.hasTerminal ? math.min(stdout.terminalColumns, 120) : 80;
 
 class _JsonWarning extends Jsonable {
   final String type;
@@ -732,11 +714,11 @@ class _JsonWarning extends Jsonable {
 
   @override
   Map<String, dynamic> toJson() => {
-    'type': type,
-    'kind': kind._flagName,
-    'message': message,
-    'text': text,
-  };
+        'type': type,
+        'kind': kind._flagName,
+        'message': message,
+        'text': text,
+      };
 }
 
 extension on Map<PackageWarning, int> {

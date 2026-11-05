@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:dartdoc_modern/src/element_type.dart';
 import 'package:dartdoc_modern/src/model/parameter.dart';
 
 /// Render HTML in an extended vertical format using an `<ol>` tag.
@@ -25,7 +24,10 @@ class ParameterRendererHtmlList extends ParameterRendererHtml {
     String openingBracket = '',
     String closingBracket = '',
   }) {
-    var classes = ['parameter-list', if (!multiLine) 'single-line'];
+    var classes = [
+      'parameter-list',
+      if (!multiLine) 'single-line',
+    ];
     return '$openingBracket'
         '<ol class="${classes.join(' ')}"> $listItems</ol>'
         '$closingBracket';
@@ -48,7 +50,8 @@ class ParameterRendererHtml extends ParameterRenderer {
     bool multiLine = false,
     String openingBracket = '',
     String closingBracket = '',
-  }) => '$openingBracket$listItems$closingBracket';
+  }) =>
+      '$openingBracket$listItems$closingBracket';
 
   @override
   String annotation(String annotation) => '<span>$annotation</span>';
@@ -58,9 +61,8 @@ class ParameterRendererHtml extends ParameterRenderer {
 
   @override
   String defaultValue(String defaultValue) {
-    var escaped = const HtmlEscape(
-      HtmlEscapeMode.unknown,
-    ).convert(defaultValue);
+    var escaped =
+        const HtmlEscape(HtmlEscapeMode.unknown).convert(defaultValue);
     return '<span class="default-value">$escaped</span>';
   }
 
@@ -100,10 +102,8 @@ abstract class ParameterRenderer {
   String typeName(String typeName);
   String required(String required);
 
-  String renderLinkedParams(
-    List<Parameter> parameters, {
-    bool showMetadata = true,
-  }) {
+  String renderLinkedParams(List<Parameter> parameters,
+      {bool showMetadata = true}) {
     if (parameters.isEmpty) {
       return '';
     }
@@ -114,9 +114,8 @@ abstract class ParameterRenderer {
     var optionalPositionalParams = parameters
         .where((Parameter p) => p.isOptionalPositional)
         .toList(growable: false);
-    var namedParams = parameters
-        .where((Parameter p) => p.isNamed)
-        .toList(growable: false);
+    var namedParams =
+        parameters.where((Parameter p) => p.isNamed).toList(growable: false);
     var isMultiline =
         isBlock && (namedParams.isNotEmpty || parameters.length > 3);
 
@@ -152,8 +151,7 @@ abstract class ParameterRenderer {
       for (var p in positionalParams) {
         var suffix = identical(p, positionalParams.last) ? trailingText : ', ';
         buffer.write(
-          _renderParameter(p, showMetadata: showMetadata, suffix: suffix),
-        );
+            _renderParameter(p, showMetadata: showMetadata, suffix: suffix));
       }
     }
     if (optionalPositionalParams.isNotEmpty) {
@@ -164,8 +162,7 @@ abstract class ParameterRenderer {
             ? ', '
             : '';
         buffer.write(
-          _renderParameter(p, showMetadata: showMetadata, suffix: suffix),
-        );
+            _renderParameter(p, showMetadata: showMetadata, suffix: suffix));
       }
     }
     if (namedParams.isNotEmpty) {
@@ -174,8 +171,7 @@ abstract class ParameterRenderer {
       for (var p in namedParams) {
         var suffix = isMultiline || !identical(p, namedParams.last) ? ', ' : '';
         buffer.write(
-          _renderParameter(p, showMetadata: showMetadata, suffix: suffix),
-        );
+            _renderParameter(p, showMetadata: showMetadata, suffix: suffix));
       }
     }
 
@@ -206,60 +202,15 @@ abstract class ParameterRenderer {
     if (param.isCovariant) {
       buffer.write('${covariant('covariant')} ');
     }
-    if (modelType is Callable) {
-      final returnTypeName = modelType.isTypedef
-          ? modelType.linkedName
-          : modelType.returnType.linkedName;
-      buffer.write(typeName(returnTypeName));
-      buffer.write(' ${parameterName(param.documentedName ?? param.name)}');
-
-      // Writes out the generic type parameters for a function type.
-      // TODO(kallentu): Pull this type parameter generation into a helper for
-      // other renderers that also do this same work.
-      if (modelType is FunctionTypeElementType) {
-        if (modelType.typeFormals.isNotEmpty) {
-          if (!modelType.typeFormals.every((t) => t.name == 'dynamic')) {
-            buffer
-              ..write('&lt;<wbr><span class="type-parameter">')
-              ..writeAll(
-                modelType.typeFormals.map((t) => t.name),
-                '</span>, <span class="type-parameter">',
-              )
-              ..write('</span>&gt;');
-          }
-        }
-      }
-
-      if (!modelType.isTypedef && modelType is DefinedElementType) {
-        buffer.write('(');
-        buffer.write(
-          renderLinkedParams(
-            (modelType as DefinedElementType).modelElement.parameters,
-            showMetadata: showMetadata,
-          ),
-        );
-        buffer.write(')');
-        buffer.write(modelType.nullabilitySuffix);
-      }
-      if (!modelType.isTypedef) {
-        buffer.write('(');
-        buffer.write(
-          renderLinkedParams(modelType.parameters, showMetadata: showMetadata),
-        );
-        buffer.write(')');
-        buffer.write(modelType.nullabilitySuffix);
-      }
-    } else {
-      final linkedTypeName = modelType.linkedName;
-      if (linkedTypeName.isNotEmpty) {
-        buffer.write(typeName(linkedTypeName));
-        if (param.name.isNotEmpty) {
-          buffer.write(' ');
-        }
-      }
+    final linkedTypeName = modelType.linkedName;
+    if (linkedTypeName.isNotEmpty) {
+      buffer.write(typeName(linkedTypeName));
       if (param.name.isNotEmpty) {
-        buffer.write(parameterName(param.documentedName ?? param.name));
+        buffer.write(' ');
       }
+    }
+    if (param.name.isNotEmpty) {
+      buffer.write(parameterName(param.documentedName ?? param.name));
     }
 
     if (param.hasDefaultValue) {
