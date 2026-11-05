@@ -135,11 +135,28 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          dart pub get --directory testing/test_package_with_docs
+          fixture="$RUNNER_TEMP/aot-fixture"
+          mkdir -p "$fixture/lib" "$fixture/doc"
+          cat > "$fixture/pubspec.yaml" <<'EOF'
+          name: aot_smoke_fixture
+          version: 0.0.1
+          publish_to: none
+          environment:
+            sdk: ^3.11.0
+          EOF
+          cat > "$fixture/lib/aot_smoke_fixture.dart" <<'EOF'
+          /// Minimal package for the standalone executable E2E.
+          library;
+
+          /// Demonstrates generated API documentation.
+          int answer() => 42;
+          EOF
+          printf '%s\n' '# AOT smoke fixture' > "$fixture/README.md"
+          printf '%s\n' '# Getting started' > "$fixture/doc/getting-started.md"
+          dart pub get --directory "$fixture"
           dart compile exe bin/dartdoc_modern.dart -o "$RUNNER_TEMP/dartdoc_modern"
           mkdir -p "$RUNNER_TEMP/aot-smoke-cwd"
           cd "$RUNNER_TEMP/aot-smoke-cwd"
-          fixture="$GITHUB_WORKSPACE/testing/test_package_with_docs"
           # HTML must work with bundled resources and no source-root variable.
           env -u DARTDOC_MODERN_ROOT "$RUNNER_TEMP/dartdoc_modern" \
             --format html --input "$fixture" --output "$RUNNER_TEMP/aot-html"
