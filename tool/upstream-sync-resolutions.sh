@@ -28,6 +28,7 @@ keep_head=(
   lib/src/package_meta.dart
   lib/src/render/parameter_renderer.dart
   lib/src/runtime_stats.dart
+  lib/src/version.dart
   lib/src/warnings.dart
   pubspec.yaml
   test/documentation_comment_test_base.dart
