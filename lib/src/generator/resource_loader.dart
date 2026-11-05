@@ -45,18 +45,25 @@ extension ResourceLoader on ResourceProvider {
   /// In AOT mode (when [Isolate.resolvePackageUri] returns `null`), returns the
   /// bytes from [resources.bundledResourcesBase64].
   Future<Uint8List> loadResourceBytes(String resourceFileName) async {
-    var resolvedUri = await (_resourcesPackageUriFuture ??=
-        Isolate.resolvePackageUri(Uri.parse('package:dartdoc_modern/resources')));
-    if (resolvedUri != null) {
-      var sourcePath = pathContext.join(
-        resolvedUri.toFilePath(),
-        resourceFileName,
-      );
-      return getFile(sourcePath).readAsBytesSync();
+    final uri = Uri.parse('package:dartdoc_modern/resources');
+    var resolvedUri =
+        await (_resourcesPackageUriFuture ??= Isolate.resolvePackageUri(uri));
+    if (resolvedUri == null) {
+      try {
+        // Keep the fork's explicit AOT root and package-config lookup.
+        // Bundled bytes remain the fallback for standalone installations.
+        resolvedUri = _resolvePackageUriAot(uri);
+      } on ArgumentError {
+        return loadBundledResourceBytes(resourceFileName);
+      }
     }
-    return loadBundledResourceBytes(resourceFileName);
+    final resource = getFile(
+      pathContext.join(resolvedUri.toFilePath(), resourceFileName),
+    );
+    return resource.exists
+        ? resource.readAsBytesSync()
+        : loadBundledResourceBytes(resourceFileName);
   }
-
 
   Future<Folder> getResourceFolder(String path) async {
     var uri = await resolveResourceUri(Uri.parse(path));

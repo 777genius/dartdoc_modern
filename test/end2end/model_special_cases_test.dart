@@ -38,11 +38,22 @@ final _testPackageGraphSdkMemo = AsyncMemoizer<PackageGraph>();
 Future<PackageGraph> get _testPackageGraphSdk =>
     _testPackageGraphSdkMemo.runOnce(_bootSdkPackage);
 
+final _testPackageGraphSdkDocsMemo = AsyncMemoizer<PackageGraph>();
+Future<PackageGraph> get _testPackageGraphSdkDocs =>
+    _testPackageGraphSdkDocsMemo.runOnce(_bootSdkDocsPackage);
+
 Future<PackageGraph> _bootSdkPackage() async {
   return PubPackageBuilder(
     await utils.contextFromArgv(
         ['--input', pubPackageMetaProvider.defaultSdkDir.path],
         pubPackageMetaProvider),
+    pubPackageMetaProvider,
+  ).buildPackageGraph();
+}
+
+Future<PackageGraph> _bootSdkDocsPackage() async {
+  return PubPackageBuilder(
+    await utils.contextFromArgv(['--sdk-docs'], pubPackageMetaProvider),
     pubPackageMetaProvider,
   ).buildPackageGraph();
 }
@@ -437,9 +448,11 @@ void main() {
 
   group('Package', () {
     late final PackageGraph sdkAsPackageGraph;
+    late final PackageGraph sdkDocsPackageGraph;
 
     setUpAll(() async {
       sdkAsPackageGraph = await _testPackageGraphSdk;
+      sdkDocsPackageGraph = await _testPackageGraphSdkDocs;
     });
 
     // Analyzer's MockSdk's html library doesn't conform to the expectations

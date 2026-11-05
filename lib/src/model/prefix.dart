@@ -29,7 +29,7 @@ class Prefix extends ModelElement with HasLibrary, HasNoPage {
   /// shared by several imports is ambiguous as a library reference; the
   /// analyzer reports it as `ambiguous_comment_reference`.
   late final Library? associatedLibrary = switch (element.scopeLibraries) {
-    [var single] => getModelForElement(single) as Library,
+    [var single] => packageGraph.findButDoNotCreateLibraryFor(single),
     _ => null,
   };
 

@@ -5,9 +5,6 @@ name: Upstream sync inspection (temporary)
 on:
   push:
     branches: [chore/upstream-sync-2026-11-05]
-    paths:
-      - .github/workflows/upstream-sync-once.yml
-      - tool/upstream-sync-resolutions.sh
 
 permissions:
   contents: write
@@ -15,6 +12,8 @@ permissions:
 jobs:
   merge:
     runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.final_sha.outputs.sha }}
     concurrency:
       group: upstream-sync-merge
       cancel-in-progress: false
@@ -66,6 +65,12 @@ jobs:
             git push origin HEAD:refs/heads/chore/upstream-sync-2026-11-05
           fi
 
+      - name: Record verified branch SHA
+        id: final_sha
+        shell: bash
+        run: |
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
   verify:
     needs: merge
     # GitHub Actions' GITHUB_TOKEN pushes do not trigger fresh PR workflows.
@@ -80,7 +85,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
-          ref: chore/upstream-sync-2026-11-05
+          ref: ${{ needs.merge.outputs.sha }}
           fetch-depth: 0
       - name: Verify upstream ancestry and sync source
         shell: bash
@@ -183,6 +188,16 @@ jobs:
             --format html --input "$fixture" --output "$RUNNER_TEMP/aot-html"
           test -s "$RUNNER_TEMP/aot-html/index.html"
           test -s "$RUNNER_TEMP/aot-html/static-assets/styles.css"
+          # Verify the fork's external AOT resource override and bundled fallback
+          # can coexist without a source checkout.
+          external_root="$RUNNER_TEMP/aot-resource-override"
+          mkdir -p "$external_root/lib/resources"
+          printf '%s\n' '/* AOT external override sentinel */' \
+            > "$external_root/lib/resources/styles.css"
+          DARTDOC_MODERN_ROOT="$external_root" "$RUNNER_TEMP/dartdoc_modern" \
+            --format html --input "$fixture" --output "$RUNNER_TEMP/aot-html-external"
+          grep -Fq 'AOT external override sentinel' \
+            "$RUNNER_TEMP/aot-html-external/static-assets/styles.css"
           # The fork's modern backends also support the explicit root fallback.
           DARTDOC_MODERN_ROOT="$GITHUB_WORKSPACE" "$RUNNER_TEMP/dartdoc_modern" \
             --format jaspr --input "$fixture" --output "$RUNNER_TEMP/aot-jaspr"

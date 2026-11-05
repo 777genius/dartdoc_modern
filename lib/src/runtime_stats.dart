@@ -20,6 +20,7 @@ class _RuntimeStats {
   final Map<String, int> _accumulators = {};
 
   String _valueAndPercent(int references) {
+    if (totalReferences == 0) return '$references (0.000%)';
     final percent = references.toDouble() / totalReferences.toDouble() * 100;
     return '$references (${percent.toStringAsFixed(3)}%)';
   }
