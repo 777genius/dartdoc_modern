@@ -1,0 +1,56 @@
+# Temporary workflow for the upstream sync draft PR.
+# Delete after the merge has been validated.
+name: Upstream sync inspection (temporary)
+
+on:
+  push:
+    branches: [chore/upstream-sync-2026-11-05]
+    paths:
+      - .github/workflows/upstream-sync-once.yml
+      - tool/upstream-sync-resolutions.sh
+
+permissions:
+  contents: write
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Three-way merge of pinned upstream
+        shell: bash
+        run: |
+          set -euo pipefail
+          UPSTREAM_SHA=03ec6df6228ac8257a737261d17e746c665b1e13
+          git config user.name 777genius
+          git config user.email 13103045+777genius@users.noreply.github.com
+          git remote add upstream https://github.com/dart-lang/dartdoc.git
+          git fetch --no-tags upstream "$UPSTREAM_SHA"
+          if git merge-base --is-ancestor "$UPSTREAM_SHA" HEAD; then
+            echo "Upstream is already an ancestor; nothing to merge."
+            exit 0
+          fi
+          if ! git merge --no-commit --no-ff "$UPSTREAM_SHA"; then
+            echo "::error::Upstream merge has conflicts. No commit or push performed."
+            git status --short
+            echo "Conflicted paths:"
+            git diff --name-only --diff-filter=U
+            echo "First conflict markers (source files):"
+            git grep -n -m 2 '^<<<<<<< ' -- 'lib/*.dart' 'lib/**/*.dart' 'tool/**/*.dart' 'test/**/*.dart' || true
+            exit 1
+          fi
+          # Allow narrow and reviewed resolutions in later workflow revisions.
+          if test -f tool/upstream-sync-resolutions.sh; then
+            bash tool/upstream-sync-resolutions.sh
+          fi
+          if test -n "$(git diff --name-only --diff-filter=U)"; then
+            echo "::error::Merge still contains unresolved conflicts."
+            git diff --name-only --diff-filter=U
+            exit 1
+          fi
+          git diff --cached --check
+          git commit -m "chore(sync): merge dart-lang/dartdoc upstream 2026-11-05"
+          git push origin "HEAD:refs/heads/chore/upstream-sync-2026-11-05"
