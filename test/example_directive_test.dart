@@ -256,6 +256,21 @@ void main() {
 ```'''));
   }
 
+  void test_processesExampleDirective_percentEncodedRegion() async {
+    await _bootPackage('''
+/// {@example /examples/hello.dart#caf%C3%A9}
+''', files: {
+      'examples/hello.dart': '''
+// #region café
+int answer = 42;
+// #endregion café
+''',
+    });
+    var doc = await libraryModel.processComment();
+    expectNoWarnings();
+    expect(doc, contains('int answer = 42;'));
+    expect(doc, isNot(contains('#region')));
+  }
   void test_processesExampleDirective_region_extractsOuterRegion() async {
     await _bootPackage('''
     /// {@example /examples/hello.dart#main}

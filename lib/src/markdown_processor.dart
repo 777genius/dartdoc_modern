@@ -401,8 +401,17 @@ class MarkdownDocument extends md.Document {
   /// comment may be inherited from another element.
   static CommentData? _commentDataFor(Warnable element) {
     if (element is! ModelElement) return null;
-    return element.modelNode?.commentData ??
-        element.documentationFrom.firstOrNull?.modelNode?.commentData;
+    final ownData = element.modelNode?.commentData;
+    if (ownData != null) return ownData;
+    if (element is GetterSetterCombo) {
+      for (final accessor in [element.getter, element.setter]) {
+        if (accessor != null && accessor.hasDocumentationComment) {
+          final commentData = accessor.modelNode?.commentData;
+          if (commentData != null) return commentData;
+        }
+      }
+    }
+    return element.documentationFrom.firstOrNull?.modelNode?.commentData;
   }
 
   /// [referenceText] in the form used as a key in [CommentData.references].

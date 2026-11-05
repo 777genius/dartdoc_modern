@@ -96,6 +96,30 @@ Continue with `Greeter`.
       );
     });
 
+    test('long code fences do not create fake headings', () {
+      const markdown = '''
+````md
+# Not the title
+```
+## Not a section
+```
+````
+
+# Actual title
+
+## Real section
+
+Searchable documentation.
+''';
+      final entries = JasprSearchIndexBuilder.buildEntriesForPage(
+        relativePath: 'content/guide/code-fence.md',
+        markdown: markdown,
+      );
+      expect(entries, hasLength(2));
+      expect(entries.first.title, 'Actual title');
+      expect(entries.last.section, 'Real section');
+      expect(entries.last.url, '/guide/code-fence#real-section');
+    });
     test('omits redundant searchText from compact page entries', () {
       const markdown = '''---
 title: Overview

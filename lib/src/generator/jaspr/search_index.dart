@@ -278,7 +278,22 @@ class _ParsedPage {
   static final _explicitHeadingAnchor = RegExp(
     r'\s+\{#([A-Za-z0-9:_\-.]+)\}\s*$',
   );
-  static final _fence = RegExp(r'^\s*(```|~~~)');
+  static final _fence = RegExp(r'^\s*(`{3,}|~{3,})');
+
+  // A closing fence must use the same character and at least the opening
+  // fence's length. A shorter fence inside an example is still code.
+  static String? _nextFence(String line, String? currentFence) {
+    final match = _fence.firstMatch(line);
+    if (match == null) return currentFence;
+    final run = match.group(1)!;
+    if (currentFence == null) return run;
+    if (run[0] == currentFence[0] &&
+        run.length >= currentFence.length &&
+        line.substring(match.end).trim().isEmpty) {
+      return null;
+    }
+    return currentFence;
+  }
 
   static _ParsedPage parse(String relativePath, String markdown) {
     final split = _splitFrontmatter(markdown);
@@ -293,14 +308,11 @@ class _ParsedPage {
     final introBuffer = StringBuffer();
     final sections = <_ParsedSection>[];
     _SectionBuffer? currentSection;
-    var inFence = false;
+    String? currentFence;
 
     for (final line in bodyLines) {
-      if (_fence.hasMatch(line)) {
-        inFence = !inFence;
-      }
-
-      final headingMatch = !inFence ? _heading.firstMatch(line) : null;
+      currentFence = _nextFence(line, currentFence);
+      final headingMatch = currentFence == null ? _heading.firstMatch(line) : null;
       if (headingMatch != null) {
         final level = headingMatch.group(1)!.length;
         final rawHeading = headingMatch.group(2)!.trim();
@@ -373,14 +385,11 @@ class _ParsedPage {
   }
 
   static String? _firstHeading(List<String> lines) {
-    var inFence = false;
+    String? currentFence;
     for (final line in lines) {
-      if (_fence.hasMatch(line)) {
-        inFence = !inFence;
-        continue;
-      }
-
-      if (inFence) continue;
+      currentFence = _nextFence(line, currentFence);
+      if (currentFence != null) continue;
+      if (_fence.hasMatch(line)) continue;
 
       final match = _heading.firstMatch(line);
       if (match != null && match.group(1)!.length == 1) {

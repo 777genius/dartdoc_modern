@@ -29,4 +29,9 @@ abstract class SanitizableHtml {
   ///
   /// This is a <a href="javascript:alert('bad-idea');">bad</a> link.
   void inlineHtml();
+
+  /// A supported custom HTML callout.
+  ///
+  /// <callout-box>Important documentation.</callout-box>
+  void customCalloutBoxHtml();
 }

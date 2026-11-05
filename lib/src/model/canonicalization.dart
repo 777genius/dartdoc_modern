@@ -52,14 +52,6 @@ Library? canonicalLibraryCandidate(ModelElement modelElement) {
 
     if (targetElement == lookupElement) return true;
 
-    // Fallback: Compare by name and library if == fails
-    // (e.g. for some re-exported elements)
-    if (lookupElement != null &&
-        targetElement?.name == lookupElement.name &&
-        targetElement?.library?.uri == lookupElement.library?.uri) {
-      return true;
-    }
-
     return false;
   }).toList(growable: true);
 

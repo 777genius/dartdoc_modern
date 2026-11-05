@@ -413,7 +413,14 @@ mixin DocumentationComment implements Warnable, SourceCode {
             message: 'Invalid path for @example directive ($rawPath)');
         return '';
       }
-      var targetRegion = parsedUri.hasFragment ? parsedUri.fragment : null;
+      String? targetRegion;
+      if (parsedUri.hasFragment) {
+        try {
+          targetRegion = Uri.decodeComponent(parsedUri.fragment);
+        } on FormatException {
+          targetRegion = parsedUri.fragment;
+        }
+      }
       var filepath = parsedUri.removeFragment().toString();
 
       var resolvedPath = resolveExamplePath(
