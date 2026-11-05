@@ -54,7 +54,8 @@ extension ResourceLoader on ResourceProvider {
         // Keep the fork's explicit AOT root and package-config lookup.
         // Bundled bytes remain the fallback for standalone installations.
         resolvedUri = _resolvePackageUriAot(uri);
-      } on ArgumentError {
+      } on ArgumentError { // ignore: avoid_catching_errors
+        // Missing AOT package paths are expected; embedded bytes are available.
         return loadBundledResourceBytes(resourceFileName);
       }
     }

@@ -19,8 +19,8 @@ Library? canonicalLibraryCandidate(ModelElement modelElement) {
   );
   var candidateList = {
     ...?libraryExports,
-    if (modelElement.library case var library?) library,
-    if (definingLibrary != null) definingLibrary,
+    ?modelElement.library,
+    ?definingLibrary,
   };
 
   if (candidateList.isEmpty) {
