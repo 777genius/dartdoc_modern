@@ -38,8 +38,10 @@ keep_head=(
   test/html_generator_test.dart
   test/io_utils_test.dart
   test/packages_test.dart
+  test/parameters_test.dart
   test/prefixes_test.dart
   test/src/utils.dart
+  testing/test_package_sanitize_html/lib/test_package_sanitize_html.dart
   tool/generate_data.dart
   tool/task.dart
   web/sig.txt
