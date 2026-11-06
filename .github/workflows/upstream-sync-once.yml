@@ -152,10 +152,41 @@ jobs:
           chmod +x "$RUNNER_TEMP/imagemagick-compat/magick"
           echo "$RUNNER_TEMP/imagemagick-compat" >> "$GITHUB_PATH"
       - name: Pixel golden regression check (Jaspr themes)
+        id: jaspr_goldens
         if: runner.os == 'Linux'
+        continue-on-error: true
         run: dart run tool/task.dart validate jaspr-theme-golden
         env:
           PLAYWRIGHT_DIR: /tmp/pw-run
+          WORK_DIR: ${{ runner.temp }}/jaspr-golden-diagnostics
+          KEEP_WORK_DIR: '1'
+      - name: Report failing Jaspr goldens
+        if: ${{ runner.os == 'Linux' && steps.jaspr_goldens.outcome == 'failure' }}
+        shell: bash
+        run: |
+          python3 - "$RUNNER_TEMP/jaspr-golden-diagnostics/index.html" <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+          report = Path(sys.argv[1])
+          if not report.is_file():
+              print('Missing golden comparison report')
+              sys.exit(0)
+          for card in re.findall(r'<section class="card .*?</section>', report.read_text(), re.S):
+              title = re.search(r'<h2>(.*?)</h2>', card)
+              metric = re.search(r'RMSE: <strong>(.*?)</strong>', card)
+              status = re.search(r'<span class="status">(.*?)</span>', card)
+              if title and metric and status:
+                  print(f'{status[1]} {title[1]} RMSE={metric[1]}')
+          PY
+      - name: Upload Jaspr golden comparison evidence
+        if: ${{ runner.os == 'Linux' && steps.jaspr_goldens.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: jaspr-golden-diagnostics
+          path: ${{ runner.temp }}/jaspr-golden-diagnostics/
+          retention-days: 2
+          if-no-files-found: warn
       - name: Standalone AOT E2E from outside the source tree
         if: runner.os == 'Linux'
         shell: bash
@@ -213,3 +244,6 @@ jobs:
           test -f test/end2end/jaspr_generator_test.dart
           test -f lib/src/generator/html_generator_backend.dart
           git diff --check
+      - name: Enforce Jaspr pixel golden gate
+        if: ${{ runner.os == 'Linux' && steps.jaspr_goldens.outcome == 'failure' }}
+        run: exit 1
