@@ -79,6 +79,7 @@ void main() {
     );
     var outDir = path.join(tempDir.path, 'doc');
     var process = await TestProcess.start(aotExe, [
+      '--format=html',
       '--input=$packagePath',
       '--output=$outDir',
     ], workingDirectory: tempDir.path);

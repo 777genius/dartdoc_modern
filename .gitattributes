@@ -1,5 +1,11 @@
 *.dart text eol=lf
 *.yaml text eol=lf
+# Preserve embedded resource bytes across Linux, macOS and Windows checkouts.
+lib/resources/*.js text eol=lf
+lib/resources/*.map text eol=lf
+lib/resources/*.css text eol=lf
+lib/resources/*.svg text eol=lf
+lib/resources/*.md text eol=lf
 
 lib/resources/styles.css linguist-generated=true
 lib/src/generator/html_resources.g.dart linguist-generated=true

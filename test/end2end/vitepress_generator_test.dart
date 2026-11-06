@@ -1903,7 +1903,7 @@ void main() {
             );
             var content = indexTs.readAsStringSync();
             content = content.replaceAll(
-              "import '../generated/api-styles.css'\n",
+              RegExp(r"import '../generated/api-styles\.css'\r?\n"),
               '',
             );
             indexTs.writeAsStringSync(content);

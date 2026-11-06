@@ -55,6 +55,14 @@ Library? canonicalLibraryCandidate(ModelElement modelElement) {
 
         if (targetElement == lookupElement) return true;
 
+        // Re-exported accessor elements may differ in identity.
+        // Fall back to their defining library and name (as in upstream).
+        if (lookupElement != null &&
+            targetElement?.name == lookupElement.name &&
+            targetElement?.library?.uri == lookupElement.library?.uri) {
+          return true;
+        }
+
         return false;
       })
       .toList(growable: true);
