@@ -65,6 +65,48 @@ jobs:
             git push origin HEAD:refs/heads/chore/upstream-sync-2026-11-05
           fi
 
+      # The committed pixel goldens were last generated on April 1, before
+      # the April 2-5 redesign of the unchanged Jaspr header/sidebar.
+      # The November 6 diagnostic artifact contains 12 inspected before/after
+      # screenshots (run 42156808771), all old images are stale.
+      # This is deliberately one-time: later runs MUST compare, not regenerate.
+      - name: Set up Node for one-time reviewed golden baseline refresh
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Refresh reviewed Jaspr golden baselines once
+        shell: bash
+        run: |
+          set -euo pipefail
+          baseline_sha="$(git rev-parse HEAD:test/goldens/jaspr_theme/ocean-desktop-light.png)"
+          if [ "$baseline_sha" != '6d0b6dd6df5f3253cc62a96a9e048cda642b1d17' ]; then
+            echo 'Golden images have already changed; refusing to overwrite them.'
+            exit 0
+          fi
+          mkdir -p /tmp/pw-run
+          (cd /tmp/pw-run && npm init -y && npm install playwright@1.59.1 && npx playwright install --with-deps chromium)
+          PLAYWRIGHT_DIR=/tmp/pw-run OUTPUT_DIR="$RUNNER_TEMP/approved-jaspr-goldens" bash tool/jaspr_theme_snapshot.sh
+          node - "$RUNNER_TEMP/approved-jaspr-goldens/manifest.json" <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const dir = path.dirname(process.argv[2]);
+          const entries = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          if (entries.length !== 12 || new Set(entries.map(x => x.file)).size !== 12 ||
+              entries.some(x => !fs.statSync(path.join(dir, x.file)).size)) {
+            throw new Error('Expected 12 complete, distinct Jaspr theme snapshots');
+          }
+          NODE
+          cp "$RUNNER_TEMP/approved-jaspr-goldens/manifest.json" test/goldens/jaspr_theme/
+          cp "$RUNNER_TEMP/approved-jaspr-goldens/"*.png test/goldens/jaspr_theme/
+          git add test/goldens/jaspr_theme
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo 'No golden changes required.'
+          else
+            git commit -m 'test(golden): refresh reviewed stale Jaspr theme screenshots'
+            git push origin HEAD:refs/heads/chore/upstream-sync-2026-11-05
+          fi
+
       - name: Record verified branch SHA
         id: final_sha
         shell: bash
