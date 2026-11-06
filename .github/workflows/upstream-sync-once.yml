@@ -126,7 +126,9 @@ jobs:
         env:
           PLAYWRIGHT_DIR: /tmp/pw-run
       - name: Jaspr visual checks
+        id: jaspr_visual
         if: runner.os == 'Linux'
+        continue-on-error: true
         run: dart run tool/task.dart validate jaspr-theme-visual
         env:
           PLAYWRIGHT_DIR: /tmp/pw-run
@@ -244,6 +246,8 @@ jobs:
           test -f test/end2end/jaspr_generator_test.dart
           test -f lib/src/generator/html_generator_backend.dart
           git diff --check
-      - name: Enforce Jaspr pixel golden gate
-        if: ${{ runner.os == 'Linux' && steps.jaspr_goldens.outcome == 'failure' }}
-        run: exit 1
+      - name: Enforce Jaspr visual and pixel golden gates
+        if: ${{ runner.os == 'Linux' && (steps.jaspr_visual.outcome == 'failure' || steps.jaspr_goldens.outcome == 'failure') }}
+        run: |
+          echo "::error::Jaspr visual or pixel golden gate failed; see prior steps and uploaded evidence."
+          exit 1
