@@ -5,7 +5,19 @@
 import 'dart:collection';
 
 import 'package:analyzer/dart/analysis/analysis_context.dart';
-import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/ast.dart'
+    show
+        BlockClassBody,
+        ClassDeclaration,
+        Declaration,
+        EnumDeclaration,
+        ExtensionDeclaration,
+        ExtensionTypeDeclaration,
+        FieldDeclaration,
+        LibraryDirective,
+        MixinDeclaration,
+        PrimaryConstructorBody,
+        TopLevelVariableDeclaration;
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/file_system/file_system.dart';
@@ -230,14 +242,13 @@ class PackageGraph with Referable {
       for (var directive in unit.directives.whereType<LibraryDirective>()) {
         // There should be only one library directive. If there are more, there
         // is no harm in grabbing ModelNode for each.
-        var commentData = directive.documentationComment?.data;
         _modelNodes.putIfAbsent(
           resolvedLibrary.element,
           () => ModelNode(
             directive,
             resolvedLibrary.element,
             _analysisContext,
-            commentData: commentData,
+            comment: directive.documentationComment,
           ),
         );
       }
@@ -285,21 +296,19 @@ class PackageGraph with Referable {
   }
 
   void _populateModelNodeFor(Declaration declaration) {
-    var commentData = declaration.documentationComment?.data;
+    var comment = declaration.documentationComment;
 
     void addModelNode(Declaration declaration) {
       var e = declaration.declaredFragment?.element;
       if (e == null) {
+        // Analyzer 14 represents a primary constructor's body as a member;
+        // its header declares the element instead.
+        if (declaration is PrimaryConstructorBody) return;
         throw StateError("Expected '$declaration' to declare an element");
       }
       _modelNodes.putIfAbsent(
         e,
-        () => ModelNode(
-          declaration,
-          e,
-          _analysisContext,
-          commentData: commentData,
-        ),
+        () => ModelNode(declaration, e, _analysisContext, comment: comment),
       );
     }
 
@@ -495,6 +504,8 @@ class PackageGraph with Referable {
       PackageWarning.ignoredCanonicalFor ||
       PackageWarning.packageOrderGivesMissingPackageName ||
       PackageWarning.unresolvedDocReference ||
+      PackageWarning.unscopedDocReference ||
+      PackageWarning.docReferenceTargetDiffers ||
       PackageWarning.unknownMacro ||
       PackageWarning.unknownHtmlFragment ||
       PackageWarning.brokenLink ||
@@ -504,6 +515,7 @@ class PackageGraph with Referable {
       PackageWarning.internalError ||
       PackageWarning.missingFromSearchIndex ||
       PackageWarning.missingExampleFile ||
+      PackageWarning.missingExampleRegion ||
       PackageWarning.typeAsHtml ||
       PackageWarning.invalidParameter ||
       PackageWarning.toolError ||
@@ -555,8 +567,8 @@ class PackageGraph with Referable {
   ///
   /// [alreadyTagged] is used internall to prevent visiting in cycles.
   void _tagExportsFor(
-    final Library publicLibrary,
-    final LibraryElement libraryElement, {
+    Library publicLibrary,
+    LibraryElement libraryElement, {
     Set<(Library, LibraryElement)>? alreadyTagged,
   }) {
     alreadyTagged ??= {};
@@ -1054,54 +1066,4 @@ class InheritableElementsKey {
   final Library library;
 
   InheritableElementsKey(this.element, this.library);
-}
-
-extension on Comment {
-  /// A mapping of all comment references to their various data.
-  CommentData get data {
-    var docImportsData = <CommentDocImportData>[];
-    for (var docImport in docImports) {
-      docImportsData.add(
-        CommentDocImportData(
-          offset: docImport.offset,
-          end: docImport.import.end,
-        ),
-      );
-    }
-
-    var referencesData = <String, CommentReferenceData>{};
-    for (var reference in references) {
-      var referable = reference.expression;
-      String name;
-      Element? staticElement;
-      if (referable case PropertyAccess(:var propertyName)) {
-        var target = referable.target;
-        if (target is! PrefixedIdentifier) continue;
-        name = '${target.name}.${propertyName.name}';
-        staticElement = propertyName.element;
-      } else if (referable case PrefixedIdentifier(:var identifier)) {
-        name = referable.name;
-        staticElement = identifier.element;
-      } else if (referable case SimpleIdentifier()) {
-        name = referable.name;
-        staticElement = referable.element;
-      } else {
-        continue;
-      }
-
-      if (staticElement != null && !referencesData.containsKey(name)) {
-        referencesData[name] = CommentReferenceData(
-          staticElement,
-          name,
-          referable.offset,
-          referable.length,
-        );
-      }
-    }
-    return CommentData(
-      offset: offset,
-      docImports: docImportsData,
-      references: referencesData,
-    );
-  }
 }

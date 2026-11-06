@@ -6,12 +6,21 @@ class _RuntimeStats {
   int totalReferences = 0;
   int resolvedReferences = 0;
 
+  /// The number of references resolved by dartdoc which the analyzer could not
+  /// resolve.
+  int unscopedReferences = 0;
+
+  /// The number of references which dartdoc and the analyzer resolve to
+  /// different elements.
+  int differentTargetReferences = 0;
+
   final List<_PerfTask> perfTasks = [];
   final List<_PerfTask> taskQueue = [];
 
   final Map<String, int> _accumulators = {};
 
   String _valueAndPercent(int references) {
+    if (totalReferences == 0) return '$references (0.000%)';
     final percent = references.toDouble() / totalReferences.toDouble() * 100;
     return '$references (${percent.toStringAsFixed(3)}%)';
   }
@@ -57,6 +66,14 @@ class _RuntimeStats {
     report.writeln(
       '  resolved references:  '
       '${_valueAndPercent(resolvedReferences)}',
+    );
+    report.writeln(
+      '  resolved, but not in scope for the analyzer:  '
+      '${_valueAndPercent(unscopedReferences)}',
+    );
+    report.writeln(
+      '  resolved to a different element than the analyzer:  '
+      '${_valueAndPercent(differentTargetReferences)}',
     );
 
     if (perfTasks.isNotEmpty) {

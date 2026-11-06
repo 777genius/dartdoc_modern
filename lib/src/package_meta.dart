@@ -9,6 +9,7 @@ import 'package:analyzer/file_system/file_system.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
 // ignore: implementation_imports
 import 'package:analyzer/src/generated/sdk.dart' show DartSdk;
+import 'package:cli_util/cli_util.dart' as cli_util;
 import 'package:dartdoc_modern/src/failure.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -38,14 +39,20 @@ final PackageMetaProvider pubPackageMetaProvider = PackageMetaProvider(
   PubPackageMeta.fromFilename,
   PubPackageMeta.fromDir,
   PhysicalResourceProvider.INSTANCE,
-  PhysicalResourceProvider.INSTANCE
-      .getFile(
-        PhysicalResourceProvider.INSTANCE.pathContext.absolute(
-          Platform.resolvedExecutable,
-        ),
-      )
-      .parent
-      .parent,
+  switch (cli_util.sdkPath) {
+    final sdk? => PhysicalResourceProvider.INSTANCE.getFolder(
+      PhysicalResourceProvider.INSTANCE.pathContext.absolute(sdk),
+    ),
+    null =>
+      PhysicalResourceProvider.INSTANCE
+          .getFile(
+            PhysicalResourceProvider.INSTANCE.pathContext.absolute(
+              Platform.resolvedExecutable,
+            ),
+          )
+          .parent
+          .parent,
+  },
   Platform.environment,
 );
 
@@ -319,8 +326,7 @@ class _FilePackageMeta extends PubPackageMeta {
 
   _FilePackageMeta(super.dir, super.resourceProvider)
     : _pubspec =
-          loadYaml(dir.getChildAssumingFile('pubspec.yaml').readAsStringSync())
-              as YamlMap;
+          loadYaml(dir.getFile('pubspec.yaml').readAsStringSync()) as YamlMap;
 
   @override
   late final String? hostedAt = () {

@@ -20,19 +20,19 @@ repository: https://github.com/777genius/dartdoc_modern
 ''',
       );
       packageDir
-          .getChildAssumingFolder('lib')
-          .getChildAssumingFolder('resources')
-          .getChildAssumingFolder('jaspr')
-          .getChildAssumingFolder('lib')
-          .getChildAssumingFile('app.dart')
+          .getFolder('lib')
+          .getFolder('resources')
+          .getFolder('jaspr')
+          .getFolder('lib')
+          .getFile('app.dart')
           .writeAsStringSync('void main() {}');
       packageDir
-          .getChildAssumingFolder('lib')
-          .getChildAssumingFolder('resources')
-          .getChildAssumingFolder('jaspr')
-          .getChildAssumingFolder('lib')
-          .getChildAssumingFolder('components')
-          .getChildAssumingFile('docs_header.dart')
+          .getFolder('lib')
+          .getFolder('resources')
+          .getFolder('jaspr')
+          .getFolder('lib')
+          .getFolder('components')
+          .getFile('docs_header.dart')
           .writeAsStringSync('class DocsHeader {}');
 
       final context = generatorContextFromArgv([

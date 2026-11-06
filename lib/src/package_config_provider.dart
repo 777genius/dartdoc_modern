@@ -33,8 +33,8 @@ package_config.PackageConfig? findPackageConfig(Folder folder) {
 /// with `checkForPackageConfigJsonFile` inlined.
 package_config.PackageConfig? findPackageConfigInDirectory(Folder folder) {
   var packageConfigFile = folder
-      .getChildAssumingFolder('.dart_tool')
-      .getChildAssumingFile('package_config.json');
+      .getFolder('.dart_tool')
+      .getFile('package_config.json');
 
   if (!packageConfigFile.exists) return null;
 

@@ -246,6 +246,7 @@ void main() {
     Class classWithHtml;
     late final Method blockHtml;
     late final Method inlineHtml;
+    late final Method customCalloutBoxHtml;
     late final PackageGraph packageGraph;
     late final Library exLibrary;
 
@@ -262,6 +263,9 @@ void main() {
       classWithHtml = exLibrary.classes.named('SanitizableHtml');
       blockHtml = classWithHtml.instanceMethods.named('blockHtml');
       inlineHtml = classWithHtml.instanceMethods.named('inlineHtml');
+      customCalloutBoxHtml = classWithHtml.instanceMethods.named(
+        'customCalloutBoxHtml',
+      );
       for (var modelElement in packageGraph.localPublicLibraries.expand(
         (l) => l.allModelElements,
       )) {
@@ -306,6 +310,13 @@ void main() {
 
     test('removes bad block HTML', () {
       expect(blockHtml.documentationAsHtml, isNot(contains('bad-idea')));
+    });
+
+    test('can have callout-box HTML', () {
+      expect(
+        customCalloutBoxHtml.documentationAsHtml,
+        contains('<callout-box>'),
+      );
     });
   });
 
@@ -587,7 +598,6 @@ void main() {
         isFalse,
       );
     });
-
     test(
       'Verify that sdk docs downgrade no-library-level-docs to warnings',
       () {

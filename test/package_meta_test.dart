@@ -32,9 +32,9 @@ void main() {
 
     test('readme with corrupt UTF-8 loads without throwing', () {
       expect(
-        resourceProvider.readAsMalformedAllowedStringSync(
-          p.getReadmeContents()!,
-        ),
+        resourceProvider
+            .readAsMalformedAllowedStringSync(p.getReadmeContents()!)
+            .replaceAll('\r\n', '\n'),
         contains('Here is some messed up UTF-8.\nÃf'),
       );
     });

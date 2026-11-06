@@ -530,7 +530,10 @@ void main() {
       });
 
       test('home scaffold uses home layout frontmatter contract', () {
-        final content = _readOutput(outDir, 'content/index.md');
+        final content = _readOutput(
+          outDir,
+          'content/index.md',
+        ).replaceAll('\r\n', '\n');
         final homeLayout = _readOutput(
           outDir,
           'lib/layouts/docs_home_layout.dart',

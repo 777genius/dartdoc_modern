@@ -1,3 +1,17 @@
+## Unreleased — upstream synchronization
+
+* Integrate upstream `dart-lang/dartdoc` through commit
+  `03ec6df6228ac8257a737261d17e746c665b1e13`, including
+  analyzer-based documentation reference diagnostics, inherited-documentation
+  provenance, `{@example}` regions, HTML callout boxes, updated rendering,
+  and AOT resource bundling.
+* Preserve the fork's HTML, Jaspr, VitePress, guides, workspace documentation,
+  release workflow, and AOT external-resource fallback.
+* Require Dart 3.11 or later because the upstream analyzer APIs require
+  `analyzer ^14.5.0`. This is a compatibility change from Dart 3.8;
+  confirm against the supported CI matrix before release.
+* No package release is performed as part of this synchronization.
+
 ## 1.1.7
 
 * Rebuild generated HTML renderers and web frontend signatures for CI release

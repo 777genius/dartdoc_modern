@@ -60,15 +60,22 @@ for theme in "${PRESETS[@]}"; do
   "$ROOT/tool/jaspr_theme_preview.sh" >"$log_file" 2>&1 &
   SERVER_PID=$!
 
-  for _ in $(seq 1 90); do
+  # The first static Jaspr build may exceed 90s on shared runners.
+  for _ in $(seq 1 180); do
     if curl -sf "http://127.0.0.1:$port/guide/getting-started/" >/dev/null 2>&1; then
       break
+    fi
+    if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+      echo "Preview for theme '$theme' exited before becoming ready."
+      tail -n 80 "$log_file" || true
+      exit 1
     fi
     sleep 1
   done
 
   if ! curl -sf "http://127.0.0.1:$port/guide/getting-started/" >/dev/null 2>&1; then
-    echo "Preview for theme '$theme' did not start. See $log_file"
+    echo "Preview for theme '$theme' did not start within 180 seconds."
+    tail -n 80 "$log_file" || true
     exit 1
   fi
 

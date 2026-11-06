@@ -33,18 +33,16 @@ class DocumentationCommentTestBase extends DartdocTestBase {
     List<String> additionalArguments = const [],
   }) async {
     projectRoot = utils.writePackage(packageName, resourceProvider);
-    projectRoot.getChildAssumingFile('dartdoc_options.yaml').writeAsStringSync(
-      '''
+    projectRoot.getFile('dartdoc_options.yaml').writeAsStringSync('''
       dartdoc:
         warnings:
           - missing-code-block-language
-      ''',
-    );
+      ''');
 
     for (var (fileName, comment) in filesAndComments) {
       projectRoot
-          .getChildAssumingFolder('lib')
-          .getChildAssumingFile(fileName)
+          .getFolder('lib')
+          .getFile(fileName)
           .writeAsStringSync(
             '$comment\n'
             'library;',

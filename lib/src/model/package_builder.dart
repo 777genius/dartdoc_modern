@@ -8,7 +8,7 @@ import 'dart:io' as io;
 import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/features.dart';
 import 'package:analyzer/dart/analysis/results.dart';
-import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/ast.dart' show CompilationUnit;
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/file_system/file_system.dart';
 // ignore: implementation_imports
@@ -19,8 +19,6 @@ import 'package:analyzer/src/dart/analysis/analysis_context_collection.dart'
 // ignore: implementation_imports
 import 'package:analyzer/src/dart/sdk/sdk.dart'
     show EmbedderSdk, languageVersionFromSdkVersion, FolderBasedDartSdk;
-// ignore: implementation_imports
-import 'package:analyzer/src/generated/engine.dart' show AnalysisOptionsImpl;
 // ignore: implementation_imports
 import 'package:analyzer/src/generated/sdk.dart' show DartSdk;
 import 'package:collection/collection.dart';
@@ -73,14 +71,13 @@ class PubPackageBuilder implements PackageBuilder {
       // of handling it ourselves?
       resourceProvider: packageMetaProvider.resourceProvider,
       sdkPath: config.sdkDir,
-      updateAnalysisOptions4: ({required AnalysisOptionsImpl analysisOptions}) {
-        analysisOptions
+      configureAnalysisOptionsBuilder: ({required analysisOptionsBuilder}) {
+        analysisOptionsBuilder
           ..warning = false
           ..lint = false;
         if (config.enableExperiment.isNotEmpty) {
-          analysisOptions.contextFeatures = FeatureSet.latestLanguageVersion(
-            flags: config.enableExperiment,
-          );
+          analysisOptionsBuilder.contextFeatures =
+              FeatureSet.latestLanguageVersion(flags: config.enableExperiment);
         }
       },
       withFineDependencies: true,

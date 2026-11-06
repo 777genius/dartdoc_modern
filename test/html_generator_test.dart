@@ -61,7 +61,7 @@ void main() {
         );
         projectRoot = utils.writePackage('my_package', resourceProvider);
         projectPath = projectRoot.path;
-        var outputPath = projectRoot.getChildAssumingFolder('doc').path;
+        var outputPath = projectRoot.getFolder('doc').path;
         var writer = DartdocFileWriter(outputPath, resourceProvider);
 
         generator = Generator(
@@ -77,7 +77,7 @@ void main() {
 
       test('a null package has some assets', () async {
         await generator.generate(null);
-        var outputPath = projectRoot.getChildAssumingFolder('doc').path;
+        var outputPath = projectRoot.getFolder('doc').path;
         var output = resourceProvider.getFolder(
           pathContext.join(outputPath, 'static-assets'),
         );

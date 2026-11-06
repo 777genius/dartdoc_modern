@@ -471,7 +471,8 @@ abstract class ModelElement
   late final List<Annotation> annotations = List.unmodifiable([
     if (library case var library?)
       for (var m in element.metadata.annotations)
-        if (m.isVisibleAnnotation) Annotation(m, library, packageGraph),
+        if (m.isVisibleAnnotation && (m.isValidAtElement(element) ?? true))
+          Annotation(m, library, packageGraph),
   ]);
 
   @override
@@ -597,12 +598,7 @@ abstract class ModelElement
     // This is not accurate if we are still constructing the Package.
     assert(packageGraph.allLibrariesAdded);
 
-    var definingLibraryIsLocalPublic = packageGraph.localPublicLibraries
-        .contains(library);
-    var possibleCanonicalLibrary = definingLibraryIsLocalPublic
-        ? library
-        : canonicalLibraryCandidate(this);
-
+    var possibleCanonicalLibrary = canonicalLibraryCandidate(this);
     if (possibleCanonicalLibrary != null) return possibleCanonicalLibrary;
 
     if (this case Inheritable(isInherited: true)) {
@@ -646,6 +642,47 @@ abstract class ModelElement
   /// This will walk up the inheritance hierarchy to find docs, if the current
   /// object doesn't have docs for this element.
   List<ModelElement> get documentationFrom => [this];
+
+  /// The elements declared elsewhere whose documentation comment is displayed
+  /// for this element, because it has none of its own.
+  ///
+  /// Empty when the documentation was written on this element itself, or on
+  /// its own accessors. Otherwise this is the member in a supertype that this
+  /// element overrides; for a property, that is the overridden getter or
+  /// setter.
+  @override
+  late final List<ModelElement> inheritedDocumentationFrom = () {
+    final seen = <String>{};
+    return [
+      for (var source in documentationFrom)
+        if (source.element != element &&
+            source.element.enclosingElement != element.enclosingElement &&
+            source.hasDocumentationComment &&
+            seen.add(source.qualifiedDisplayName))
+          source,
+    ];
+  }();
+
+  @override
+  bool get hasInheritedDocumentation => inheritedDocumentationFrom.isNotEmpty;
+
+  /// This element's name, qualified with its enclosing container's name if it
+  /// is a member of one.
+  String get qualifiedDisplayName => switch (enclosingElement) {
+    Container(:var displayName) => '$displayName.${this.displayName}',
+    _ => displayName,
+  };
+
+  /// The [qualifiedDisplayName], wrapped in an HTML link (an `<a>` tag) if
+  /// [href] is non-`null`.
+  String get linkedQualifiedName {
+    var parts = linkedNameParts;
+    var prefix = switch (enclosingElement) {
+      Container(:var displayName) => '$displayName.',
+      _ => '',
+    };
+    return '${parts.tag}$prefix${parts.text}${parts.endTag}';
+  }
 
   @override
   Element get element;

@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:analyzer/dart/analysis/features.dart';
+import 'package:analyzer/dart/ast/ast.dart' show LibraryDirective;
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/scope.dart';
 import 'package:dartdoc_modern/src/model/kind.dart';
@@ -24,6 +25,9 @@ class Library extends ModelElement with TopLevelContainer {
 
   final String _restoredUri;
 
+  /// Whether the library's defining compilation unit has a `library` directive.
+  final bool _hasLibraryDirective;
+
   @override
   final Package package;
 
@@ -34,6 +38,7 @@ class Library extends ModelElement with TopLevelContainer {
     this._restoredUri,
     this._localElements,
     this._exportedElements,
+    this._hasLibraryDirective,
   ) : super(null, packageGraph);
 
   factory Library.fromLibraryResult(
@@ -45,6 +50,14 @@ class Library extends ModelElement with TopLevelContainer {
 
     var libraryElement = resolvedLibrary.element;
     var firstLibraryFragment = libraryElement.firstFragment;
+    // Empty only for SDK libraries in google3, which are not parsed there;
+    // assume a `library` directive so that their documentation is kept.
+    var units = resolvedLibrary.units;
+    var hasLibraryDirective =
+        units.isEmpty ||
+        units.first.directives.any(
+          (directive) => directive is LibraryDirective,
+        );
 
     var localElements = <Element>{
       for (var g in firstLibraryFragment.getters) g.element,
@@ -68,11 +81,31 @@ class Library extends ModelElement with TopLevelContainer {
       resolvedLibrary.element.firstFragment.source.uri.toString(),
       localElements,
       exportedElements,
+      hasLibraryDirective,
     );
 
     package.allLibraries.add(library);
     return library;
   }
+
+  /// The documentation comment of this library, or `null` if there is none.
+  ///
+  /// Per the Dart documentation comment specification (sections 3.1 and 3.5),
+  /// a comment documents a library only when it is placed before a `library`
+  /// directive. The analyzer, however, falls back to the comment before the
+  /// first directive of _any_ kind (`import`, `export`, `part`) when there is
+  /// no `library` directive. Ignore that comment here, so that dartdoc follows
+  /// the specification.
+  // TODO(zarah): Remove this override and the one below once
+  // https://github.com/dart-lang/sdk/issues/64700 is fixed and dartdoc requires
+  // an analyzer with the fix.
+  @override
+  String? get documentationComment =>
+      _hasLibraryDirective ? super.documentationComment : null;
+
+  @override
+  bool get hasDocumentationComment =>
+      _hasLibraryDirective && super.hasDocumentationComment;
 
   /// Allow scope for Libraries.
   @override
@@ -493,7 +526,18 @@ class Library extends ModelElement with TopLevelContainer {
         if (!elementNames.contains(elementName)) elementName,
     };
     for (var notFound in notFoundInAllModelElements) {
-      warn(PackageWarning.ignoredCanonicalFor, message: notFound);
+      var message = notFound;
+      var lastDot = notFound.lastIndexOf('.');
+      if (lastDot != -1 && lastDot < notFound.length - 1) {
+        var suffix = notFound.substring(lastDot);
+        var possibleMatches = elementNames.where(
+          (name) => name.endsWith(suffix),
+        );
+        if (possibleMatches.isNotEmpty) {
+          message = '$notFound (did you mean ${possibleMatches.join(', ')}?)';
+        }
+      }
+      warn(PackageWarning.ignoredCanonicalFor, message: message);
     }
     // TODO(jcollins-g): warn if a macro/tool generates an unexpected
     // canonicalFor?

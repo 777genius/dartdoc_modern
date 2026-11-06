@@ -36,6 +36,20 @@ final _pathContext = _resourceProvider.pathContext;
 final String platformVersionString = Platform.version.split(' ').first;
 final Version platformVersion = Version.parse(platformVersionString);
 
+/// The URL prefix of the links dartdoc generates into the SDK API docs, given
+/// the mock SDK's version.
+///
+/// This mirrors how [Package] expands `%b%/%v%` in the SDK's default
+/// [DartdocOptionContext.linkToUrl]: `stable` for a release, otherwise the
+/// prerelease tag, such as `dev`, then the version. If that rule changes, this
+/// must change with it.
+final String sdkDocsUrlPrefix = () {
+  var tag = platformVersion.isPreRelease
+      ? platformVersion.preRelease.whereType<String>().first
+      : 'stable';
+  return 'https://api.dart.dev/$tag/$platformVersionString';
+}();
+
 final Folder testPackageToolError = _resourceProvider.getFolder(
   _pathContext.absolute(
     _pathContext.normalize('testing/test_package_tool_error'),
@@ -154,11 +168,13 @@ PackageMetaProvider get testPackageMetaProvider {
 
 /// Writes additional files for a mock SDK.
 ///
-/// Included is a "version" file and an "api_readme.md" file.
+/// Included is a "version" file and an "api_readme.md" file. The version is
+/// that of the SDK running the tests, because the analyzer rejects
+/// `// @dart=X.Y` overrides newer than the host SDK.
 void writeMockSdkFiles(Folder sdkFolder) {
-  sdkFolder.getChildAssumingFile('version').writeAsStringSync('3.10.6');
+  sdkFolder.getFile('version').writeAsStringSync(platformVersionString);
   sdkFolder
-      .getChildAssumingFile('api_readme.md')
+      .getFile('api_readme.md')
       .writeAsStringSync(
         'Welcome to the [Dart](https://dart.dev/) API reference documentation',
       );
@@ -169,10 +185,10 @@ void writeMockSdkFiles(Folder sdkFolder) {
 /// Dartdoc has a few indicator files it uses to verify that a directory
 /// represents a Dart SDK. These include "bin/dart" and "bin/pub".
 void _writeMockSdkBinFiles(Folder root) {
-  var sdkBinFolder = root.getChildAssumingFolder('bin');
-  sdkBinFolder.getChildAssumingFile('dart').writeAsStringSync('');
-  var sdkIncludeFolder = root.getChildAssumingFolder('include');
-  sdkIncludeFolder.getChildAssumingFile('dart_version.h').writeAsStringSync('');
+  var sdkBinFolder = root.getFolder('bin');
+  sdkBinFolder.getFile('dart').writeAsStringSync('');
+  var sdkIncludeFolder = root.getFolder('include');
+  sdkIncludeFolder.getFile('dart_version.h').writeAsStringSync('');
 }
 
 /// Writes a package named [packageName], with [resourceProvider], to the
@@ -198,11 +214,8 @@ homepage: https://github.com/dart-lang
       ResourceProviderExtension(resourceProvider).convertPath('/projects'),
     ),
   );
-  var projectFolder = projectsFolder.getChildAssumingFolder(packageName)
-    ..create();
-  projectFolder
-      .getChildAssumingFile('pubspec.yaml')
-      .writeAsStringSync(pubspecContent);
+  var projectFolder = projectsFolder.getFolder(packageName)..create();
+  projectFolder.getFile('pubspec.yaml').writeAsStringSync(pubspecContent);
   var buffer = StringBuffer('''
 {
   "configVersion": 2,
@@ -232,10 +245,10 @@ homepage: https://github.com/dart-lang
 }
 ''');
   projectFolder
-      .getChildAssumingFolder('.dart_tool')
-      .getChildAssumingFile('package_config.json')
+      .getFolder('.dart_tool')
+      .getFile('package_config.json')
       .writeAsStringSync(buffer.toString());
-  projectFolder.getChildAssumingFolder('lib').create();
+  projectFolder.getFolder('lib').create();
 
   return projectFolder;
 }

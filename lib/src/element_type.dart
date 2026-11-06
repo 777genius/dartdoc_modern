@@ -16,8 +16,9 @@ import 'package:dartdoc_modern/src/runtime_stats.dart';
 import 'package:dartdoc_modern/src/type_utils.dart';
 import 'package:meta/meta.dart';
 
-/// Base class representing a type in Dartdoc.  It wraps a [DartType], and
-/// may link to a [ModelElement].
+/// Base class representing a type in Dartdoc.
+///
+/// It wraps a [DartType], and may link to a [ModelElement].
 abstract class ElementType with Referable {
   final DartType type;
   @override
@@ -25,10 +26,7 @@ abstract class ElementType with Referable {
   @override
   final Library? library;
 
-  final String nullabilitySuffix;
-
-  ElementType._(this.type, this.library, this.packageGraph)
-    : nullabilitySuffix = type.nullabilitySuffixWithin;
+  ElementType._(this.type, this.library, this.packageGraph);
 
   factory ElementType.for_(
     DartType type,
@@ -59,9 +57,16 @@ abstract class ElementType with Referable {
     );
   }
 
+  /// The `?` or empty string to put after the type name.
+  String get nullabilitySuffix =>
+      type.nullabilitySuffix == NullabilitySuffix.question ? '?' : '';
+
   bool get isTypedef => false;
 
   String get linkedName;
+
+  /// Signature without parameter annotations, including nested function types.
+  String get linkedNameNoMetadata => linkedName;
 
   /// Name with generics and nullability indication, in HTML tags.
   String get nameWithGenerics;
@@ -71,10 +76,12 @@ abstract class ElementType with Referable {
   String get nameWithGenericsPlain;
 
   @override
-  String get displayName => throw UnimplementedError();
+  String get displayName =>
+      throw UnimplementedError('Not implemented by ElementType');
 
   @override
-  String get breadcrumbName => throw UnimplementedError();
+  String get breadcrumbName =>
+      throw UnimplementedError('Not implemented by ElementType');
 
   Iterable<ElementType> get typeArguments;
 
@@ -124,7 +131,7 @@ class UndefinedElementType extends ElementType {
     // all types.
     if (type is InvalidType) return 'dynamic';
     assert(
-      const {'Never'}.contains(type.documentableElement?.name),
+      type.documentableElement?.name == 'Never',
       'Unrecognized type for UndefinedElementType: $type',
     );
     return type.documentableElement!.name!;
@@ -167,6 +174,10 @@ class FunctionTypeElementType extends UndefinedElementType
 
   @override
   String get name => 'Function';
+
+  @override
+  String get linkedNameNoMetadata => const FunctionTypeElementTypeRendererHtml()
+      .renderLinkedNameWithMetadata(this, showMetadata: false);
 
   @override
   ElementTypeRenderer get _renderer =>
@@ -420,20 +431,4 @@ mixin Rendered implements ElementType {
   );
 
   ElementTypeRenderer<ElementType> get _renderer;
-}
-
-extension on DartType {
-  /// The dartdoc nullability suffix for this type in [library].
-  String get nullabilitySuffixWithin {
-    if (this is! VoidType && !isBottom) {
-      /// If a legacy type appears inside the public interface of a Null
-      /// safety library, we pretend it is nullable for the purpose of
-      /// documentation (since star-types are not supposed to be public).
-      if (nullabilitySuffix == NullabilitySuffix.question ||
-          nullabilitySuffix == NullabilitySuffix.star) {
-        return '?';
-      }
-    }
-    return '';
-  }
 }

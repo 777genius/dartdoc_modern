@@ -14,14 +14,15 @@ Library? canonicalLibraryCandidate(ModelElement modelElement) {
   var libraryElement = modelElement.element.library;
   if (libraryElement == null) return null;
   var libraryExports = modelElement.packageGraph.libraryExports[libraryElement];
+  var definingLibrary = modelElement.packageGraph.findButDoNotCreateLibraryFor(
+    libraryElement,
+  );
   var candidateList = {
     ...?libraryExports,
-    // When the element is defined in a library that is not documented, the
-    // `libraryExports` map will not contain that library. However, we still want
-    // to consider the defining library as a candidate if it happens to be
-    // documented.
     ?modelElement.library,
+    ?definingLibrary,
   };
+
   if (candidateList.isEmpty) {
     return null;
   }
@@ -39,6 +40,8 @@ Library? canonicalLibraryCandidate(ModelElement modelElement) {
     return null;
   }
 
+  final targetElement = _normalize(topLevelElement);
+
   final candidateLibraries = candidateList
       .where((l) {
         if (!l.isPublic) return false;
@@ -47,13 +50,20 @@ Library? canonicalLibraryCandidate(ModelElement modelElement) {
         if (l.name == modelElement.library?.name) return true;
         var lookup =
             l.element.exportNamespace.definedNames2[topLevelElementName];
-        var lookupElement = lookup is PropertyAccessorElement
-            ? lookup.variable
-            : lookup;
-        var targetElement = topLevelElement is PropertyAccessorElement
-            ? topLevelElement.variable
-            : topLevelElement;
-        return targetElement == lookupElement;
+
+        var lookupElement = _normalize(lookup);
+
+        if (targetElement == lookupElement) return true;
+
+        // Re-exported accessor elements may differ in identity.
+        // Fall back to their defining library and name (as in upstream).
+        if (lookupElement != null &&
+            targetElement?.name == lookupElement.name &&
+            targetElement?.library?.uri == lookupElement.library?.uri) {
+          return true;
+        }
+
+        return false;
       })
       .toList(growable: true);
 
@@ -73,6 +83,9 @@ Library? canonicalLibraryCandidate(ModelElement modelElement) {
     topLevelModelElement,
   ).canonicalLibraryCandidate(candidateLibraries);
 }
+
+Element? _normalize(Element? e) =>
+    e is PropertyAccessorElement && !e.isOriginDeclaration ? e.variable : e;
 
 /// Canonicalization support in Dartdoc.
 ///
