@@ -217,10 +217,13 @@ else
     "$DART_BIN" "${generator_args[@]}"
   )
 
-  echo "Resolving dependencies offline..."
+  echo "Resolving dependencies (offline first, online fallback if cache is cold)..."
   (
     cd "$OUTPUT_DIR"
-    PUB_CACHE="$PUB_CACHE_DIR" "$DART_BIN" pub get --offline
+    if ! PUB_CACHE="$PUB_CACHE_DIR" "$DART_BIN" pub get --offline; then
+      echo "Jaspr dependencies missing from cache; fetching them..."
+      PUB_CACHE="$PUB_CACHE_DIR" "$DART_BIN" pub get
+    fi
   )
 
   echo "Building static Jaspr preview..."
