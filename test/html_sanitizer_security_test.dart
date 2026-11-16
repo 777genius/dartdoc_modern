@@ -142,6 +142,27 @@ void main() {
       );
     });
 
+    test('removes unclosed iframe with an untrusted host', () {
+      expect(sanitizeHtml('<iframe src="https://attacker.invalid/">'), isEmpty);
+    });
+
+    test('removes self-closing iframe without a matching close', () {
+      expect(
+        sanitizeHtml('<iframe src="https://www.youtube.com/embed/abc" />'),
+        isEmpty,
+      );
+    });
+
+    test('rejects iframe host when an attribute contains a quoted >', () {
+      expect(
+        sanitizeHtml(
+          'before<iframe title="x > y" '
+          'src="https://attacker.invalid/"></iframe>after',
+        ),
+        'beforeafter',
+      );
+    });
+
     test('preserves safe image source', () {
       const markup = '<img src="https://dart.dev/favicon.ico">';
       expect(sanitizeHtml(markup), markup);

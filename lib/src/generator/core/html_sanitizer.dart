@@ -31,8 +31,14 @@ final _styleOpenClose = RegExp(
 final _baseTag = RegExp(r'<\s*base\b[^>]*/?\s*>', caseSensitive: false);
 final _metaTag = RegExp(r'<\s*meta\b[^>]*/?\s*>', caseSensitive: false);
 final _linkTag = RegExp(r'<\s*link\b[^>]*/?\s*>', caseSensitive: false);
+// Match complete iframe elements, respecting '>' within quoted attributes.
+// Malformed / unclosed iframe opening tags are handled separately below.
 final _iframeTag = RegExp(
-  r'<\s*iframe\b[^>]*>[\s\S]*?<\s*/\s*iframe\s*>',
+  r'''<\s*iframe\b(?:"[^"]*"|'[^']*'|[^'">])*?>[\s\S]*?<\s*/\s*iframe\s*>''',
+  caseSensitive: false,
+);
+final _iframeOpeningTag = RegExp(
+  r'''<\s*iframe\b(?:"[^"]*"|'[^']*'|[^'">])*?>''',
   caseSensitive: false,
 );
 // Match complete opening tags, including quoted '>' characters. Attribute
@@ -140,6 +146,22 @@ String sanitizeHtml(String html, {Set<String> extraAllowedHosts = const {}}) {
         'sanitizeHtml: removed <iframe> without src attribute',
       );
     }
+    return '';
+  });
+
+  // Reject unmatched iframe openers as well. HTML treats <iframe/> as a
+  // non-void start tag, so a missing closing tag must not bypass the
+  // trusted-host check. Keep opening tags of complete, allowed embeds.
+  final completeIframes = _iframeTag.allMatches(html).toList();
+  html = html.replaceAllMapped(_iframeOpeningTag, (match) {
+    final covered = completeIframes.any(
+      (iframe) => iframe.start <= match.start && match.end <= iframe.end,
+    );
+    if (covered) return match.group(0)!;
+    _logSanitizerWarning(
+      'removed unclosed <iframe>',
+      'sanitizeHtml: removed unclosed or malformed <iframe> tag',
+    );
     return '';
   });
 
