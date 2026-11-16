@@ -1727,7 +1727,7 @@ void main() {
           'run',
           p.join(repoRoot, 'tool', 'jaspr_scaffold_smoke.dart'),
           outDir.path,
-        ], repoRoot);
+        ], repoRoot, executable: _scaffoldDartExecutable);
       });
     });
 
