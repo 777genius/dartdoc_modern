@@ -82,6 +82,19 @@ jobs:
         run: |
           $dart = (Get-Command dart).Source
           "JASPR_SCAFFOLD_DART_EXECUTABLE=$dart" >> $env:GITHUB_ENV
+      # setup-dart reuses a fixed download filename in RUNNER_TEMP. Remove the
+      # *downloaded archive* after installing the auxiliary stable SDK so the
+      # second action can fetch the actual selected (dev) SDK safely.
+      - name: Clear temporary SDK archive (Unix)
+        if: matrix.sdk == 'dev' && runner.os != 'Windows'
+        shell: bash
+        run: rm -f "$RUNNER_TEMP"/dartsdk-*.zip
+      - name: Clear temporary SDK archive (Windows)
+        if: matrix.sdk == 'dev' && runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path $env:RUNNER_TEMP -Filter 'dartsdk-*.zip' -File |
+            Remove-Item -Force
       - name: Set up selected Dart SDK
         uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
         with:
