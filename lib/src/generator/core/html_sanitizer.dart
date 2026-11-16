@@ -60,6 +60,14 @@ final _dangerousEmbedSelfClose = {
     tag: RegExp('<\\s*$tag\\b[^>]*/\\s*>', caseSensitive: false),
 };
 
+// Paired and slash-terminated matching above does not cover void <embed>
+// or malformed/unclosed forbidden elements. Match remaining openers with the
+// same quote-aware syntax used for iframes; never leave an active embed.
+final _dangerousOpeningTag = RegExp(
+  r'''<\s*(?:script|style|embed|object|applet|form|svg)\b(?:"[^"]*"|'[^']*'|[^'">])*?>''',
+  caseSensitive: false,
+);
+
 /// Built-in iframe hosts that are always allowed.
 const builtinAllowedHosts = {
   'youtube.com',
@@ -103,6 +111,10 @@ String sanitizeHtml(String html, {Set<String> extraAllowedHosts = const {}}) {
     html = _warnOnRemoval(html, _dangerousEmbedOpenClose[tag]!, '<$tag>');
     html = _warnOnRemoval(html, _dangerousEmbedSelfClose[tag]!, '<$tag/>');
   }
+
+  // 4a. Remove any forbidden opener left by the paired and self-close
+  // patterns (notably a void <embed> without a slash or an unclosed tag).
+  html = _warnOnRemoval(html, _dangerousOpeningTag, 'dangerous element');
 
   // 4b. Remove <base> tags.
   html = _warnOnRemoval(html, _baseTag, '<base>');

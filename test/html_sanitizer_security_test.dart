@@ -142,6 +142,29 @@ void main() {
       );
     });
 
+    test('removes HTML void embed without a self-closing slash', () {
+      expect(
+        sanitizeHtml('before<embed src="https://example.com/payload">after'),
+        'beforeafter',
+      );
+    });
+
+    test('removes unclosed script, object, svg and form openers', () {
+      expect(
+        sanitizeHtml(
+          '<script src="https://example.com/code.js">'
+          '<object data="https://example.com/payload">'
+          '<svg onload="alert(1)">'
+          '<form action="https://example.com/submit">',
+        ),
+        isEmpty,
+      );
+    });
+
+    test('removes unclosed script opener without making text executable', () {
+      expect(sanitizeHtml('<script>some text'), 'some text');
+    });
+
     test('removes unclosed iframe with an untrusted host', () {
       expect(sanitizeHtml('<iframe src="https://attacker.invalid/">'), isEmpty);
     });
