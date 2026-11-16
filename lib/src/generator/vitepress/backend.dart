@@ -9,8 +9,7 @@ import 'package:dartdoc_modern/src/dartdoc_options.dart';
 import 'package:dartdoc_modern/src/generator/core/legacy_guide_redirects.dart';
 import 'package:dartdoc_modern/src/generator/generator.dart';
 import 'package:dartdoc_modern/src/generator/generator_backend.dart';
-import 'package:dartdoc_modern/src/generator/template_data.dart';
-import 'package:dartdoc_modern/src/generator/templates.dart';
+import 'package:dartdoc_modern/src/generator/core/no_op_templates.dart';
 import 'package:dartdoc_modern/src/generator/vitepress/docs.dart';
 import 'package:dartdoc_modern/src/generator/vitepress/paths.dart'
     show VitePressPathResolver, isDuplicateSdkLibrary, isInternalSdkLibrary;
@@ -151,7 +150,7 @@ a.api-link:hover code {
 ///
 /// Key design decisions:
 /// - Never calls `super.generate*()` (super produces HTML via templates).
-/// - Passes [_NoOpTemplates] stub to satisfy the base constructor's
+/// - Passes [NoOpTemplates] stub to satisfy the base constructor's
 ///   [Templates] requirement.
 /// - Member-level methods (`generateConstructor`, `generateMethod`,
 ///   `generateProperty`) are no-ops because members are embedded inline
@@ -211,7 +210,7 @@ class VitePressGeneratorBackend extends GeneratorBackend {
        _guideExclude = guideExclude,
        _allowedIframeHosts = Set.of(allowedIframeHosts),
        _homePageMarkdown = homePageMarkdown,
-       super(options, _NoOpTemplates(), writer, resourceProvider);
+       super(options, NoOpTemplates(), writer, resourceProvider);
 
   // ---------------------------------------------------------------------------
   // Lifecycle hooks
@@ -873,78 +872,3 @@ class VitePressGeneratorBackend extends GeneratorBackend {
   int get deletedCount => _deletedCount;
 }
 
-// ---------------------------------------------------------------------------
-// _NoOpTemplates
-// ---------------------------------------------------------------------------
-
-/// A no-op [Templates] implementation that satisfies [GeneratorBackend]'s
-/// constructor requirement.
-///
-/// [VitePressGeneratorBackend] never calls any template rendering methods
-/// because it overrides all `generate*()` methods and never delegates to
-/// `super`. All template methods return an empty string.
-class _NoOpTemplates implements Templates {
-  @override
-  String renderCategory(CategoryTemplateData context) => '';
-
-  @override
-  String renderCategoryRedirect(CategoryTemplateData context) => '';
-
-  @override
-  String renderClass<T extends Class>(ClassTemplateData context) => '';
-
-  @override
-  String renderConstructor(ConstructorTemplateData context) => '';
-
-  @override
-  String renderEnum(EnumTemplateData context) => '';
-
-  @override
-  String renderError(PackageTemplateData context) => '';
-
-  @override
-  String renderExtension(ExtensionTemplateData context) => '';
-
-  @override
-  String renderExtensionType(ExtensionTypeTemplateData context) => '';
-
-  @override
-  String renderFunction(FunctionTemplateData context) => '';
-
-  @override
-  String renderIndex(PackageTemplateData context) => '';
-
-  @override
-  String renderLibrary(LibraryTemplateData context) => '';
-
-  @override
-  String renderLibraryRedirect(LibraryTemplateData context) => '';
-
-  @override
-  String renderMethod(MethodTemplateData context) => '';
-
-  @override
-  String renderMixin(MixinTemplateData context) => '';
-
-  @override
-  String renderProperty(PropertyTemplateData context) => '';
-
-  @override
-  String renderSearchPage(PackageTemplateData context) => '';
-
-  @override
-  String renderSidebarForContainer(
-    TemplateDataWithContainer<Documentable> context,
-  ) => '';
-
-  @override
-  String renderSidebarForLibrary(
-    TemplateDataWithLibrary<Documentable> context,
-  ) => '';
-
-  @override
-  String renderTopLevelProperty(TopLevelPropertyTemplateData context) => '';
-
-  @override
-  String renderTypedef(TypedefTemplateData context) => '';
-}
