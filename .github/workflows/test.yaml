@@ -64,7 +64,26 @@ jobs:
         if: runner.os == 'Windows'
         run: git config --global core.autocrlf input
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-      - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
+      # Jaspr 0.23.x cannot resolve build_web_compilers on Dart >=3.14.
+      # Run parent dartdoc tests on the selected SDK (including dev), but use
+      # the last compatible stable toolchain to validate generated Jaspr sites.
+      - name: Install compatible Jaspr scaffold SDK
+        if: matrix.sdk == 'dev'
+        uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
+        with:
+          sdk: '3.13.7'
+      - name: Record compatible Jaspr scaffold SDK (Unix)
+        if: matrix.sdk == 'dev' && runner.os != 'Windows'
+        shell: bash
+        run: echo "JASPR_SCAFFOLD_DART_EXECUTABLE=$(command -v dart)" >> "$GITHUB_ENV"
+      - name: Record compatible Jaspr scaffold SDK (Windows)
+        if: matrix.sdk == 'dev' && runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $dart = (Get-Command dart).Source
+          "JASPR_SCAFFOLD_DART_EXECUTABLE=$dart" >> $env:GITHUB_ENV
+      - name: Set up selected Dart SDK
+        uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
         with:
           sdk: ${{ matrix.sdk }}
       - name: Install Playwright
