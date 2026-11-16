@@ -33,19 +33,21 @@ final _metaTag = RegExp(r'<\s*meta\b[^>]*/?\s*>', caseSensitive: false);
 final _linkTag = RegExp(r'<\s*link\b[^>]*/?\s*>', caseSensitive: false);
 // Match complete iframe elements, respecting '>' within quoted attributes.
 // Malformed / unclosed iframe opening tags are handled separately below.
-final _iframeTag = RegExp(
-  r'''<\s*iframe\b(?:"[^"]*"|'[^']*'|[^'">])*?>[\s\S]*?<\s*/\s*iframe\s*>''',
+final _iframeEndTag = RegExp(
+  r'</\s*iframe\s*>',
   caseSensitive: false,
 );
-final _iframeOpeningTag = RegExp(
-  r'''<\s*iframe\b(?:"[^"]*"|'[^']*'|[^'">])*?>''',
-  caseSensitive: false,
-);
-// Match complete opening tags, including quoted '>' characters. Attribute
-// names and values are validated by the HTML5 parser, not a whitespace regex.
-final _openingTag = RegExp(
-  r'''<([A-Za-z][A-Za-z0-9:-]*)(?:"[^"]*"|'[^']*'|[^'">])*?>''',
-);
+// Use the HTML tokenizer's attribute value states to find opening tags.
+// An unquoted literal quote is NOT an opening quote.
+const _forbiddenElementNames = {
+  'script',
+  'style',
+  'embed',
+  'object',
+  'applet',
+  'form',
+  'svg',
+};
 final _urlScheme = RegExp(r'^([a-z][a-z0-9+.-]*):');
 final _urlControlChars = RegExp(r'[\u0000-\u0020\u007f]');
 final _dangerousEmbedOpenClose = {
@@ -59,14 +61,6 @@ final _dangerousEmbedSelfClose = {
   for (final tag in ['embed', 'object', 'applet', 'form', 'svg'])
     tag: RegExp('<\\s*$tag\\b[^>]*/\\s*>', caseSensitive: false),
 };
-
-// Paired and slash-terminated matching above does not cover void <embed>
-// or malformed/unclosed forbidden elements. Match remaining openers with the
-// same quote-aware syntax used for iframes; never leave an active embed.
-final _dangerousOpeningTag = RegExp(
-  r'''<\s*(?:script|style|embed|object|applet|form|svg)\b(?:"[^"]*"|'[^']*'|[^'">])*?>''',
-  caseSensitive: false,
-);
 
 /// Built-in iframe hosts that are always allowed.
 const builtinAllowedHosts = {
@@ -96,107 +90,210 @@ final _sanitizerLogCounts = <String, int>{};
 /// Does NOT perform format-specific escaping (e.g. Vue template syntax).
 /// Format backends should apply their own escaping after calling this.
 String sanitizeHtml(String html, {Set<String> extraAllowedHosts = const {}}) {
-  // 1. Remove null bytes (bypass prevention).
   html = html.replaceAll('\x00', '');
 
-  // 2. Remove <script> tags.
+  // Removing a nested tag can expose another forbidden opener.
+  String previous;
+  do {
+    previous = html;
+    html = _removeForbiddenElements(html, extraAllowedHosts);
+  } while (html != previous);
+
+  return _sanitizeHtmlAttributes(html);
+}
+
+String _removeForbiddenElements(String html, Set<String> extraAllowedHosts) {
   html = _warnOnRemoval(html, _scriptOpenClose, '<script>');
   html = _warnOnRemoval(html, _scriptSelfClose, '<script/>');
-
-  // 3. Remove <style> tags.
   html = _warnOnRemoval(html, _styleOpenClose, '<style>');
-
-  // 4. Remove dangerous embed elements.
   for (final tag in ['embed', 'object', 'applet', 'form', 'svg']) {
     html = _warnOnRemoval(html, _dangerousEmbedOpenClose[tag]!, '<$tag>');
     html = _warnOnRemoval(html, _dangerousEmbedSelfClose[tag]!, '<$tag/>');
   }
 
-  // 4a. Remove any forbidden opener left by the paired and self-close
-  // patterns (notably a void <embed> without a slash or an unclosed tag).
-  html = _warnOnRemoval(html, _dangerousOpeningTag, 'dangerous element');
-
-  // 4b. Remove <base> tags.
   html = _warnOnRemoval(html, _baseTag, '<base>');
-
-  // 4c. Remove <meta> tags.
   html = _warnOnRemoval(html, _metaTag, '<meta>');
-
-  // 4d. Remove <link> tags.
   html = _warnOnRemoval(html, _linkTag, '<link>');
+  html = _removeDisallowedIframes(html, extraAllowedHosts);
 
-  // 5. Remove <iframe> tags whose host is not in the allowed set.
-  html = html.replaceAllMapped(_iframeTag, (match) {
-    final tag = match.group(0)!;
-    final openingTag = _openingTag.firstMatch(tag)?.group(0);
-    final src = openingTag == null
-        ? null
-        : _parseOpeningTag(openingTag)?.attributes['src'];
-    if (src != null) {
-      final uri = Uri.tryParse(src);
-      if (uri != null && (uri.scheme == 'https' || uri.scheme == 'http')) {
-        final host = uri.host.toLowerCase();
-        if (builtinAllowedHosts.contains(host) ||
-            extraAllowedHosts.contains(host)) {
-          return tag; // Keep allowed iframe embeds.
-        }
-        _logSanitizerWarning(
-          'removed <iframe> with host "$host"',
-          'sanitizeHtml: removed <iframe> with host "$host". '
-              'To allow it, add "$host" to the allowedIframeHosts option '
-              'in dartdoc_options.yaml.',
-        );
-      } else {
-        _logSanitizerWarning(
-          'removed <iframe> with disallowed src',
-          'sanitizeHtml: removed <iframe> with disallowed src: $src',
-        );
-      }
-    } else {
+  // Void <embed> and incomplete forbidden elements may lack a closing tag.
+  return _rewriteOpeningTags(html, (tag, original) {
+    if (_forbiddenElementNames.contains(tag.name)) {
       _logSanitizerWarning(
-        'removed <iframe> without src attribute',
-        'sanitizeHtml: removed <iframe> without src attribute',
+        'removed dangerous HTML opener',
+        'sanitizeHtml: removed <${tag.name}> opening tag',
       );
+      return '';
     }
-    return '';
+    return original;
   });
-
-  // Reject unmatched iframe openers as well. HTML treats <iframe/> as a
-  // non-void start tag, so a missing closing tag must not bypass the
-  // trusted-host check. Keep opening tags of complete, allowed embeds.
-  final completeIframes = _iframeTag.allMatches(html).toList();
-  html = html.replaceAllMapped(_iframeOpeningTag, (match) {
-    final covered = completeIframes.any(
-      (iframe) => iframe.start <= match.start && match.end <= iframe.end,
-    );
-    if (covered) return match.group(0)!;
-    _logSanitizerWarning(
-      'removed unclosed <iframe>',
-      'sanitizeHtml: removed unclosed or malformed <iframe> tag',
-    );
-    return '';
-  });
-
-  // Parse opening tags as HTML5: browsers recognize attributes after a
-  // solidus or directly after a quoted value, without intervening whitespace.
-  // Preserve the original spelling of tags that need no changes.
-  html = _sanitizeHtmlAttributes(html);
-
-  return html;
 }
 
-/// Removes dangerous attributes based on the browser's attribute tokenizer.
+String _removeDisallowedIframes(String html, Set<String> extraAllowedHosts) {
+  final buffer = StringBuffer();
+  var cursor = 0;
+  for (final tag in _scanOpeningTags(html)) {
+    if (tag.name != 'iframe' || tag.start < cursor) continue;
+    buffer.write(html.substring(cursor, tag.start));
+
+    if (!tag.complete) {
+      buffer.write('&lt;');
+      cursor = tag.end;
+      continue;
+    }
+
+    final original = html.substring(tag.start, tag.end);
+    final src = _parseOpeningTag(original)?.attributes['src'];
+    final uri = src == null ? null : Uri.tryParse(src);
+    final allowed = uri != null &&
+        (uri.scheme == 'https' || uri.scheme == 'http') &&
+        (builtinAllowedHosts.contains(uri.host.toLowerCase()) ||
+            extraAllowedHosts.contains(uri.host.toLowerCase()));
+    final closing = _iframeEndTag.firstMatch(html, tag.end);
+    if (allowed && closing != null) {
+      buffer.write(html.substring(tag.start, closing.end));
+    } else {
+      _logSanitizerWarning(
+        'removed disallowed iframe',
+        'sanitizeHtml: removed iframe with untrusted or missing src',
+      );
+    }
+    cursor = closing?.end ?? tag.end;
+  }
+  buffer.write(html.substring(cursor));
+  return buffer.toString();
+}
+
+/// A scanned opening tag. Incomplete tags include just their '<' character.
+final class _OpeningTagSpan {
+  const _OpeningTagSpan(this.start, this.end, this.name, this.complete);
+
+  final int start;
+  final int end;
+  final String name;
+  final bool complete;
+}
+
+enum _TagScanState {
+  between,
+  attributeName,
+  beforeValue,
+  unquoted,
+  singleQuoted,
+  doubleQuoted,
+}
+
+/// Find tag boundaries without regex backtracking. Quotes only start an
+/// attribute value after '='. A quote within an unquoted value is literal.
+List<_OpeningTagSpan> _scanOpeningTags(String html) {
+  final tags = <_OpeningTagSpan>[];
+  var position = 0;
+
+  while (position < html.length) {
+    final start = html.indexOf('<', position);
+    if (start < 0 || start + 1 >= html.length) break;
+    if (!_isAsciiLetter(html.codeUnitAt(start + 1))) {
+      position = start + 1;
+      continue;
+    }
+
+    var index = start + 2;
+    while (index < html.length && _isTagNameChar(html.codeUnitAt(index))) {
+      index++;
+    }
+    final name = html.substring(start + 1, index).toLowerCase();
+    var state = _TagScanState.between;
+    var complete = false;
+
+    while (index < html.length) {
+      final unit = html.codeUnitAt(index);
+      if (state == _TagScanState.singleQuoted) {
+        if (unit == 39) state = _TagScanState.between;
+      } else if (state == _TagScanState.doubleQuoted) {
+        if (unit == 34) state = _TagScanState.between;
+      } else if (unit == 62) {
+        complete = true;
+        index++;
+        break;
+      } else if (state == _TagScanState.between) {
+        if (!_isHtmlSpace(unit) && unit != 47) {
+          state = _TagScanState.attributeName;
+        }
+      } else if (state == _TagScanState.attributeName) {
+        if (unit == 61) {
+          state = _TagScanState.beforeValue;
+        } else if (_isHtmlSpace(unit) || unit == 47) {
+          state = _TagScanState.between;
+        }
+      } else if (state == _TagScanState.beforeValue) {
+        if (unit == 34) {
+          state = _TagScanState.doubleQuoted;
+        } else if (unit == 39) {
+          state = _TagScanState.singleQuoted;
+        } else if (!_isHtmlSpace(unit)) {
+          state = _TagScanState.unquoted;
+        }
+      } else if (state == _TagScanState.unquoted && _isHtmlSpace(unit)) {
+        state = _TagScanState.between;
+      }
+      index++;
+    }
+
+    if (complete) {
+      tags.add(_OpeningTagSpan(start, index, name, true));
+      position = index;
+    } else {
+      tags.add(_OpeningTagSpan(start, start + 1, name, false));
+      position = start + 1;
+    }
+  }
+  return tags;
+}
+
+bool _isAsciiLetter(int code) =>
+    (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+
+bool _isTagNameChar(int code) =>
+    _isAsciiLetter(code) ||
+    (code >= 48 && code <= 57) ||
+    code == 45 ||
+    code == 58;
+
+bool _isHtmlSpace(int code) =>
+    code == 32 || code == 9 || code == 10 || code == 13 || code == 12;
+
+String _rewriteOpeningTags(
+  String html,
+  String Function(_OpeningTagSpan, String) rewrite,
+) {
+  final buffer = StringBuffer();
+  var cursor = 0;
+  for (final tag in _scanOpeningTags(html)) {
+    buffer.write(html.substring(cursor, tag.start));
+    buffer.write(
+      tag.complete
+          ? rewrite(tag, html.substring(tag.start, tag.end))
+          : '&lt;',
+    );
+    cursor = tag.end;
+  }
+  buffer.write(html.substring(cursor));
+  return buffer.toString();
+}
+
+/// Validate URL and event attributes using the browser's tag boundaries.
 String _sanitizeHtmlAttributes(String html) {
-  return html.replaceAllMapped(_openingTag, (match) {
-    final originalTag = match.group(0)!;
+  return _rewriteOpeningTags(html, (tag, originalTag) {
     final element = _parseOpeningTag(originalTag);
-    if (element == null) return originalTag;
+    if (element == null) {
+      // The fragment parser ignores table-context tags such as td and tr.
+      // Strip their unchecked attributes instead of returning raw HTML.
+      return '<${tag.name}${originalTag.endsWith('/>') ? '/>' : '>'}';
+    }
 
     var removed = false;
     final attrs = <MapEntry<String, String>>[];
     for (final attribute in element.attributes.entries) {
-      // The HTML DOM exposes attribute keys as Object (including namespaced
-      // names), so normalize the name before validating and rebuilding them.
       final name = attribute.key.toString().toLowerCase();
       final value = attribute.value;
       final forbidden = name == 'srcdoc' ||
@@ -219,11 +316,11 @@ String _sanitizeHtmlAttributes(String html) {
             ' ${entry.key}="${_escapeHtmlAttributeValue(entry.value)}"')
         .join();
     final terminator = originalTag.endsWith('/>') ? '/>' : '>';
-    return '<${match.group(1)}$encodedAttributes$terminator';
+    return '<${tag.name}$encodedAttributes$terminator';
   });
 }
 
-// Use the browser's HTML5 attribute parser for whitelist and URL checks.
+// Use the HTML5 attribute parser after identifying the tag's actual span.
 dom.Element? _parseOpeningTag(String openingTag) {
   final fragment = parseFragment(openingTag);
   for (final node in fragment.nodes) {

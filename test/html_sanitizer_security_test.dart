@@ -186,6 +186,43 @@ void main() {
       );
     });
 
+    test('removes javascript URL after a quote in unquoted attribute', () {
+      final result = sanitizeHtml(
+        '<a title=x"y href="javascript:alert(1)">open</a>',
+      );
+      expect(result, isNot(contains('javascript:')));
+      expect(result, contains('open</a>'));
+    });
+
+    test('rejects iframe after unquoted literal-quote attribute', () {
+      expect(
+        sanitizeHtml('<iframe title=x"y src="https://evil.invalid/"></iframe>'),
+        isEmpty,
+      );
+    });
+
+    test('removes embed after unquoted literal-quote attribute', () {
+      expect(sanitizeHtml('<embed title=x"y src="//evil.invalid/p">'), isEmpty);
+    });
+
+    test('rechecks forbidden markup after removing nested tags', () {
+      expect(
+        sanitizeHtml('<scr<script>ipt>alert(1)').toLowerCase(),
+        isNot(contains('<script')),
+      );
+      expect(
+        sanitizeHtml('<scr<meta>ipt>alert(1)</script>').toLowerCase(),
+        isNot(contains('<script')),
+      );
+    });
+
+    test('strips unchecked attributes from table-context tags', () {
+      expect(sanitizeHtml('<td onclick="alert(1)">'), '<td>');
+      expect(sanitizeHtml('<tr onmouseover="alert(1)">'), '<tr>');
+      expect(sanitizeHtml('<caption onclick="alert(1)">'), '<caption>');
+      expect(sanitizeHtml('<td>'), '<td>');
+    });
+
     test('preserves safe image source', () {
       const markup = '<img src="https://dart.dev/favicon.ico">';
       expect(sanitizeHtml(markup), markup);
