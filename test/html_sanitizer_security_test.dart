@@ -71,6 +71,47 @@ void main() {
       );
     });
 
+    test('rejects solidus-separated unsafe link', () {
+      expect(
+        sanitizeHtml('<a/href="javascript:alert(1)">open</a>'),
+        '<a>open</a>',
+      );
+    });
+
+    test('rejects adjacent unsafe URL after a quoted attribute', () {
+      expect(
+        sanitizeHtml('<a title="read"href="javascript:alert(1)">open</a>'),
+        '<a title="read">open</a>',
+      );
+    });
+
+    test('removes adjacent srcdoc on an allowed iframe', () {
+      expect(
+        sanitizeHtml(
+          '<iframe src="https://www.youtube.com/embed/example"'
+          'srcdoc="&lt;script&gt;alert(1)&lt;/script&gt;"></iframe>',
+        ),
+        '<iframe src="https://www.youtube.com/embed/example"></iframe>',
+      );
+    });
+
+    test('removes solidus-separated srcdoc on an allowed iframe', () {
+      expect(
+        sanitizeHtml(
+          '<iframe src="https://dartpad.dev/embed"'
+          '/srcdoc="&lt;script&gt;alert(1)&lt;/script&gt;"></iframe>',
+        ),
+        '<iframe src="https://dartpad.dev/embed"></iframe>',
+      );
+    });
+
+    test('removes adjacent event handlers after quoted attributes', () {
+      expect(
+        sanitizeHtml('<button type="button"onclick="alert(1)">go</button>'),
+        '<button type="button">go</button>',
+      );
+    });
+
     test('preserves safe image source', () {
       const markup = '<img src="https://dart.dev/favicon.ico">';
       expect(sanitizeHtml(markup), markup);
