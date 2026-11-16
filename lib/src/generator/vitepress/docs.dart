@@ -1,21 +1,18 @@
 // Backwards-compatible VitePress facade over the common Markdown processor.
 import 'package:dartdoc_modern/src/generator/core/markdown_docs.dart';
-import 'package:dartdoc_modern/src/generator/vitepress/paths.dart';
-import 'package:dartdoc_modern/src/model/model.dart';
+import 'package:dartdoc_modern/src/generator/core/path_utils.dart'
+    as path_utils;
+
 
 export 'package:dartdoc_modern/src/generator/core/markdown_docs.dart'
     show MarkdownRenderer;
 
 class VitePressDocProcessor extends MarkdownDocProcessor {
   VitePressDocProcessor(
-    PackageGraph packageGraph,
-    VitePressPathResolver paths, {
-    Set<String> allowedIframeHosts = const {},
-  }) : super(
-         packageGraph,
-         paths,
-         allowedIframeHosts: allowedIframeHosts,
-       );
+    super.packageGraph,
+    super.paths, {
+    super.allowedIframeHosts = const {},
+  });
 
   static String sanitizeHtml(
     String html, {
@@ -26,5 +23,5 @@ class VitePressDocProcessor extends MarkdownDocProcessor {
   );
 
   static String normalizeSdkLibraryPath(String path) =>
-      MarkdownDocProcessor.normalizeSdkLibraryPath(path);
+      path_utils.normalizeSdkLibraryPath(path);
 }

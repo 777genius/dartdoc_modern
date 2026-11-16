@@ -6,13 +6,15 @@ import 'dart:async';
 
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:dartdoc_modern/src/dartdoc_options.dart';
+import 'package:dartdoc_modern/src/generator/core/api_markdown_renderer.dart'
+    as renderer;
 import 'package:dartdoc_modern/src/generator/core/guide_collection.dart'
     as guide_core;
 import 'package:dartdoc_modern/src/generator/core/html_sanitizer.dart';
 import 'package:dartdoc_modern/src/generator/core/legacy_guide_redirects.dart';
+import 'package:dartdoc_modern/src/generator/core/no_op_templates.dart';
 import 'package:dartdoc_modern/src/generator/generator.dart';
 import 'package:dartdoc_modern/src/generator/generator_backend.dart';
-import 'package:dartdoc_modern/src/generator/core/no_op_templates.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/dart_string.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/docs.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/paths.dart'
@@ -21,8 +23,6 @@ import 'package:dartdoc_modern/src/generator/jaspr/scaffold.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/search_index.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/sidebar.dart'
     show JasprSidebarGenerator;
-import 'package:dartdoc_modern/src/generator/core/api_markdown_renderer.dart'
-    as renderer;
 import 'package:dartdoc_modern/src/logging.dart';
 import 'package:dartdoc_modern/src/markdown_validator.dart';
 import 'package:dartdoc_modern/src/model/model.dart';

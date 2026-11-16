@@ -2,9 +2,9 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'package:dartdoc_modern/src/generator/core/markdown_docs.dart';
 import 'package:dartdoc_modern/src/generator/core/path_utils.dart'
     as path_utils;
-import 'package:dartdoc_modern/src/generator/core/markdown_docs.dart';
 
 export 'package:dartdoc_modern/src/generator/core/markdown_docs.dart'
     show MarkdownRenderer;

@@ -13,9 +13,9 @@ library;
 import 'package:dartdoc_modern/src/comment_references/model_comment_reference.dart';
 import 'package:dartdoc_modern/src/generator/core/html_sanitizer.dart'
     as core_sanitize;
+import 'package:dartdoc_modern/src/generator/core/markdown_paths.dart';
 import 'package:dartdoc_modern/src/generator/core/path_utils.dart'
     as path_utils;
-import 'package:dartdoc_modern/src/generator/core/markdown_paths.dart';
 import 'package:dartdoc_modern/src/matching_link_result.dart';
 import 'package:dartdoc_modern/src/model/model.dart';
 import 'package:dartdoc_modern/src/runtime_stats.dart';

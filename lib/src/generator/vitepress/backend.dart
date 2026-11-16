@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:dartdoc_modern/src/dartdoc_options.dart';
 import 'package:dartdoc_modern/src/generator/core/legacy_guide_redirects.dart';
+import 'package:dartdoc_modern/src/generator/core/no_op_templates.dart';
 import 'package:dartdoc_modern/src/generator/generator.dart';
 import 'package:dartdoc_modern/src/generator/generator_backend.dart';
-import 'package:dartdoc_modern/src/generator/core/no_op_templates.dart';
 import 'package:dartdoc_modern/src/generator/vitepress/docs.dart';
 import 'package:dartdoc_modern/src/generator/vitepress/paths.dart'
     show VitePressPathResolver, isDuplicateSdkLibrary, isInternalSdkLibrary;
