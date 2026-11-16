@@ -2,19 +2,16 @@ import 'dart:io';
 
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/analysis/utilities.dart' show parseString;
-
-import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:dartdoc_modern/src/generator/core/markdown_paths.dart';
 import 'package:dartdoc_modern/src/generator/core/no_op_templates.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/paths.dart';
-import 'package:dartdoc_modern/src/generator/vitepress/paths.dart';
 import 'package:dartdoc_modern/src/generator/templates.dart';
+import 'package:dartdoc_modern/src/generator/vitepress/paths.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
-// Inspect Dart directives instead of matching arbitrary source substrings.
-// Resolve relative URIs and conditional alternatives before comparing layers.
+// Parse actual Dart import/export directives rather than matching comments or
+// string literals. Resolve both relative URIs and conditional alternatives.
 Iterable<String> _namespaceDependencies(String filePath, String source) sync* {
   final unit = parseString(
     content: source,
@@ -26,20 +23,19 @@ Iterable<String> _namespaceDependencies(String filePath, String source) sync* {
       directive.uri.stringValue,
       for (final condition in directive.configurations) condition.uri.stringValue,
     ];
-    for (final uri in uris) {
-      if (uri == null) continue;
+    for (final uri in uris.whereType<String>()) {
       if (uri.startsWith('package:dartdoc_modern/')) {
         yield 'lib/' + uri.substring('package:dartdoc_modern/'.length);
-      } else if (!uri.startsWith('dart:') && !uri.startsWith('package:')) {
+      } else if (!Uri.parse(uri).hasScheme) {
         yield p.normalize(p.join(p.dirname(filePath), uri)).replaceAll('\\', '/');
       }
     }
   }
 }
 
-bool _dependsOnBackend(String path, String source, String backend) =>
+bool _dependsOnBackend(String file, String source, String backend) =>
     _namespaceDependencies(
-      path,
+      file,
       source,
     ).any((uri) => uri.startsWith('lib/src/generator/$backend/'));
 
@@ -61,11 +57,8 @@ void main() {
       'lib/src/generator/core/no_op_templates.dart',
     ]) {
       final source = File(file).readAsStringSync();
-      expect(
-        _forbiddenBackendImports(source, file, {'vitepress', 'jaspr'}),
-        isEmpty,
-        reason: file,
-      );
+      expect(_dependsOnBackend(file, source, 'vitepress'), isFalse, reason: file);
+      expect(_dependsOnBackend(file, source, 'jaspr'), isFalse, reason: file);
     }
   });
 
@@ -76,75 +69,31 @@ void main() {
       'lib/src/generator/jaspr/backend.dart',
     ]) {
       final source = File(file).readAsStringSync();
-      expect(
-        _forbiddenBackendImports(source, file, {'vitepress'}),
-        isEmpty,
-        reason: file,
-      );
+      expect(_dependsOnBackend(file, source, 'vitepress'), isFalse, reason: file);
     }
   });
 
-  test('boundary check recognizes relative imports and ignores comments', () {
-    const origin = 'lib/src/generator/core/markdown_docs.dart';
+  test('boundary check catches relative and conditional backend imports', () {
+    const file = 'lib/src/generator/core/markdown_docs.dart';
     expect(
-      _forbiddenBackendImports(
-        "import '../vitepress/paths.dart';",
-        origin,
-        {'vitepress'},
-      ),
-      isNotEmpty,
+      _dependsOnBackend(file, "import '../vitepress/paths.dart';", 'vitepress'),
+      isTrue,
     );
     expect(
-      _forbiddenBackendImports(
+      _dependsOnBackend(
+        file,
+        "import 'dart:io' if (dart.library.html) '../jaspr/docs.dart';",
+        'jaspr',
+      ),
+      isTrue,
+    );
+    expect(
+      _dependsOnBackend(
+        file,
         "// import 'package:dartdoc_modern/src/generator/vitepress/paths.dart';",
-        origin,
-        {'vitepress'},
+        'vitepress',
       ),
-      isEmpty,
+      isFalse,
     );
   });
-}
-
-List<String> _forbiddenBackendImports(
-  String source,
-  String origin,
-  Set<String> backends,
-) {
-  final unit = parseString(
-    content: source,
-    path: origin,
-    throwIfDiagnostics: false,
-  ).unit;
-  final found = <String>[];
-  for (final directive in unit.directives) {
-    final uris = <String?>[];
-    if (directive is ImportDirective) {
-      uris.add(directive.uri.stringValue);
-      uris.addAll(directive.configurations.map((c) => c.uri.stringValue));
-    } else if (directive is ExportDirective) {
-      uris.add(directive.uri.stringValue);
-      uris.addAll(directive.configurations.map((c) => c.uri.stringValue));
-    } else {
-      continue;
-    }
-    for (final uri in uris.whereType<String>()) {
-      String? path;
-      const packagePrefix = 'package:dartdoc_modern/';
-      if (uri.startsWith(packagePrefix)) {
-        path = 'lib/${uri.substring(packagePrefix.length)}';
-      } else if (!Uri.parse(uri).hasScheme) {
-        path = File.fromUri(File(origin).absolute.uri.resolve(uri))
-            .path.replaceAll('\\', '/');
-      }
-      if (path == null) continue;
-      if (backends.any(
-        (backend) =>
-            path!.contains('/src/generator/$backend/') ||
-            path.startsWith('lib/src/generator/$backend/'),
-      )) {
-        found.add(uri);
-      }
-    }
-  }
-  return found;
 }
