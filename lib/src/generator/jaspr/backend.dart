@@ -21,7 +21,7 @@ import 'package:dartdoc_modern/src/generator/jaspr/scaffold.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/search_index.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/sidebar.dart'
     show JasprSidebarGenerator;
-import 'package:dartdoc_modern/src/generator/vitepress/renderer.dart'
+import 'package:dartdoc_modern/src/generator/core/api_markdown_renderer.dart'
     as renderer;
 import 'package:dartdoc_modern/src/logging.dart';
 import 'package:dartdoc_modern/src/markdown_validator.dart';
