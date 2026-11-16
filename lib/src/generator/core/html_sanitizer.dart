@@ -35,10 +35,6 @@ final _iframeTag = RegExp(
   r'<\s*iframe\b[^>]*>[\s\S]*?<\s*/\s*iframe\s*>',
   caseSensitive: false,
 );
-final _iframeSrcAttr = RegExp(
-  r"""src\s*=\s*["']([^"']*)["']""",
-  caseSensitive: false,
-);
 // Match complete opening tags, including quoted '>' characters. Attribute
 // names and values are validated by the HTML5 parser, not a whitespace regex.
 final _openingTag = RegExp(
@@ -114,9 +110,11 @@ String sanitizeHtml(String html, {Set<String> extraAllowedHosts = const {}}) {
   // 5. Remove <iframe> tags whose host is not in the allowed set.
   html = html.replaceAllMapped(_iframeTag, (match) {
     final tag = match.group(0)!;
-    final srcMatch = _iframeSrcAttr.firstMatch(tag);
-    if (srcMatch != null) {
-      final src = srcMatch.group(1)!;
+    final openingTag = _openingTag.firstMatch(tag)?.group(0);
+    final src = openingTag == null
+        ? null
+        : _parseOpeningTag(openingTag)?.attributes['src'];
+    if (src != null) {
       final uri = Uri.tryParse(src);
       if (uri != null && (uri.scheme == 'https' || uri.scheme == 'http')) {
         final host = uri.host.toLowerCase();
@@ -157,14 +155,7 @@ String sanitizeHtml(String html, {Set<String> extraAllowedHosts = const {}}) {
 String _sanitizeHtmlAttributes(String html) {
   return html.replaceAllMapped(_openingTag, (match) {
     final originalTag = match.group(0)!;
-    final fragment = parseFragment(originalTag);
-    dom.Element? element;
-    for (final node in fragment.nodes) {
-      if (node is dom.Element) {
-        element = node;
-        break;
-      }
-    }
+    final element = _parseOpeningTag(originalTag);
     if (element == null) return originalTag;
 
     var removed = false;
@@ -194,6 +185,15 @@ String _sanitizeHtmlAttributes(String html) {
     final terminator = originalTag.endsWith('/>') ? '/>' : '>';
     return '<${match.group(1)}$encodedAttributes$terminator';
   });
+}
+
+// Use the browser's HTML5 attribute parser for whitelist and URL checks.
+dom.Element? _parseOpeningTag(String openingTag) {
+  final fragment = parseFragment(openingTag);
+  for (final node in fragment.nodes) {
+    if (node is dom.Element) return node;
+  }
+  return null;
 }
 
 bool _isSafeUrl(String attribute, String value) {

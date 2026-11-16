@@ -62,6 +62,26 @@ void main() {
       );
     });
 
+    test('iframe whitelist ignores a trusted host in data-src', () {
+      expect(
+        sanitizeHtml(
+          '<iframe data-src="https://www.youtube.com/embed/safe" '
+          'src="https://attacker.invalid/"></iframe>',
+        ),
+        isEmpty,
+      );
+    });
+
+    test('iframe whitelist ignores a trusted host in non-src attributes', () {
+      expect(
+        sanitizeHtml(
+          '<iframe title="https://dartpad.dev" '
+          'src="https://attacker.invalid/"></iframe>',
+        ),
+        isEmpty,
+      );
+    });
+
     test('removes unquoted srcdoc from allowed iframe', () {
       const html =
           '<iframe src="https://dartpad.dev/embed" srcdoc=javascript:alert(1)></iframe>';
