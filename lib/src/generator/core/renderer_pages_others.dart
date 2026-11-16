@@ -503,5 +503,5 @@ String _stripLeadingH1(String text, String expectedTitle) {
     return result.trimLeft();
   }
   // Different H1 from user content -- downshift to H2.
-  return '## ${match.group(1)}${text.substring(match.end)}';
+  return '## ${match.group(1)}${match.group(2) ?? ''}${text.substring(match.end)}';
 }
