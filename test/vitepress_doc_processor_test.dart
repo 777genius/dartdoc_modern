@@ -252,7 +252,7 @@ void main() {
       final result = VitePressDocProcessor.sanitizeHtml(
         '<a href="javascript:alert(1)">click</a>',
       );
-      expect(result, contains('href="'));
+      expect(result, isNot(contains('href="')));
       expect(result, isNot(contains('javascript:')));
     });
 
@@ -260,7 +260,7 @@ void main() {
       final result = VitePressDocProcessor.sanitizeHtml(
         '<img src="javascript:alert(1)">',
       );
-      expect(result, contains('src="'));
+      expect(result, isNot(contains('src="')));
       expect(result, isNot(contains('javascript:')));
     });
 
