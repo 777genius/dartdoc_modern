@@ -149,7 +149,7 @@ String _removeDisallowedIframes(String html, Set<String> extraAllowedHosts) {
         (uri.scheme == 'https' || uri.scheme == 'http') &&
         (builtinAllowedHosts.contains(uri.host.toLowerCase()) ||
             extraAllowedHosts.contains(uri.host.toLowerCase()));
-    final closing = _iframeEndTag.firstMatch(html, tag.end);
+    final closing = _iframeEndTag.allMatches(html, tag.end).firstOrNull;
     if (allowed && closing != null) {
       buffer.write(html.substring(tag.start, closing.end));
     } else {
