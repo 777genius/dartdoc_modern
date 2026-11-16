@@ -76,27 +76,29 @@ class MarkdownPathResolver {
       for (final library in package.publicLibrariesSorted) {
         allLibraries.add(library);
         final normalized = _normalizeDots(library.dirName);
-        dirNameCounts[normalized] = (dirNameCounts[normalized] ?? 0) + 1;
+        dirNameCounts[normalized.toLowerCase()] =
+            (dirNameCounts[normalized.toLowerCase()] ?? 0) + 1;
       }
     }
 
-    // Reserve globally unique names before disambiguating collisions so a
-    // generated prefix never shadows another library's original directory.
+    // Compare directory names case-insensitively: macOS and Windows commonly
+    // use case-insensitive filesystems. Reserve unique names before prefixing
+    // duplicates so a generated prefix cannot shadow an original directory.
     final reservedNames = <String>{};
     for (final library in allLibraries) {
       final baseName = _normalizeDots(library.dirName);
-      if (dirNameCounts[baseName] == 1) {
+      if (dirNameCounts[baseName.toLowerCase()] == 1) {
         _libraryDirNames[library] = baseName;
-        reservedNames.add(baseName);
+        reservedNames.add(baseName.toLowerCase());
       }
     }
     for (final library in allLibraries) {
       final baseName = _normalizeDots(library.dirName);
-      if (dirNameCounts[baseName] == 1) continue;
+      if (dirNameCounts[baseName.toLowerCase()] == 1) continue;
       final prefix = '${library.package.name}_$baseName';
       var candidate = prefix;
       var suffix = 2;
-      while (!reservedNames.add(candidate)) {
+      while (!reservedNames.add(candidate.toLowerCase())) {
         candidate = '${prefix}_$suffix';
         suffix++;
       }
