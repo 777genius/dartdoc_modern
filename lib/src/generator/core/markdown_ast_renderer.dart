@@ -269,6 +269,7 @@ class MarkdownRenderer implements md.NodeVisitor {
         // so we skip it.
         if (_inAlert && !_alertTitleSkipped) {
           _alertTitleSkipped = true;
+          _elementStack.removeLast();
           return false; // Skip the title paragraph and its children.
         }
         if (_isInsideBlockquote()) {
@@ -307,6 +308,7 @@ class MarkdownRenderer implements md.NodeVisitor {
           _writelnToBuffer();
           _writeToBuffer('$codeIndent$fence');
           _inCodeBlock = false;
+          _elementStack.removeLast();
           return false; // Don't visit children -- we already handled them.
         }
         // Non-code pre block -- just pass through content.
@@ -353,15 +355,18 @@ class MarkdownRenderer implements md.NodeVisitor {
         } else {
           _writeToTarget('![$alt]($src)');
         }
+        _elementStack.removeLast();
         return false; // Self-closing, no children.
 
       case 'br':
         _writeToTarget('  \n');
+        _elementStack.removeLast();
         return false;
 
       case 'hr':
         _ensureBlankLine();
         _writeToBuffer('---');
+        _elementStack.removeLast();
         return false;
 
       case 'ul':
