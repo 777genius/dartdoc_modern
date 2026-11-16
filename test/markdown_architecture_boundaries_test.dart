@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/analysis/utilities.dart' show parseString;
+import 'package:analyzer/dart/ast/ast.dart';
 import 'package:dartdoc_modern/src/generator/core/markdown_paths.dart';
 import 'package:dartdoc_modern/src/generator/core/no_op_templates.dart';
 import 'package:dartdoc_modern/src/generator/jaspr/paths.dart';
@@ -25,7 +25,7 @@ Iterable<String> _namespaceDependencies(String filePath, String source) sync* {
     ];
     for (final uri in uris.whereType<String>()) {
       if (uri.startsWith('package:dartdoc_modern/')) {
-        yield 'lib/' + uri.substring('package:dartdoc_modern/'.length);
+        yield 'lib/${uri.substring('package:dartdoc_modern/'.length)}';
       } else if (!Uri.parse(uri).hasScheme) {
         yield p.normalize(p.join(p.dirname(filePath), uri)).replaceAll('\\', '/');
       }
