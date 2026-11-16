@@ -10,6 +10,7 @@
 library;
 
 import 'package:dartdoc_modern/src/logging.dart';
+import 'package:html/parser.dart' show parseFragment;
 
 // ---------------------------------------------------------------------------
 // Pre-compiled patterns for sanitization.
@@ -37,14 +38,14 @@ final _iframeSrcAttr = RegExp(
   r"""src\s*=\s*["']([^"']*)["']""",
   caseSensitive: false,
 );
-final _javascriptUrl = RegExp(
-  r'''(href|src)\s*=\s*["']?\s*javascript:''',
+// Match entire href/src values, not just a dangerous scheme prefix.
+// The separate groups retain the original raw spelling for safe attributes.
+final _urlAttribute = RegExp(
+  r'''(?:\s+)(href|src)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))''',
   caseSensitive: false,
 );
-final _dataUrl = RegExp(
-  r'''(href|src)\s*=\s*["']?\s*data:''',
-  caseSensitive: false,
-);
+final _urlScheme = RegExp(r'^([a-z][a-z0-9+.-]*):');
+final _urlControlChars = RegExp(r'[\u0000-\u0020\u007f]');
 final _eventHandler = RegExp(
   r'''\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)''',
   caseSensitive: false,
@@ -147,22 +148,33 @@ String sanitizeHtml(String html, {Set<String> extraAllowedHosts = const {}}) {
     return '';
   });
 
-  // 6. Remove javascript: URLs.
-  html = html.replaceAllMapped(_javascriptUrl, (match) {
-    _logSanitizerWarning(
-      'removed javascript: URL',
-      'sanitizeHtml: removed javascript: URL',
-    );
-    return '${match[1]}="';
-  });
+  // 6. Remove unsafe URL attributes (not just the scheme prefix). Browsers
+  // decode HTML entities in attribute values, so checking the raw string
+  // allows e.g. "jav&#x61;script:" to bypass a literal prefix regex.
+  html = html.replaceAllMapped(_urlAttribute, (match) {
+    final attribute = match.group(1)!.toLowerCase();
+    final rawValue = match.group(2) ?? match.group(3) ?? match.group(4)!;
+    final normalizedValue = parseFragment(rawValue)
+        .text
+        .replaceAll(_urlControlChars, '')
+        .toLowerCase();
+    final scheme = _urlScheme.firstMatch(normalizedValue)?.group(1);
+    if (scheme == null) return match.group(0)!; // Relative URLs and fragments.
 
-  // 6b. Remove data: URIs in href/src.
-  html = html.replaceAllMapped(_dataUrl, (match) {
+    // Keep only schemes that are useful in generated documentation.
+    final allowed = attribute == 'src'
+        ? scheme == 'https' || scheme == 'http'
+        : scheme == 'https' ||
+              scheme == 'http' ||
+              scheme == 'mailto' ||
+              scheme == 'tel';
+    if (allowed) return match.group(0)!;
+
     _logSanitizerWarning(
-      'removed data: URI',
-      'sanitizeHtml: removed data: URI',
+      'removed unsafe URL scheme',
+      'sanitizeHtml: removed unsafe $attribute URL scheme "$scheme"',
     );
-    return '${match[1]}="';
+    return '';
   });
 
   // 7. Remove inline event handlers.
