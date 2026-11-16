@@ -136,10 +136,12 @@ List<String> _forbiddenBackendImports(
         path = File.fromUri(File(origin).absolute.uri.resolve(uri))
             .path.replaceAll('\\', '/');
       }
-      if (path != null &&
-          backends.any((backend) =>
-              path!.contains('/src/generator/$backend/') ||
-              path.startsWith('lib/src/generator/$backend/'))) {
+      if (path == null) continue;
+      if (backends.any(
+        (backend) =>
+            path!.contains('/src/generator/$backend/') ||
+            path.startsWith('lib/src/generator/$backend/'),
+      )) {
         found.add(uri);
       }
     }
