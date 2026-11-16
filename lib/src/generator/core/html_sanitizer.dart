@@ -46,6 +46,11 @@ final _urlAttribute = RegExp(
 );
 final _urlScheme = RegExp(r'^([a-z][a-z0-9+.-]*):');
 final _urlControlChars = RegExp(r'[\u0000-\u0020\u007f]');
+// Even trusted iframes cannot be allowed to execute arbitrary inline srcdoc HTML.
+final _srcdocAttribute = RegExp(
+  r'''\s+srcdoc\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)''',
+  caseSensitive: false,
+);
 final _eventHandler = RegExp(
   r'''\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)''',
   caseSensitive: false,
@@ -84,6 +89,7 @@ final _sanitizerLogCounts = <String, int>{};
 /// - `<embed>`, `<object>`, `<applet>`, `<form>`, `<svg>` tags
 /// - `<iframe>` tags whose host is not in the allowed set
 /// - `javascript:` and `data:` URLs
+/// - `srcdoc` iframe attributes (inline executable HTML)
 /// - Inline event handlers (`on*=`)
 ///
 /// Does NOT perform format-specific escaping (e.g. Vue template syntax).
@@ -147,6 +153,9 @@ String sanitizeHtml(String html, {Set<String> extraAllowedHosts = const {}}) {
     }
     return '';
   });
+
+  // 5b. An allowed iframe URL does not make an inline srcdoc payload safe.
+  html = _warnOnRemoval(html, _srcdocAttribute, 'srcdoc attribute');
 
   // 6. Remove unsafe URL attributes (not just the scheme prefix). Browsers
   // decode HTML entities in attribute values, so checking the raw string
