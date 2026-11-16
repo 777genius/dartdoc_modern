@@ -240,6 +240,7 @@ class MarkdownDocProcessor {
     );
     final nodes = document.parse(result);
     result = MarkdownRenderer().render(nodes);
+    result = _resolveInjectMarkers(result);
     return sanitizeHtml(result, extraAllowedHosts: allowedIframeHosts);
   }
 
