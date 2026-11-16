@@ -154,8 +154,10 @@ String sanitizeHtml(String html, {Set<String> extraAllowedHosts = const {}}) {
   html = html.replaceAllMapped(_urlAttribute, (match) {
     final attribute = match.group(1)!.toLowerCase();
     final rawValue = match.group(2) ?? match.group(3) ?? match.group(4)!;
-    final normalizedValue = parseFragment(rawValue)
-        .text
+    // A failed decode must never make an unsafe scheme appear safe.
+    final decodedValue = parseFragment(rawValue).text;
+    if (decodedValue == null) return '';
+    final normalizedValue = decodedValue
         .replaceAll(_urlControlChars, '')
         .toLowerCase();
     final scheme = _urlScheme.firstMatch(normalizedValue)?.group(1);
