@@ -53,6 +53,24 @@ void main() {
       }
     });
 
+    test('allowed iframe cannot retain executable srcdoc HTML', () {
+      const html = '<iframe src="https://www.youtube.com/embed/example" '
+          'srcdoc="&lt;script&gt;alert(1)&lt;/script&gt;"></iframe>';
+      expect(
+        sanitizeHtml(html),
+        '<iframe src="https://www.youtube.com/embed/example"></iframe>',
+      );
+    });
+
+    test('removes unquoted srcdoc from allowed iframe', () {
+      const html =
+          '<iframe src="https://dartpad.dev/embed" srcdoc=javascript:alert(1)></iframe>';
+      expect(
+        sanitizeHtml(html),
+        '<iframe src="https://dartpad.dev/embed"></iframe>',
+      );
+    });
+
     test('preserves safe image source', () {
       const markup = '<img src="https://dart.dev/favicon.ico">';
       expect(sanitizeHtml(markup), markup);
