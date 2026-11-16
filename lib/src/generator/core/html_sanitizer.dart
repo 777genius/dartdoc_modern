@@ -10,6 +10,7 @@
 library;
 
 import 'package:dartdoc_modern/src/logging.dart';
+import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' show parseFragment;
 
 // ---------------------------------------------------------------------------
@@ -38,23 +39,13 @@ final _iframeSrcAttr = RegExp(
   r"""src\s*=\s*["']([^"']*)["']""",
   caseSensitive: false,
 );
-// Match entire href/src values, not just a dangerous scheme prefix.
-// The separate groups retain the original raw spelling for safe attributes.
-final _urlAttribute = RegExp(
-  r'''(?:\s+)(href|src)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))''',
-  caseSensitive: false,
+// Match complete opening tags, including quoted '>' characters. Attribute
+// names and values are validated by the HTML5 parser, not a whitespace regex.
+final _openingTag = RegExp(
+  r'''<([A-Za-z][A-Za-z0-9:-]*)(?:"[^"]*"|'[^']*'|[^'">])*?>''',
 );
 final _urlScheme = RegExp(r'^([a-z][a-z0-9+.-]*):');
 final _urlControlChars = RegExp(r'[\u0000-\u0020\u007f]');
-// Even trusted iframes cannot be allowed to execute arbitrary inline srcdoc HTML.
-final _srcdocAttribute = RegExp(
-  r'''\s+srcdoc\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)''',
-  caseSensitive: false,
-);
-final _eventHandler = RegExp(
-  r'''\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)''',
-  caseSensitive: false,
-);
 final _dangerousEmbedOpenClose = {
   for (final tag in ['embed', 'object', 'applet', 'form', 'svg'])
     tag: RegExp(
@@ -154,45 +145,70 @@ String sanitizeHtml(String html, {Set<String> extraAllowedHosts = const {}}) {
     return '';
   });
 
-  // 5b. An allowed iframe URL does not make an inline srcdoc payload safe.
-  html = _warnOnRemoval(html, _srcdocAttribute, 'srcdoc attribute');
-
-  // 6. Remove unsafe URL attributes (not just the scheme prefix). Browsers
-  // decode HTML entities in attribute values, so checking the raw string
-  // allows e.g. "jav&#x61;script:" to bypass a literal prefix regex.
-  html = html.replaceAllMapped(_urlAttribute, (match) {
-    final attribute = match.group(1)!.toLowerCase();
-    final rawValue = match.group(2) ?? match.group(3) ?? match.group(4)!;
-    // A failed decode must never make an unsafe scheme appear safe.
-    final decodedValue = parseFragment(rawValue).text;
-    if (decodedValue == null) return '';
-    final normalizedValue = decodedValue
-        .replaceAll(_urlControlChars, '')
-        .toLowerCase();
-    final scheme = _urlScheme.firstMatch(normalizedValue)?.group(1);
-    if (scheme == null) return match.group(0)!; // Relative URLs and fragments.
-
-    // Keep only schemes that are useful in generated documentation.
-    final allowed = attribute == 'src'
-        ? scheme == 'https' || scheme == 'http'
-        : scheme == 'https' ||
-              scheme == 'http' ||
-              scheme == 'mailto' ||
-              scheme == 'tel';
-    if (allowed) return match.group(0)!;
-
-    _logSanitizerWarning(
-      'removed unsafe URL scheme',
-      'sanitizeHtml: removed unsafe $attribute URL scheme "$scheme"',
-    );
-    return '';
-  });
-
-  // 7. Remove inline event handlers.
-  html = _warnOnRemoval(html, _eventHandler, 'inline event handler');
+  // Parse opening tags as HTML5: browsers recognize attributes after a
+  // solidus or directly after a quoted value, without intervening whitespace.
+  // Preserve the original spelling of tags that need no changes.
+  html = _sanitizeHtmlAttributes(html);
 
   return html;
 }
+
+/// Removes dangerous attributes based on the browser's attribute tokenizer.
+String _sanitizeHtmlAttributes(String html) {
+  return html.replaceAllMapped(_openingTag, (match) {
+    final originalTag = match.group(0)!;
+    final fragment = parseFragment(originalTag);
+    dom.Element? element;
+    for (final node in fragment.nodes) {
+      if (node is dom.Element) {
+        element = node;
+        break;
+      }
+    }
+    if (element == null) return originalTag;
+
+    var removed = false;
+    final attrs = <MapEntry<String, String>>[];
+    for (final attribute in element.attributes.entries) {
+      final name = attribute.key.toLowerCase();
+      final value = attribute.value;
+      final forbidden = name == 'srcdoc' ||
+          name.startsWith('on') ||
+          ((name == 'href' || name == 'src') && !_isSafeUrl(name, value));
+      if (forbidden) {
+        removed = true;
+        _logSanitizerWarning(
+          'removed unsafe HTML attribute',
+          'sanitizeHtml: removed unsafe $name attribute',
+        );
+      } else {
+        attrs.add(attribute);
+      }
+    }
+    if (!removed) return originalTag;
+
+    final encodedAttributes = attrs
+        .map((entry) =>
+            ' ${entry.key}="${_escapeHtmlAttributeValue(entry.value)}"')
+        .join();
+    final terminator = originalTag.endsWith('/>') ? '/>' : '>';
+    return '<${match.group(1)}$encodedAttributes$terminator';
+  });
+}
+
+bool _isSafeUrl(String attribute, String value) {
+  // HTML5 parsing decodes entities in attribute values before this check.
+  final normalized = value.replaceAll(_urlControlChars, '').toLowerCase();
+  final scheme = _urlScheme.firstMatch(normalized)?.group(1);
+  if (scheme == null) return true; // Relative URL or fragment.
+  if (scheme == 'https' || scheme == 'http') return true;
+  return attribute == 'href' && (scheme == 'mailto' || scheme == 'tel');
+}
+
+String _escapeHtmlAttributeValue(String value) => value
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('<', '&lt;');
 
 /// Removes all matches of [pattern] from [html], logging a warning
 /// for each occurrence with the given [description].
