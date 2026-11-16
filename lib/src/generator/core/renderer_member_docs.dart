@@ -3,7 +3,26 @@ part of 'api_markdown_renderer.dart';
 String _postProcessMemberDoc(String doc, {required String memberAnchor}) {
   final lines = doc.split('\n');
   final result = <String>[];
+  String? openFence;
+  final fencePattern = RegExp(r'^(`{3,}|~{3,})');
   for (final line in lines) {
+    final trimmed = line.trimLeft();
+    final marker = fencePattern.firstMatch(trimmed)?.group(1);
+    if (openFence != null) {
+      result.add(line);
+      if (marker != null &&
+          marker[0] == openFence[0] &&
+          marker.length >= openFence.length &&
+          trimmed.substring(marker.length).trim().isEmpty) {
+        openFence = null;
+      }
+      continue;
+    }
+    if (marker != null) {
+      openFence = marker;
+      result.add(line);
+      continue;
+    }
     var processed = line;
     // Match markdown headings: ^#{1,6} ...
     final headingMatch = RegExp(r'^(#{1,6})\s').firstMatch(processed);
