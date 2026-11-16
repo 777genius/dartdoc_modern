@@ -16,8 +16,8 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.13.1
-  # Jaspr 0.23.5 requires analyzer 12; newer compilers require analyzer 13.
-  build_web_compilers: 4.8.5
+  # Pub selects the compiler compatible with the consuming Dart SDK.
+  build_web_compilers: ^4.4.16
   jaspr_builder: ^0.23.5
   jaspr_cli: ^0.23.4
   lints: ^6.1.0
