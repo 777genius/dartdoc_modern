@@ -82,6 +82,16 @@ void main() {
       );
     });
 
+    test('iframe host cannot be spoofed by a nested src in srcdoc', () {
+      expect(
+        sanitizeHtml(
+          '<iframe srcdoc=\'src="https://www.youtube.com/embed/safe"\' '
+          'src="https://attacker.invalid/"></iframe>',
+        ),
+        isEmpty,
+      );
+    });
+
     test('removes unquoted srcdoc from allowed iframe', () {
       const html =
           '<iframe src="https://dartpad.dev/embed" srcdoc=javascript:alert(1)></iframe>';
