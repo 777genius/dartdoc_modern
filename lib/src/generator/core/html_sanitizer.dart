@@ -183,7 +183,9 @@ String _sanitizeHtmlAttributes(String html) {
     var removed = false;
     final attrs = <MapEntry<String, String>>[];
     for (final attribute in element.attributes.entries) {
-      final name = attribute.key.toLowerCase();
+      // The HTML DOM exposes attribute keys as Object (including namespaced
+      // names), so normalize the name before validating and rebuilding them.
+      final name = attribute.key.toString().toLowerCase();
       final value = attribute.value;
       final forbidden = name == 'srcdoc' ||
           name.startsWith('on') ||
@@ -195,7 +197,7 @@ String _sanitizeHtmlAttributes(String html) {
           'sanitizeHtml: removed unsafe $name attribute',
         );
       } else {
-        attrs.add(attribute);
+        attrs.add(MapEntry(name, value));
       }
     }
     if (!removed) return originalTag;
