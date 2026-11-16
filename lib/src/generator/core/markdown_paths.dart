@@ -80,14 +80,27 @@ class MarkdownPathResolver {
       }
     }
 
-    // Assign unique dir names: prefix with package name only on collision.
+    // Reserve globally unique names before disambiguating collisions so a
+    // generated prefix never shadows another library's original directory.
+    final reservedNames = <String>{};
     for (final library in allLibraries) {
       final baseName = _normalizeDots(library.dirName);
-      if (dirNameCounts[baseName]! > 1) {
-        _libraryDirNames[library] = '${library.package.name}_$baseName';
-      } else {
+      if (dirNameCounts[baseName] == 1) {
         _libraryDirNames[library] = baseName;
+        reservedNames.add(baseName);
       }
+    }
+    for (final library in allLibraries) {
+      final baseName = _normalizeDots(library.dirName);
+      if (dirNameCounts[baseName] == 1) continue;
+      final prefix = '${library.package.name}_$baseName';
+      var candidate = prefix;
+      var suffix = 2;
+      while (!reservedNames.add(candidate)) {
+        candidate = '${prefix}_$suffix';
+        suffix++;
+      }
+      _libraryDirNames[library] = candidate;
     }
 
     // Map internal SDK library duplicates to their canonical counterpart's
