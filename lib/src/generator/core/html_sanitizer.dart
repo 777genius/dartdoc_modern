@@ -220,6 +220,11 @@ List<_OpeningTagSpan> _scanOpeningTags(String html) {
           state = _TagScanState.attributeName;
         }
       } else if (state == _TagScanState.attributeName) {
+        if (unit == 60) {
+          // A new '<' in an unquoted name is malformed; escape the outer
+          // opener and inspect the nested tag separately on the next scan.
+          break;
+        }
         if (unit == 61) {
           state = _TagScanState.beforeValue;
         } else if (_isHtmlSpace(unit) || unit == 47) {
