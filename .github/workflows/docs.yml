@@ -3,6 +3,9 @@ name: Deploy Documentation
 on:
   push:
     branches: [main]
+  # Build and qualify docs changes before they reach main.
+  pull_request:
+    paths: [.github/workflows/docs.yml]
   workflow_dispatch:
 
 permissions:
@@ -11,7 +14,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.event.pull_request.number || 'main' }}
   cancel-in-progress: false
 
 env:
@@ -137,11 +140,14 @@ jobs:
           )
 
       - uses: actions/configure-pages@v5
+        if: github.event_name != 'pull_request'
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
           path: publish
 
   deploy:
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     environment:
