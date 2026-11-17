@@ -3,6 +3,9 @@ name: Deploy Documentation
 on:
   push:
     branches: [main]
+  # Build and qualify docs changes before they reach main.
+  pull_request:
+    paths: [.github/workflows/docs.yml]
   workflow_dispatch:
 
 permissions:
@@ -11,7 +14,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.event.pull_request.number || 'main' }}
   cancel-in-progress: false
 
 env:
@@ -26,9 +29,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Jaspr 0.23 generated apps require Dart <3.14 until its analyzer
+      # constraints are compatible with newer build_web_compilers.
       - uses: dart-lang/setup-dart@v1
         with:
-          sdk: stable
+          sdk: 3.13.7
 
       - uses: actions/setup-node@v4
         with:
@@ -135,11 +140,14 @@ jobs:
           )
 
       - uses: actions/configure-pages@v5
+        if: github.event_name != 'pull_request'
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
           path: publish
 
   deploy:
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     environment:
