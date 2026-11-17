@@ -1139,6 +1139,15 @@ Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
   final scaffoldDart =
       Platform.environment['JASPR_SCAFFOLD_DART_EXECUTABLE'] ??
       Platform.resolvedExecutable;
+  final scaffoldEnvironment = {
+    'PUB_CACHE': pubCacheDir.path,
+    // Jaspr's builder launches child dart processes via PATH. Keep those
+    // processes on the same SDK used to resolve the generated scaffold.
+    'PATH': [
+      path.dirname(scaffoldDart),
+      Platform.environment['PATH'] ?? '',
+    ].join(Platform.isWindows ? ';' : ':'),
+  };
 
   try {
     _prepareOfflinePubCache(pubCacheDir);
@@ -1163,7 +1172,7 @@ Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
       scaffoldDart,
       ['analyze'],
       workingDirectory: outputDir.path,
-      environment: {'PUB_CACHE': pubCacheDir.path},
+      environment: scaffoldEnvironment,
     );
 
     await SubprocessLauncher('$labelPrefix-build').runStreamed(
@@ -1178,7 +1187,7 @@ Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
         'DOCS_BASE_PATH=$basePath',
       ],
       workingDirectory: outputDir.path,
-      environment: {'PUB_CACHE': pubCacheDir.path},
+      environment: scaffoldEnvironment,
     );
 
     return _JasprPreviewWorkspace(

@@ -211,6 +211,10 @@ List<_OpeningTagSpan> _scanOpeningTags(String html) {
         if (unit == 39) state = _TagScanState.between;
       } else if (state == _TagScanState.doubleQuoted) {
         if (unit == 34) state = _TagScanState.between;
+      } else if (unit == 60) {
+        // A nested '<' outside a quoted value makes this opener unsafe.
+        // Escape it, then scan the nested tag on the next pass.
+        break;
       } else if (unit == 62) {
         complete = true;
         index++;
@@ -220,11 +224,6 @@ List<_OpeningTagSpan> _scanOpeningTags(String html) {
           state = _TagScanState.attributeName;
         }
       } else if (state == _TagScanState.attributeName) {
-        if (unit == 60) {
-          // A new '<' in an unquoted name is malformed; escape the outer
-          // opener and inspect the nested tag separately on the next scan.
-          break;
-        }
         if (unit == 61) {
           state = _TagScanState.beforeValue;
         } else if (_isHtmlSpace(unit) || unit == 47) {
