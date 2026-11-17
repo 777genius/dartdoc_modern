@@ -26,9 +26,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Jaspr 0.23 generated apps require Dart <3.14 until its analyzer
+      # constraints are compatible with newer build_web_compilers.
       - uses: dart-lang/setup-dart@v1
         with:
-          sdk: stable
+          sdk: 3.13.7
 
       - uses: actions/setup-node@v4
         with:
