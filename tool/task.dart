@@ -1136,6 +1136,18 @@ Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
   final pubCacheDir = Directory.systemTemp.createTempSync(
     'dartdoc-jaspr-$labelPrefix-pub',
   );
+  final scaffoldDart =
+      Platform.environment['JASPR_SCAFFOLD_DART_EXECUTABLE'] ??
+      Platform.resolvedExecutable;
+  final scaffoldEnvironment = {
+    'PUB_CACHE': pubCacheDir.path,
+    // Jaspr's builder launches child dart processes via PATH. Keep those
+    // processes on the same SDK used to resolve the generated scaffold.
+    'PATH': [
+      path.dirname(scaffoldDart),
+      Platform.environment['PATH'] ?? '',
+    ].join(Platform.isWindows ? ';' : ':'),
+  };
 
   try {
     _prepareOfflinePubCache(pubCacheDir);
@@ -1153,16 +1165,18 @@ Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
       labelPrefix: labelPrefix,
       workingDirectory: outputDir.path,
       pubCachePath: pubCacheDir.path,
+      dartExecutable: scaffoldDart,
     );
 
-    await SubprocessLauncher('$labelPrefix-analyze').runStreamedDartCommand(
+    await SubprocessLauncher('$labelPrefix-analyze').runStreamed(
+      scaffoldDart,
       ['analyze'],
       workingDirectory: outputDir.path,
-      environment: {'PUB_CACHE': pubCacheDir.path},
+      environment: scaffoldEnvironment,
     );
 
     await SubprocessLauncher('$labelPrefix-build').runStreamed(
-      Platform.executable,
+      scaffoldDart,
       [
         'run',
         'jaspr_cli:jaspr',
@@ -1173,7 +1187,7 @@ Future<_JasprPreviewWorkspace> _prepareJasprPreviewWorkspace({
         'DOCS_BASE_PATH=$basePath',
       ],
       workingDirectory: outputDir.path,
-      environment: {'PUB_CACHE': pubCacheDir.path},
+      environment: scaffoldEnvironment,
     );
 
     return _JasprPreviewWorkspace(
@@ -1197,18 +1211,21 @@ Future<void> _runPubGetWithOfflineFallback({
   required String labelPrefix,
   required String workingDirectory,
   required String pubCachePath,
+  required String dartExecutable,
 }) async {
   final launcher = SubprocessLauncher('$labelPrefix-pub-get');
   final environment = {'PUB_CACHE': pubCachePath};
 
   try {
-    await launcher.runStreamedDartCommand(
+    await launcher.runStreamed(
+      dartExecutable,
       ['pub', 'get', '--offline'],
       workingDirectory: workingDirectory,
       environment: environment,
     );
   } on SubprocessException {
-    await launcher.runStreamedDartCommand(
+    await launcher.runStreamed(
+      dartExecutable,
       ['pub', 'get'],
       workingDirectory: workingDirectory,
       environment: environment,

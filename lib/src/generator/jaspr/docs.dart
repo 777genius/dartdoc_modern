@@ -2,18 +2,18 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'package:dartdoc_modern/src/generator/core/markdown_docs.dart';
 import 'package:dartdoc_modern/src/generator/core/path_utils.dart'
     as path_utils;
-import 'package:dartdoc_modern/src/generator/vitepress/docs.dart';
 
-export 'package:dartdoc_modern/src/generator/vitepress/docs.dart'
+export 'package:dartdoc_modern/src/generator/core/markdown_docs.dart'
     show MarkdownRenderer;
 
 /// Jaspr shares the same documentation parsing pipeline as VitePress.
 ///
 /// The output diverges later, inside the Jaspr backend, where VitePress-only
 /// frontmatter and component syntax are stripped from generated markdown.
-class JasprDocProcessor extends VitePressDocProcessor {
+class JasprDocProcessor extends MarkdownDocProcessor {
   JasprDocProcessor(
     super.packageGraph,
     super.paths, {
@@ -24,7 +24,7 @@ class JasprDocProcessor extends VitePressDocProcessor {
     String html, {
     Set<String> extraAllowedHosts = const {},
   }) {
-    return VitePressDocProcessor.sanitizeHtml(
+    return MarkdownDocProcessor.sanitizeHtml(
       html,
       extraAllowedHosts: extraAllowedHosts,
     );

@@ -2,17 +2,17 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'package:dartdoc_modern/src/generator/core/markdown_paths.dart';
 import 'package:dartdoc_modern/src/generator/core/path_utils.dart'
     as path_utils;
-import 'package:dartdoc_modern/src/generator/vitepress/paths.dart';
 import 'package:dartdoc_modern/src/model/model.dart';
 
-export 'package:dartdoc_modern/src/generator/vitepress/paths.dart'
-    show VitePressPathResolver, isDuplicateSdkLibrary, isInternalSdkLibrary;
+export 'package:dartdoc_modern/src/generator/core/path_utils.dart'
+    show isDuplicateSdkLibrary, isInternalSdkLibrary;
 
 /// Jaspr uses the same public URL structure as VitePress, but stores markdown
 /// source files under `content/`.
-class JasprPathResolver extends VitePressPathResolver {
+class JasprPathResolver extends MarkdownPathResolver {
   @override
   String? filePathFor(Documentable element) {
     if (element is Library) {

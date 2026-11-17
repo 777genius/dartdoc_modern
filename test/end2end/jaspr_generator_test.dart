@@ -103,9 +103,20 @@ bool _hasWarning(DartdocResults results, PackageWarning warning) {
   );
 }
 
-void _runDartTool(List<String> args, String workingDirectory) {
+// The generated Jaspr 0.23 scaffold targets Dart 3.10–3.13. The parent
+// dartdoc tests still run on the selected matrix SDK (including dev), while
+// the external generated app is compiled with a compatible stable toolchain.
+String get _scaffoldDartExecutable =>
+    Platform.environment['JASPR_SCAFFOLD_DART_EXECUTABLE'] ??
+    Platform.resolvedExecutable;
+
+void _runDartTool(
+  List<String> args,
+  String workingDirectory, {
+  String? executable,
+}) {
   final result = Process.runSync(
-    Platform.resolvedExecutable,
+    executable ?? Platform.resolvedExecutable,
     args,
     workingDirectory: workingDirectory,
   );
@@ -130,7 +141,7 @@ void _runPubGetForScaffold(String workingDirectory) {
     return content.contains('"packages"');
   }
 
-  final offlineResult = Process.runSync(Platform.resolvedExecutable, [
+  final offlineResult = Process.runSync(_scaffoldDartExecutable, [
     'pub',
     'get',
     '--offline',
@@ -142,7 +153,7 @@ void _runPubGetForScaffold(String workingDirectory) {
     return;
   }
 
-  final onlineResult = Process.runSync(Platform.resolvedExecutable, [
+  final onlineResult = Process.runSync(_scaffoldDartExecutable, [
     'pub',
     'get',
   ], workingDirectory: workingDirectory);
@@ -1706,13 +1717,17 @@ void main() {
           'build_runner',
           'build',
           '--delete-conflicting-outputs',
-        ], outDir.path);
-        _runDartTool(['analyze'], outDir.path);
+        ], outDir.path, executable: _scaffoldDartExecutable);
+        _runDartTool(
+          ['analyze'],
+          outDir.path,
+          executable: _scaffoldDartExecutable,
+        );
         _runDartTool([
           'run',
           p.join(repoRoot, 'tool', 'jaspr_scaffold_smoke.dart'),
           outDir.path,
-        ], repoRoot);
+        ], repoRoot, executable: _scaffoldDartExecutable);
       });
     });
 
