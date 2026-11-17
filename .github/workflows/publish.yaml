@@ -10,6 +10,12 @@ on:
   push:
     tags: [ 'v[0-9]+.[0-9]+.[0-9]+' ]
 
+# Only the pull request dry run is superseded by a newer event for the same PR.
+# A tag push gets a group per run, so a real publish is never cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   publish:
     if: ${{ github.event_name == 'push' }}
