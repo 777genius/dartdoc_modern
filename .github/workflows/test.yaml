@@ -23,6 +23,36 @@ env:
   PUB_ENVIRONMENT: bot.github
 
 jobs:
+
+  generated-web-assets:
+    # The normal buildbot restores committed JS after compiling, so verify
+    # that the checked-in HTML frontend actually matches its Dart sources.
+    name: Generated HTML resources
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
+        with:
+          sdk: '3.11.0'
+      - name: Install dependencies
+        run: dart pub get
+      - name: Rebuild HTML frontend and bundled resources
+        run: dart run tool/task.dart build web
+      - name: Check generated resources are committed
+        run: git diff --exit-code -- lib/resources/docs.dart.js lib/resources/docs.dart.js.map lib/resources/styles.css lib/src/generator/html_resources.g.dart web/sig.txt
+      - name: Preserve regenerated resources for debugging
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-html-resources
+          retention-days: 3
+          path: |
+            lib/resources/docs.dart.js
+            lib/resources/docs.dart.js.map
+            lib/resources/styles.css
+            lib/src/generator/html_resources.g.dart
+            web/sig.txt
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:
