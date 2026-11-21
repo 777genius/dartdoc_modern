@@ -434,10 +434,13 @@ HTMLElement _createSuggestion(String query, IndexItem match) {
   // The one line description to use in the search suggestions.
   final matchDescription = match.desc;
   if (matchDescription != null && matchDescription.isNotEmpty) {
+    // Descriptions are HTML text with their tags removed. Decode entities
+    // before escaping and highlighting them as plain text.
+    final description = _decodeHtml(matchDescription);
     final inputDescription = HTMLQuoteElement.blockquote()
       ..classList.add('one-line-description')
-      ..setAttribute('title', _decodeHtml(matchDescription))
-      ..innerHtml = highlightMatches(matchDescription, query);
+      ..setAttribute('title', description)
+      ..innerHtml = highlightMatches(description, query);
     suggestion.appendChild(inputDescription);
   }
 
