@@ -34,10 +34,17 @@ jobs:
       - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
         with:
           sdk: '3.11.0'
+      # Keep the pub cache at a fixed path relative to lib/resources, so Dart
+      # always serializes the same ../../../.pub-cache/ source-map paths.
+      # Step-level env takes precedence even when setup-dart exports PUB_CACHE.
       - name: Install dependencies
         run: dart pub get
+        env:
+          PUB_CACHE: ${{ github.workspace }}/../.pub-cache
       - name: Rebuild HTML frontend and bundled resources
         run: dart run tool/task.dart build web
+        env:
+          PUB_CACHE: ${{ github.workspace }}/../.pub-cache
       - name: Check generated resources are committed
         run: git diff --exit-code -- lib/resources/docs.dart.js lib/resources/docs.dart.js.map lib/resources/styles.css lib/src/generator/html_resources.g.dart web/sig.txt
       - name: Preserve regenerated resources for debugging
