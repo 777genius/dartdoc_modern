@@ -5,17 +5,15 @@ on:
     branches: [main]
   # Build and qualify docs changes before they reach main.
   pull_request:
-    paths: [.github/workflows/docs.yml]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages-${{ github.event.pull_request.number || 'main' }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   PAGES_BASE_PATH: /${{ github.event.repository.name }}
@@ -139,8 +137,6 @@ jobs:
             find . -name '*.html' -type f | sed 's#^\./##' | sort
           )
 
-      - uses: actions/configure-pages@v5
-        if: github.event_name != 'pull_request'
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
@@ -157,5 +153,6 @@ jobs:
       pages: write
       id-token: write
     steps:
+      - uses: actions/configure-pages@v5
       - id: deployment
         uses: actions/deploy-pages@v4
