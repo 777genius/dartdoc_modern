@@ -1,7 +1,7 @@
 ## Unreleased — upstream synchronization
 
 * Integrate upstream `dart-lang/dartdoc` through commit
-  `03ec6df6228ac8257a737261d17e746c665b1e13`, including
+  `f954d84a38a5c91b92d9e885b30708645dfff2d8`, including
   analyzer-based documentation reference diagnostics, inherited-documentation
   provenance, `{@example}` regions, HTML callout boxes, updated rendering,
   and AOT resource bundling.
@@ -10,6 +10,11 @@
 * Require Dart 3.11 or later because the upstream analyzer APIs require
   `analyzer ^14.5.0`. This is a compatibility change from Dart 3.8;
   confirm against the supported CI matrix before release.
+* Merge upstream fixes for category file confinement, safe `http(s)` source/package
+  URLs, escaped category/search HTML, and literal search highlighting.
+* Import additional upstream Co19 parameter-placement and URL-safety tests.
+* Fix CI cache-date output formatting; run full docs build on pull requests,
+  and keep GitHub Pages credentials scoped to the deployment job.
 * No package release is performed as part of this synchronization.
 
 ## 1.1.7
