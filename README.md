@@ -20,6 +20,15 @@ Projects using generated docs:
 - [flutter_headless](https://777genius.github.io/flutter_headless/)
 - [modularity_dart](https://cherrypick-agency.github.io/modularity_dart/)
 
+## Security and upstream compatibility
+
+The fork tracks `dart-lang/dartdoc` while preserving its additional backends. As
+of the November 2026 upstream sync, the HTML backend validates `http(s)` URLs
+used by `linkTo.url` and `linkToSource.uriTemplate`, escapes search result
+content and treats search text literally. Category `markdown:` paths are
+confined to the directory of their defining `dartdoc_options.yaml` file,
+including symlink checks. Invalid URLs may produce `invalid-url` warnings.
+
 ## Why This Exists
 
 Default `dartdoc` HTML is useful, but many teams want a documentation site that feels more like a modern product docs experience:

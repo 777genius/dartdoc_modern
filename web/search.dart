@@ -2,7 +2,6 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:js_interop';
 
 import 'package:dartdoc_modern/src/search.dart';
@@ -74,7 +73,6 @@ void init() {
 
 int _suggestionLimit = 10;
 int _suggestionLength = 0;
-const _htmlEscape = HtmlEscape();
 
 /// A limited tree of element containers.
 ///
@@ -153,7 +151,6 @@ class _Search {
       if (query == null) {
         return;
       }
-      query = _htmlEscape.convert(query);
       _suggestionLimit = _suggestionLength;
       handleSearch(query, isSearchPage: true);
       showSearchResultPage(query);
@@ -183,11 +180,11 @@ class _Search {
     mainContent
       ..textContent = ''
       ..appendChild(HTMLElement.section()..classList.add('search-summary'))
-      ..appendChild(HTMLHeadingElement.h2()..innerHtml = 'Search Results')
+      ..appendChild(HTMLHeadingElement.h2()..textContent = 'Search Results')
       ..appendChild(
         HTMLDivElement()
           ..classList.add('search-summary')
-          ..innerHtml = '$_suggestionLength results for "$searchText"',
+          ..textContent = '$_suggestionLength results for "$searchText"',
       );
 
     if (_containerMap.isNotEmpty) {
@@ -197,7 +194,7 @@ class _Search {
     } else {
       var noResults = HTMLDivElement()
         ..classList.add('search-summary')
-        ..innerHtml =
+        ..textContent =
             'There was not a match for "$searchText". Want to try searching '
             'from additional Dart-related sites? ';
 
@@ -334,10 +331,9 @@ class _Search {
           } else {
             // If there is no search suggestion selected, then change the
             // window location to `search.html`.
-            var query = _htmlEscape.convert(actualValue);
             var searchPath = Uri.parse(
               '${_htmlBase}search.html',
-            ).replace(queryParameters: {'q': query});
+            ).replace(queryParameters: {'q': actualValue});
             window.location.assign(searchPath.toString());
             return;
           }
@@ -420,7 +416,7 @@ HTMLElement _createSuggestion(String query, IndexItem match) {
 
   final suggestionTitle = HTMLSpanElement()
     ..classList.add('tt-suggestion-title')
-    ..innerHtml = _highlight(
+    ..innerHtml = highlightMatches(
       '${match.name} ${match.kind.toString().toLowerCase()}',
       query,
     );
@@ -431,17 +427,20 @@ HTMLElement _createSuggestion(String query, IndexItem match) {
     suggestion.appendChild(
       HTMLSpanElement()
         ..classList.add('tt-suggestion-container')
-        ..innerHtml = '(in ${_highlight(enclosingElement.name, query)})',
+        ..innerHtml = '(in ${highlightMatches(enclosingElement.name, query)})',
     );
   }
 
   // The one line description to use in the search suggestions.
   final matchDescription = match.desc;
   if (matchDescription != null && matchDescription.isNotEmpty) {
+    // Descriptions are HTML text with their tags removed. Decode entities
+    // before escaping and highlighting them as plain text.
+    final description = _decodeHtml(matchDescription);
     final inputDescription = HTMLQuoteElement.blockquote()
       ..classList.add('one-line-description')
-      ..setAttribute('title', _decodeHtml(matchDescription))
-      ..innerHtml = _highlight(matchDescription, query);
+      ..setAttribute('title', description)
+      ..innerHtml = highlightMatches(description, query);
     suggestion.appendChild(inputDescription);
   }
 
@@ -501,16 +500,10 @@ HTMLElement _createContainer(String encloser, String href) => HTMLDivElement()
       ..appendChild(
         HTMLAnchorElement()
           ..setAttribute('href', href)
-          ..innerHtml = encloser,
+          ..textContent = encloser,
       ),
   );
 
-/// Wraps each instance of [query] in [text] with a `<strong>` tag, as HTML
-/// text.
-String _highlight(String text, String query) => text.replaceAllMapped(
-  RegExp(query, caseSensitive: false),
-  (match) => "<strong class='tt-highlight'>${match[0]}</strong>",
-);
 
 /// Decodes HTML entities (like `&lt;`) into their HTML elements (like `<`).
 ///
