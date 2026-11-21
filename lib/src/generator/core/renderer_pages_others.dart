@@ -18,7 +18,7 @@ String renderMixinPage(
     outlineCollapsible: _isOutlineCollapsible(mixin_),
     category: 'Mixins',
     library: library.name,
-    sourceUrl: mixin_.hasSourceHref ? mixin_.sourceHref : null,
+    sourceUrl: mixin_.hasSourceHref ? mixin_.sourceHrefRaw : null,
   );
 
   builder.writeH1(
@@ -91,7 +91,7 @@ String renderExtensionPage(
     outlineCollapsible: _isOutlineCollapsible(ext),
     category: 'Extensions',
     library: library.name,
-    sourceUrl: ext.hasSourceHref ? ext.sourceHref : null,
+    sourceUrl: ext.hasSourceHref ? ext.sourceHrefRaw : null,
   );
 
   builder.writeH1(nameWithGenerics, deprecated: ext.isDeprecated);
@@ -138,7 +138,7 @@ String renderExtensionTypePage(
     outlineCollapsible: _isOutlineCollapsible(et),
     category: 'Extension Types',
     library: library.name,
-    sourceUrl: et.hasSourceHref ? et.sourceHref : null,
+    sourceUrl: et.hasSourceHref ? et.sourceHrefRaw : null,
   );
 
   builder.writeH1(
@@ -190,7 +190,7 @@ String renderFunctionPage(
     outline: false,
     category: 'Functions',
     library: library.name,
-    sourceUrl: func.hasSourceHref ? func.sourceHref : null,
+    sourceUrl: func.hasSourceHref ? func.sourceHrefRaw : null,
   );
 
   builder.writeH1(nameWithGenerics, deprecated: func.isDeprecated);
@@ -235,7 +235,7 @@ String renderPropertyPage(
     outline: false,
     category: sidebarKind,
     library: library.name,
-    sourceUrl: prop.hasSourceHref ? prop.sourceHref : null,
+    sourceUrl: prop.hasSourceHref ? prop.sourceHrefRaw : null,
   );
 
   builder.writeH1(prop.name, deprecated: prop.isDeprecated);
