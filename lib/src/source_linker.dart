@@ -162,7 +162,7 @@ class SourceLinker {
         // yields a valid URL rather than one rejected below.
         '%f%' => path.url.joinAll(path
             .split(path.relative(sourceFileName, from: root))
-            .map(Uri.encodeComponent)),
+            .map((segment) => Uri.encodeComponent(segment).replaceAll("'", '%27'))),
         '%r%' => revision!,
         '%l%' => lineNumber.toString(),
         _ => ''
