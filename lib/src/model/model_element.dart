@@ -574,12 +574,15 @@ abstract class ModelElement
     );
   }();
 
-  bool get hasSourceHref => sourceHref.isNotEmpty;
+  /// Validated source URL before any HTML-specific escaping.
+  ///
+  /// Use this in Markdown frontmatter and non-HTML link contexts.
+  late final String sourceHrefRaw = SourceLinker.fromElement(this).href();
 
-  /// The URL of this element's source, escaped for an HTML attribute (see
-  /// `_source_link.html`), or the empty string if there is none.
-  late final String sourceHref =
-      htmlAttributeEscape.convert(SourceLinker.fromElement(this).href());
+  bool get hasSourceHref => sourceHrefRaw.isNotEmpty;
+
+  /// HTML-attribute-safe source URL for legacy HTML templates.
+  late final String sourceHref = htmlAttributeEscape.convert(sourceHrefRaw);
 
   Library get canonicalLibraryOrThrow {
     final canonicalLibrary = this.canonicalLibrary;
