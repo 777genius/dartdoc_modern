@@ -24,6 +24,7 @@ import 'package:dartdoc_modern/src/render/parameter_renderer.dart';
 import 'package:dartdoc_modern/src/runtime_stats.dart';
 import 'package:dartdoc_modern/src/source_linker.dart';
 import 'package:dartdoc_modern/src/type_utils.dart';
+import 'package:dartdoc_modern/src/utils.dart';
 import 'package:dartdoc_modern/src/warnings.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p show Context;
@@ -575,7 +576,10 @@ abstract class ModelElement
 
   bool get hasSourceHref => sourceHref.isNotEmpty;
 
-  late final String sourceHref = SourceLinker.fromElement(this).href();
+  /// The URL of this element's source, escaped for an HTML attribute (see
+  /// `_source_link.html`), or the empty string if there is none.
+  late final String sourceHref =
+      htmlAttributeEscape.convert(SourceLinker.fromElement(this).href());
 
   Library get canonicalLibraryOrThrow {
     final canonicalLibrary = this.canonicalLibrary;
@@ -919,7 +923,9 @@ abstract class ModelElement
 
     var cssClass = isDeprecated ? ' class="deprecated"' : '';
     return (
-      tag: '<a$cssClass href="$href">',
+      // [href] is validated where it is built (`Package.documentedWhere`);
+      // escape it anyway, as it is written into an HTML attribute.
+      tag: '<a$cssClass href="${htmlAttributeEscape.convert(href)}">',
       text: displayName,
       endTag: '</a>',
     );
