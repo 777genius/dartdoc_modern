@@ -99,6 +99,17 @@ void main() {
           equals('https://github.com/base/blob/main/to/file.dart#L14'));
     });
 
+    test('Percent-encode apostrophes in file names', () {
+      final href = SourceLinker(
+        excludes: [],
+        lineNumber: 14,
+        root: 'path',
+        sourceFileName: "path/to/it's.dart",
+        uriTemplate: 'https://github.com/base/blob/main/%f%#L%l%',
+      ).href();
+      expect(href, 'https://github.com/base/blob/main/to/it%27s.dart#L14');
+    });
+
     test('Percent-encode the file path', () {
       String sourceLinkerHref() => SourceLinker(
               excludes: [],
