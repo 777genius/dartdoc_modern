@@ -266,7 +266,7 @@ String renderClassPage(
     outlineCollapsible: _isOutlineCollapsible(clazz),
     category: category,
     library: library.name,
-    sourceUrl: clazz.hasSourceHref ? clazz.sourceHref : null,
+    sourceUrl: clazz.hasSourceHref ? clazz.sourceHrefRaw : null,
   );
 
   builder.writeH1(
@@ -330,7 +330,7 @@ String renderEnumPage(
     outlineCollapsible: _isOutlineCollapsible(enumeration),
     category: 'Enums',
     library: library.name,
-    sourceUrl: enumeration.hasSourceHref ? enumeration.sourceHref : null,
+    sourceUrl: enumeration.hasSourceHref ? enumeration.sourceHrefRaw : null,
   );
 
   builder.writeH1(
